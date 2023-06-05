@@ -1,77 +1,33 @@
-<mxfile host="65bd71144e">
-    <diagram id="Ypj5rLJIwxC1mN9q6Cak" name="ページ1">
-        <mxGraphModel dx="1328" dy="705" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+<mxfile host="65bd71144e" pages="2">
+    <diagram id="Ypj5rLJIwxC1mN9q6Cak" name="モデル設計">
+        <mxGraphModel dx="1512" dy="932" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
-                <mxCell id="2" value="マイページ操作" style="swimlane;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;rounded=1;fontSize=14;fontStyle=0;strokeWidth=2;resizeParent=0;resizeLast=1;shadow=0;dashed=0;align=center;swimlaneLine=1;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
-                    <mxGeometry x="585" y="180" width="240" height="150" as="geometry">
-                        <mxRectangle x="50" y="130" width="90" height="30" as="alternateBounds"/>
-                    </mxGeometry>
-                </mxCell>
-                <mxCell id="3" value="+ 新規登録()&#10;+ ユーザー編集&#10;（名前、会社名、住所、電話番号）&#10;+メールアドレス変更／再認証&#10;+ パスワード変更()&#10;+ 退会（情報削除）" style="align=left;strokeColor=none;fillColor=none;spacingLeft=4;fontSize=14;verticalAlign=top;resizable=0;rotatable=0;part=1;" parent="2" vertex="1">
-                    <mxGeometry y="30" width="240" height="120" as="geometry"/>
-                </mxCell>
-                <mxCell id="4" value="予約操作" style="swimlane;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;rounded=1;fontSize=14;fontStyle=0;strokeWidth=2;resizeParent=0;resizeLast=1;shadow=0;dashed=0;align=center;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
-                    <mxGeometry x="870" y="180" width="174" height="100" as="geometry">
-                        <mxRectangle x="50" y="130" width="90" height="30" as="alternateBounds"/>
-                    </mxGeometry>
-                </mxCell>
-                <mxCell id="5" value="+ 新規予約&#10;+ 予約確認&#10;+ 予約変更&#10;" style="align=left;strokeColor=none;fillColor=none;spacingLeft=4;fontSize=14;verticalAlign=top;resizable=0;rotatable=0;part=1;" parent="4" vertex="1">
-                    <mxGeometry y="30" width="174" height="70" as="geometry"/>
-                </mxCell>
-                <mxCell id="6" value="&lt;font size=&quot;1&quot;&gt;&lt;b style=&quot;font-size: 22px&quot;&gt;機能図&lt;/b&gt;&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;" parent="1" vertex="1">
-                    <mxGeometry x="750" y="30" width="200" height="30" as="geometry"/>
-                </mxCell>
-                <mxCell id="QDLxGsyKTm8Yx_DF1yRc-73" value="&lt;font style=&quot;font-size: 15px;&quot;&gt;&lt;span style=&quot;font-size: 15px;&quot;&gt;ユーザー操作機能&lt;/span&gt;&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=15;fontStyle=1" parent="1" vertex="1">
-                    <mxGeometry x="760" y="100" width="200" height="30" as="geometry"/>
-                </mxCell>
-                <mxCell id="QDLxGsyKTm8Yx_DF1yRc-74" value="ユーザー操作" style="swimlane;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;rounded=1;fontSize=14;fontStyle=0;strokeWidth=2;resizeParent=0;resizeLast=1;shadow=0;dashed=0;align=center;swimlaneLine=1;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
-                    <mxGeometry x="570" y="485" width="240" height="150" as="geometry">
-                        <mxRectangle x="50" y="130" width="90" height="30" as="alternateBounds"/>
-                    </mxGeometry>
-                </mxCell>
-                <mxCell id="QDLxGsyKTm8Yx_DF1yRc-75" value="+ ユーザー一覧確認&#10;+ 退会操作&#10;+ 特別ポイント付与？&#10;+ ユーザー情報変更" style="align=left;strokeColor=none;fillColor=none;spacingLeft=4;fontSize=14;verticalAlign=top;resizable=0;rotatable=0;part=1;" parent="QDLxGsyKTm8Yx_DF1yRc-74" vertex="1">
-                    <mxGeometry y="30" width="240" height="120" as="geometry"/>
-                </mxCell>
-                <mxCell id="QDLxGsyKTm8Yx_DF1yRc-76" value="メールマガジン管理" style="swimlane;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;rounded=1;fontSize=14;fontStyle=0;strokeWidth=2;resizeParent=0;resizeLast=1;shadow=0;dashed=0;align=center;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
-                    <mxGeometry x="850" y="530" width="279" height="100" as="geometry">
-                        <mxRectangle x="50" y="130" width="90" height="30" as="alternateBounds"/>
-                    </mxGeometry>
-                </mxCell>
-                <mxCell id="QDLxGsyKTm8Yx_DF1yRc-77" value="+ メールマガジン発行&#10;+ メールアドレス送信履歴&#10;+ メールマガジン送信エラー確認&#10;" style="align=left;strokeColor=none;fillColor=none;spacingLeft=4;fontSize=14;verticalAlign=top;resizable=0;rotatable=0;part=1;" parent="QDLxGsyKTm8Yx_DF1yRc-76" vertex="1">
-                    <mxGeometry y="30" width="279" height="70" as="geometry"/>
-                </mxCell>
-                <mxCell id="QDLxGsyKTm8Yx_DF1yRc-78" value="管理者機能" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=15;fontStyle=1" parent="1" vertex="1">
-                    <mxGeometry x="750" y="450" width="200" height="30" as="geometry"/>
-                </mxCell>
                 <mxCell id="QDLxGsyKTm8Yx_DF1yRc-79" value="&lt;b style=&quot;font-size: 22px;&quot;&gt;モデル設計&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;" parent="1" vertex="1">
                     <mxGeometry x="180" y="30" width="200" height="30" as="geometry"/>
                 </mxCell>
                 <mxCell id="QDLxGsyKTm8Yx_DF1yRc-80" value="ユーザー" style="swimlane;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;rounded=0;fontSize=14;fontStyle=0;strokeWidth=2;resizeParent=0;resizeLast=1;shadow=0;dashed=0;align=center;swimlaneLine=1;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
-                    <mxGeometry x="180" y="80" width="180" height="260" as="geometry">
+                    <mxGeometry x="87" y="80" width="200" height="300" as="geometry">
                         <mxRectangle x="50" y="130" width="90" height="30" as="alternateBounds"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="QDLxGsyKTm8Yx_DF1yRc-81" value="- ID&#10;+ 姓名*&#10;+ ふりがな*&#10;+ メールアドレス*&#10;+ パスワード*&#10;+ 所持ポイント&#10;+ 会社名&#10;+ 都道府県*&#10;+ 住所&#10;+ 電話番号&#10;+ 登録日&#10;+ 変更日&#10;" style="align=left;strokeColor=none;fillColor=none;spacingLeft=4;fontSize=14;verticalAlign=top;resizable=0;rotatable=0;part=1;" parent="QDLxGsyKTm8Yx_DF1yRc-80" vertex="1">
-                    <mxGeometry y="30" width="180" height="230" as="geometry"/>
+                <mxCell id="QDLxGsyKTm8Yx_DF1yRc-81" value="- ID&#10;+ 姓名*&#10;+ ふりがな*&#10;+ メールアドレス*&#10;+ パスワード*&#10;+ 合計チェックインポイント&#10;+ 会社名&#10;+ 都道府県*&#10;+ 住所&#10;+ 電話番号&#10;+ 登録日&#10;+ 変更日&#10;+ 最終ログイン&#10;+ ブラックリスト&#10;+ 内部伝達事項" style="align=left;strokeColor=none;fillColor=none;spacingLeft=4;fontSize=14;verticalAlign=top;resizable=0;rotatable=0;part=1;" parent="QDLxGsyKTm8Yx_DF1yRc-80" vertex="1">
+                    <mxGeometry y="30" width="200" height="270" as="geometry"/>
                 </mxCell>
                 <mxCell id="QDLxGsyKTm8Yx_DF1yRc-82" value="データは退会時に削除" style="shape=callout;whiteSpace=wrap;html=1;perimeter=calloutPerimeter;rounded=1;fontSize=15;position2=0.63;direction=west;" parent="1" vertex="1">
-                    <mxGeometry x="190" y="340" width="190" height="70" as="geometry"/>
+                    <mxGeometry x="270" y="360" width="190" height="70" as="geometry"/>
                 </mxCell>
-                <mxCell id="QDLxGsyKTm8Yx_DF1yRc-83" value="都道府県でフィルタリングするかも&lt;br&gt;郵便番号不要" style="shape=callout;whiteSpace=wrap;html=1;perimeter=calloutPerimeter;rounded=1;fontSize=15;position2=1;direction=west;" parent="1" vertex="1">
-                    <mxGeometry x="362" y="270" width="148" height="100" as="geometry"/>
-                </mxCell>
-                <mxCell id="QDLxGsyKTm8Yx_DF1yRc-84" value="管理ユーザー" style="swimlane;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;rounded=0;fontSize=14;fontStyle=0;strokeWidth=2;resizeParent=0;resizeLast=1;shadow=0;dashed=0;align=center;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
-                    <mxGeometry x="180" y="510" width="174" height="100" as="geometry">
+                <mxCell id="QDLxGsyKTm8Yx_DF1yRc-84" value="店舗管理" style="swimlane;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;rounded=0;fontSize=14;fontStyle=0;strokeWidth=2;resizeParent=0;resizeLast=1;shadow=0;dashed=0;align=center;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+                    <mxGeometry x="100" y="460" width="230" height="120" as="geometry">
                         <mxRectangle x="50" y="130" width="90" height="30" as="alternateBounds"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="QDLxGsyKTm8Yx_DF1yRc-85" value="+ ID&#10;+ 名前*&#10;+ パスワード*" style="align=left;strokeColor=none;fillColor=none;spacingLeft=4;fontSize=14;verticalAlign=top;resizable=0;rotatable=0;part=1;" parent="QDLxGsyKTm8Yx_DF1yRc-84" vertex="1">
-                    <mxGeometry y="30" width="174" height="70" as="geometry"/>
+                <mxCell id="QDLxGsyKTm8Yx_DF1yRc-85" value="+ ID&#10;+ 店舗名*&#10;+ パスワード*&#10;+ QRハッシュ&#10;+ 表示ステータス（非表示／表示）" style="align=left;strokeColor=none;fillColor=none;spacingLeft=4;fontSize=14;verticalAlign=top;resizable=0;rotatable=0;part=1;" parent="QDLxGsyKTm8Yx_DF1yRc-84" vertex="1">
+                    <mxGeometry y="30" width="230" height="90" as="geometry"/>
                 </mxCell>
-                <mxCell id="QDLxGsyKTm8Yx_DF1yRc-88" value="メルマガ履歴" style="swimlane;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;rounded=0;fontSize=14;fontStyle=0;strokeWidth=2;resizeParent=0;resizeLast=1;shadow=0;dashed=0;align=center;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
-                    <mxGeometry x="320" y="630" width="174" height="120" as="geometry">
+                <mxCell id="QDLxGsyKTm8Yx_DF1yRc-88" value="メルマガ発行" style="swimlane;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;rounded=0;fontSize=14;fontStyle=0;strokeWidth=2;resizeParent=0;resizeLast=1;shadow=0;dashed=0;align=center;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
+                    <mxGeometry x="300" y="610" width="174" height="120" as="geometry">
                         <mxRectangle x="50" y="130" width="90" height="30" as="alternateBounds"/>
                     </mxGeometry>
                 </mxCell>
@@ -79,45 +35,156 @@
                     <mxGeometry y="30" width="174" height="90" as="geometry"/>
                 </mxCell>
                 <mxCell id="vvRxVRpAEax69KsqW2r8-6" value="お知らせ投稿" style="swimlane;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;rounded=0;fontSize=14;fontStyle=0;strokeWidth=2;resizeParent=0;resizeLast=1;shadow=0;dashed=0;align=center;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
-                    <mxGeometry x="100" y="630" width="174" height="120" as="geometry">
+                    <mxGeometry x="60" y="610" width="220" height="140" as="geometry">
                         <mxRectangle x="50" y="130" width="90" height="30" as="alternateBounds"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="vvRxVRpAEax69KsqW2r8-7" value="+ ID&#10;+ 投稿日時&#10;+ タイトル&#10;+ 内容" style="align=left;strokeColor=none;fillColor=none;spacingLeft=4;fontSize=14;verticalAlign=top;resizable=0;rotatable=0;part=1;" parent="vvRxVRpAEax69KsqW2r8-6" vertex="1">
+                <mxCell id="vvRxVRpAEax69KsqW2r8-7" value="+ ID&#10;+ ログインID&#10;+ 投稿日時&#10;+ タイトル&#10;+ 内容&#10;+ 公開ステータス（下書き、公開）" style="align=left;strokeColor=none;fillColor=none;spacingLeft=4;fontSize=14;verticalAlign=top;resizable=0;rotatable=0;part=1;" parent="vvRxVRpAEax69KsqW2r8-6" vertex="1">
+                    <mxGeometry y="30" width="220" height="110" as="geometry"/>
+                </mxCell>
+                <mxCell id="JOn02FfmO0olEOrSS0eA-10" value="チェックインQR発行" style="shape=callout;whiteSpace=wrap;html=1;perimeter=calloutPerimeter;rounded=1;" parent="1" vertex="1">
+                    <mxGeometry x="340" y="460" width="120" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="JOn02FfmO0olEOrSS0eA-15" value="チェックイン履歴" style="swimlane;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;rounded=0;fontSize=14;fontStyle=0;strokeWidth=2;resizeParent=0;resizeLast=1;shadow=0;dashed=0;align=center;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
+                    <mxGeometry x="704" y="450" width="174" height="130" as="geometry">
+                        <mxRectangle x="50" y="130" width="90" height="30" as="alternateBounds"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="JOn02FfmO0olEOrSS0eA-16" value="+ ID&#10;+ ユーザーID&#10;+ 店舗ID&#10;+ 加算ポイント&#10;+ 日時" style="align=left;strokeColor=none;fillColor=none;spacingLeft=4;fontSize=14;verticalAlign=top;resizable=0;rotatable=0;part=1;" parent="JOn02FfmO0olEOrSS0eA-15" vertex="1">
+                    <mxGeometry y="30" width="174" height="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="JOn02FfmO0olEOrSS0eA-22" value="クーポン発行履歴" style="swimlane;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;rounded=0;fontSize=14;fontStyle=0;strokeWidth=2;resizeParent=0;resizeLast=1;shadow=0;dashed=0;align=center;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
+                    <mxGeometry x="910" y="610" width="174" height="130" as="geometry">
+                        <mxRectangle x="50" y="130" width="90" height="30" as="alternateBounds"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="JOn02FfmO0olEOrSS0eA-23" value="+ ID&#10;+ クーポンID&#10;+ ユーザーID&#10;+ 発行日時&#10;+ 利用日時" style="align=left;strokeColor=none;fillColor=none;spacingLeft=4;fontSize=14;verticalAlign=top;resizable=0;rotatable=0;part=1;" parent="JOn02FfmO0olEOrSS0eA-22" vertex="1">
+                    <mxGeometry y="30" width="174" height="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="QDLxGsyKTm8Yx_DF1yRc-83" value="" style="shape=callout;whiteSpace=wrap;html=1;perimeter=calloutPerimeter;rounded=1;fontSize=15;position2=1;direction=west;labelBorderColor=default;" parent="1" vertex="1">
+                    <mxGeometry x="234" y="160" width="200" as="geometry"/>
+                </mxCell>
+                <mxCell id="JOn02FfmO0olEOrSS0eA-26" value="&lt;span style=&quot;font-size: 15px;&quot;&gt;都道府県でフィルタリングするかも&lt;/span&gt;&lt;br style=&quot;font-size: 15px;&quot;&gt;&lt;span style=&quot;font-size: 15px;&quot;&gt;郵便番号不要&lt;br&gt;住所は任意だが予約が楽になる事は促す&lt;br&gt;&lt;/span&gt;" style="shape=callout;whiteSpace=wrap;html=1;perimeter=calloutPerimeter;rounded=1;position2=0.23;" parent="1" vertex="1">
+                    <mxGeometry x="242" y="90" width="250" height="130" as="geometry"/>
+                </mxCell>
+                <mxCell id="tDOQktGGOeNeEkl13snA-1" value="クーポン" style="swimlane;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;rounded=0;fontSize=14;fontStyle=0;strokeWidth=2;resizeParent=0;resizeLast=1;shadow=0;dashed=0;align=center;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+                    <mxGeometry x="540" y="80" width="174" height="120" as="geometry">
+                        <mxRectangle x="50" y="130" width="90" height="30" as="alternateBounds"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="tDOQktGGOeNeEkl13snA-2" value="+ ID&#10;+ クーポン名&#10;+ 期限&#10;+ 発行日&#10;" style="align=left;strokeColor=none;fillColor=none;spacingLeft=4;fontSize=14;verticalAlign=top;resizable=0;rotatable=0;part=1;" parent="tDOQktGGOeNeEkl13snA-1" vertex="1">
                     <mxGeometry y="30" width="174" height="90" as="geometry"/>
                 </mxCell>
-                <mxCell id="vvRxVRpAEax69KsqW2r8-11" value="複数権限必要？" style="shape=callout;whiteSpace=wrap;html=1;perimeter=calloutPerimeter;rounded=1;" parent="1" vertex="1">
-                    <mxGeometry x="290" y="460" width="120" height="70" as="geometry"/>
-                </mxCell>
-                <mxCell id="C7XxUXMGCLujco2U-XDZ-6" value="ポイント操作" style="swimlane;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;rounded=1;fontSize=14;fontStyle=0;strokeWidth=2;resizeParent=0;resizeLast=1;shadow=0;dashed=0;align=center;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
-                    <mxGeometry x="870" y="314" width="174" height="116" as="geometry">
+                <mxCell id="y0LomLdg8PzKLnbacuVT-1" value="キャンペーン投稿" style="swimlane;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;rounded=0;fontSize=14;fontStyle=0;strokeWidth=2;resizeParent=0;resizeLast=1;shadow=0;dashed=0;align=center;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
+                    <mxGeometry x="704" y="610" width="174" height="130" as="geometry">
                         <mxRectangle x="50" y="130" width="90" height="30" as="alternateBounds"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="C7XxUXMGCLujco2U-XDZ-7" value="+ ポイント取得&#10;+ ポイント使用&#10;+ ポイント付与&#10;+ ポイントキャンセル" style="align=left;strokeColor=none;fillColor=none;spacingLeft=4;fontSize=14;verticalAlign=top;resizable=0;rotatable=0;part=1;" parent="C7XxUXMGCLujco2U-XDZ-6" vertex="1">
-                    <mxGeometry y="30" width="174" height="86" as="geometry"/>
+                <mxCell id="y0LomLdg8PzKLnbacuVT-2" value="+ ID&#10;+ 投稿日時&#10;+ タイトル&#10;+ リンク&#10;+ URL" style="align=left;strokeColor=none;fillColor=none;spacingLeft=4;fontSize=14;verticalAlign=top;resizable=0;rotatable=0;part=1;" parent="y0LomLdg8PzKLnbacuVT-1" vertex="1">
+                    <mxGeometry y="30" width="174" height="100" as="geometry"/>
                 </mxCell>
-                <mxCell id="cmEi-EgIrCK5vTL85Ido-6" value="管理者もポイント&lt;br&gt;付与できる？" style="shape=callout;whiteSpace=wrap;html=1;perimeter=calloutPerimeter;rounded=1;fontSize=15;position2=1;direction=west;" parent="1" vertex="1">
-                    <mxGeometry x="970" y="430" width="148" height="70" as="geometry"/>
-                </mxCell>
-                <mxCell id="cmEi-EgIrCK5vTL85Ido-7" value="お知らせ管理" style="swimlane;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;rounded=1;fontSize=14;fontStyle=0;strokeWidth=2;resizeParent=0;resizeLast=1;shadow=0;dashed=0;align=center;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
-                    <mxGeometry x="850" y="670" width="279" height="100" as="geometry">
+                <mxCell id="bPRByP77CgL87HgDPv-k-1" value="メルマガ履歴" style="swimlane;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;rounded=0;fontSize=14;fontStyle=0;strokeWidth=2;resizeParent=0;resizeLast=1;shadow=0;dashed=0;align=center;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
+                    <mxGeometry x="498" y="610" width="174" height="130" as="geometry">
                         <mxRectangle x="50" y="130" width="90" height="30" as="alternateBounds"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="cmEi-EgIrCK5vTL85Ido-8" value="+ お知らせ投稿&#10;+ お知らせ編集&#10;+ お知らせ削除" style="align=left;strokeColor=none;fillColor=none;spacingLeft=4;fontSize=14;verticalAlign=top;resizable=0;rotatable=0;part=1;" parent="cmEi-EgIrCK5vTL85Ido-7" vertex="1">
+                <mxCell id="bPRByP77CgL87HgDPv-k-2" value="+ ID&#10;+ メルマガID&#10;+ ユーザーID&#10;+ 日時" style="align=left;strokeColor=none;fillColor=none;spacingLeft=4;fontSize=14;verticalAlign=top;resizable=0;rotatable=0;part=1;" parent="bPRByP77CgL87HgDPv-k-1" vertex="1">
+                    <mxGeometry y="30" width="174" height="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="3" value="スタンプの画像は登録出来た方がいい？" style="shape=callout;whiteSpace=wrap;html=1;perimeter=calloutPerimeter;rounded=1;" vertex="1" parent="1">
+                    <mxGeometry x="350" y="510" width="120" height="70" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+    <diagram id="T14JHQDXa-lqYUm5LxLD" name="機能図">
+        <mxGraphModel dx="1611" dy="1131" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="s2heIAq-vm3_v-Uyg1g2-1" value="マイページ操作" style="swimlane;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;rounded=1;fontSize=14;fontStyle=0;strokeWidth=2;resizeParent=0;resizeLast=1;shadow=0;dashed=0;align=center;swimlaneLine=1;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+                    <mxGeometry x="65" y="160" width="240" height="150" as="geometry">
+                        <mxRectangle x="50" y="130" width="90" height="30" as="alternateBounds"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="s2heIAq-vm3_v-Uyg1g2-2" value="+ 新規登録()&#10;+ ユーザー編集&#10;（名前、会社名、住所、電話番号）&#10;+メールアドレス変更／再認証&#10;+ パスワード変更()&#10;+ 退会（情報削除）" style="align=left;strokeColor=none;fillColor=none;spacingLeft=4;fontSize=14;verticalAlign=top;resizable=0;rotatable=0;part=1;" parent="s2heIAq-vm3_v-Uyg1g2-1" vertex="1">
+                    <mxGeometry y="30" width="240" height="120" as="geometry"/>
+                </mxCell>
+                <mxCell id="s2heIAq-vm3_v-Uyg1g2-3" value="予約操作" style="swimlane;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;rounded=1;fontSize=14;fontStyle=0;strokeWidth=2;resizeParent=0;resizeLast=1;shadow=0;dashed=0;align=center;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
+                    <mxGeometry x="390" y="160" width="174" height="100" as="geometry">
+                        <mxRectangle x="50" y="130" width="90" height="30" as="alternateBounds"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="s2heIAq-vm3_v-Uyg1g2-4" value="+ 新規予約&#10;+ 予約確認&#10;+ 予約変更&#10;" style="align=left;strokeColor=none;fillColor=none;spacingLeft=4;fontSize=14;verticalAlign=top;resizable=0;rotatable=0;part=1;" parent="s2heIAq-vm3_v-Uyg1g2-3" vertex="1">
+                    <mxGeometry y="30" width="174" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="s2heIAq-vm3_v-Uyg1g2-5" value="&lt;font size=&quot;1&quot;&gt;&lt;b style=&quot;font-size: 22px&quot;&gt;機能図&lt;/b&gt;&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;" parent="1" vertex="1">
+                    <mxGeometry x="230" y="40" width="200" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="s2heIAq-vm3_v-Uyg1g2-6" value="&lt;font style=&quot;font-size: 15px;&quot;&gt;&lt;span style=&quot;font-size: 15px;&quot;&gt;ユーザー操作機能&lt;/span&gt;&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=15;fontStyle=1" parent="1" vertex="1">
+                    <mxGeometry x="240" y="110" width="200" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="s2heIAq-vm3_v-Uyg1g2-7" value="ユーザー操作" style="swimlane;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;rounded=1;fontSize=14;fontStyle=0;strokeWidth=2;resizeParent=0;resizeLast=1;shadow=0;dashed=0;align=center;swimlaneLine=1;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+                    <mxGeometry x="90" y="575" width="240" height="150" as="geometry">
+                        <mxRectangle x="50" y="130" width="90" height="30" as="alternateBounds"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="s2heIAq-vm3_v-Uyg1g2-8" value="+ ユーザー一覧確認&#10;+ 退会操作&#10;+ ユーザー情報変更&#10;+ ブラック顧客" style="align=left;strokeColor=none;fillColor=none;spacingLeft=4;fontSize=14;verticalAlign=top;resizable=0;rotatable=0;part=1;" parent="s2heIAq-vm3_v-Uyg1g2-7" vertex="1">
+                    <mxGeometry y="30" width="240" height="120" as="geometry"/>
+                </mxCell>
+                <mxCell id="s2heIAq-vm3_v-Uyg1g2-9" value="メールマガジン管理" style="swimlane;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;rounded=1;fontSize=14;fontStyle=0;strokeWidth=2;resizeParent=0;resizeLast=1;shadow=0;dashed=0;align=center;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
+                    <mxGeometry x="370" y="620" width="279" height="100" as="geometry">
+                        <mxRectangle x="50" y="130" width="90" height="30" as="alternateBounds"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="s2heIAq-vm3_v-Uyg1g2-10" value="+ メールマガジン発行&#10;+ メールアドレス送信履歴&#10;+ メールマガジン送信エラー確認&#10;" style="align=left;strokeColor=none;fillColor=none;spacingLeft=4;fontSize=14;verticalAlign=top;resizable=0;rotatable=0;part=1;" parent="s2heIAq-vm3_v-Uyg1g2-9" vertex="1">
                     <mxGeometry y="30" width="279" height="70" as="geometry"/>
                 </mxCell>
-                <mxCell id="wLjRgpaJYClQW6r-O-2p-6" value="&lt;span style=&quot;color: rgb(0, 0, 0); font-family: Helvetica; font-size: 14px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: left; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; background-color: rgb(248, 249, 250); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; float: none; display: inline !important;&quot;&gt;+ 来館回数&lt;/span&gt;&lt;br style=&quot;padding: 0px; margin: 0px; color: rgb(0, 0, 0); font-family: Helvetica; font-size: 14px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: left; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; background-color: rgb(248, 249, 250); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;&quot;&gt;" style="text;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-                    <mxGeometry x="40" y="210" width="100" height="40" as="geometry"/>
+                <mxCell id="s2heIAq-vm3_v-Uyg1g2-11" value="管理者機能" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=15;fontStyle=1" parent="1" vertex="1">
+                    <mxGeometry x="260" y="520" width="200" height="30" as="geometry"/>
                 </mxCell>
-                <mxCell id="7" value="クーポン管理" style="swimlane;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;rounded=1;fontSize=14;fontStyle=0;strokeWidth=2;resizeParent=0;resizeLast=1;shadow=0;dashed=0;align=center;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
-                    <mxGeometry x="550" y="645" width="279" height="90" as="geometry">
+                <mxCell id="s2heIAq-vm3_v-Uyg1g2-12" value="チェックイン操作" style="swimlane;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;rounded=1;fontSize=14;fontStyle=0;strokeWidth=2;resizeParent=0;resizeLast=1;shadow=0;dashed=0;align=center;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
+                    <mxGeometry x="390" y="294" width="226" height="116" as="geometry">
                         <mxRectangle x="50" y="130" width="90" height="30" as="alternateBounds"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="8" value="+ クーポン発行&#10;+ クーポン使用履歴" style="align=left;strokeColor=none;fillColor=none;spacingLeft=4;fontSize=14;verticalAlign=top;resizable=0;rotatable=0;part=1;" vertex="1" parent="7">
+                <mxCell id="s2heIAq-vm3_v-Uyg1g2-13" value="+ チェックイン&#10;+ チェックインポイント確認&#10;" style="align=left;strokeColor=none;fillColor=none;spacingLeft=4;fontSize=14;verticalAlign=top;resizable=0;rotatable=0;part=1;" parent="s2heIAq-vm3_v-Uyg1g2-12" vertex="1">
+                    <mxGeometry y="30" width="226" height="86" as="geometry"/>
+                </mxCell>
+                <mxCell id="s2heIAq-vm3_v-Uyg1g2-15" value="お知らせ管理" style="swimlane;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;rounded=1;fontSize=14;fontStyle=0;strokeWidth=2;resizeParent=0;resizeLast=1;shadow=0;dashed=0;align=center;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
+                    <mxGeometry x="370" y="760" width="279" height="100" as="geometry">
+                        <mxRectangle x="50" y="130" width="90" height="30" as="alternateBounds"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="s2heIAq-vm3_v-Uyg1g2-16" value="+ お知らせ投稿&#10;+ お知らせ編集&#10;+ お知らせ削除" style="align=left;strokeColor=none;fillColor=none;spacingLeft=4;fontSize=14;verticalAlign=top;resizable=0;rotatable=0;part=1;" parent="s2heIAq-vm3_v-Uyg1g2-15" vertex="1">
+                    <mxGeometry y="30" width="279" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="s2heIAq-vm3_v-Uyg1g2-17" value="クーポン管理" style="swimlane;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;rounded=1;fontSize=14;fontStyle=0;strokeWidth=2;resizeParent=0;resizeLast=1;shadow=0;dashed=0;align=center;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
+                    <mxGeometry x="70.5" y="765" width="279" height="90" as="geometry">
+                        <mxRectangle x="50" y="130" width="90" height="30" as="alternateBounds"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="s2heIAq-vm3_v-Uyg1g2-18" value="+ クーポン発行&#10;+ クーポン使用履歴" style="align=left;strokeColor=none;fillColor=none;spacingLeft=4;fontSize=14;verticalAlign=top;resizable=0;rotatable=0;part=1;" parent="s2heIAq-vm3_v-Uyg1g2-17" vertex="1">
                     <mxGeometry y="30" width="279" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="s2heIAq-vm3_v-Uyg1g2-19" value="アプリの初回登録で、ユーザーに登録してもらいたい。登録する情報は氏名、メアド、生年月日（誕生日クーポンを付与する）、住所（都道府県のみ）" style="shape=callout;whiteSpace=wrap;html=1;perimeter=calloutPerimeter;rounded=1;" parent="1" vertex="1">
+                    <mxGeometry x="480" y="560" width="300" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="s2heIAq-vm3_v-Uyg1g2-20" value="チェックイン" style="swimlane;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;rounded=1;fontSize=14;fontStyle=0;strokeWidth=2;resizeParent=0;resizeLast=1;shadow=0;dashed=0;align=center;swimlaneLine=1;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+                    <mxGeometry x="65" y="340" width="240" height="70" as="geometry">
+                        <mxRectangle x="50" y="130" width="90" height="30" as="alternateBounds"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="s2heIAq-vm3_v-Uyg1g2-21" value="+ チェックイン" style="align=left;strokeColor=none;fillColor=none;spacingLeft=4;fontSize=14;verticalAlign=top;resizable=0;rotatable=0;part=1;" parent="s2heIAq-vm3_v-Uyg1g2-20" vertex="1">
+                    <mxGeometry y="30" width="240" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="s2heIAq-vm3_v-Uyg1g2-22" value="クーポン" style="swimlane;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;rounded=1;fontSize=14;fontStyle=0;strokeWidth=2;resizeParent=0;resizeLast=1;shadow=0;dashed=0;align=center;swimlaneLine=1;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+                    <mxGeometry x="65" y="430" width="240" height="70" as="geometry">
+                        <mxRectangle x="50" y="130" width="90" height="30" as="alternateBounds"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="s2heIAq-vm3_v-Uyg1g2-23" value="+ クーポン一覧&#10;+ クーポン利用" style="align=left;strokeColor=none;fillColor=none;spacingLeft=4;fontSize=14;verticalAlign=top;resizable=0;rotatable=0;part=1;" parent="s2heIAq-vm3_v-Uyg1g2-22" vertex="1">
+                    <mxGeometry y="30" width="240" height="40" as="geometry"/>
                 </mxCell>
             </root>
         </mxGraphModel>
