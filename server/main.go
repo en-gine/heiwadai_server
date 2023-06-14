@@ -7,8 +7,11 @@ import (
 	"net/http"
 	"os"
 
-	userv1 "server/api/user/v1"
-	"server/api/user/v1/userv1connect"
+	"go.uber.org/zap"
+
+	userv1connect "server/api/v1/user/userconnect"
+
+	controller "server/controller/user"
 
 	"github.com/bufbuild/connect-go"
 	grpcreflect "github.com/bufbuild/connect-grpcreflect-go"
@@ -16,24 +19,7 @@ import (
 	"golang.org/x/net/http2/h2c"
 )
 
-type UserServer struct{}
-
-func (s *UserServer) User(ctx context.Context, req *connect.Request[userv1.UserRequest]) (*connect.Response[userv1.UserResponse], error) {
-	log.Println("Request headers: ", req.Header())
-
-	if req.Msg.Name == "" {
-		// エラーにステータスコードを追加
-		return nil, connect.NewError(connect.CodeInvalidArgument, fmt.Errorf("name is required."))
-	}
-
-	userResp := &userv1.UserResponse{
-		Usering: fmt.Sprintf("Hello, %s!", req.Msg.Name),
-	}
-	resp := connect.NewResponse(userResp)
-	// ヘッダをセットしてみたり
-	resp.Header().Set("Greet-Version", "v1")
-	return resp, nil
-}
+var Logger *zap.Logger
 
 // リフレクション設定
 func newServeMuxWithReflection() *http.ServeMux {
@@ -51,7 +37,12 @@ func newInterCeptors() connect.Option {
 	interceptor := func(next connect.UnaryFunc) connect.UnaryFunc {
 		return connect.UnaryFunc(func(ctx context.Context, req connect.AnyRequest) (connect.AnyResponse, error) {
 			// ここでヘッダをセットするなど色々処理を書ける
-			req.Header().Set("hoge", "fuga")
+			Logger.Info(
+				"Request",
+				zap.String("Procedure", req.Spec().Procedure),
+				zap.String("Protocol", req.Peer().Protocol),
+				zap.String("Addr", req.Peer().Addr),
+			)
 			return next(ctx, req)
 		})
 	}
@@ -60,10 +51,10 @@ func newInterCeptors() connect.Option {
 
 func main() {
 
-	userServer := &UserServer{}
+	userContoroller := controller.UserRegisterController{}
 	mux := newServeMuxWithReflection()
 	interceptor := newInterCeptors()
-	path, handler := userv1connect.NewUserServiceHandler(userServer, interceptor)
+	path, handler := userv1connect.NewUserRegisterControllerHandler(&userContoroller, interceptor)
 	mux.Handle(path, handler)
 
 	msg := os.ExpandEnv("${ENV} mode run! port: ${SERVER_PORT}")

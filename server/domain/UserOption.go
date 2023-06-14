@@ -1,23 +1,23 @@
 package domain
 
 import (
-	"math/big"
+	"github.com/google/uuid"
 )
 
 type UserOption struct {
-	userId          big.Int
-	innerNote       string
-	isBlackCustomer bool
+	UserUUId        uuid.UUID
+	InnerNote       string
+	IsBlackCustomer bool
 }
 
-func (u *UserOption) NewUserOption(
-	userId big.Int,
+func (u *UserOption) New(
+	UserUUId uuid.UUID,
 	innerNote string,
 	isBlackCustomer bool,
 ) *UserOption {
 	return &UserOption{
-		userId:          userId,
-		innerNote:       innerNote,
-		isBlackCustomer: isBlackCustomer,
+		UserUUId:        UserUUId,
+		InnerNote:       innerNote,
+		IsBlackCustomer: isBlackCustomer,
 	}
 }
