@@ -19,7 +19,7 @@ func (u *UserRegisterController) Call(ctx context.Context, req *connect.Request[
 		return nil, err
 	}
 
-	service := usecase.RegisterUserUsecase{}
+	service := usecase.UserRegisterUsecase{}
 	user, err := service.Exec(
 		msg.FirstName,
 		msg.LastName,

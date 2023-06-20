@@ -23,6 +23,12 @@ type User struct {
 	AcceptMail    bool
 }
 
+type UserWithOption struct {
+	User
+	InnerNote       string
+	IsBlackCustomer bool
+}
+
 func (u *User) New(
 	UUID uuid.UUID,
 	FirstName string,

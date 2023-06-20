@@ -5,7 +5,7 @@ gen: #protoファイルからapiコードを自動生成
 run: 
 	go run main.go
 
-gotest:
+test-all:
 	go test -v ./test/...
 
 install-buf:

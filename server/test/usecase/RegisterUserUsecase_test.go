@@ -1,6 +1,6 @@
 package usecase_test
 
-// Path: test/usecase/RegisterUserUsecaseTest.go
+// Path: test/usecase/UserRegisterUsecaseTest.go
 // Compare this snippet from usecase/user/RegisterUser.go:
 // package user
 //
@@ -8,7 +8,7 @@ import (
 	"reflect"
 	"server/domain"
 	"server/infra/interfaces"
-	"server/usecase/user"
+	user "server/usecase/user"
 	"testing"
 	"time"
 
@@ -18,15 +18,15 @@ import (
 	"github.com/google/uuid"
 )
 
-type RegisterUserUsecase struct {
+type UserRegisterUsecase struct {
 	userRepository interfaces.IUserRepository
 }
 
-func Test_RegisterUserUsecase_Exec(t *testing.T) {
+func Test_UserRegisterUsecase_Exec(t *testing.T) {
 	// Create a mock user repository
 	mockRepo := new(mocks.UserRepository)
 
-	// Create a RegisterUserUsecase instance with the mock repository
+	// Create a UserRegisterUsecase instance with the mock repository
 	usecase := user.New(mockRepo)
 
 	// Define test cases
