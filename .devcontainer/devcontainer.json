@@ -30,7 +30,8 @@
 			"extensions": [
 				"zxh404.vscode-proto3",
 				"golang.go",
-				"genieai.chatgpt-vscode"
+				"genieai.chatgpt-vscode",
+				"GitHub.copilot"
 			],
 		}
   }

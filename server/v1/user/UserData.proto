@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package server.user;
+
+// ※ bufの managed mode を使用するためgo_packageを記述していません
+
+message UserUpdateDataRequest {
+  string ID = 1;
+  string firstName = 2;
+  string lastName = 3;
+  string firstNameKana = 4;
+  string lastNameKana = 5;
+  string companyName = 6;
+  string birthDate = 7;
+  string zipCode = 8;
+  string prefecture = 9;
+  string city = 10;
+  string address = 11;
+  string tel = 12;
+  string mail = 13;
+  bool acceptMail = 14;
+}
+
+message UserDataResponse {
+  string ID = 1;
+  string firstName = 2;
+  string lastName = 3;
+  string firstNameKana = 4;
+  string lastNameKana = 5;
+  string companyName = 6;
+  string birthDate = 7;
+  string zipCode = 8;
+  string prefecture = 9;
+  string city = 10;
+  string address = 11;
+  string tel = 12;
+  string mail = 13;
+  bool acceptMail = 14;
+
+}
+
+service UserDataController {
+  rpc Update(UserRegisterRequest) returns (UserRegisterResponse) {}
+  rpc Delete(UserRegisterRequest) returns (UserRegisterResponse) {}
+}

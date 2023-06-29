@@ -18,10 +18,11 @@ message UserRegisterRequest {
   string tel = 11;
   string mail = 12;
   bool acceptMail = 13;
+  bool acceptTerm = 14;
 }
 
 message UserRegisterResponse {
-  string UUID = 1;
+  string ID = 1;
   string firstName = 2;
   string lastName = 3;
   string firstNameKana = 4;

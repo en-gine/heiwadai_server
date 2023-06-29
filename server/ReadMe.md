@@ -5,14 +5,10 @@
 Connect Go
 https://github.com/bufbuild/connect-go
 
-## Validation
-
-Go playground Validator
-https://github.com/go-playground/validator
 
 ## ORM
 
-SQL Builder
+SQL Boiler
 https://github.com/volatiletech/sqlboiler
 
 ## Migration
