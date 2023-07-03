@@ -7,6 +7,6 @@ import (
 )
 
 type IUserRepository interface {
-	Save(user *entity.User) (*entity.User, error)
+	Save(user *entity.User) error
 	Delete(id uuid.UUID) error
 }

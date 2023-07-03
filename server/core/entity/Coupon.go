@@ -1,7 +1,7 @@
 package entity
 
 import (
-	"errors"
+	"server/core/errors"
 	"time"
 
 	"github.com/google/uuid"
@@ -51,12 +51,12 @@ func newCoupon(
 	OverView string,
 	User *User,
 	TargetStore []*Store,
-) (*Coupon, error) {
+) (*Coupon, *errors.DomainError) {
 	if len(Name) > 10 {
-		return nil, errors.New("クーポン名は10文字以内にしてください")
+		return nil, errors.NewDomainError(errors.InvalidParameter, "クーポン名は10文字以内にしてください")
 	}
 	if ExpireAt.Before(time.Now()) {
-		return nil, errors.New("有効期限が現在より前にはできません")
+		return nil, errors.NewDomainError(errors.InvalidParameter, "有効期限が現在より前にはできません")
 	}
 	return &Coupon{
 		ID:                ID,
@@ -70,7 +70,7 @@ func newCoupon(
 	}, nil
 }
 
-func StoredCoupon(
+func RegenCoupon(
 	ID uuid.UUID,
 	Name string,
 	CouponType CouponType,
@@ -98,7 +98,7 @@ func StoredCoupon(
 func CreateStandardCoupon(
 	User *User,
 	TargetStore []*Store,
-) (*Coupon, error) {
+) (*Coupon, *errors.DomainError) {
 	expireAtOneYear := time.Now().AddDate(1, 0, 0)
 
 	return newCoupon(
@@ -124,7 +124,7 @@ func CreateCustomCoupon(
 	TargetStore []*Store,
 ) (*Coupon, error) {
 	if Name == "" {
-		return nil, errors.New("クーポン名が空です")
+		return nil, errors.NewDomainError(errors.InvalidParameter, "クーポン名が空です")
 	}
 
 	return newCoupon(
@@ -164,7 +164,7 @@ func CreateBirthdayCoupon(
 func UsedCoupon(coupon *Coupon) *Coupon {
 	now := time.Now()
 	coupon.UsedAt = &now
-	return StoredCoupon(
+	return RegenCoupon(
 		coupon.ID,
 		coupon.Name,
 		coupon.CouponType,

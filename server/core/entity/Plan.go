@@ -12,7 +12,7 @@ type Plan struct {
 	OverView     string
 }
 
-func StoredPlan(
+func RegenPlan(
 	RoomType string,
 	IncludedMeal string,
 	Smoking string,

@@ -28,7 +28,7 @@ func CreateStore(
 	}
 }
 
-func StoredStore(
+func RegenStore(
 	ID uuid.UUID,
 	Name string,
 	Address string,

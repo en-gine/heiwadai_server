@@ -106,7 +106,7 @@ func spaUserToEntity(data *supa.User) (*entity.User, error) {
 		return nil, err
 	}
 
-	return entity.StoredUser(
+	return entity.RegenUser(
 		uuid,
 		data.UserMetadata["FirstName"].(string),
 		data.UserMetadata["LastName"].(string),

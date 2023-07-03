@@ -56,7 +56,7 @@ func CreateUser(
 	}
 }
 
-func StoredUser(
+func RegenUser(
 	ID uuid.UUID,
 	FirstName string,
 	LastName string,

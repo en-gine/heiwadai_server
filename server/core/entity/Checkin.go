@@ -27,7 +27,7 @@ func CreateCheckin(
 	}
 }
 
-func StoredCheckin(
+func RegenCheckin(
 	id uuid.UUID,
 	store Store,
 	user User,

@@ -1,8 +1,8 @@
 package user
 
 import (
-	"errors"
 	"server/core/entity"
+	"server/core/errors"
 	queryService "server/core/infra/queryService"
 	"server/core/infra/repository"
 	"time"
@@ -41,27 +41,27 @@ func NewUserCheckinUsecase(
 	}
 }
 
-func (u *UserCheckinUsecase) GetStampCard(user *entity.User) (*entity.StampCard, error) {
+func (u *UserCheckinUsecase) GetStampCard(user *entity.User) (*entity.StampCard, *errors.DomainError) {
 	userCheckins, err := u.checkinQuery.GetActiveCheckin(user)
 	if err != nil {
-		return nil, err
+		return nil, errors.NewDomainError(errors.QueryError, err.Error())
 	}
 	return entity.NewStampCard(userCheckins)
 }
 
 // チェックインによってクーポンが付与された場合クーポンを返す
-func (u *UserCheckinUsecase) Checkin(AuthUser *entity.User, QrHash uuid.UUID) (*entity.Coupon, error) {
+func (u *UserCheckinUsecase) Checkin(AuthUser *entity.User, QrHash uuid.UUID) (*entity.Coupon, *errors.DomainError) {
 
 	allStores, err := u.storeQuery.GetActiveAll()
 	if err != nil {
-		return nil, err
+		return nil, errors.NewDomainError(errors.QueryError, err.Error())
 	}
 	var checkInStore *entity.Store
 	var isUnlimitQr bool
 	lastCheckin, err := u.checkinQuery.GetLastStoreCheckin(AuthUser, *checkInStore)
 
 	if err != nil {
-		return nil, err
+		return nil, errors.NewDomainError(errors.QueryError, err.Error())
 	}
 
 	for _, store := range allStores {
@@ -78,13 +78,13 @@ func (u *UserCheckinUsecase) Checkin(AuthUser *entity.User, QrHash uuid.UUID) (*
 	}
 
 	if checkInStore == nil {
-		return nil, errors.New("該当のQRコードの店舗が見つかりません。")
+		return nil, errors.NewDomainError(errors.QueryDataNotFoundError, "該当のQRコードの店舗が見つかりません。")
 	}
 
 	isSameStore := lastCheckin != nil && lastCheckin.Store.ID == checkInStore.ID
 
 	if !isUnlimitQr && isSameStore && lastCheckin.CheckInAt.Add(24*time.Hour).After(time.Now()) {
-		return nil, errors.New("24時間以内にチェックインした店舗はチェックインできません。")
+		return nil, errors.NewDomainError(errors.UnPemitedOperation, "24時間以内にチェックインした店舗はチェックインできません。")
 	}
 
 	u.transaction.Begin()
@@ -92,22 +92,26 @@ func (u *UserCheckinUsecase) Checkin(AuthUser *entity.User, QrHash uuid.UUID) (*
 	myCheckins, err := u.checkinQuery.GetActiveCheckin(AuthUser)
 	if err != nil {
 		u.transaction.Rollback()
-		return nil, err
+		return nil, errors.NewDomainError(errors.QueryError, err.Error())
 	}
 	var newCoupon *entity.Coupon
 	if len(myCheckins) >= 5 {
-		newCoupon, err = entity.CreateStandardCoupon(AuthUser, allStores)
-		if err != nil {
+		newCoupon, domainErr := entity.CreateStandardCoupon(AuthUser, allStores)
+		if domainErr != nil {
 			u.transaction.Rollback()
-			return nil, err
+			return nil, domainErr
 		}
 		err = u.couponRepository.Save(newCoupon)
+		if err != nil {
+			u.transaction.Rollback()
+			return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
+		}
 	}
 
 	err = u.checkInRepository.Save(newCheckin)
 	if err != nil {
 		u.transaction.Rollback()
-		return nil, err
+		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
 	}
 	u.transaction.Commit()
 

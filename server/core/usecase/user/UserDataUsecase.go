@@ -2,11 +2,10 @@ package user
 
 import (
 	"server/core/entity"
+	"server/core/errors"
 	queryservice "server/core/infra/queryService"
 	"server/core/infra/repository"
 	"time"
-
-	"errors"
 
 	"github.com/google/uuid"
 )
@@ -36,15 +35,15 @@ func (u *UserDataUsecase) Create(
 	Tel *string,
 	Mail string,
 	AcceptMail bool, // メルマガ配信可
-) (*entity.User, error) {
+) (*entity.User, *errors.DomainError) {
 
 	existUser, err := u.userQuery.GetByMail(Mail)
 	if err != nil {
-		return nil, errors.New("ユーザーの検索に失敗しました")
+		return nil, errors.NewDomainError(errors.QueryDataNotFoundError, "ユーザーの検索に失敗しました")
 	}
 
 	if existUser != nil {
-		return nil, errors.New("既に登録されているメールアドレスです")
+		return nil, errors.NewDomainError(errors.UnPemitedOperation, "既に登録されているメールアドレスです")
 	}
 
 	insertData := entity.CreateUser(
@@ -62,7 +61,11 @@ func (u *UserDataUsecase) Create(
 		Mail,
 		AcceptMail,
 	)
-	return u.userRepository.Save(insertData)
+	err = u.userRepository.Save(insertData)
+	if err != nil {
+		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
+	}
+	return insertData, nil
 }
 
 func (u *UserDataUsecase) Update(
@@ -80,18 +83,18 @@ func (u *UserDataUsecase) Update(
 	Tel *string,
 	Mail string,
 	AcceptMail bool, // メルマガ配信可
-) (*entity.User, error) {
+) (*entity.User, *errors.DomainError) {
 
 	existUser, err := u.userQuery.GetById(ID)
 	if err != nil {
-		return nil, errors.New("ユーザーの検索に失敗しました")
+		return nil, errors.NewDomainError(errors.QueryError, "ユーザーの検索に失敗しました")
 	}
 
 	if existUser == nil {
-		return nil, errors.New("登録されているユーザーが存在しません")
+		return nil, errors.NewDomainError(errors.QueryDataNotFoundError, "登録されているユーザーが存在しません")
 	}
 
-	updateData := entity.StoredUser(
+	updateData := entity.RegenUser(
 		ID,
 		FirstName,
 		LastName,
@@ -107,5 +110,10 @@ func (u *UserDataUsecase) Update(
 		Mail,
 		AcceptMail,
 	)
-	return u.userRepository.Save(updateData)
+	err = u.userRepository.Save(updateData)
+	if err != nil {
+		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
+	}
+
+	return updateData, nil
 }

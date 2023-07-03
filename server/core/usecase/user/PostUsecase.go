@@ -2,6 +2,7 @@ package user
 
 import (
 	"server/core/entity"
+	"server/core/errors"
 	queryservice "server/core/infra/queryService"
 	"server/core/infra/repository"
 )
@@ -18,9 +19,11 @@ func NewPostUsecase(postRepository repository.IPostRepository, postQuery queryse
 	}
 }
 
-func (u *PostUsecase) GetActiveList() ([]*entity.Post, error) {
+func (u *PostUsecase) GetActiveList() ([]*entity.Post, *errors.DomainError) {
 
 	posts, err := u.postQuery.GetActiveAll(nil, nil, nil)
-
-	return posts, err
+	if err != nil {
+		return nil, errors.NewDomainError(errors.QueryError, err.Error())
+	}
+	return posts, nil
 }
