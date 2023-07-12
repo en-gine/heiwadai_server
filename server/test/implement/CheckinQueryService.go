@@ -5,7 +5,7 @@ import (
 
 	"server/core/entity"
 	"server/core/infra/queryService/types"
-	"server/repository/implement"
+	"server/infrastructure/repository"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/google/uuid"
@@ -28,7 +28,7 @@ func TestCheckinQueryService(t *testing.T) {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 	}
 
-	checkinQueryService := &implement.CheckinQueryService{}
+	checkinQueryService := &repository.CheckinQueryService{}
 
 	mock.ExpectQuery("^SELECT (.+) FROM checkins").WillReturnRows(sqlmock.NewRows([]string{"id", "user_id", "store_id"}))
 

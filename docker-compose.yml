@@ -11,20 +11,6 @@ services:
       - ./server:/server
     ports:
       - 3000:3000
-  pgadmin:
-    user: root
-    container_name: heiwadai-pgadmin
-    image: dpage/pgadmin4:7.3
-    environment:
-      PGADMIN_DEFAULT_EMAIL: sutefu23@gmail.com
-      PGADMIN_DEFAULT_PASSWORD: postgres
-      TZ: Asia/Tokyo
-    volumes:
-      - ./docker/data/pgadmin:/var/lib/pgadmin
-    ports:
-      - 8080:80
-    depends_on:
-      - db
   db:
     container_name: supabase-db
     image: supabase/postgres:15.1.0.90
@@ -47,11 +33,18 @@ services:
       - ./docker/init/db/roles.sql:/docker-entrypoint-initdb.d/init-scripts/99-roles.sql:Z
       # PGDATA directory is persisted between restarts
       - ./docker/data/db/data:/var/lib/postgresql/data:Z
-  proteus:
-    user: root
-    container_name: heiwadai-proteus
-    image: golang:1.8-jessie
-    tty: true
-    command: bash
+  rabbitmq:
+    # -management を付与したイメージの場合、15672ポートでManagement Plugin(Web UIのようなもの)が利用できるようになる
+    image: rabbitmq:3.12.1-management
+    hostname: rabbitmq
+    container_name: heiwadai-rabbitmq
+    ports:
+      - 5672:5672
+      - 15672:15672
+    # ユーザ名/パスワードの設定
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
+    # データの永続化
     volumes:
-      - ./server:/server
+      - ./docker/data/rabbitmq/data:/var/lib/rabbitmq

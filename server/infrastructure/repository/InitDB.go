@@ -1,4 +1,4 @@
-package implement
+package repository
 
 import (
 	"database/sql"

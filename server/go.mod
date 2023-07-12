@@ -65,6 +65,7 @@ require (
 	github.com/bufbuild/connect-grpcreflect-go v1.1.0
 	github.com/google/uuid v1.3.0
 	github.com/nedpals/supabase-go v0.3.0
+	github.com/streadway/amqp v1.1.0
 	github.com/stretchr/testify v1.8.4 // indirect
 	go.uber.org/zap v1.24.0
 	golang.org/x/text v0.10.0 // indirect

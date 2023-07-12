@@ -7,7 +7,7 @@ import (
 	"server/core/entity"
 	"server/core/infra/action"
 	"server/core/infra/types"
-	"server/external/parser"
+	"server/infrastructure/parser"
 
 	"github.com/google/uuid"
 	supa "github.com/nedpals/supabase-go"
