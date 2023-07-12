@@ -2,3 +2,4 @@
 *.dtmp
 .env
 /docker/data
+/docker/volumes/db/data

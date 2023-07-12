@@ -8,8 +8,8 @@ import (
 
 type Checkin struct {
 	ID uuid.UUID
-	Store
-	User
+	*Store
+	*User
 	CheckInAt time.Time
 	Archive   bool
 }
@@ -20,8 +20,8 @@ func CreateCheckin(
 ) *Checkin {
 	return &Checkin{
 		ID:        uuid.New(),
-		Store:     store,
-		User:      user,
+		Store:     &store,
+		User:      &user,
 		CheckInAt: time.Now(),
 		Archive:   false,
 	}
@@ -29,8 +29,8 @@ func CreateCheckin(
 
 func RegenCheckin(
 	id uuid.UUID,
-	store Store,
-	user User,
+	store *Store,
+	user *User,
 	at time.Time,
 	archive bool,
 ) *Checkin {

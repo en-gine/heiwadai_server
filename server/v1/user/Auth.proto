@@ -1,18 +1,23 @@
 syntax = "proto3";
 
 package server.user;
+option go_package = "server/api/v1";
 
-message AuthRequest {
+message UserAuthRequest {
   string email = 1;
   string password = 2;
 }
 
-message AuthResponse {
+message UserAuthResponse {
 	string accessToken = 1;
 	int64 expiresIn = 2;
 	string refreshToken= 3;
+  bool isUserAcceptable = 4;
 }
 
 service AuthController {
-  rpc Call(AuthRequest) returns (AuthResponse) {}
+  rpc SignIn(UserAuthRequest) returns (UserAuthResponse) {}
+  rpc SignUp(UserAuthRequest) returns (UserAuthResponse) {}
+  rpc ForgetPassword(UserAuthRequest) returns (UserAuthResponse) {}
+  rpc ChangeMail(UserAuthRequest) returns (UserAuthResponse) {}
 }

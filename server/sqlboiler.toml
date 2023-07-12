@@ -1,0 +1,12 @@
+output = "db/models"
+pkgname = "models"
+wipe = "true"
+debug = "true"
+
+[psql]
+  sslmode="disable"
+  blacklist = ["shema_migrations"]
+
+[auto-columns]
+    created = "create_at"
+    updated = "update_at"

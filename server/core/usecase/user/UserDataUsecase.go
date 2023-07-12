@@ -46,6 +46,11 @@ func (u *UserDataUsecase) Create(
 		return nil, errors.NewDomainError(errors.UnPemitedOperation, "既に登録されているメールアドレスです")
 	}
 
+	prefecture, domainErr := entity.StringToPrefecture(Prefecture)
+	if domainErr != nil {
+		return nil, domainErr
+	}
+
 	insertData := entity.CreateUser(
 		FirstName,
 		LastName,
@@ -54,7 +59,7 @@ func (u *UserDataUsecase) Create(
 		CompanyName,
 		BirthDate,
 		ZipCode,
-		Prefecture,
+		prefecture,
 		City,
 		Address,
 		Tel,
@@ -93,6 +98,10 @@ func (u *UserDataUsecase) Update(
 	if existUser == nil {
 		return nil, errors.NewDomainError(errors.QueryDataNotFoundError, "登録されているユーザーが存在しません")
 	}
+	prefecture, domainErr := entity.StringToPrefecture(Prefecture)
+	if domainErr != nil {
+		return nil, domainErr
+	}
 
 	updateData := entity.RegenUser(
 		ID,
@@ -103,7 +112,7 @@ func (u *UserDataUsecase) Update(
 		CompanyName,
 		BirthDate,
 		ZipCode,
-		Prefecture,
+		prefecture,
 		City,
 		Address,
 		Tel,

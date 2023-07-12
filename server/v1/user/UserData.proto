@@ -2,44 +2,60 @@ syntax = "proto3";
 
 package server.user;
 
-// ※ bufの managed mode を使用するためgo_packageを記述していません
+option go_package = "server/api/v1";
+
+message UserRegisterRequest {
+  string FirstName = 1;
+  string LastName = 2;
+  string FirstNameKana = 3;
+  string LastNameKana = 4;
+  string CompanyName = 5;
+  string BirthDate = 6;
+  string ZipCode = 7;
+  string Prefecture = 8;
+  string City = 9;
+  string Address = 10;
+  string Tel = 11;
+  string Mail = 12;
+  bool AcceptMail = 13;
+  bool AcceptTerm = 14;
+}
 
 message UserUpdateDataRequest {
   string ID = 1;
-  string firstName = 2;
-  string lastName = 3;
-  string firstNameKana = 4;
-  string lastNameKana = 5;
-  string companyName = 6;
-  string birthDate = 7;
-  string zipCode = 8;
-  string prefecture = 9;
-  string city = 10;
-  string address = 11;
-  string tel = 12;
-  string mail = 13;
-  bool acceptMail = 14;
+  string FirstName = 2;
+  string LastName = 3;
+  string FirstNameKana = 4;
+  string LastNameKana = 5;
+  string CompanyName = 6;
+  string BirthDate = 7;
+  string ZipCode = 8;
+  string Prefecture = 9;
+  string City = 10;
+  string Address = 11;
+  string Tel = 12;
+  string Mail = 13;
+  bool AcceptMail = 14;
 }
 
 message UserDataResponse {
   string ID = 1;
-  string firstName = 2;
-  string lastName = 3;
-  string firstNameKana = 4;
-  string lastNameKana = 5;
-  string companyName = 6;
-  string birthDate = 7;
-  string zipCode = 8;
-  string prefecture = 9;
-  string city = 10;
-  string address = 11;
-  string tel = 12;
-  string mail = 13;
-  bool acceptMail = 14;
-
+  string FirstName = 2;
+  string LastName = 3;
+  string FirstNameKana = 4;
+  string LastNameKana = 5;
+  string CompanyName = 6;
+  string BirthDate = 7;
+  string ZipCode = 8;
+  string Prefecture = 9;
+  string City = 10;
+  string Address = 11;
+  string Tel = 12;
+  string Mail = 13;
+  bool AcceptMail = 14;
 }
 
 service UserDataController {
-  rpc Update(UserRegisterRequest) returns (UserRegisterResponse) {}
-  rpc Delete(UserRegisterRequest) returns (UserRegisterResponse) {}
+  rpc Register(UserRegisterRequest) returns (UserDataResponse) {}
+  rpc Update(UserUpdateDataRequest) returns (UserDataResponse) {}
 }

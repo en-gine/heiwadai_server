@@ -1,13 +1,9 @@
 package action
 
-type Mail struct {
-	From    string
-	To      string
-	Subject string
-	Body    string
-}
+import (
+	"server/core/entity"
+)
 
 type IMailAction interface {
-	Send(mail *Mail) error
-	SendAll(mails *[]Mail) error
+	SendAll(users []*entity.User) error
 }

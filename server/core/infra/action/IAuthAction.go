@@ -10,4 +10,5 @@ type IAuthAction interface {
 	SignIn(email string, password string) (*types.Token, error)
 	GetUser(token *types.Token) (*entity.User, error)
 	Refresh(token *types.Token) (*types.Token, error)
+	ResetPassword(mail string) error
 }

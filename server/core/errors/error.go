@@ -13,7 +13,7 @@ const (
 	InvalidParameter ErrorType = iota
 	UnPemitedOperation
 	RepositoryError
-	ActionCallError
+	ActionError
 	QueryError
 	QueryDataNotFoundError
 )

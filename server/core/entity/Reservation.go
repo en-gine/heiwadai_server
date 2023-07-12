@@ -8,8 +8,8 @@ import (
 
 type Reservation struct {
 	ID           uuid.UUID
-	CheckIn      time.Time
-	CheckOut     time.Time
+	CheckInDate  time.Time
+	CheckOutDate time.Time
 	ChackInTime  time.Time
 	Content      string
 	Cost         int
@@ -37,8 +37,8 @@ type StayCustomer struct {
 }
 
 func CreateReservation(
-	CheckIn time.Time,
-	CheckOut time.Time,
+	CheckInDate time.Time,
+	CheckOutDate time.Time,
 	ChackInTime time.Time,
 	Content string,
 	Cost int,
@@ -51,8 +51,8 @@ func CreateReservation(
 ) *Reservation {
 	return &Reservation{
 		ID:           uuid.New(),
-		CheckIn:      CheckIn,
-		CheckOut:     CheckOut,
+		CheckInDate:  CheckInDate,
+		CheckOutDate: CheckOutDate,
 		ChackInTime:  ChackInTime,
 		Content:      Content,
 		Cost:         Cost,

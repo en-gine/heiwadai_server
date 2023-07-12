@@ -2,9 +2,12 @@ package queryservice
 
 import (
 	"server/core/entity"
+
+	"github.com/google/uuid"
 )
 
 type IStoreQueryService interface {
+	GetById(id uuid.UUID) (*entity.Store, error)
 	GetActiveAll() ([]*entity.Store, error)
-	GetAll(limit *int, page *int, per_page *int) ([]*entity.Store, error) //activeかどうか不問
+	GetAll() ([]*entity.Store, error) //activeかどうか不問
 }

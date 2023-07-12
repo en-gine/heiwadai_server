@@ -15,7 +15,7 @@ type User struct {
 	CompanyName   *string
 	BirthDate     time.Time
 	ZipCode       *string
-	Prefecture    string
+	Prefecture    Prefecture
 	City          *string
 	Address       *string
 	Tel           *string
@@ -31,7 +31,7 @@ func CreateUser(
 	CompanyName *string,
 	BirthDate time.Time,
 	ZipCode *string,
-	Prefecture string,
+	Prefecture Prefecture,
 	City *string,
 	Address *string,
 	Tel *string,
@@ -65,7 +65,7 @@ func RegenUser(
 	CompanyName *string,
 	BirthDate time.Time,
 	ZipCode *string,
-	Prefecture string,
+	Prefecture Prefecture,
 	City *string,
 	Address *string,
 	Tel *string,

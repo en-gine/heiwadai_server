@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package server.admin;
+
+import "v1/shared/Store.proto";
+
+message StoreRegisterRequest {
+  string Name = 1;
+  string ZipCode = 2;
+  string Address = 3;
+  string Tel = 4;
+  string Parking = 5;
+  string AccessInfo = 6;
+  bool IsActive = 7;
+  bool Stayable = 8;
+  string QRCode = 9;
+  string UnLimitedQRCode = 10;
+}
+
+message StoreUpdateRequest {
+  string ID = 1;
+  string Name = 2;
+  string ZipCode = 3;
+  string Address = 4;
+  string Tel = 5;
+  string Parking = 6;
+  string AccessInfo = 7;
+  bool IsActive = 8;
+  bool Stayable = 9;
+  string QRCode = 10;
+  string UnLimitedQRCode = 11;
+}
+
+service StoreController {
+  rpc Register(StoreRegisterRequest) returns (server.shared.StoreResponse) {}
+  rpc Update(StoreUpdateRequest) returns (server.shared.StoreResponse) {}
+}
+

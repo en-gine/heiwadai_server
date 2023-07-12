@@ -1,33 +1,40 @@
 package user
 
 import (
+	"context"
 	userv1 "server/api/v1/user"
+	userv1connect "server/api/v1/user/userconnect"
+	queryservice "server/core/infra/queryService"
 	"server/core/infra/repository"
 	usecase "server/core/usecase/user"
 
 	"github.com/Songmu/go-httpdate"
 	connect "github.com/bufbuild/connect-go"
+	"github.com/google/uuid"
 )
 
 type UserDataController struct {
 	userRepository repository.IUserRepository
+	userQuery      queryservice.IUserQueryService
 }
 
-func NewUserDataController(userRepository repository.IUserRepository) *UserDataController {
+var _ userv1connect.UserDataControllerClient = &UserDataController{}
+
+func NewUserDataController(userRepository repository.IUserRepository, userQuery queryservice.IUserQueryService) *UserDataController {
 	return &UserDataController{
 		userRepository: userRepository,
+		userQuery:      userQuery,
 	}
 }
 
-func (u *UserDataController) Update(req *connect.Request[userv1.UserDataRequest]) (*connect.Response[userv1.UserDataResponse], error) {
+func (u *UserDataController) Register(ctx context.Context, req *connect.Request[userv1.UserRegisterRequest]) (*connect.Response[userv1.UserDataResponse], error) {
 	msg := req.Msg
 	birth, err := httpdate.Str2Time(msg.BirthDate, nil)
 	if err != nil {
 		return nil, err
 	}
-
-	service := usecase.NewUserDataUsecase(u.userRepository)
-	user, err := service.Update(
+	service := usecase.NewUserDataUsecase(u.userRepository, u.userQuery)
+	user, err := service.Create(
 		msg.FirstName,
 		msg.LastName,
 		msg.FirstNameKana,
@@ -43,9 +50,6 @@ func (u *UserDataController) Update(req *connect.Request[userv1.UserDataRequest]
 		msg.AcceptMail,
 	)
 
-	if err != nil {
-		return nil, err
-	}
 	res := connect.NewResponse(&userv1.UserDataResponse{
 		FirstName:     user.FirstName,
 		LastName:      user.LastName,
@@ -54,7 +58,50 @@ func (u *UserDataController) Update(req *connect.Request[userv1.UserDataRequest]
 		CompanyName:   *user.CompanyName,
 		BirthDate:     user.BirthDate.String(),
 		ZipCode:       *user.ZipCode,
-		Prefecture:    user.Prefecture,
+		Prefecture:    user.Prefecture.String(),
+		City:          *user.City,
+		Address:       *user.Address,
+		Tel:           *user.Tel,
+		Mail:          user.Mail,
+		AcceptMail:    user.AcceptMail,
+	})
+	return res, nil
+}
+
+func (u *UserDataController) Update(ctx context.Context, req *connect.Request[userv1.UserUpdateDataRequest]) (*connect.Response[userv1.UserDataResponse], error) {
+	msg := req.Msg
+	birth, err := httpdate.Str2Time(msg.BirthDate, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	service := usecase.NewUserDataUsecase(u.userRepository, u.userQuery)
+	user, err := service.Update(
+		uuid.MustParse(msg.ID),
+		msg.FirstName,
+		msg.LastName,
+		msg.FirstNameKana,
+		msg.LastNameKana,
+		&msg.CompanyName,
+		birth,
+		&msg.ZipCode,
+		msg.Prefecture,
+		&msg.City,
+		&msg.Address,
+		&msg.Tel,
+		msg.Mail,
+		msg.AcceptMail,
+	)
+
+	res := connect.NewResponse(&userv1.UserDataResponse{
+		FirstName:     user.FirstName,
+		LastName:      user.LastName,
+		FirstNameKana: user.FirstNameKana,
+		LastNameKana:  user.LastNameKana,
+		CompanyName:   *user.CompanyName,
+		BirthDate:     user.BirthDate.String(),
+		ZipCode:       *user.ZipCode,
+		Prefecture:    user.Prefecture.String(),
 		City:          *user.City,
 		Address:       *user.Address,
 		Tel:           *user.Tel,

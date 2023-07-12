@@ -58,7 +58,7 @@ func (u *UserCheckinUsecase) Checkin(AuthUser *entity.User, QrHash uuid.UUID) (*
 	}
 	var checkInStore *entity.Store
 	var isUnlimitQr bool
-	lastCheckin, err := u.checkinQuery.GetLastStoreCheckin(AuthUser, *checkInStore)
+	lastCheckin, err := u.checkinQuery.GetLastStoreCheckin(AuthUser, checkInStore)
 
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())
@@ -66,12 +66,12 @@ func (u *UserCheckinUsecase) Checkin(AuthUser *entity.User, QrHash uuid.UUID) (*
 
 	for _, store := range allStores {
 		//通常のQRコードでは24時間以内にチェックインした店舗はチェックインできない
-		if store.QrCode == QrHash {
+		if store.QRCode == QrHash {
 			checkInStore = store
 			isUnlimitQr = false
 		}
 		//無制限のQRコード
-		if store.UnLimitedQrCode == QrHash {
+		if store.UnLimitedQRCode == QrHash {
 			checkInStore = store
 			isUnlimitQr = true
 		}

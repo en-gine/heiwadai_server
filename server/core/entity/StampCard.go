@@ -19,9 +19,7 @@ func NewStampCard(
 		return nil, errors.NewDomainError(errors.InvalidParameter, "チェックイン数が上限を超えています。")
 	}
 
-	for i, userCheckIn := range userCheckIns {
-		stampCard[i] = userCheckIn
-	}
+	copy(stampCard, userCheckIns)
 	return &StampCard{
 		Checkins: stampCard,
 	}, nil

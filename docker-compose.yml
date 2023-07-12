@@ -11,17 +11,6 @@ services:
       - ./server:/server
     ports:
       - 3000:3000
-  db:
-    container_name: heiwadai-db
-    image: postgres:15.1-alpine
-    volumes:
-      - ./docker/data/db:/var/lib/postgresql/data
-    ports:
-      - ${DB_PORT}:${DB_PORT}
-    environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
   pgadmin:
     user: root
     container_name: heiwadai-pgadmin
@@ -36,3 +25,33 @@ services:
       - 8080:80
     depends_on:
       - db
+  db:
+    container_name: supabase-db
+    image: supabase/postgres:15.1.0.90
+    restart: unless-stopped
+    ports:
+      - ${PSQL_PORT}:${PSQL_PORT}
+    environment:
+      PGPORT: ${PSQL_PORT}
+      POSTGRES_PORT: ${PSQL_PORT}
+      PGPASSWORD: ${PSQL_PASS}
+      POSTGRES_USER: ${PSQL_USER}
+      POSTGRES_PASSWORD: ${PSQL_PASS}
+      PGDATABASE: ${PSQL_DBNAME}
+      POSTGRES_DB: ${PSQL_DBNAME}
+    volumes:
+      - ./docker/init/db/realtime.sql:/docker-entrypoint-initdb.d/migrations/99-realtime.sql:Z
+      # Must be superuser to create event trigger
+      - ./docker/init/db/webhooks.sql:/docker-entrypoint-initdb.d/init-scripts/98-webhooks.sql:Z
+      # Must be superuser to alter reserved role
+      - ./docker/init/db/roles.sql:/docker-entrypoint-initdb.d/init-scripts/99-roles.sql:Z
+      # PGDATA directory is persisted between restarts
+      - ./docker/data/db/data:/var/lib/postgresql/data:Z
+  proteus:
+    user: root
+    container_name: heiwadai-proteus
+    image: golang:1.8-jessie
+    tty: true
+    command: bash
+    volumes:
+      - ./server:/server

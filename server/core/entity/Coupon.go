@@ -14,11 +14,15 @@ type Coupon struct {
 	DiscountAmount    uint       //割引額
 	ExpireAt          time.Time  //有効期限
 	IsCombinationable bool       //併用可能
-	OverView          string     //概要
+	Notices           []string   //注意事項
 	UsedAt            *time.Time //使用済
 	User              *User
 	TargetStore       []*Store //対象店舗
+	CreateAt          time.Time
+	Status            CouponStatus
 }
+
+var DefaultNotices = []string{"クーポンは併用できません", "ランチではお使いになれません"}
 
 type CouponType int
 
@@ -41,6 +45,30 @@ func (s CouponType) String() string {
 	}
 }
 
+type CouponStatus int
+
+const (
+	CouponDraft CouponStatus = iota
+	CouponSaved
+	CouponIssued
+	CouponUsed
+)
+
+func (b CouponStatus) String() string {
+	switch b {
+	case CouponDraft:
+		return "Draft"
+	case CouponSaved:
+		return "Saved"
+	case CouponIssued:
+		return "Issued"
+	case CouponUsed:
+		return "Used"
+	default:
+		return "Unknown"
+	}
+}
+
 func newCoupon(
 	ID uuid.UUID,
 	Name string,
@@ -48,9 +76,11 @@ func newCoupon(
 	DiscountAmount uint,
 	ExpireAt time.Time,
 	IsCombinationable bool,
-	OverView string,
+	Notices []string,
 	User *User,
 	TargetStore []*Store,
+	CreateAt time.Time,
+	Status CouponStatus,
 ) (*Coupon, *errors.DomainError) {
 	if len(Name) > 10 {
 		return nil, errors.NewDomainError(errors.InvalidParameter, "クーポン名は10文字以内にしてください")
@@ -64,9 +94,11 @@ func newCoupon(
 		DiscountAmount:    DiscountAmount,
 		ExpireAt:          ExpireAt,
 		IsCombinationable: IsCombinationable,
-		OverView:          OverView,
+		Notices:           Notices,
 		User:              User,
 		TargetStore:       TargetStore,
+		CreateAt:          CreateAt,
+		Status:            Status,
 	}, nil
 }
 
@@ -77,10 +109,12 @@ func RegenCoupon(
 	DiscountAmount uint,
 	ExpireAt time.Time,
 	IsCombinationable bool,
-	OverView string,
+	Notices []string,
 	UsedAt *time.Time,
 	User *User,
 	TargetStore []*Store,
+	CreateAt time.Time,
+	Status CouponStatus,
 ) *Coupon {
 	return &Coupon{
 		ID:                ID,
@@ -88,10 +122,12 @@ func RegenCoupon(
 		DiscountAmount:    DiscountAmount,
 		ExpireAt:          ExpireAt,
 		IsCombinationable: IsCombinationable,
-		OverView:          OverView,
+		Notices:           Notices,
 		UsedAt:            UsedAt,
 		User:              User,
 		TargetStore:       TargetStore,
+		CreateAt:          CreateAt,
+		Status:            Status,
 	}
 }
 
@@ -108,9 +144,11 @@ func CreateStandardCoupon(
 		500,
 		expireAtOneYear,
 		false,
-		"",
+		DefaultNotices,
 		User,
 		TargetStore,
+		time.Now(),
+		CouponIssued,
 	)
 }
 
@@ -119,10 +157,9 @@ func CreateCustomCoupon(
 	DiscountAmount uint,
 	ExpireAt time.Time,
 	IsCombinationable bool,
-	OverView string,
-	User *User,
+	Notices []string,
 	TargetStore []*Store,
-) (*Coupon, error) {
+) (*Coupon, *errors.DomainError) {
 	if Name == "" {
 		return nil, errors.NewDomainError(errors.InvalidParameter, "クーポン名が空です")
 	}
@@ -134,9 +171,29 @@ func CreateCustomCoupon(
 		DiscountAmount,
 		ExpireAt,
 		IsCombinationable,
-		OverView,
-		User,
+		Notices,
+		nil,
 		TargetStore,
+		time.Now(),
+		CouponDraft,
+	)
+}
+func SaveCustomCoupon(
+	DraftCoupon *Coupon,
+) (*Coupon, *errors.DomainError) {
+
+	return newCoupon(
+		DraftCoupon.ID,
+		DraftCoupon.Name,
+		Custom,
+		DraftCoupon.DiscountAmount,
+		DraftCoupon.ExpireAt,
+		DraftCoupon.IsCombinationable,
+		DraftCoupon.Notices,
+		nil,
+		DraftCoupon.TargetStore,
+		DraftCoupon.CreateAt,
+		CouponSaved,
 	)
 }
 
@@ -144,10 +201,9 @@ func CreateBirthdayCoupon(
 	DiscountAmount uint,
 	ExpireAt time.Time,
 	IsCombinationable bool,
-	OverView string,
 	User *User,
 	TargetStore []*Store,
-) (*Coupon, error) {
+) (*Coupon, *errors.DomainError) {
 	return newCoupon(
 		uuid.New(),
 		"お誕生日",
@@ -155,15 +211,17 @@ func CreateBirthdayCoupon(
 		DiscountAmount,
 		ExpireAt,
 		IsCombinationable,
-		OverView,
+		DefaultNotices,
 		User,
 		TargetStore,
+		time.Now(),
+		CouponIssued,
 	)
 }
 
 func UsedCoupon(coupon *Coupon) *Coupon {
 	now := time.Now()
-	coupon.UsedAt = &now
+
 	return RegenCoupon(
 		coupon.ID,
 		coupon.Name,
@@ -171,9 +229,11 @@ func UsedCoupon(coupon *Coupon) *Coupon {
 		coupon.DiscountAmount,
 		coupon.ExpireAt,
 		coupon.IsCombinationable,
-		coupon.OverView,
-		coupon.UsedAt,
+		coupon.Notices,
+		&now,
 		coupon.User,
 		coupon.TargetStore,
+		coupon.CreateAt,
+		CouponUsed,
 	)
 }

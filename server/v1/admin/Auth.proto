@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package server.admin;
+
+message AdminAuthRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message AdminAuthResponse {
+	string accessToken = 1;
+	int64 expiresIn = 2;
+	string refreshToken= 3;
+}
+
+service AuthController {
+  rpc Call(AdminAuthRequest) returns (AdminAuthResponse) {}
+}

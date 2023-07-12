@@ -10,6 +10,7 @@ import (
 
 	userv1connect "server/api/v1/user/userconnect"
 	"server/external/spabase"
+	"server/repository/implement"
 
 	controller "server/controller/user"
 
@@ -35,8 +36,15 @@ func StartServer() {
 
 	mux := NewConnectReflection()
 	requireAuth := NewAuthentificatable(spabase.NewAuthClient())
-	userContoroller := controller.UserRegisterController{}
-	path, handler := userv1connect.NewUserRegisterControllerHandler(&userContoroller, requireAuth)
+
+	userRepository, err := implement.NewUserRepository()
+	if err != nil {
+		log.Fatal(err)
+	}
+	userQueryService, _ := implement.NewUserQueryService()
+
+	userContoroller := controller.NewUserDataController(userRepository, userQueryService)
+	path, handler := userv1connect.NewUserDataControllerHandler(userContoroller, requireAuth)
 	mux.Handle(path, handler)
 
 	msg := os.ExpandEnv("${ENV} mode run! port: ${SERVER_PORT}")

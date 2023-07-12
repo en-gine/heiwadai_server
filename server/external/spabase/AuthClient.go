@@ -71,6 +71,10 @@ func (au *AuthClient) Refresh(token *types.Token) (*types.Token, error) {
 
 	ctx := context.Background()
 	data, err := au.client.Auth.RefreshUser(ctx, token.AccessToken, *token.RefreshToken)
+	if err != nil {
+		return nil, errors.New("Error Refreshing Token" + err.Error())
+	}
+
 	return &types.Token{
 		AccessToken:  data.AccessToken,
 		RefreshToken: &data.RefreshToken,
@@ -90,6 +94,12 @@ func (au *AuthClient) GetUser(token *types.Token) (*entity.User, error) {
 
 }
 
+func (au *AuthClient) ResetPassword(email string) error {
+	ctx := context.Background()
+	err := au.client.Auth.ResetPasswordForEmail(ctx, email)
+	return err
+}
+
 // supabaseのユーザー情報をentity.Userに変換
 func spaUserToEntity(data *supa.User) (*entity.User, error) {
 	uuid, err := uuid.Parse(data.ID)
@@ -105,6 +115,10 @@ func spaUserToEntity(data *supa.User) (*entity.User, error) {
 	if err != nil {
 		return nil, err
 	}
+	pref, domainErr := entity.IntToPrefecture(data.UserMetadata["Prefecture"].(int))
+	if domainErr != nil {
+		return nil, domainErr
+	}
 
 	return entity.RegenUser(
 		uuid,
@@ -115,7 +129,7 @@ func spaUserToEntity(data *supa.User) (*entity.User, error) {
 		parser.ToStringPtr(data.UserMetadata["CompanyName"]),
 		birthDate,
 		parser.ToStringPtr(data.UserMetadata["ZipCode"]),
-		data.UserMetadata["Prefecture"].(string),
+		pref,
 		parser.ToStringPtr(data.UserMetadata["City"]),
 		parser.ToStringPtr(data.UserMetadata["Address"]),
 		parser.ToStringPtr(data.UserMetadata["Tel"]),

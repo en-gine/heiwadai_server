@@ -42,6 +42,10 @@ func (u *UserCouponUsecase) UseMyCoupon(AuthUser *entity.User, couponId uuid.UUI
 	if AuthUser.ID != coupon.User.ID {
 		return errors.NewDomainError(errors.InvalidParameter, "ユーザー自身のクーポンではありません。")
 	}
+	if coupon.Status != entity.CouponIssued {
+		return errors.NewDomainError(errors.UnPemitedOperation, "発行済ステータスのクーポンではありません。")
+	}
+
 	if coupon.UsedAt != nil {
 		return errors.NewDomainError(errors.UnPemitedOperation, "クーポンはすでに使用済みです。")
 	}
