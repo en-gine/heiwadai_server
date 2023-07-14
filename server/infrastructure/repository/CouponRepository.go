@@ -7,7 +7,6 @@ import (
 	"server/core/infra/repository"
 	"server/db/models"
 
-	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 )
 
@@ -39,7 +38,6 @@ func (pr *CouponRepository) Save(updateCoupon *entity.Coupon) error {
 		DiscountAmount:    int(updateCoupon.DiscountAmount),
 		ExpireAt:          updateCoupon.ExpireAt,
 		IsCombinationable: updateCoupon.IsCombinationable,
-		UsedAt:            null.TimeFromPtr(updateCoupon.UsedAt),
 		CreateAt:          updateCoupon.CreateAt,
 		CouponStatus:      int(updateCoupon.Status),
 	}

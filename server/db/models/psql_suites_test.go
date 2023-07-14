@@ -14,6 +14,8 @@ func TestUpsert(t *testing.T) {
 
 	t.Run("Coupons", testCouponsUpsert)
 
+	t.Run("CouponAttachedUsers", testCouponAttachedUsersUpsert)
+
 	t.Run("CouponNotices", testCouponNoticesUpsert)
 
 	t.Run("CouponStores", testCouponStoresUpsert)

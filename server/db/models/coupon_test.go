@@ -737,68 +737,85 @@ func testCouponOneToOneSetOpCouponStoreUsingCouponStore(t *testing.T) {
 	}
 }
 
-func testCouponToOneUserUsingUser(t *testing.T) {
+func testCouponToManyCouponAttachedUsers(t *testing.T) {
+	var err error
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
 
-	var local Coupon
-	var foreign User
+	var a Coupon
+	var b, c CouponAttachedUser
 
 	seed := randomize.NewSeed()
-	if err := randomize.Struct(seed, &local, couponDBTypes, true, couponColumnsWithDefault...); err != nil {
+	if err = randomize.Struct(seed, &a, couponDBTypes, true, couponColumnsWithDefault...); err != nil {
 		t.Errorf("Unable to randomize Coupon struct: %s", err)
 	}
-	if err := randomize.Struct(seed, &foreign, userDBTypes, false, userColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize User struct: %s", err)
-	}
 
-	if err := foreign.Insert(ctx, tx, boil.Infer()); err != nil {
+	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Fatal(err)
 	}
 
-	queries.Assign(&local.UserID, foreign.ID)
-	if err := local.Insert(ctx, tx, boil.Infer()); err != nil {
+	if err = randomize.Struct(seed, &b, couponAttachedUserDBTypes, false, couponAttachedUserColumnsWithDefault...); err != nil {
+		t.Fatal(err)
+	}
+	if err = randomize.Struct(seed, &c, couponAttachedUserDBTypes, false, couponAttachedUserColumnsWithDefault...); err != nil {
 		t.Fatal(err)
 	}
 
-	check, err := local.User().One(ctx, tx)
+	b.CouponID = a.ID
+	c.CouponID = a.ID
+
+	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+	if err = c.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	check, err := a.CouponAttachedUsers().All(ctx, tx)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if !queries.Equal(check.ID, foreign.ID) {
-		t.Errorf("want: %v, got %v", foreign.ID, check.ID)
+	bFound, cFound := false, false
+	for _, v := range check {
+		if v.CouponID == b.CouponID {
+			bFound = true
+		}
+		if v.CouponID == c.CouponID {
+			cFound = true
+		}
 	}
 
-	ranAfterSelectHook := false
-	AddUserHook(boil.AfterSelectHook, func(ctx context.Context, e boil.ContextExecutor, o *User) error {
-		ranAfterSelectHook = true
-		return nil
-	})
+	if !bFound {
+		t.Error("expected to find b")
+	}
+	if !cFound {
+		t.Error("expected to find c")
+	}
 
-	slice := CouponSlice{&local}
-	if err = local.L.LoadUser(ctx, tx, false, (*[]*Coupon)(&slice), nil); err != nil {
+	slice := CouponSlice{&a}
+	if err = a.L.LoadCouponAttachedUsers(ctx, tx, false, (*[]*Coupon)(&slice), nil); err != nil {
 		t.Fatal(err)
 	}
-	if local.R.User == nil {
-		t.Error("struct should have been eager loaded")
+	if got := len(a.R.CouponAttachedUsers); got != 2 {
+		t.Error("number of eager loaded records wrong, got:", got)
 	}
 
-	local.R.User = nil
-	if err = local.L.LoadUser(ctx, tx, true, &local, nil); err != nil {
+	a.R.CouponAttachedUsers = nil
+	if err = a.L.LoadCouponAttachedUsers(ctx, tx, true, &a, nil); err != nil {
 		t.Fatal(err)
 	}
-	if local.R.User == nil {
-		t.Error("struct should have been eager loaded")
+	if got := len(a.R.CouponAttachedUsers); got != 2 {
+		t.Error("number of eager loaded records wrong, got:", got)
 	}
 
-	if !ranAfterSelectHook {
-		t.Error("failed to run AfterSelect hook for relationship")
+	if t.Failed() {
+		t.Logf("%#v", check)
 	}
 }
 
-func testCouponToOneSetOpUserUsingUser(t *testing.T) {
+func testCouponToManyAddOpCouponAttachedUsers(t *testing.T) {
 	var err error
 
 	ctx := context.Background()
@@ -806,17 +823,17 @@ func testCouponToOneSetOpUserUsingUser(t *testing.T) {
 	defer func() { _ = tx.Rollback() }()
 
 	var a Coupon
-	var b, c User
+	var b, c, d, e CouponAttachedUser
 
 	seed := randomize.NewSeed()
 	if err = randomize.Struct(seed, &a, couponDBTypes, false, strmangle.SetComplement(couponPrimaryKeyColumns, couponColumnsWithoutDefault)...); err != nil {
 		t.Fatal(err)
 	}
-	if err = randomize.Struct(seed, &b, userDBTypes, false, strmangle.SetComplement(userPrimaryKeyColumns, userColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
-	}
-	if err = randomize.Struct(seed, &c, userDBTypes, false, strmangle.SetComplement(userPrimaryKeyColumns, userColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
+	foreigners := []*CouponAttachedUser{&b, &c, &d, &e}
+	for _, x := range foreigners {
+		if err = randomize.Struct(seed, x, couponAttachedUserDBTypes, false, strmangle.SetComplement(couponAttachedUserPrimaryKeyColumns, couponAttachedUserColumnsWithoutDefault)...); err != nil {
+			t.Fatal(err)
+		}
 	}
 
 	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
@@ -825,85 +842,52 @@ func testCouponToOneSetOpUserUsingUser(t *testing.T) {
 	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Fatal(err)
 	}
+	if err = c.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
 
-	for i, x := range []*User{&b, &c} {
-		err = a.SetUser(ctx, tx, i != 0, x)
+	foreignersSplitByInsertion := [][]*CouponAttachedUser{
+		{&b, &c},
+		{&d, &e},
+	}
+
+	for i, x := range foreignersSplitByInsertion {
+		err = a.AddCouponAttachedUsers(ctx, tx, i != 0, x...)
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		if a.R.User != x {
-			t.Error("relationship struct not set to correct value")
+		first := x[0]
+		second := x[1]
+
+		if a.ID != first.CouponID {
+			t.Error("foreign key was wrong value", a.ID, first.CouponID)
+		}
+		if a.ID != second.CouponID {
+			t.Error("foreign key was wrong value", a.ID, second.CouponID)
 		}
 
-		if x.R.Coupons[0] != &a {
-			t.Error("failed to append to foreign relationship struct")
+		if first.R.Coupon != &a {
+			t.Error("relationship was not added properly to the foreign slice")
 		}
-		if !queries.Equal(a.UserID, x.ID) {
-			t.Error("foreign key was wrong value", a.UserID)
-		}
-
-		zero := reflect.Zero(reflect.TypeOf(a.UserID))
-		reflect.Indirect(reflect.ValueOf(&a.UserID)).Set(zero)
-
-		if err = a.Reload(ctx, tx); err != nil {
-			t.Fatal("failed to reload", err)
+		if second.R.Coupon != &a {
+			t.Error("relationship was not added properly to the foreign slice")
 		}
 
-		if !queries.Equal(a.UserID, x.ID) {
-			t.Error("foreign key was wrong value", a.UserID, x.ID)
+		if a.R.CouponAttachedUsers[i*2] != first {
+			t.Error("relationship struct slice not set to correct value")
 		}
-	}
-}
+		if a.R.CouponAttachedUsers[i*2+1] != second {
+			t.Error("relationship struct slice not set to correct value")
+		}
 
-func testCouponToOneRemoveOpUserUsingUser(t *testing.T) {
-	var err error
-
-	ctx := context.Background()
-	tx := MustTx(boil.BeginTx(ctx, nil))
-	defer func() { _ = tx.Rollback() }()
-
-	var a Coupon
-	var b User
-
-	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, &a, couponDBTypes, false, strmangle.SetComplement(couponPrimaryKeyColumns, couponColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
-	}
-	if err = randomize.Struct(seed, &b, userDBTypes, false, strmangle.SetComplement(userPrimaryKeyColumns, userColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
-	}
-
-	if err = a.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-
-	if err = a.SetUser(ctx, tx, true, &b); err != nil {
-		t.Fatal(err)
-	}
-
-	if err = a.RemoveUser(ctx, tx, &b); err != nil {
-		t.Error("failed to remove relationship")
-	}
-
-	count, err := a.User().Count(ctx, tx)
-	if err != nil {
-		t.Error(err)
-	}
-	if count != 0 {
-		t.Error("want no relationships remaining")
-	}
-
-	if a.R.User != nil {
-		t.Error("R struct entry should be nil")
-	}
-
-	if !queries.IsValuerNil(a.UserID) {
-		t.Error("foreign key value should be nil")
-	}
-
-	if len(b.R.Coupons) != 0 {
-		t.Error("failed to remove a from b's relationships")
+		count, err := a.CouponAttachedUsers().Count(ctx, tx)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if want := int64((i + 1) * 2); count != want {
+			t.Error("want", want, "got", count)
+		}
 	}
 }
 
@@ -981,7 +965,7 @@ func testCouponsSelect(t *testing.T) {
 }
 
 var (
-	couponDBTypes = map[string]string{`ID`: `uuid`, `Name`: `character varying`, `CouponType`: `integer`, `DiscountAmount`: `integer`, `ExpireAt`: `timestamp with time zone`, `IsCombinationable`: `boolean`, `UsedAt`: `timestamp with time zone`, `UserID`: `uuid`, `CreateAt`: `timestamp with time zone`, `UpdateAt`: `timestamp with time zone`, `CouponStatus`: `integer`}
+	couponDBTypes = map[string]string{`ID`: `uuid`, `Name`: `character varying`, `CouponType`: `integer`, `DiscountAmount`: `integer`, `ExpireAt`: `timestamp with time zone`, `IsCombinationable`: `boolean`, `CreateAt`: `timestamp with time zone`, `UpdateAt`: `timestamp with time zone`, `CouponStatus`: `integer`}
 	_             = bytes.MinRead
 )
 

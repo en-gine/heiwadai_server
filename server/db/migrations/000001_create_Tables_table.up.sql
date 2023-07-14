@@ -70,9 +70,6 @@ CREATE TABLE coupon (
     discount_amount INTEGER NOT NULL,
     expire_at TIMESTAMPTZ NOT NULL,
     is_combinationable BOOLEAN NOT NULL,
-    used_at TIMESTAMPTZ,
-    user_id UUID,
-    FOREIGN KEY (user_id) REFERENCES "user" (id),
     create_at TIMESTAMPTZ NOT NULL default now(),
     update_at TIMESTAMPTZ NOT NULL default now(),
     coupon_status int NOT NULL
@@ -86,6 +83,15 @@ CREATE TABLE coupon_notices (
 CREATE TABLE coupon_stores (
 	coupon_id UUID REFERENCES coupon(id) PRIMARY KEY,
 	store_id UUID NOT NULL REFERENCES store(id)
+);
+
+CREATE TABLE coupon_attached_user (
+	coupon_id UUID,
+    used_at TIMESTAMPTZ,
+    user_id UUID,
+    FOREIGN KEY (coupon_id) REFERENCES coupon(id),
+    FOREIGN KEY (user_id) REFERENCES "user" (id),
+    PRIMARY KEY(coupon_id, user_id)
 );
 
 CREATE TABLE banner (
@@ -122,12 +128,11 @@ CREATE TABLE mail_magazine (
     FOREIGN KEY (author) REFERENCES admin (id)
 );
 
-create schema if not exists auth ;
 create or replace function public.handle_new_user() 
 returns trigger as $$
 begin
   insert into public.users (id, email)
-  values (new.id, new.email);
+  values (new.id);
   return new;
 end;
 $$ language plpgsql security definer;

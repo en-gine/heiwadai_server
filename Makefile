@@ -12,8 +12,5 @@ stop:
 restart:
 	docker compose restart
 
-gen: #protoファイルからapiコードを自動生成
-	docker compose exec server buf generate
-
 run: 
 	docker compose exec server go run main.go

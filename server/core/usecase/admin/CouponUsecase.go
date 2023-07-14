@@ -14,11 +14,13 @@ import (
 type AdminCouponUsecase struct {
 	couponRepository repository.ICouponRepository
 	couponQuery      queryservice.ICouponQueryService
+	userCouponQuery  queryservice.IUserCouponQueryService
 	couponAction     action.IAttachCouponAction
 	storeQuery       queryservice.IStoreQueryService
 }
 
-func NewAdminCouponUsecase(couponRepository repository.ICouponRepository, couponQuery queryservice.ICouponQueryService, couponAction action.IAttachCouponAction, storeQuery queryservice.IStoreQueryService) *AdminCouponUsecase {
+func NewAdminCouponUsecase(couponRepository repository.ICouponRepository, couponQuery queryservice.ICouponQueryService,
+	userCouponQuery queryservice.IUserCouponQueryService, couponAction action.IAttachCouponAction, storeQuery queryservice.IStoreQueryService) *AdminCouponUsecase {
 	return &AdminCouponUsecase{
 		couponRepository: couponRepository,
 		couponQuery:      couponQuery,
@@ -27,9 +29,9 @@ func NewAdminCouponUsecase(couponRepository repository.ICouponRepository, coupon
 	}
 }
 
-func (u *AdminCouponUsecase) GetUserList(User *entity.User) ([]*entity.Coupon, *errors.DomainError) {
+func (u *AdminCouponUsecase) GetUsersCouponList(User *entity.User) ([]*entity.UserAttachedCoupon, *errors.DomainError) {
 
-	coupons, err := u.couponQuery.GetActiveAll(User)
+	coupons, err := u.userCouponQuery.GetActiveAll(User)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())
 	}
@@ -105,11 +107,7 @@ func (u *AdminCouponUsecase) AttachCustomCoupon(couponId uuid.UUID) (*int, *erro
 		return nil, errors.NewDomainError(errors.UnPemitedOperation, "保存済ステータスのクーポンではありません。")
 	}
 
-	if coupon.UsedAt != nil {
-		return nil, errors.NewDomainError(errors.UnPemitedOperation, "クーポンはすでに使用済みです。")
-	}
-
-	count, err := u.couponAction.Isssue(coupon)
+	count, err := u.couponAction.Issue(coupon)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.ActionError, err.Error())
 	}

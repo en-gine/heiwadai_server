@@ -5,5 +5,5 @@ import (
 )
 
 type IMailAction interface {
-	SendAll(users []*entity.User) error
+	SendAll(prefecture []*entity.Prefecture) error
 }

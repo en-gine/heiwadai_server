@@ -14,7 +14,7 @@ var _ action.IMailAction = &SendMail{}
 type SendMail struct {
 }
 
-func (s *SendMail) SendAll(users []*entity.User) error {
+func (s *SendMail) SendAll([]*entity.Prefecture) error {
 	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
 	if err != nil {
 		log.Fatalf("%s: %s", "Failed to connect to RabbitMQ", err)

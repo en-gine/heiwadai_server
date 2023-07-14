@@ -5,5 +5,5 @@ import (
 )
 
 type IAttachCouponAction interface {
-	Isssue(Coupon *entity.Coupon) (int, error) // 発行数を返す
+	Issue(Coupon *entity.Coupon) (int, error) // 発行数を返す
 }

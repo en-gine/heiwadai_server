@@ -14,7 +14,6 @@ import (
 	"time"
 
 	"github.com/friendsofgo/errors"
-	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -24,17 +23,15 @@ import (
 
 // Coupon is an object representing the database table.
 type Coupon struct {
-	ID                string      `boil:"id" json:"id" toml:"id" yaml:"id"`
-	Name              string      `boil:"name" json:"name" toml:"name" yaml:"name"`
-	CouponType        int         `boil:"coupon_type" json:"coupon_type" toml:"coupon_type" yaml:"coupon_type"`
-	DiscountAmount    int         `boil:"discount_amount" json:"discount_amount" toml:"discount_amount" yaml:"discount_amount"`
-	ExpireAt          time.Time   `boil:"expire_at" json:"expire_at" toml:"expire_at" yaml:"expire_at"`
-	IsCombinationable bool        `boil:"is_combinationable" json:"is_combinationable" toml:"is_combinationable" yaml:"is_combinationable"`
-	UsedAt            null.Time   `boil:"used_at" json:"used_at,omitempty" toml:"used_at" yaml:"used_at,omitempty"`
-	UserID            null.String `boil:"user_id" json:"user_id,omitempty" toml:"user_id" yaml:"user_id,omitempty"`
-	CreateAt          time.Time   `boil:"create_at" json:"create_at" toml:"create_at" yaml:"create_at"`
-	UpdateAt          time.Time   `boil:"update_at" json:"update_at" toml:"update_at" yaml:"update_at"`
-	CouponStatus      int         `boil:"coupon_status" json:"coupon_status" toml:"coupon_status" yaml:"coupon_status"`
+	ID                string    `boil:"id" json:"id" toml:"id" yaml:"id"`
+	Name              string    `boil:"name" json:"name" toml:"name" yaml:"name"`
+	CouponType        int       `boil:"coupon_type" json:"coupon_type" toml:"coupon_type" yaml:"coupon_type"`
+	DiscountAmount    int       `boil:"discount_amount" json:"discount_amount" toml:"discount_amount" yaml:"discount_amount"`
+	ExpireAt          time.Time `boil:"expire_at" json:"expire_at" toml:"expire_at" yaml:"expire_at"`
+	IsCombinationable bool      `boil:"is_combinationable" json:"is_combinationable" toml:"is_combinationable" yaml:"is_combinationable"`
+	CreateAt          time.Time `boil:"create_at" json:"create_at" toml:"create_at" yaml:"create_at"`
+	UpdateAt          time.Time `boil:"update_at" json:"update_at" toml:"update_at" yaml:"update_at"`
+	CouponStatus      int       `boil:"coupon_status" json:"coupon_status" toml:"coupon_status" yaml:"coupon_status"`
 
 	R *couponR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L couponL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -47,8 +44,6 @@ var CouponColumns = struct {
 	DiscountAmount    string
 	ExpireAt          string
 	IsCombinationable string
-	UsedAt            string
-	UserID            string
 	CreateAt          string
 	UpdateAt          string
 	CouponStatus      string
@@ -59,8 +54,6 @@ var CouponColumns = struct {
 	DiscountAmount:    "discount_amount",
 	ExpireAt:          "expire_at",
 	IsCombinationable: "is_combinationable",
-	UsedAt:            "used_at",
-	UserID:            "user_id",
 	CreateAt:          "create_at",
 	UpdateAt:          "update_at",
 	CouponStatus:      "coupon_status",
@@ -73,8 +66,6 @@ var CouponTableColumns = struct {
 	DiscountAmount    string
 	ExpireAt          string
 	IsCombinationable string
-	UsedAt            string
-	UserID            string
 	CreateAt          string
 	UpdateAt          string
 	CouponStatus      string
@@ -85,38 +76,12 @@ var CouponTableColumns = struct {
 	DiscountAmount:    "coupon.discount_amount",
 	ExpireAt:          "coupon.expire_at",
 	IsCombinationable: "coupon.is_combinationable",
-	UsedAt:            "coupon.used_at",
-	UserID:            "coupon.user_id",
 	CreateAt:          "coupon.create_at",
 	UpdateAt:          "coupon.update_at",
 	CouponStatus:      "coupon.coupon_status",
 }
 
 // Generated where
-
-type whereHelpernull_Time struct{ field string }
-
-func (w whereHelpernull_Time) EQ(x null.Time) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, false, x)
-}
-func (w whereHelpernull_Time) NEQ(x null.Time) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, true, x)
-}
-func (w whereHelpernull_Time) LT(x null.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LT, x)
-}
-func (w whereHelpernull_Time) LTE(x null.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LTE, x)
-}
-func (w whereHelpernull_Time) GT(x null.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GT, x)
-}
-func (w whereHelpernull_Time) GTE(x null.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GTE, x)
-}
-
-func (w whereHelpernull_Time) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
-func (w whereHelpernull_Time) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
 
 var CouponWhere = struct {
 	ID                whereHelperstring
@@ -125,8 +90,6 @@ var CouponWhere = struct {
 	DiscountAmount    whereHelperint
 	ExpireAt          whereHelpertime_Time
 	IsCombinationable whereHelperbool
-	UsedAt            whereHelpernull_Time
-	UserID            whereHelpernull_String
 	CreateAt          whereHelpertime_Time
 	UpdateAt          whereHelpertime_Time
 	CouponStatus      whereHelperint
@@ -137,8 +100,6 @@ var CouponWhere = struct {
 	DiscountAmount:    whereHelperint{field: "\"coupon\".\"discount_amount\""},
 	ExpireAt:          whereHelpertime_Time{field: "\"coupon\".\"expire_at\""},
 	IsCombinationable: whereHelperbool{field: "\"coupon\".\"is_combinationable\""},
-	UsedAt:            whereHelpernull_Time{field: "\"coupon\".\"used_at\""},
-	UserID:            whereHelpernull_String{field: "\"coupon\".\"user_id\""},
 	CreateAt:          whereHelpertime_Time{field: "\"coupon\".\"create_at\""},
 	UpdateAt:          whereHelpertime_Time{field: "\"coupon\".\"update_at\""},
 	CouponStatus:      whereHelperint{field: "\"coupon\".\"coupon_status\""},
@@ -146,32 +107,25 @@ var CouponWhere = struct {
 
 // CouponRels is where relationship names are stored.
 var CouponRels = struct {
-	User         string
-	CouponNotice string
-	CouponStore  string
+	CouponNotice        string
+	CouponStore         string
+	CouponAttachedUsers string
 }{
-	User:         "User",
-	CouponNotice: "CouponNotice",
-	CouponStore:  "CouponStore",
+	CouponNotice:        "CouponNotice",
+	CouponStore:         "CouponStore",
+	CouponAttachedUsers: "CouponAttachedUsers",
 }
 
 // couponR is where relationships are stored.
 type couponR struct {
-	User         *User         `boil:"User" json:"User" toml:"User" yaml:"User"`
-	CouponNotice *CouponNotice `boil:"CouponNotice" json:"CouponNotice" toml:"CouponNotice" yaml:"CouponNotice"`
-	CouponStore  *CouponStore  `boil:"CouponStore" json:"CouponStore" toml:"CouponStore" yaml:"CouponStore"`
+	CouponNotice        *CouponNotice           `boil:"CouponNotice" json:"CouponNotice" toml:"CouponNotice" yaml:"CouponNotice"`
+	CouponStore         *CouponStore            `boil:"CouponStore" json:"CouponStore" toml:"CouponStore" yaml:"CouponStore"`
+	CouponAttachedUsers CouponAttachedUserSlice `boil:"CouponAttachedUsers" json:"CouponAttachedUsers" toml:"CouponAttachedUsers" yaml:"CouponAttachedUsers"`
 }
 
 // NewStruct creates a new relationship struct
 func (*couponR) NewStruct() *couponR {
 	return &couponR{}
-}
-
-func (r *couponR) GetUser() *User {
-	if r == nil {
-		return nil
-	}
-	return r.User
 }
 
 func (r *couponR) GetCouponNotice() *CouponNotice {
@@ -188,13 +142,20 @@ func (r *couponR) GetCouponStore() *CouponStore {
 	return r.CouponStore
 }
 
+func (r *couponR) GetCouponAttachedUsers() CouponAttachedUserSlice {
+	if r == nil {
+		return nil
+	}
+	return r.CouponAttachedUsers
+}
+
 // couponL is where Load methods for each relationship are stored.
 type couponL struct{}
 
 var (
-	couponAllColumns            = []string{"id", "name", "coupon_type", "discount_amount", "expire_at", "is_combinationable", "used_at", "user_id", "create_at", "update_at", "coupon_status"}
+	couponAllColumns            = []string{"id", "name", "coupon_type", "discount_amount", "expire_at", "is_combinationable", "create_at", "update_at", "coupon_status"}
 	couponColumnsWithoutDefault = []string{"id", "name", "coupon_type", "discount_amount", "expire_at", "is_combinationable", "coupon_status"}
-	couponColumnsWithDefault    = []string{"used_at", "user_id", "create_at", "update_at"}
+	couponColumnsWithDefault    = []string{"create_at", "update_at"}
 	couponPrimaryKeyColumns     = []string{"id"}
 	couponGeneratedColumns      = []string{}
 )
@@ -477,17 +438,6 @@ func (q couponQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (boo
 	return count > 0, nil
 }
 
-// User pointed to by the foreign key.
-func (o *Coupon) User(mods ...qm.QueryMod) userQuery {
-	queryMods := []qm.QueryMod{
-		qm.Where("\"id\" = ?", o.UserID),
-	}
-
-	queryMods = append(queryMods, mods...)
-
-	return Users(queryMods...)
-}
-
 // CouponNotice pointed to by the foreign key.
 func (o *Coupon) CouponNotice(mods ...qm.QueryMod) couponNoticeQuery {
 	queryMods := []qm.QueryMod{
@@ -510,128 +460,18 @@ func (o *Coupon) CouponStore(mods ...qm.QueryMod) couponStoreQuery {
 	return CouponStores(queryMods...)
 }
 
-// LoadUser allows an eager lookup of values, cached into the
-// loaded structs of the objects. This is for an N-1 relationship.
-func (couponL) LoadUser(ctx context.Context, e boil.ContextExecutor, singular bool, maybeCoupon interface{}, mods queries.Applicator) error {
-	var slice []*Coupon
-	var object *Coupon
-
-	if singular {
-		var ok bool
-		object, ok = maybeCoupon.(*Coupon)
-		if !ok {
-			object = new(Coupon)
-			ok = queries.SetFromEmbeddedStruct(&object, &maybeCoupon)
-			if !ok {
-				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeCoupon))
-			}
-		}
-	} else {
-		s, ok := maybeCoupon.(*[]*Coupon)
-		if ok {
-			slice = *s
-		} else {
-			ok = queries.SetFromEmbeddedStruct(&slice, maybeCoupon)
-			if !ok {
-				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeCoupon))
-			}
-		}
+// CouponAttachedUsers retrieves all the coupon_attached_user's CouponAttachedUsers with an executor.
+func (o *Coupon) CouponAttachedUsers(mods ...qm.QueryMod) couponAttachedUserQuery {
+	var queryMods []qm.QueryMod
+	if len(mods) != 0 {
+		queryMods = append(queryMods, mods...)
 	}
 
-	args := make([]interface{}, 0, 1)
-	if singular {
-		if object.R == nil {
-			object.R = &couponR{}
-		}
-		if !queries.IsNil(object.UserID) {
-			args = append(args, object.UserID)
-		}
-
-	} else {
-	Outer:
-		for _, obj := range slice {
-			if obj.R == nil {
-				obj.R = &couponR{}
-			}
-
-			for _, a := range args {
-				if queries.Equal(a, obj.UserID) {
-					continue Outer
-				}
-			}
-
-			if !queries.IsNil(obj.UserID) {
-				args = append(args, obj.UserID)
-			}
-
-		}
-	}
-
-	if len(args) == 0 {
-		return nil
-	}
-
-	query := NewQuery(
-		qm.From(`user`),
-		qm.WhereIn(`user.id in ?`, args...),
+	queryMods = append(queryMods,
+		qm.Where("\"coupon_attached_user\".\"coupon_id\"=?", o.ID),
 	)
-	if mods != nil {
-		mods.Apply(query)
-	}
 
-	results, err := query.QueryContext(ctx, e)
-	if err != nil {
-		return errors.Wrap(err, "failed to eager load User")
-	}
-
-	var resultSlice []*User
-	if err = queries.Bind(results, &resultSlice); err != nil {
-		return errors.Wrap(err, "failed to bind eager loaded slice User")
-	}
-
-	if err = results.Close(); err != nil {
-		return errors.Wrap(err, "failed to close results of eager load for user")
-	}
-	if err = results.Err(); err != nil {
-		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for user")
-	}
-
-	if len(userAfterSelectHooks) != 0 {
-		for _, obj := range resultSlice {
-			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
-				return err
-			}
-		}
-	}
-
-	if len(resultSlice) == 0 {
-		return nil
-	}
-
-	if singular {
-		foreign := resultSlice[0]
-		object.R.User = foreign
-		if foreign.R == nil {
-			foreign.R = &userR{}
-		}
-		foreign.R.Coupons = append(foreign.R.Coupons, object)
-		return nil
-	}
-
-	for _, local := range slice {
-		for _, foreign := range resultSlice {
-			if queries.Equal(local.UserID, foreign.ID) {
-				local.R.User = foreign
-				if foreign.R == nil {
-					foreign.R = &userR{}
-				}
-				foreign.R.Coupons = append(foreign.R.Coupons, local)
-				break
-			}
-		}
-	}
-
-	return nil
+	return CouponAttachedUsers(queryMods...)
 }
 
 // LoadCouponNotice allows an eager lookup of values, cached into the
@@ -868,83 +708,117 @@ func (couponL) LoadCouponStore(ctx context.Context, e boil.ContextExecutor, sing
 	return nil
 }
 
-// SetUser of the coupon to the related item.
-// Sets o.R.User to related.
-// Adds o to related.R.Coupons.
-func (o *Coupon) SetUser(ctx context.Context, exec boil.ContextExecutor, insert bool, related *User) error {
-	var err error
-	if insert {
-		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
-			return errors.Wrap(err, "failed to insert into foreign table")
-		}
-	}
+// LoadCouponAttachedUsers allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-M or N-M relationship.
+func (couponL) LoadCouponAttachedUsers(ctx context.Context, e boil.ContextExecutor, singular bool, maybeCoupon interface{}, mods queries.Applicator) error {
+	var slice []*Coupon
+	var object *Coupon
 
-	updateQuery := fmt.Sprintf(
-		"UPDATE \"coupon\" SET %s WHERE %s",
-		strmangle.SetParamNames("\"", "\"", 1, []string{"user_id"}),
-		strmangle.WhereClause("\"", "\"", 2, couponPrimaryKeyColumns),
-	)
-	values := []interface{}{related.ID, o.ID}
-
-	if boil.IsDebug(ctx) {
-		writer := boil.DebugWriterFrom(ctx)
-		fmt.Fprintln(writer, updateQuery)
-		fmt.Fprintln(writer, values)
-	}
-	if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
-		return errors.Wrap(err, "failed to update local table")
-	}
-
-	queries.Assign(&o.UserID, related.ID)
-	if o.R == nil {
-		o.R = &couponR{
-			User: related,
+	if singular {
+		var ok bool
+		object, ok = maybeCoupon.(*Coupon)
+		if !ok {
+			object = new(Coupon)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeCoupon)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeCoupon))
+			}
 		}
 	} else {
-		o.R.User = related
-	}
-
-	if related.R == nil {
-		related.R = &userR{
-			Coupons: CouponSlice{o},
+		s, ok := maybeCoupon.(*[]*Coupon)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeCoupon)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeCoupon))
+			}
 		}
+	}
+
+	args := make([]interface{}, 0, 1)
+	if singular {
+		if object.R == nil {
+			object.R = &couponR{}
+		}
+		args = append(args, object.ID)
 	} else {
-		related.R.Coupons = append(related.R.Coupons, o)
+	Outer:
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &couponR{}
+			}
+
+			for _, a := range args {
+				if a == obj.ID {
+					continue Outer
+				}
+			}
+
+			args = append(args, obj.ID)
+		}
 	}
 
-	return nil
-}
-
-// RemoveUser relationship.
-// Sets o.R.User to nil.
-// Removes o from all passed in related items' relationships struct.
-func (o *Coupon) RemoveUser(ctx context.Context, exec boil.ContextExecutor, related *User) error {
-	var err error
-
-	queries.SetScanner(&o.UserID, nil)
-	if _, err = o.Update(ctx, exec, boil.Whitelist("user_id")); err != nil {
-		return errors.Wrap(err, "failed to update local table")
-	}
-
-	if o.R != nil {
-		o.R.User = nil
-	}
-	if related == nil || related.R == nil {
+	if len(args) == 0 {
 		return nil
 	}
 
-	for i, ri := range related.R.Coupons {
-		if queries.Equal(o.UserID, ri.UserID) {
-			continue
-		}
-
-		ln := len(related.R.Coupons)
-		if ln > 1 && i < ln-1 {
-			related.R.Coupons[i] = related.R.Coupons[ln-1]
-		}
-		related.R.Coupons = related.R.Coupons[:ln-1]
-		break
+	query := NewQuery(
+		qm.From(`coupon_attached_user`),
+		qm.WhereIn(`coupon_attached_user.coupon_id in ?`, args...),
+	)
+	if mods != nil {
+		mods.Apply(query)
 	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load coupon_attached_user")
+	}
+
+	var resultSlice []*CouponAttachedUser
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice coupon_attached_user")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results in eager load on coupon_attached_user")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for coupon_attached_user")
+	}
+
+	if len(couponAttachedUserAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+	if singular {
+		object.R.CouponAttachedUsers = resultSlice
+		for _, foreign := range resultSlice {
+			if foreign.R == nil {
+				foreign.R = &couponAttachedUserR{}
+			}
+			foreign.R.Coupon = object
+		}
+		return nil
+	}
+
+	for _, foreign := range resultSlice {
+		for _, local := range slice {
+			if local.ID == foreign.CouponID {
+				local.R.CouponAttachedUsers = append(local.R.CouponAttachedUsers, foreign)
+				if foreign.R == nil {
+					foreign.R = &couponAttachedUserR{}
+				}
+				foreign.R.Coupon = local
+				break
+			}
+		}
+	}
+
 	return nil
 }
 
@@ -1044,6 +918,59 @@ func (o *Coupon) SetCouponStore(ctx context.Context, exec boil.ContextExecutor, 
 		}
 	} else {
 		related.R.Coupon = o
+	}
+	return nil
+}
+
+// AddCouponAttachedUsers adds the given related objects to the existing relationships
+// of the coupon, optionally inserting them as new records.
+// Appends related to o.R.CouponAttachedUsers.
+// Sets related.R.Coupon appropriately.
+func (o *Coupon) AddCouponAttachedUsers(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*CouponAttachedUser) error {
+	var err error
+	for _, rel := range related {
+		if insert {
+			rel.CouponID = o.ID
+			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
+				return errors.Wrap(err, "failed to insert into foreign table")
+			}
+		} else {
+			updateQuery := fmt.Sprintf(
+				"UPDATE \"coupon_attached_user\" SET %s WHERE %s",
+				strmangle.SetParamNames("\"", "\"", 1, []string{"coupon_id"}),
+				strmangle.WhereClause("\"", "\"", 2, couponAttachedUserPrimaryKeyColumns),
+			)
+			values := []interface{}{o.ID, rel.CouponID, rel.UserID}
+
+			if boil.IsDebug(ctx) {
+				writer := boil.DebugWriterFrom(ctx)
+				fmt.Fprintln(writer, updateQuery)
+				fmt.Fprintln(writer, values)
+			}
+			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+				return errors.Wrap(err, "failed to update foreign table")
+			}
+
+			rel.CouponID = o.ID
+		}
+	}
+
+	if o.R == nil {
+		o.R = &couponR{
+			CouponAttachedUsers: related,
+		}
+	} else {
+		o.R.CouponAttachedUsers = append(o.R.CouponAttachedUsers, related...)
+	}
+
+	for _, rel := range related {
+		if rel.R == nil {
+			rel.R = &couponAttachedUserR{
+				Coupon: o,
+			}
+		} else {
+			rel.R.Coupon = o
+		}
 	}
 	return nil
 }

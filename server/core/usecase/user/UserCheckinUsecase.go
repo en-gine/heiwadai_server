@@ -11,19 +11,23 @@ import (
 )
 
 type UserCheckinUsecase struct {
-	storeRepository   repository.IStoreRepository
-	checkInRepository repository.ICheckinRepository
-	couponRepository  repository.ICouponRepository
-	storeQuery        queryService.IStoreQueryService
-	checkinQuery      queryService.ICheckinQueryService
-	couponQuery       queryService.ICouponQueryService
-	transaction       repository.ITransaction
+	storeRepository      repository.IStoreRepository
+	checkInRepository    repository.ICheckinRepository
+	couponRepository     repository.ICouponRepository
+	usercouponRepository repository.IUserCouponRepository
+	usercouponQuery      queryService.IUserCouponQueryService
+	storeQuery           queryService.IStoreQueryService
+	checkinQuery         queryService.ICheckinQueryService
+	couponQuery          queryService.ICouponQueryService
+	transaction          repository.ITransaction
 }
 
 func NewUserCheckinUsecase(
 	storeRepository repository.IStoreRepository,
 	checkInRepository repository.ICheckinRepository,
 	couponRepository repository.ICouponRepository,
+	usercouponRepository repository.IUserCouponRepository,
+	usercouponQuery queryService.IUserCouponQueryService,
 	storeQuery queryService.IStoreQueryService,
 	checkinQuery queryService.ICheckinQueryService,
 	couponQuery queryService.ICouponQueryService,
@@ -31,13 +35,15 @@ func NewUserCheckinUsecase(
 
 ) *UserCheckinUsecase {
 	return &UserCheckinUsecase{
-		storeRepository:   storeRepository,
-		checkInRepository: checkInRepository,
-		couponRepository:  couponRepository,
-		storeQuery:        storeQuery,
-		checkinQuery:      checkinQuery,
-		couponQuery:       couponQuery,
-		transaction:       transaction,
+		storeRepository:      storeRepository,
+		checkInRepository:    checkInRepository,
+		couponRepository:     couponRepository,
+		usercouponRepository: usercouponRepository,
+		usercouponQuery:      usercouponQuery,
+		storeQuery:           storeQuery,
+		checkinQuery:         checkinQuery,
+		couponQuery:          couponQuery,
+		transaction:          transaction,
 	}
 }
 
@@ -50,7 +56,7 @@ func (u *UserCheckinUsecase) GetStampCard(user *entity.User) (*entity.StampCard,
 }
 
 // チェックインによってクーポンが付与された場合クーポンを返す
-func (u *UserCheckinUsecase) Checkin(AuthUser *entity.User, QrHash uuid.UUID) (*entity.Coupon, *errors.DomainError) {
+func (u *UserCheckinUsecase) Checkin(AuthUser *entity.User, QrHash uuid.UUID) (*entity.UserAttachedCoupon, *errors.DomainError) {
 
 	allStores, err := u.storeQuery.GetActiveAll()
 	if err != nil {
@@ -94,14 +100,16 @@ func (u *UserCheckinUsecase) Checkin(AuthUser *entity.User, QrHash uuid.UUID) (*
 		u.transaction.Rollback()
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())
 	}
-	var newCoupon *entity.Coupon
+	var userAttachedCoupon *entity.UserAttachedCoupon
 	if len(myCheckins) >= 5 {
-		newCoupon, domainErr := entity.CreateStandardCoupon(AuthUser, allStores)
+		standardCoupon, domainErr := u.couponQuery.GetCouponByType(entity.CouponStandard)
 		if domainErr != nil {
 			u.transaction.Rollback()
-			return nil, domainErr
+			return nil, errors.NewDomainError(errors.QueryError, err.Error())
 		}
-		err = u.couponRepository.Save(newCoupon)
+		userAttachedCoupon := entity.CreateUserAttachedCoupon(AuthUser, standardCoupon)
+
+		err = u.usercouponRepository.Save(userAttachedCoupon)
 		if err != nil {
 			u.transaction.Rollback()
 			return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
@@ -115,5 +123,5 @@ func (u *UserCheckinUsecase) Checkin(AuthUser *entity.User, QrHash uuid.UUID) (*
 	}
 	u.transaction.Commit()
 
-	return newCoupon, nil
+	return userAttachedCoupon, nil
 }

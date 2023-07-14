@@ -4,29 +4,31 @@
 package models
 
 var TableNames = struct {
-	Admin            string
-	Banner           string
-	Checkin          string
-	Coupon           string
-	CouponNotices    string
-	CouponStores     string
-	MailMagazine     string
-	Post             string
-	SchemaMigrations string
-	Store            string
-	User             string
-	UserOption       string
+	Admin              string
+	Banner             string
+	Checkin            string
+	Coupon             string
+	CouponAttachedUser string
+	CouponNotices      string
+	CouponStores       string
+	MailMagazine       string
+	Post               string
+	SchemaMigrations   string
+	Store              string
+	User               string
+	UserOption         string
 }{
-	Admin:            "admin",
-	Banner:           "banner",
-	Checkin:          "checkin",
-	Coupon:           "coupon",
-	CouponNotices:    "coupon_notices",
-	CouponStores:     "coupon_stores",
-	MailMagazine:     "mail_magazine",
-	Post:             "post",
-	SchemaMigrations: "schema_migrations",
-	Store:            "store",
-	User:             "user",
-	UserOption:       "user_option",
+	Admin:              "admin",
+	Banner:             "banner",
+	Checkin:            "checkin",
+	Coupon:             "coupon",
+	CouponAttachedUser: "coupon_attached_user",
+	CouponNotices:      "coupon_notices",
+	CouponStores:       "coupon_stores",
+	MailMagazine:       "mail_magazine",
+	Post:               "post",
+	SchemaMigrations:   "schema_migrations",
+	Store:              "store",
+	User:               "user",
+	UserOption:         "user_option",
 }

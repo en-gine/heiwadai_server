@@ -571,14 +571,14 @@ func testUserToManyCheckins(t *testing.T) {
 	}
 }
 
-func testUserToManyCoupons(t *testing.T) {
+func testUserToManyCouponAttachedUsers(t *testing.T) {
 	var err error
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
 
 	var a User
-	var b, c Coupon
+	var b, c CouponAttachedUser
 
 	seed := randomize.NewSeed()
 	if err = randomize.Struct(seed, &a, userDBTypes, true, userColumnsWithDefault...); err != nil {
@@ -589,15 +589,16 @@ func testUserToManyCoupons(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err = randomize.Struct(seed, &b, couponDBTypes, false, couponColumnsWithDefault...); err != nil {
+	if err = randomize.Struct(seed, &b, couponAttachedUserDBTypes, false, couponAttachedUserColumnsWithDefault...); err != nil {
 		t.Fatal(err)
 	}
-	if err = randomize.Struct(seed, &c, couponDBTypes, false, couponColumnsWithDefault...); err != nil {
+	if err = randomize.Struct(seed, &c, couponAttachedUserDBTypes, false, couponAttachedUserColumnsWithDefault...); err != nil {
 		t.Fatal(err)
 	}
 
-	queries.Assign(&b.UserID, a.ID)
-	queries.Assign(&c.UserID, a.ID)
+	b.UserID = a.ID
+	c.UserID = a.ID
+
 	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Fatal(err)
 	}
@@ -605,17 +606,17 @@ func testUserToManyCoupons(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	check, err := a.Coupons().All(ctx, tx)
+	check, err := a.CouponAttachedUsers().All(ctx, tx)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	bFound, cFound := false, false
 	for _, v := range check {
-		if queries.Equal(v.UserID, b.UserID) {
+		if v.UserID == b.UserID {
 			bFound = true
 		}
-		if queries.Equal(v.UserID, c.UserID) {
+		if v.UserID == c.UserID {
 			cFound = true
 		}
 	}
@@ -628,18 +629,18 @@ func testUserToManyCoupons(t *testing.T) {
 	}
 
 	slice := UserSlice{&a}
-	if err = a.L.LoadCoupons(ctx, tx, false, (*[]*User)(&slice), nil); err != nil {
+	if err = a.L.LoadCouponAttachedUsers(ctx, tx, false, (*[]*User)(&slice), nil); err != nil {
 		t.Fatal(err)
 	}
-	if got := len(a.R.Coupons); got != 2 {
+	if got := len(a.R.CouponAttachedUsers); got != 2 {
 		t.Error("number of eager loaded records wrong, got:", got)
 	}
 
-	a.R.Coupons = nil
-	if err = a.L.LoadCoupons(ctx, tx, true, &a, nil); err != nil {
+	a.R.CouponAttachedUsers = nil
+	if err = a.L.LoadCouponAttachedUsers(ctx, tx, true, &a, nil); err != nil {
 		t.Fatal(err)
 	}
-	if got := len(a.R.Coupons); got != 2 {
+	if got := len(a.R.CouponAttachedUsers); got != 2 {
 		t.Error("number of eager loaded records wrong, got:", got)
 	}
 
@@ -976,7 +977,7 @@ func testUserToManyRemoveOpCheckins(t *testing.T) {
 	}
 }
 
-func testUserToManyAddOpCoupons(t *testing.T) {
+func testUserToManyAddOpCouponAttachedUsers(t *testing.T) {
 	var err error
 
 	ctx := context.Background()
@@ -984,15 +985,15 @@ func testUserToManyAddOpCoupons(t *testing.T) {
 	defer func() { _ = tx.Rollback() }()
 
 	var a User
-	var b, c, d, e Coupon
+	var b, c, d, e CouponAttachedUser
 
 	seed := randomize.NewSeed()
 	if err = randomize.Struct(seed, &a, userDBTypes, false, strmangle.SetComplement(userPrimaryKeyColumns, userColumnsWithoutDefault)...); err != nil {
 		t.Fatal(err)
 	}
-	foreigners := []*Coupon{&b, &c, &d, &e}
+	foreigners := []*CouponAttachedUser{&b, &c, &d, &e}
 	for _, x := range foreigners {
-		if err = randomize.Struct(seed, x, couponDBTypes, false, strmangle.SetComplement(couponPrimaryKeyColumns, couponColumnsWithoutDefault)...); err != nil {
+		if err = randomize.Struct(seed, x, couponAttachedUserDBTypes, false, strmangle.SetComplement(couponAttachedUserPrimaryKeyColumns, couponAttachedUserColumnsWithoutDefault)...); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -1007,13 +1008,13 @@ func testUserToManyAddOpCoupons(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	foreignersSplitByInsertion := [][]*Coupon{
+	foreignersSplitByInsertion := [][]*CouponAttachedUser{
 		{&b, &c},
 		{&d, &e},
 	}
 
 	for i, x := range foreignersSplitByInsertion {
-		err = a.AddCoupons(ctx, tx, i != 0, x...)
+		err = a.AddCouponAttachedUsers(ctx, tx, i != 0, x...)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -1021,10 +1022,10 @@ func testUserToManyAddOpCoupons(t *testing.T) {
 		first := x[0]
 		second := x[1]
 
-		if !queries.Equal(a.ID, first.UserID) {
+		if a.ID != first.UserID {
 			t.Error("foreign key was wrong value", a.ID, first.UserID)
 		}
-		if !queries.Equal(a.ID, second.UserID) {
+		if a.ID != second.UserID {
 			t.Error("foreign key was wrong value", a.ID, second.UserID)
 		}
 
@@ -1035,14 +1036,14 @@ func testUserToManyAddOpCoupons(t *testing.T) {
 			t.Error("relationship was not added properly to the foreign slice")
 		}
 
-		if a.R.Coupons[i*2] != first {
+		if a.R.CouponAttachedUsers[i*2] != first {
 			t.Error("relationship struct slice not set to correct value")
 		}
-		if a.R.Coupons[i*2+1] != second {
+		if a.R.CouponAttachedUsers[i*2+1] != second {
 			t.Error("relationship struct slice not set to correct value")
 		}
 
-		count, err := a.Coupons().Count(ctx, tx)
+		count, err := a.CouponAttachedUsers().Count(ctx, tx)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -1051,182 +1052,6 @@ func testUserToManyAddOpCoupons(t *testing.T) {
 		}
 	}
 }
-
-func testUserToManySetOpCoupons(t *testing.T) {
-	var err error
-
-	ctx := context.Background()
-	tx := MustTx(boil.BeginTx(ctx, nil))
-	defer func() { _ = tx.Rollback() }()
-
-	var a User
-	var b, c, d, e Coupon
-
-	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, &a, userDBTypes, false, strmangle.SetComplement(userPrimaryKeyColumns, userColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
-	}
-	foreigners := []*Coupon{&b, &c, &d, &e}
-	for _, x := range foreigners {
-		if err = randomize.Struct(seed, x, couponDBTypes, false, strmangle.SetComplement(couponPrimaryKeyColumns, couponColumnsWithoutDefault)...); err != nil {
-			t.Fatal(err)
-		}
-	}
-
-	if err = a.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-	if err = c.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-
-	err = a.SetCoupons(ctx, tx, false, &b, &c)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	count, err := a.Coupons().Count(ctx, tx)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if count != 2 {
-		t.Error("count was wrong:", count)
-	}
-
-	err = a.SetCoupons(ctx, tx, true, &d, &e)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	count, err = a.Coupons().Count(ctx, tx)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if count != 2 {
-		t.Error("count was wrong:", count)
-	}
-
-	if !queries.IsValuerNil(b.UserID) {
-		t.Error("want b's foreign key value to be nil")
-	}
-	if !queries.IsValuerNil(c.UserID) {
-		t.Error("want c's foreign key value to be nil")
-	}
-	if !queries.Equal(a.ID, d.UserID) {
-		t.Error("foreign key was wrong value", a.ID, d.UserID)
-	}
-	if !queries.Equal(a.ID, e.UserID) {
-		t.Error("foreign key was wrong value", a.ID, e.UserID)
-	}
-
-	if b.R.User != nil {
-		t.Error("relationship was not removed properly from the foreign struct")
-	}
-	if c.R.User != nil {
-		t.Error("relationship was not removed properly from the foreign struct")
-	}
-	if d.R.User != &a {
-		t.Error("relationship was not added properly to the foreign struct")
-	}
-	if e.R.User != &a {
-		t.Error("relationship was not added properly to the foreign struct")
-	}
-
-	if a.R.Coupons[0] != &d {
-		t.Error("relationship struct slice not set to correct value")
-	}
-	if a.R.Coupons[1] != &e {
-		t.Error("relationship struct slice not set to correct value")
-	}
-}
-
-func testUserToManyRemoveOpCoupons(t *testing.T) {
-	var err error
-
-	ctx := context.Background()
-	tx := MustTx(boil.BeginTx(ctx, nil))
-	defer func() { _ = tx.Rollback() }()
-
-	var a User
-	var b, c, d, e Coupon
-
-	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, &a, userDBTypes, false, strmangle.SetComplement(userPrimaryKeyColumns, userColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
-	}
-	foreigners := []*Coupon{&b, &c, &d, &e}
-	for _, x := range foreigners {
-		if err = randomize.Struct(seed, x, couponDBTypes, false, strmangle.SetComplement(couponPrimaryKeyColumns, couponColumnsWithoutDefault)...); err != nil {
-			t.Fatal(err)
-		}
-	}
-
-	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-
-	err = a.AddCoupons(ctx, tx, true, foreigners...)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	count, err := a.Coupons().Count(ctx, tx)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if count != 4 {
-		t.Error("count was wrong:", count)
-	}
-
-	err = a.RemoveCoupons(ctx, tx, foreigners[:2]...)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	count, err = a.Coupons().Count(ctx, tx)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if count != 2 {
-		t.Error("count was wrong:", count)
-	}
-
-	if !queries.IsValuerNil(b.UserID) {
-		t.Error("want b's foreign key value to be nil")
-	}
-	if !queries.IsValuerNil(c.UserID) {
-		t.Error("want c's foreign key value to be nil")
-	}
-
-	if b.R.User != nil {
-		t.Error("relationship was not removed properly from the foreign struct")
-	}
-	if c.R.User != nil {
-		t.Error("relationship was not removed properly from the foreign struct")
-	}
-	if d.R.User != &a {
-		t.Error("relationship to a should have been preserved")
-	}
-	if e.R.User != &a {
-		t.Error("relationship to a should have been preserved")
-	}
-
-	if len(a.R.Coupons) != 2 {
-		t.Error("should have preserved two relationships")
-	}
-
-	// Removal doesn't do a stable deletion for performance so we have to flip the order
-	if a.R.Coupons[1] != &d {
-		t.Error("relationship to d should have been preserved")
-	}
-	if a.R.Coupons[0] != &e {
-		t.Error("relationship to e should have been preserved")
-	}
-}
-
 func testUserToManyAddOpUserOptions(t *testing.T) {
 	var err error
 
