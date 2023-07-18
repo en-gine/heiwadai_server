@@ -9,7 +9,7 @@ import (
 	"go.uber.org/zap"
 
 	userv1connect "server/api/v1/user/userconnect"
-	"server/infrastructure/action/spabase"
+	"server/infrastructure/action"
 	"server/infrastructure/repository"
 
 	controller "server/controller/user"
@@ -35,7 +35,8 @@ func NewConnectReflection() *http.ServeMux {
 func StartServer() {
 
 	mux := NewConnectReflection()
-	requireAuth := NewAuthentificatable(spabase.NewAuthClient())
+	authClient := action.NewAuthClient()
+	requireAuth := NewAuthentificatable(authClient)
 
 	userRepository, err := repository.NewUserRepository()
 	if err != nil {
@@ -43,7 +44,7 @@ func StartServer() {
 	}
 	userQueryService, _ := repository.NewUserQueryService()
 
-	userContoroller := controller.NewUserDataController(userRepository, userQueryService)
+	userContoroller := controller.NewUserDataController(authClient, userRepository, userQueryService)
 	path, handler := userv1connect.NewUserDataControllerHandler(userContoroller, requireAuth)
 	mux.Handle(path, handler)
 

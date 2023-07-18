@@ -21,58 +21,6 @@ func NewUserDataUsecase(userRepository repository.IUserRepository, userQuery que
 	}
 }
 
-func (u *UserDataUsecase) Create(
-	FirstName string,
-	LastName string,
-	FirstNameKana string,
-	LastNameKana string,
-	CompanyName *string,
-	BirthDate time.Time,
-	ZipCode *string,
-	Prefecture string,
-	City *string,
-	Address *string,
-	Tel *string,
-	Mail string,
-	AcceptMail bool, // メルマガ配信可
-) (*entity.User, *errors.DomainError) {
-
-	existUser, err := u.userQuery.GetByMail(Mail)
-	if err != nil {
-		return nil, errors.NewDomainError(errors.QueryDataNotFoundError, "ユーザーの検索に失敗しました")
-	}
-
-	if existUser != nil {
-		return nil, errors.NewDomainError(errors.UnPemitedOperation, "既に登録されているメールアドレスです")
-	}
-
-	prefecture, domainErr := entity.StringToPrefecture(Prefecture)
-	if domainErr != nil {
-		return nil, domainErr
-	}
-
-	insertData := entity.CreateUser(
-		FirstName,
-		LastName,
-		FirstNameKana,
-		LastNameKana,
-		CompanyName,
-		BirthDate,
-		ZipCode,
-		prefecture,
-		City,
-		Address,
-		Tel,
-		Mail,
-		AcceptMail,
-	)
-	err = u.userRepository.Save(insertData)
-	if err != nil {
-		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
-	}
-	return insertData, nil
-}
-
 func (u *UserDataUsecase) Update(
 	ID uuid.UUID,
 	FirstName string,

@@ -1,4 +1,4 @@
-package messaging
+package action
 
 import (
 	"log"
@@ -14,7 +14,7 @@ var _ action.IMailAction = &SendMail{}
 type SendMail struct {
 }
 
-func (s *SendMail) SendAll(prefectures []*entity.Prefecture) error {
+func (s *SendMail) SendAll([]*entity.Prefecture) error {
 	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
 	if err != nil {
 		log.Fatalf("%s: %s", "Failed to connect to RabbitMQ", err)
@@ -57,7 +57,7 @@ func (s *SendMail) SendAll(prefectures []*entity.Prefecture) error {
 	go func() {
 		for d := range msgs {
 			log.Printf("Received a message: %s", d.Body)
-			sendMail(string(d.Body))
+			// sendMail(string(d.Body))
 		}
 	}()
 
@@ -67,7 +67,7 @@ func (s *SendMail) SendAll(prefectures []*entity.Prefecture) error {
 	return err
 }
 
-func sendMail(email string) {
+func (s *SendMail) Send(email string, Body string) error {
 	from := "your-email@example.com"
 	pass := "your-password"
 	to := email
@@ -83,8 +83,9 @@ func sendMail(email string) {
 
 	if err != nil {
 		log.Fatalf("smtp error: %s", err)
-		return
+		return nil
 	}
 
 	log.Print("sent, visit http://foobar.com/\n")
+	return nil
 }

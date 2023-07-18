@@ -16,12 +16,10 @@ import 'UserData.pbjson.dart';
 export 'UserData.pb.dart';
 
 abstract class UserDataControllerServiceBase extends $pb.GeneratedService {
-  $async.Future<$6.UserDataResponse> register($pb.ServerContext ctx, $6.UserRegisterRequest request);
   $async.Future<$6.UserDataResponse> update($pb.ServerContext ctx, $6.UserUpdateDataRequest request);
 
   $pb.GeneratedMessage createRequest($core.String method) {
     switch (method) {
-      case 'Register': return $6.UserRegisterRequest();
       case 'Update': return $6.UserUpdateDataRequest();
       default: throw $core.ArgumentError('Unknown method: $method');
     }
@@ -29,7 +27,6 @@ abstract class UserDataControllerServiceBase extends $pb.GeneratedService {
 
   $async.Future<$pb.GeneratedMessage> handleCall($pb.ServerContext ctx, $core.String method, $pb.GeneratedMessage request) {
     switch (method) {
-      case 'Register': return this.register(ctx, request as $6.UserRegisterRequest);
       case 'Update': return this.update(ctx, request as $6.UserUpdateDataRequest);
       default: throw $core.ArgumentError('Unknown method: $method');
     }

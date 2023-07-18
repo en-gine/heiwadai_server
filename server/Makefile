@@ -1,4 +1,4 @@
-gen: #protoファイルからapiコードを自動生成
+buf: #protoファイルからapiコードを自動生成
 	rm -rf ./api/v1/* && \
 	buf generate
 

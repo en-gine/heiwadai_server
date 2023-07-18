@@ -4,16 +4,13 @@ import (
 	"context"
 	"errors"
 
-	"server/core/entity"
 	"server/core/infra/action"
-	"server/core/infra/types"
 	"strings"
 
 	"github.com/bufbuild/connect-go"
 )
 
 type Authentificatable struct {
-	AuthUser     *entity.User
 	Token        string
 	RefleshToken string
 }
@@ -37,20 +34,6 @@ func NewAuthentificatable(AuthClient action.IAuthAction) connect.Option {
 			// メンバ変数にtokenをセット
 			auth.Token = bearerToken
 			auth.RefleshToken = refreshToken
-
-			// ユーザーを取得
-			user, err := AuthClient.GetUser(&types.Token{AccessToken: auth.Token})
-
-			if err != nil {
-				return nil, connect.NewError(connect.CodeUnauthenticated, err)
-			}
-
-			if user == nil {
-				return nil, connect.NewError(connect.CodeUnauthenticated, err)
-			}
-
-			auth.AuthUser = user
-
 			return next(ctx, req)
 		})
 	}

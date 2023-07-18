@@ -33,6 +33,16 @@ services:
       - ./docker/init/db/roles.sql:/docker-entrypoint-initdb.d/init-scripts/99-roles.sql:Z
       # PGDATA directory is persisted between restarts
       - ./docker/data/db/data:/var/lib/postgresql/data:Z
+  redis:
+    container_name: heiwadai-redis
+    image: redis:7.0.12
+    restart: unless-stopped
+    ports:
+      - ${REDIS_PORT}:${REDIS_PORT}
+    environment:
+      REDIS_ARGS: --requirepass ${REDIS_PASS} --save 5 30 --appendonly yes
+    volumes:
+      - ./docker/data/redis/data:/data:Z
   rabbitmq:
     # -management を付与したイメージの場合、15672ポートでManagement Plugin(Web UIのようなもの)が利用できるようになる
     image: rabbitmq:3.12.1-management

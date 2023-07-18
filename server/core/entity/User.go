@@ -24,6 +24,7 @@ type User struct {
 }
 
 func CreateUser(
+	ID uuid.UUID,
 	FirstName string,
 	LastName string,
 	FirstNameKana string,
@@ -39,7 +40,7 @@ func CreateUser(
 	AcceptMail bool,
 ) *User {
 	return &User{
-		ID:            uuid.New(),
+		ID:            ID,
 		FirstName:     FirstName,
 		LastName:      LastName,
 		FirstNameKana: FirstNameKana,

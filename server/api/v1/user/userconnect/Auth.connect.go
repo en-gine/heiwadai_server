@@ -8,6 +8,7 @@ import (
 	context "context"
 	errors "errors"
 	connect_go "github.com/bufbuild/connect-go"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	http "net/http"
 	user "server/api/v1/user"
 	strings "strings"
@@ -33,13 +34,31 @@ const (
 // reflection-formatted method names, remove the leading slash and convert the remaining slash to a
 // period.
 const (
-	// AuthControllerCallProcedure is the fully-qualified name of the AuthController's Call RPC.
-	AuthControllerCallProcedure = "/server.user.AuthController/Call"
+	// AuthControllerRegisterProcedure is the fully-qualified name of the AuthController's Register RPC.
+	AuthControllerRegisterProcedure = "/server.user.AuthController/Register"
+	// AuthControllerSignUpProcedure is the fully-qualified name of the AuthController's SignUp RPC.
+	AuthControllerSignUpProcedure = "/server.user.AuthController/SignUp"
+	// AuthControllerSignInProcedure is the fully-qualified name of the AuthController's SignIn RPC.
+	AuthControllerSignInProcedure = "/server.user.AuthController/SignIn"
+	// AuthControllerResetPasswordMailProcedure is the fully-qualified name of the AuthController's
+	// ResetPasswordMail RPC.
+	AuthControllerResetPasswordMailProcedure = "/server.user.AuthController/ResetPasswordMail"
+	// AuthControllerUpdatePasswordProcedure is the fully-qualified name of the AuthController's
+	// UpdatePassword RPC.
+	AuthControllerUpdatePasswordProcedure = "/server.user.AuthController/UpdatePassword"
+	// AuthControllerUpdateEmailProcedure is the fully-qualified name of the AuthController's
+	// UpdateEmail RPC.
+	AuthControllerUpdateEmailProcedure = "/server.user.AuthController/UpdateEmail"
 )
 
 // AuthControllerClient is a client for the server.user.AuthController service.
 type AuthControllerClient interface {
-	Call(context.Context, *connect_go.Request[user.UserAuthRequest]) (*connect_go.Response[user.UserAuthResponse], error)
+	Register(context.Context, *connect_go.Request[user.UserRegisterRequest]) (*connect_go.Response[emptypb.Empty], error)
+	SignUp(context.Context, *connect_go.Request[user.UserAuthRequest]) (*connect_go.Response[emptypb.Empty], error)
+	SignIn(context.Context, *connect_go.Request[user.UserAuthRequest]) (*connect_go.Response[user.UserAuthResponse], error)
+	ResetPasswordMail(context.Context, *connect_go.Request[user.ResetPasswordRequest]) (*connect_go.Response[emptypb.Empty], error)
+	UpdatePassword(context.Context, *connect_go.Request[user.UpdatePasswordRequest]) (*connect_go.Response[emptypb.Empty], error)
+	UpdateEmail(context.Context, *connect_go.Request[user.UpdateEmailRequest]) (*connect_go.Response[emptypb.Empty], error)
 }
 
 // NewAuthControllerClient constructs a client for the server.user.AuthController service. By
@@ -52,9 +71,34 @@ type AuthControllerClient interface {
 func NewAuthControllerClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) AuthControllerClient {
 	baseURL = strings.TrimRight(baseURL, "/")
 	return &authControllerClient{
-		call: connect_go.NewClient[user.UserAuthRequest, user.UserAuthResponse](
+		register: connect_go.NewClient[user.UserRegisterRequest, emptypb.Empty](
 			httpClient,
-			baseURL+AuthControllerCallProcedure,
+			baseURL+AuthControllerRegisterProcedure,
+			opts...,
+		),
+		signUp: connect_go.NewClient[user.UserAuthRequest, emptypb.Empty](
+			httpClient,
+			baseURL+AuthControllerSignUpProcedure,
+			opts...,
+		),
+		signIn: connect_go.NewClient[user.UserAuthRequest, user.UserAuthResponse](
+			httpClient,
+			baseURL+AuthControllerSignInProcedure,
+			opts...,
+		),
+		resetPasswordMail: connect_go.NewClient[user.ResetPasswordRequest, emptypb.Empty](
+			httpClient,
+			baseURL+AuthControllerResetPasswordMailProcedure,
+			opts...,
+		),
+		updatePassword: connect_go.NewClient[user.UpdatePasswordRequest, emptypb.Empty](
+			httpClient,
+			baseURL+AuthControllerUpdatePasswordProcedure,
+			opts...,
+		),
+		updateEmail: connect_go.NewClient[user.UpdateEmailRequest, emptypb.Empty](
+			httpClient,
+			baseURL+AuthControllerUpdateEmailProcedure,
 			opts...,
 		),
 	}
@@ -62,17 +106,52 @@ func NewAuthControllerClient(httpClient connect_go.HTTPClient, baseURL string, o
 
 // authControllerClient implements AuthControllerClient.
 type authControllerClient struct {
-	call *connect_go.Client[user.UserAuthRequest, user.UserAuthResponse]
+	register          *connect_go.Client[user.UserRegisterRequest, emptypb.Empty]
+	signUp            *connect_go.Client[user.UserAuthRequest, emptypb.Empty]
+	signIn            *connect_go.Client[user.UserAuthRequest, user.UserAuthResponse]
+	resetPasswordMail *connect_go.Client[user.ResetPasswordRequest, emptypb.Empty]
+	updatePassword    *connect_go.Client[user.UpdatePasswordRequest, emptypb.Empty]
+	updateEmail       *connect_go.Client[user.UpdateEmailRequest, emptypb.Empty]
 }
 
-// Call calls server.user.AuthController.Call.
-func (c *authControllerClient) Call(ctx context.Context, req *connect_go.Request[user.UserAuthRequest]) (*connect_go.Response[user.UserAuthResponse], error) {
-	return c.call.CallUnary(ctx, req)
+// Register calls server.user.AuthController.Register.
+func (c *authControllerClient) Register(ctx context.Context, req *connect_go.Request[user.UserRegisterRequest]) (*connect_go.Response[emptypb.Empty], error) {
+	return c.register.CallUnary(ctx, req)
+}
+
+// SignUp calls server.user.AuthController.SignUp.
+func (c *authControllerClient) SignUp(ctx context.Context, req *connect_go.Request[user.UserAuthRequest]) (*connect_go.Response[emptypb.Empty], error) {
+	return c.signUp.CallUnary(ctx, req)
+}
+
+// SignIn calls server.user.AuthController.SignIn.
+func (c *authControllerClient) SignIn(ctx context.Context, req *connect_go.Request[user.UserAuthRequest]) (*connect_go.Response[user.UserAuthResponse], error) {
+	return c.signIn.CallUnary(ctx, req)
+}
+
+// ResetPasswordMail calls server.user.AuthController.ResetPasswordMail.
+func (c *authControllerClient) ResetPasswordMail(ctx context.Context, req *connect_go.Request[user.ResetPasswordRequest]) (*connect_go.Response[emptypb.Empty], error) {
+	return c.resetPasswordMail.CallUnary(ctx, req)
+}
+
+// UpdatePassword calls server.user.AuthController.UpdatePassword.
+func (c *authControllerClient) UpdatePassword(ctx context.Context, req *connect_go.Request[user.UpdatePasswordRequest]) (*connect_go.Response[emptypb.Empty], error) {
+	return c.updatePassword.CallUnary(ctx, req)
+}
+
+// UpdateEmail calls server.user.AuthController.UpdateEmail.
+func (c *authControllerClient) UpdateEmail(ctx context.Context, req *connect_go.Request[user.UpdateEmailRequest]) (*connect_go.Response[emptypb.Empty], error) {
+	return c.updateEmail.CallUnary(ctx, req)
 }
 
 // AuthControllerHandler is an implementation of the server.user.AuthController service.
 type AuthControllerHandler interface {
-	Call(context.Context, *connect_go.Request[user.UserAuthRequest]) (*connect_go.Response[user.UserAuthResponse], error)
+	Register(context.Context, *connect_go.Request[user.UserRegisterRequest]) (*connect_go.Response[emptypb.Empty], error)
+	SignUp(context.Context, *connect_go.Request[user.UserAuthRequest]) (*connect_go.Response[emptypb.Empty], error)
+	SignIn(context.Context, *connect_go.Request[user.UserAuthRequest]) (*connect_go.Response[user.UserAuthResponse], error)
+	ResetPasswordMail(context.Context, *connect_go.Request[user.ResetPasswordRequest]) (*connect_go.Response[emptypb.Empty], error)
+	UpdatePassword(context.Context, *connect_go.Request[user.UpdatePasswordRequest]) (*connect_go.Response[emptypb.Empty], error)
+	UpdateEmail(context.Context, *connect_go.Request[user.UpdateEmailRequest]) (*connect_go.Response[emptypb.Empty], error)
 }
 
 // NewAuthControllerHandler builds an HTTP handler from the service implementation. It returns the
@@ -81,15 +160,50 @@ type AuthControllerHandler interface {
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
 func NewAuthControllerHandler(svc AuthControllerHandler, opts ...connect_go.HandlerOption) (string, http.Handler) {
-	authControllerCallHandler := connect_go.NewUnaryHandler(
-		AuthControllerCallProcedure,
-		svc.Call,
+	authControllerRegisterHandler := connect_go.NewUnaryHandler(
+		AuthControllerRegisterProcedure,
+		svc.Register,
+		opts...,
+	)
+	authControllerSignUpHandler := connect_go.NewUnaryHandler(
+		AuthControllerSignUpProcedure,
+		svc.SignUp,
+		opts...,
+	)
+	authControllerSignInHandler := connect_go.NewUnaryHandler(
+		AuthControllerSignInProcedure,
+		svc.SignIn,
+		opts...,
+	)
+	authControllerResetPasswordMailHandler := connect_go.NewUnaryHandler(
+		AuthControllerResetPasswordMailProcedure,
+		svc.ResetPasswordMail,
+		opts...,
+	)
+	authControllerUpdatePasswordHandler := connect_go.NewUnaryHandler(
+		AuthControllerUpdatePasswordProcedure,
+		svc.UpdatePassword,
+		opts...,
+	)
+	authControllerUpdateEmailHandler := connect_go.NewUnaryHandler(
+		AuthControllerUpdateEmailProcedure,
+		svc.UpdateEmail,
 		opts...,
 	)
 	return "/server.user.AuthController/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
-		case AuthControllerCallProcedure:
-			authControllerCallHandler.ServeHTTP(w, r)
+		case AuthControllerRegisterProcedure:
+			authControllerRegisterHandler.ServeHTTP(w, r)
+		case AuthControllerSignUpProcedure:
+			authControllerSignUpHandler.ServeHTTP(w, r)
+		case AuthControllerSignInProcedure:
+			authControllerSignInHandler.ServeHTTP(w, r)
+		case AuthControllerResetPasswordMailProcedure:
+			authControllerResetPasswordMailHandler.ServeHTTP(w, r)
+		case AuthControllerUpdatePasswordProcedure:
+			authControllerUpdatePasswordHandler.ServeHTTP(w, r)
+		case AuthControllerUpdateEmailProcedure:
+			authControllerUpdateEmailHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -99,6 +213,26 @@ func NewAuthControllerHandler(svc AuthControllerHandler, opts ...connect_go.Hand
 // UnimplementedAuthControllerHandler returns CodeUnimplemented from all methods.
 type UnimplementedAuthControllerHandler struct{}
 
-func (UnimplementedAuthControllerHandler) Call(context.Context, *connect_go.Request[user.UserAuthRequest]) (*connect_go.Response[user.UserAuthResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.AuthController.Call is not implemented"))
+func (UnimplementedAuthControllerHandler) Register(context.Context, *connect_go.Request[user.UserRegisterRequest]) (*connect_go.Response[emptypb.Empty], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.AuthController.Register is not implemented"))
+}
+
+func (UnimplementedAuthControllerHandler) SignUp(context.Context, *connect_go.Request[user.UserAuthRequest]) (*connect_go.Response[emptypb.Empty], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.AuthController.SignUp is not implemented"))
+}
+
+func (UnimplementedAuthControllerHandler) SignIn(context.Context, *connect_go.Request[user.UserAuthRequest]) (*connect_go.Response[user.UserAuthResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.AuthController.SignIn is not implemented"))
+}
+
+func (UnimplementedAuthControllerHandler) ResetPasswordMail(context.Context, *connect_go.Request[user.ResetPasswordRequest]) (*connect_go.Response[emptypb.Empty], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.AuthController.ResetPasswordMail is not implemented"))
+}
+
+func (UnimplementedAuthControllerHandler) UpdatePassword(context.Context, *connect_go.Request[user.UpdatePasswordRequest]) (*connect_go.Response[emptypb.Empty], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.AuthController.UpdatePassword is not implemented"))
+}
+
+func (UnimplementedAuthControllerHandler) UpdateEmail(context.Context, *connect_go.Request[user.UpdateEmailRequest]) (*connect_go.Response[emptypb.Empty], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.AuthController.UpdateEmail is not implemented"))
 }

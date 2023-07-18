@@ -35,6 +35,7 @@ CREATE TABLE store (
 	parking VARCHAR NOT NULL,
 	access_info VARCHAR NOT NULL,
     is_active BOOLEAN NOT NULL,
+    stamp_image bytea,
     stayable BOOLEAN NOT NULL,
     qr_code UUID NOT NULL,
     un_limited_qr_code UUID NOT NULL,
@@ -127,12 +128,12 @@ CREATE TABLE mail_magazine (
     update_at TIMESTAMPTZ NOT NULL default now(),
     FOREIGN KEY (author) REFERENCES admin (id)
 );
-
+--- userが作成されるたびに、userテーブルにもidとemailをinsertする
 create or replace function public.handle_new_user() 
 returns trigger as $$
 begin
-  insert into public.users (id, email)
-  values (new.id);
+  insert into public.user (id, email)
+  values (new.id, new.email);
   return new;
 end;
 $$ language plpgsql security definer;
@@ -140,3 +141,19 @@ $$ language plpgsql security definer;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure public.handle_new_user();
+
+--- userが更新されるたびに、userテーブルのemailを更新する
+create or replace function public.handle_user_email_update() 
+returns trigger as $$
+begin
+  update public.user
+  set email = new.email
+  where id = new.id;
+  
+  return new;
+end;
+$$ language plpgsql security definer;
+
+create trigger on_auth_user_updated
+  after update of email on auth.users
+  for each row execute procedure public.handle_user_email_update();

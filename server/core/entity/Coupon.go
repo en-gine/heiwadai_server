@@ -100,33 +100,7 @@ func newCoupon(
 	}, nil
 }
 
-func RegenCoupon(
-	ID uuid.UUID,
-	Name string,
-	CouponType CouponType,
-	DiscountAmount uint,
-	ExpireAt time.Time,
-	IsCombinationable bool,
-	Notices []string,
-	TargetStore []*Store,
-	CreateAt time.Time,
-	Status CouponStatus,
-) *Coupon {
-	return &Coupon{
-		ID:                ID,
-		Name:              Name,
-		DiscountAmount:    DiscountAmount,
-		ExpireAt:          ExpireAt,
-		IsCombinationable: IsCombinationable,
-		Notices:           Notices,
-		TargetStore:       TargetStore,
-		CreateAt:          CreateAt,
-		Status:            Status,
-	}
-}
-
 func CreateStandardCoupon(
-	User *User,
 	TargetStore []*Store,
 ) (*Coupon, *errors.DomainError) {
 	expireAtOneYear := time.Now().AddDate(1, 0, 0)
@@ -138,6 +112,26 @@ func CreateStandardCoupon(
 		500,
 		expireAtOneYear,
 		false,
+		DefaultNotices,
+		TargetStore,
+		time.Now(),
+		CouponIssued,
+	)
+}
+
+func CreateBirthdayCoupon(
+	DiscountAmount uint,
+	ExpireAt time.Time,
+	IsCombinationable bool,
+	TargetStore []*Store,
+) (*Coupon, *errors.DomainError) {
+	return newCoupon(
+		uuid.New(),
+		"お誕生日",
+		CouponBirthday,
+		DiscountAmount,
+		ExpireAt,
+		IsCombinationable,
 		DefaultNotices,
 		TargetStore,
 		time.Now(),
@@ -170,6 +164,7 @@ func CreateCustomCoupon(
 		CouponDraft,
 	)
 }
+
 func SaveCustomCoupon(
 	DraftCoupon *Coupon,
 ) (*Coupon, *errors.DomainError) {
@@ -188,22 +183,27 @@ func SaveCustomCoupon(
 	)
 }
 
-func CreateBirthdayCoupon(
+func RegenCoupon(
+	ID uuid.UUID,
+	Name string,
+	CouponType CouponType,
 	DiscountAmount uint,
 	ExpireAt time.Time,
 	IsCombinationable bool,
+	Notices []string,
 	TargetStore []*Store,
-) (*Coupon, *errors.DomainError) {
-	return newCoupon(
-		uuid.New(),
-		"お誕生日",
-		CouponBirthday,
-		DiscountAmount,
-		ExpireAt,
-		IsCombinationable,
-		DefaultNotices,
-		TargetStore,
-		time.Now(),
-		CouponIssued,
-	)
+	CreateAt time.Time,
+	Status CouponStatus,
+) *Coupon {
+	return &Coupon{
+		ID:                ID,
+		Name:              Name,
+		DiscountAmount:    DiscountAmount,
+		ExpireAt:          ExpireAt,
+		IsCombinationable: IsCombinationable,
+		Notices:           Notices,
+		TargetStore:       TargetStore,
+		CreateAt:          CreateAt,
+		Status:            Status,
+	}
 }

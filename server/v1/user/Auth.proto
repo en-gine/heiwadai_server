@@ -1,7 +1,27 @@
 syntax = "proto3";
 
 package server.user;
+
+import "google/protobuf/empty.proto";
+
 option go_package = "server/api/v1";
+
+message UserRegisterRequest {
+  string FirstName = 1;
+  string LastName = 2;
+  string FirstNameKana = 3;
+  string LastNameKana = 4;
+  string CompanyName = 5;
+  string BirthDate = 6;
+  string ZipCode = 7;
+  string Prefecture = 8;
+  string City = 9;
+  string Address = 10;
+  string Tel = 11;
+  string Mail = 12;
+  bool AcceptMail = 13;
+  bool AcceptTerm = 14;
+}
 
 message UserAuthRequest {
   string email = 1;
@@ -12,12 +32,27 @@ message UserAuthResponse {
 	string accessToken = 1;
 	int64 expiresIn = 2;
 	string refreshToken= 3;
-  bool isUserAcceptable = 4;
+}
+
+message ResetPasswordRequest{
+  string email = 1;
+}
+
+message UpdatePasswordRequest{
+  string password = 1;
+  string token = 2;
+}
+
+message UpdateEmailRequest{
+  string email = 1;
+  string token = 2;
 }
 
 service AuthController {
+  rpc Register(UserRegisterRequest) returns (google.protobuf.Empty) {}
+  rpc SignUp(UserAuthRequest) returns (google.protobuf.Empty) {}
   rpc SignIn(UserAuthRequest) returns (UserAuthResponse) {}
-  rpc SignUp(UserAuthRequest) returns (UserAuthResponse) {}
-  rpc ForgetPassword(UserAuthRequest) returns (UserAuthResponse) {}
-  rpc ChangeMail(UserAuthRequest) returns (UserAuthResponse) {}
+  rpc ResetPasswordMail(ResetPasswordRequest) returns (google.protobuf.Empty) {}
+  rpc UpdatePassword(UpdatePasswordRequest) returns (google.protobuf.Empty) {}
+  rpc UpdateEmail(UpdateEmailRequest) returns (google.protobuf.Empty) {}
 }

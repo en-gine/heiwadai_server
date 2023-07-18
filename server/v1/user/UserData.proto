@@ -4,22 +4,7 @@ package server.user;
 
 option go_package = "server/api/v1";
 
-message UserRegisterRequest {
-  string FirstName = 1;
-  string LastName = 2;
-  string FirstNameKana = 3;
-  string LastNameKana = 4;
-  string CompanyName = 5;
-  string BirthDate = 6;
-  string ZipCode = 7;
-  string Prefecture = 8;
-  string City = 9;
-  string Address = 10;
-  string Tel = 11;
-  string Mail = 12;
-  bool AcceptMail = 13;
-  bool AcceptTerm = 14;
-}
+
 
 message UserUpdateDataRequest {
   string ID = 1;
@@ -56,6 +41,5 @@ message UserDataResponse {
 }
 
 service UserDataController {
-  rpc Register(UserRegisterRequest) returns (UserDataResponse) {}
   rpc Update(UserUpdateDataRequest) returns (UserDataResponse) {}
 }

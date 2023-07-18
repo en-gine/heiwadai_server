@@ -4,3 +4,5 @@
 /docker/data
 /docker/volumes/db/data
 node_modules
+/server/keys
+/server/log

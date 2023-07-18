@@ -1,4 +1,4 @@
-package messaging
+package action
 
 import (
 	"server/core/entity"

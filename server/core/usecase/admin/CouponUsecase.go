@@ -29,6 +29,24 @@ func NewAdminCouponUsecase(couponRepository repository.ICouponRepository, coupon
 	}
 }
 
+// Seederで叩く想定。デフォルトのクーポンをDB生成＆保持
+func (u *AdminCouponUsecase) CreateDefaultCoupon() *errors.DomainError {
+	store, err := u.storeQuery.GetActiveAll()
+	if err != nil {
+		return errors.NewDomainError(errors.RepositoryError, err.Error())
+	}
+
+	standard, domainErr := entity.CreateStandardCoupon(store)
+	if err != nil {
+		return domainErr
+	}
+	err = u.couponRepository.Save(standard)
+	if err != nil {
+		return errors.NewDomainError(errors.RepositoryError, err.Error())
+	}
+	return nil
+}
+
 func (u *AdminCouponUsecase) GetUsersCouponList(User *entity.User) ([]*entity.UserAttachedCoupon, *errors.DomainError) {
 
 	coupons, err := u.userCouponQuery.GetActiveAll(User)
@@ -94,7 +112,7 @@ func (u *AdminCouponUsecase) SaveCustomCoupon(couponId uuid.UUID) *errors.Domain
 	}
 	return nil
 }
-func (u *AdminCouponUsecase) AttachCustomCoupon(couponId uuid.UUID) (*int, *errors.DomainError) {
+func (u *AdminCouponUsecase) AttachCustomCouponToAllUser(couponId uuid.UUID) (*int, *errors.DomainError) {
 	coupon, err := u.couponQuery.GetById(couponId)
 
 	if err != nil {

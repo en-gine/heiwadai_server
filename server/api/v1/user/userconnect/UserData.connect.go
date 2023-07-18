@@ -33,9 +33,6 @@ const (
 // reflection-formatted method names, remove the leading slash and convert the remaining slash to a
 // period.
 const (
-	// UserDataControllerRegisterProcedure is the fully-qualified name of the UserDataController's
-	// Register RPC.
-	UserDataControllerRegisterProcedure = "/server.user.UserDataController/Register"
 	// UserDataControllerUpdateProcedure is the fully-qualified name of the UserDataController's Update
 	// RPC.
 	UserDataControllerUpdateProcedure = "/server.user.UserDataController/Update"
@@ -43,7 +40,6 @@ const (
 
 // UserDataControllerClient is a client for the server.user.UserDataController service.
 type UserDataControllerClient interface {
-	Register(context.Context, *connect_go.Request[user.UserRegisterRequest]) (*connect_go.Response[user.UserDataResponse], error)
 	Update(context.Context, *connect_go.Request[user.UserUpdateDataRequest]) (*connect_go.Response[user.UserDataResponse], error)
 }
 
@@ -57,11 +53,6 @@ type UserDataControllerClient interface {
 func NewUserDataControllerClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) UserDataControllerClient {
 	baseURL = strings.TrimRight(baseURL, "/")
 	return &userDataControllerClient{
-		register: connect_go.NewClient[user.UserRegisterRequest, user.UserDataResponse](
-			httpClient,
-			baseURL+UserDataControllerRegisterProcedure,
-			opts...,
-		),
 		update: connect_go.NewClient[user.UserUpdateDataRequest, user.UserDataResponse](
 			httpClient,
 			baseURL+UserDataControllerUpdateProcedure,
@@ -72,13 +63,7 @@ func NewUserDataControllerClient(httpClient connect_go.HTTPClient, baseURL strin
 
 // userDataControllerClient implements UserDataControllerClient.
 type userDataControllerClient struct {
-	register *connect_go.Client[user.UserRegisterRequest, user.UserDataResponse]
-	update   *connect_go.Client[user.UserUpdateDataRequest, user.UserDataResponse]
-}
-
-// Register calls server.user.UserDataController.Register.
-func (c *userDataControllerClient) Register(ctx context.Context, req *connect_go.Request[user.UserRegisterRequest]) (*connect_go.Response[user.UserDataResponse], error) {
-	return c.register.CallUnary(ctx, req)
+	update *connect_go.Client[user.UserUpdateDataRequest, user.UserDataResponse]
 }
 
 // Update calls server.user.UserDataController.Update.
@@ -88,7 +73,6 @@ func (c *userDataControllerClient) Update(ctx context.Context, req *connect_go.R
 
 // UserDataControllerHandler is an implementation of the server.user.UserDataController service.
 type UserDataControllerHandler interface {
-	Register(context.Context, *connect_go.Request[user.UserRegisterRequest]) (*connect_go.Response[user.UserDataResponse], error)
 	Update(context.Context, *connect_go.Request[user.UserUpdateDataRequest]) (*connect_go.Response[user.UserDataResponse], error)
 }
 
@@ -98,11 +82,6 @@ type UserDataControllerHandler interface {
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
 func NewUserDataControllerHandler(svc UserDataControllerHandler, opts ...connect_go.HandlerOption) (string, http.Handler) {
-	userDataControllerRegisterHandler := connect_go.NewUnaryHandler(
-		UserDataControllerRegisterProcedure,
-		svc.Register,
-		opts...,
-	)
 	userDataControllerUpdateHandler := connect_go.NewUnaryHandler(
 		UserDataControllerUpdateProcedure,
 		svc.Update,
@@ -110,8 +89,6 @@ func NewUserDataControllerHandler(svc UserDataControllerHandler, opts ...connect
 	)
 	return "/server.user.UserDataController/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
-		case UserDataControllerRegisterProcedure:
-			userDataControllerRegisterHandler.ServeHTTP(w, r)
 		case UserDataControllerUpdateProcedure:
 			userDataControllerUpdateHandler.ServeHTTP(w, r)
 		default:
@@ -122,10 +99,6 @@ func NewUserDataControllerHandler(svc UserDataControllerHandler, opts ...connect
 
 // UnimplementedUserDataControllerHandler returns CodeUnimplemented from all methods.
 type UnimplementedUserDataControllerHandler struct{}
-
-func (UnimplementedUserDataControllerHandler) Register(context.Context, *connect_go.Request[user.UserRegisterRequest]) (*connect_go.Response[user.UserDataResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.UserDataController.Register is not implemented"))
-}
 
 func (UnimplementedUserDataControllerHandler) Update(context.Context, *connect_go.Request[user.UserUpdateDataRequest]) (*connect_go.Response[user.UserDataResponse], error) {
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.UserDataController.Update is not implemented"))
