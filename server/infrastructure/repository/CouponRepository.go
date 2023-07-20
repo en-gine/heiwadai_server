@@ -16,16 +16,12 @@ type CouponRepository struct {
 	db *sql.DB
 }
 
-func NewCouponRepository() (*CouponRepository, error) {
-	db, err := InitDB()
-
-	if err != nil {
-		return nil, err
-	}
+func NewCouponRepository() *CouponRepository {
+	db := InitDB()
 
 	return &CouponRepository{
 		db: db,
-	}, nil
+	}
 }
 
 func (pr *CouponRepository) Save(updateCoupon *entity.Coupon) error {

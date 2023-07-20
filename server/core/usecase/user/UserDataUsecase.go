@@ -18,6 +18,7 @@ type UserDataUsecase struct {
 func NewUserDataUsecase(userRepository repository.IUserRepository, userQuery queryservice.IUserQueryService) *UserDataUsecase {
 	return &UserDataUsecase{
 		userRepository: userRepository,
+		userQuery:      userQuery,
 	}
 }
 
@@ -40,7 +41,7 @@ func (u *UserDataUsecase) Update(
 
 	existUser, err := u.userQuery.GetById(ID)
 	if err != nil {
-		return nil, errors.NewDomainError(errors.QueryError, "ユーザーの検索に失敗しました")
+		return nil, errors.NewDomainError(errors.QueryError, err.Error())
 	}
 
 	if existUser == nil {

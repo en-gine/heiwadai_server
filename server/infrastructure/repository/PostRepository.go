@@ -17,16 +17,12 @@ type PostRepository struct {
 	db *sql.DB
 }
 
-func NewPostRepository() (*PostRepository, error) {
-	db, err := InitDB()
-
-	if err != nil {
-		return nil, err
-	}
+func NewPostRepository() *PostRepository {
+	db := InitDB()
 
 	return &PostRepository{
 		db: db,
-	}, nil
+	}
 }
 
 func (pr *PostRepository) Save(updatePost *entity.Post) error {

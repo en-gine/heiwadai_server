@@ -3,7 +3,7 @@ buf: #protoファイルからapiコードを自動生成
 	buf generate
 
 run: 
-	go run main.go
+	go run .
 
 test-all:
 	go test -v ./test/...
@@ -41,3 +41,5 @@ install-sqlboiler:
 sqlboiler:#sqlboilerでmodelを自動生成
 	sqlboiler psql --wipe
 
+install-wire:
+	go install github.com/google/wire/cmd/wire@latest

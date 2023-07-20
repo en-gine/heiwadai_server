@@ -41,7 +41,7 @@ func (u *AuthUsecase) Register(
 	AcceptTerm bool, // 利用規約に同意
 ) (*entity.User, *errors.DomainError) {
 
-	if AcceptTerm == false {
+	if !AcceptTerm {
 		return nil, errors.NewDomainError(errors.UnPemitedOperation, "利用規約に同意してください")
 	}
 
@@ -61,6 +61,10 @@ func (u *AuthUsecase) Register(
 
 	// 招待メール送信
 	newId, err := u.authAction.InviteUserByEmail(Mail)
+
+	if err != nil {
+		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
+	}
 
 	userData := entity.CreateUser(
 		newId,

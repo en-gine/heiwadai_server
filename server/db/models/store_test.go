@@ -1378,7 +1378,7 @@ func testStoresSelect(t *testing.T) {
 }
 
 var (
-	storeDBTypes = map[string]string{`ID`: `uuid`, `Name`: `character varying`, `Address`: `character varying`, `Tel`: `character varying`, `Parking`: `character varying`, `AccessInfo`: `character varying`, `IsActive`: `boolean`, `Stayable`: `boolean`, `QRCode`: `uuid`, `UnLimitedQRCode`: `uuid`, `CreateAt`: `timestamp with time zone`, `UpdateAt`: `timestamp with time zone`}
+	storeDBTypes = map[string]string{`ID`: `uuid`, `Name`: `character varying`, `BranchName`: `character varying`, `Address`: `character varying`, `Tel`: `character varying`, `Parking`: `character varying`, `AccessInfo`: `character varying`, `IsActive`: `boolean`, `StampImageURL`: `character varying`, `Stayable`: `boolean`, `QRCode`: `uuid`, `UnLimitedQRCode`: `uuid`, `CreateAt`: `timestamp with time zone`, `UpdateAt`: `timestamp with time zone`}
 	_            = bytes.MinRead
 )
 

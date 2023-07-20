@@ -17,16 +17,12 @@ type CheckinRepository struct {
 	db *sql.DB
 }
 
-func NewCheckinRepository() (*CheckinRepository, error) {
-	db, err := InitDB()
-
-	if err != nil {
-		return nil, err
-	}
+func NewCheckinRepository() *CheckinRepository {
+	db := InitDB()
 
 	return &CheckinRepository{
 		db: db,
-	}, nil
+	}
 }
 
 func (pr *CheckinRepository) Save(updateCheckin *entity.Checkin) error {

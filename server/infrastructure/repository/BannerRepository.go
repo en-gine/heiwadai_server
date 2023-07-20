@@ -17,16 +17,12 @@ type BannerRepository struct {
 	db *sql.DB
 }
 
-func NewBannerRepository() (*BannerRepository, error) {
-	db, err := InitDB()
-
-	if err != nil {
-		return nil, err
-	}
+func NewBannerRepository() *BannerRepository {
+	db := InitDB()
 
 	return &BannerRepository{
 		db: db,
-	}, nil
+	}
 }
 
 func (pr *BannerRepository) Save(updateBanner *entity.Banner) error {

@@ -17,13 +17,7 @@ type AuthClient struct {
 	client *supa.Client
 }
 
-func NewAuthClient() *AuthClient {
-	auth := &AuthClient{}
-	auth.createClient()
-	return &AuthClient{}
-}
-
-func (au *AuthClient) createClient() {
+func NewAuthClient() AuthClient {
 	authURL := os.Getenv("SUPABASE_URL")
 	authKey := os.Getenv("SUPABASE_KEY")
 	if authURL == "" {
@@ -32,9 +26,13 @@ func (au *AuthClient) createClient() {
 	if authKey == "" {
 		panic("SUPABASE_KEY is not set")
 	}
-	au.client = supa.CreateClient(authURL, authKey)
+	client := supa.CreateClient(authURL, authKey)
 
+	return AuthClient{
+		client: client,
+	}
 }
+
 func (au *AuthClient) SignUp(email string, password string) error {
 
 	ctx := context.Background()
@@ -95,8 +93,11 @@ func (au *AuthClient) UpdatePassword(password string, token string) error {
 func (au *AuthClient) InviteUserByEmail(email string) (uuid.UUID, error) {
 	ctx := context.Background()
 	user, err := au.client.Auth.InviteUserByEmail(ctx, email)
+	if err != nil {
+		return uuid.Nil, err
+	}
 	newUserID := uuid.MustParse(user.ID)
-	return newUserID, err
+	return newUserID, nil
 }
 
 func (au *AuthClient) UpdateEmail(email string, token string) error {

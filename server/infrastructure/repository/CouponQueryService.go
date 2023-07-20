@@ -18,16 +18,12 @@ type CouponQueryService struct {
 	db *sql.DB
 }
 
-func NewCouponQueryService() (*CouponQueryService, error) {
-	db, err := InitDB()
-
-	if err != nil {
-		return nil, err
-	}
+func NewCouponQueryService() *CouponQueryService {
+	db := InitDB()
 
 	return &CouponQueryService{
 		db: db,
-	}, nil
+	}
 }
 
 func (pq *CouponQueryService) GetById(id uuid.UUID) (*entity.Coupon, error) {
@@ -71,9 +67,14 @@ func (pq *CouponQueryService) GetCouponListByType(couponType entity.CouponType, 
 
 func (pq *CouponQueryService) GetCouponByType(couponType entity.CouponType) (*entity.Coupon, error) {
 	coupon, err := models.Coupons(models.CouponWhere.CouponType.EQ(couponType.ToInt())).One(context.Background(), pq.db)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+
 	if err != nil {
 		return nil, err
 	}
+
 	sotres, err := coupon.CouponStore(qm.Load(models.CouponStoreRels.Store)).All(context.Background(), pq.db)
 	if err != nil {
 		return nil, err

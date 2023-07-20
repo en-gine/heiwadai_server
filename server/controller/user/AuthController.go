@@ -17,9 +17,9 @@ type AuthController struct {
 
 var _ userv1connect.AuthControllerClient = &AuthController{}
 
-func NewAuthController(authUsecase usecase.AuthUsecase) *AuthController {
+func NewAuthController(authUsecase *usecase.AuthUsecase) *AuthController {
 	return &AuthController{
-		authUseCase: authUsecase,
+		authUseCase: *authUsecase,
 	}
 }
 func (ac *AuthController) Register(ctx context.Context, req *connect_go.Request[user.UserRegisterRequest]) (*connect_go.Response[emptypb.Empty], error) {

@@ -7,11 +7,13 @@ import (
 type Store struct {
 	ID              uuid.UUID
 	Name            string
+	BranchName      *string
 	ZipCode         string
 	Address         string
 	Tel             string
 	Parking         string
 	AccessInfo      string
+	StampImageUrl   *string
 	IsActive        bool
 	Stayable        bool //宿泊施設かどうか
 	QRCode          uuid.UUID
@@ -20,18 +22,22 @@ type Store struct {
 
 func CreateStore(
 	Name string,
+	BranchName *string,
 	Address string,
 	Tel string,
 	Parking string,
 	AccessInfo string,
+	StampImageUrl *string,
 ) *Store {
 	return &Store{
 		ID:              uuid.New(),
 		Name:            Name,
+		BranchName:      BranchName,
 		Address:         Address,
 		Tel:             Tel,
 		Parking:         Parking,
 		AccessInfo:      AccessInfo,
+		StampImageUrl:   StampImageUrl,
 		IsActive:        true,
 		QRCode:          uuid.New(),
 		UnLimitedQRCode: uuid.New(),
@@ -41,10 +47,12 @@ func CreateStore(
 func RegenStore(
 	ID uuid.UUID,
 	Name string,
+	BranchName *string,
 	Address string,
 	Tel string,
 	Parking string,
 	AccessInfo string,
+	StampImageUrl *string,
 	IsActive bool,
 	QRCode uuid.UUID,
 	UnLimitedQRCode uuid.UUID,
@@ -52,10 +60,12 @@ func RegenStore(
 	return &Store{
 		ID:              ID,
 		Name:            Name,
+		BranchName:      BranchName,
 		Address:         Address,
 		Tel:             Tel,
 		Parking:         Parking,
 		AccessInfo:      AccessInfo,
+		StampImageUrl:   StampImageUrl,
 		IsActive:        IsActive,
 		QRCode:          QRCode,
 		UnLimitedQRCode: UnLimitedQRCode,

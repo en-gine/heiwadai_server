@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/friendsofgo/errors"
+	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -23,18 +24,20 @@ import (
 
 // Store is an object representing the database table.
 type Store struct {
-	ID              string    `boil:"id" json:"id" toml:"id" yaml:"id"`
-	Name            string    `boil:"name" json:"name" toml:"name" yaml:"name"`
-	Address         string    `boil:"address" json:"address" toml:"address" yaml:"address"`
-	Tel             string    `boil:"tel" json:"tel" toml:"tel" yaml:"tel"`
-	Parking         string    `boil:"parking" json:"parking" toml:"parking" yaml:"parking"`
-	AccessInfo      string    `boil:"access_info" json:"access_info" toml:"access_info" yaml:"access_info"`
-	IsActive        bool      `boil:"is_active" json:"is_active" toml:"is_active" yaml:"is_active"`
-	Stayable        bool      `boil:"stayable" json:"stayable" toml:"stayable" yaml:"stayable"`
-	QRCode          string    `boil:"qr_code" json:"qr_code" toml:"qr_code" yaml:"qr_code"`
-	UnLimitedQRCode string    `boil:"un_limited_qr_code" json:"un_limited_qr_code" toml:"un_limited_qr_code" yaml:"un_limited_qr_code"`
-	CreateAt        time.Time `boil:"create_at" json:"create_at" toml:"create_at" yaml:"create_at"`
-	UpdateAt        time.Time `boil:"update_at" json:"update_at" toml:"update_at" yaml:"update_at"`
+	ID              string      `boil:"id" json:"id" toml:"id" yaml:"id"`
+	Name            string      `boil:"name" json:"name" toml:"name" yaml:"name"`
+	BranchName      null.String `boil:"branch_name" json:"branch_name,omitempty" toml:"branch_name" yaml:"branch_name,omitempty"`
+	Address         string      `boil:"address" json:"address" toml:"address" yaml:"address"`
+	Tel             string      `boil:"tel" json:"tel" toml:"tel" yaml:"tel"`
+	Parking         string      `boil:"parking" json:"parking" toml:"parking" yaml:"parking"`
+	AccessInfo      string      `boil:"access_info" json:"access_info" toml:"access_info" yaml:"access_info"`
+	IsActive        bool        `boil:"is_active" json:"is_active" toml:"is_active" yaml:"is_active"`
+	StampImageURL   null.String `boil:"stamp_image_url" json:"stamp_image_url,omitempty" toml:"stamp_image_url" yaml:"stamp_image_url,omitempty"`
+	Stayable        bool        `boil:"stayable" json:"stayable" toml:"stayable" yaml:"stayable"`
+	QRCode          string      `boil:"qr_code" json:"qr_code" toml:"qr_code" yaml:"qr_code"`
+	UnLimitedQRCode string      `boil:"un_limited_qr_code" json:"un_limited_qr_code" toml:"un_limited_qr_code" yaml:"un_limited_qr_code"`
+	CreateAt        time.Time   `boil:"create_at" json:"create_at" toml:"create_at" yaml:"create_at"`
+	UpdateAt        time.Time   `boil:"update_at" json:"update_at" toml:"update_at" yaml:"update_at"`
 
 	R *storeR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L storeL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -43,11 +46,13 @@ type Store struct {
 var StoreColumns = struct {
 	ID              string
 	Name            string
+	BranchName      string
 	Address         string
 	Tel             string
 	Parking         string
 	AccessInfo      string
 	IsActive        string
+	StampImageURL   string
 	Stayable        string
 	QRCode          string
 	UnLimitedQRCode string
@@ -56,11 +61,13 @@ var StoreColumns = struct {
 }{
 	ID:              "id",
 	Name:            "name",
+	BranchName:      "branch_name",
 	Address:         "address",
 	Tel:             "tel",
 	Parking:         "parking",
 	AccessInfo:      "access_info",
 	IsActive:        "is_active",
+	StampImageURL:   "stamp_image_url",
 	Stayable:        "stayable",
 	QRCode:          "qr_code",
 	UnLimitedQRCode: "un_limited_qr_code",
@@ -71,11 +78,13 @@ var StoreColumns = struct {
 var StoreTableColumns = struct {
 	ID              string
 	Name            string
+	BranchName      string
 	Address         string
 	Tel             string
 	Parking         string
 	AccessInfo      string
 	IsActive        string
+	StampImageURL   string
 	Stayable        string
 	QRCode          string
 	UnLimitedQRCode string
@@ -84,11 +93,13 @@ var StoreTableColumns = struct {
 }{
 	ID:              "store.id",
 	Name:            "store.name",
+	BranchName:      "store.branch_name",
 	Address:         "store.address",
 	Tel:             "store.tel",
 	Parking:         "store.parking",
 	AccessInfo:      "store.access_info",
 	IsActive:        "store.is_active",
+	StampImageURL:   "store.stamp_image_url",
 	Stayable:        "store.stayable",
 	QRCode:          "store.qr_code",
 	UnLimitedQRCode: "store.un_limited_qr_code",
@@ -101,11 +112,13 @@ var StoreTableColumns = struct {
 var StoreWhere = struct {
 	ID              whereHelperstring
 	Name            whereHelperstring
+	BranchName      whereHelpernull_String
 	Address         whereHelperstring
 	Tel             whereHelperstring
 	Parking         whereHelperstring
 	AccessInfo      whereHelperstring
 	IsActive        whereHelperbool
+	StampImageURL   whereHelpernull_String
 	Stayable        whereHelperbool
 	QRCode          whereHelperstring
 	UnLimitedQRCode whereHelperstring
@@ -114,11 +127,13 @@ var StoreWhere = struct {
 }{
 	ID:              whereHelperstring{field: "\"store\".\"id\""},
 	Name:            whereHelperstring{field: "\"store\".\"name\""},
+	BranchName:      whereHelpernull_String{field: "\"store\".\"branch_name\""},
 	Address:         whereHelperstring{field: "\"store\".\"address\""},
 	Tel:             whereHelperstring{field: "\"store\".\"tel\""},
 	Parking:         whereHelperstring{field: "\"store\".\"parking\""},
 	AccessInfo:      whereHelperstring{field: "\"store\".\"access_info\""},
 	IsActive:        whereHelperbool{field: "\"store\".\"is_active\""},
+	StampImageURL:   whereHelpernull_String{field: "\"store\".\"stamp_image_url\""},
 	Stayable:        whereHelperbool{field: "\"store\".\"stayable\""},
 	QRCode:          whereHelperstring{field: "\"store\".\"qr_code\""},
 	UnLimitedQRCode: whereHelperstring{field: "\"store\".\"un_limited_qr_code\""},
@@ -174,9 +189,9 @@ func (r *storeR) GetCouponStores() CouponStoreSlice {
 type storeL struct{}
 
 var (
-	storeAllColumns            = []string{"id", "name", "address", "tel", "parking", "access_info", "is_active", "stayable", "qr_code", "un_limited_qr_code", "create_at", "update_at"}
+	storeAllColumns            = []string{"id", "name", "branch_name", "address", "tel", "parking", "access_info", "is_active", "stamp_image_url", "stayable", "qr_code", "un_limited_qr_code", "create_at", "update_at"}
 	storeColumnsWithoutDefault = []string{"id", "name", "address", "tel", "parking", "access_info", "is_active", "stayable", "qr_code", "un_limited_qr_code"}
-	storeColumnsWithDefault    = []string{"create_at", "update_at"}
+	storeColumnsWithDefault    = []string{"branch_name", "stamp_image_url", "create_at", "update_at"}
 	storePrimaryKeyColumns     = []string{"id"}
 	storeGeneratedColumns      = []string{}
 )

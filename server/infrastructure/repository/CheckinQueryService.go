@@ -19,16 +19,12 @@ type CheckinQueryService struct {
 	db *sql.DB
 }
 
-func NewCheckinQueryService() (*CheckinQueryService, error) {
-	db, err := InitDB()
-
-	if err != nil {
-		return nil, err
-	}
+func NewCheckinQueryService() *CheckinQueryService {
+	db := InitDB()
 
 	return &CheckinQueryService{
 		db: db,
-	}, nil
+	}
 }
 
 func (pq *CheckinQueryService) GetActiveCheckin(user *entity.User) ([]*entity.Checkin, error) {
@@ -46,9 +42,14 @@ func (pq *CheckinQueryService) GetActiveCheckin(user *entity.User) ([]*entity.Ch
 
 func (pq *CheckinQueryService) GetLastStoreCheckin(user *entity.User, store *entity.Store) (*entity.Checkin, error) {
 	checkin, err := models.Checkins(models.CheckinWhere.UserID.EQ(null.StringFrom(user.ID.String())), models.CheckinWhere.StoreID.EQ(null.StringFrom(store.ID.String())), qm.Load(models.CheckinRels.User), qm.Load(models.CheckinRels.Store), qm.OrderBy(`checkin_at desc`)).One(context.Background(), pq.db)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+
 	if err != nil {
 		return nil, err
 	}
+
 	var result = CheckinModelToEntity(checkin, nil, nil)
 	return result, nil
 }

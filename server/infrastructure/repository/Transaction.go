@@ -13,15 +13,12 @@ type Transaction struct {
 	tx *sql.Tx
 }
 
-func NewTransaction() (*Transaction, error) {
-	db, err := InitDB()
-	if err != nil {
-		return nil, err
-	}
+func NewTransaction() *Transaction {
+	db := InitDB()
 
 	return &Transaction{
 		db: db,
-	}, nil
+	}
 }
 func (r *Transaction) Begin() error {
 	tx, err := r.db.BeginTx(context.Background(), nil)

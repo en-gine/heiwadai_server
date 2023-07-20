@@ -16,16 +16,12 @@ type StoreQueryService struct {
 	db *sql.DB
 }
 
-func NewStoreQueryService() (*StoreQueryService, error) {
-	db, err := InitDB()
-
-	if err != nil {
-		return nil, err
-	}
+func NewStoreQueryService() *StoreQueryService {
+	db := InitDB()
 
 	return &StoreQueryService{
 		db: db,
-	}, nil
+	}
 }
 
 func (pq *StoreQueryService) GetById(id uuid.UUID) (*entity.Store, error) {
@@ -66,10 +62,12 @@ func StoreModelToEntity(model *models.Store) *entity.Store {
 	return entity.RegenStore(
 		uuid.MustParse(model.ID),
 		model.Name,
+		model.BranchName.Ptr(),
 		model.Address,
 		model.Tel,
 		model.Parking,
 		model.AccessInfo,
+		model.StampImageURL.Ptr(),
 		model.IsActive,
 		uuid.MustParse(model.QRCode),
 		uuid.MustParse(model.UnLimitedQRCode),

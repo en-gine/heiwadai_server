@@ -4,9 +4,6 @@ import (
 	"context"
 	userv1 "server/api/v1/user"
 	userv1connect "server/api/v1/user/userconnect"
-	"server/core/infra/action"
-	queryservice "server/core/infra/queryService"
-	"server/core/infra/repository"
 	usecase "server/core/usecase/user"
 
 	"github.com/Songmu/go-httpdate"
@@ -15,18 +12,14 @@ import (
 )
 
 type UserDataController struct {
-	authAction     action.IAuthAction
-	userRepository repository.IUserRepository
-	userQuery      queryservice.IUserQueryService
+	usecase usecase.UserDataUsecase
 }
 
 var _ userv1connect.UserDataControllerClient = &UserDataController{}
 
-func NewUserDataController(authAction action.IAuthAction, userRepository repository.IUserRepository, userQuery queryservice.IUserQueryService) *UserDataController {
+func NewUserDataController(userusecase *usecase.UserDataUsecase) *UserDataController {
 	return &UserDataController{
-		authAction:     authAction,
-		userRepository: userRepository,
-		userQuery:      userQuery,
+		usecase: *userusecase,
 	}
 }
 
@@ -37,8 +30,7 @@ func (u *UserDataController) Update(ctx context.Context, req *connect.Request[us
 		return nil, err
 	}
 
-	service := usecase.NewUserDataUsecase(u.userRepository, u.userQuery)
-	user, err := service.Update(
+	user, err := u.usecase.Update(
 		uuid.MustParse(msg.ID),
 		msg.FirstName,
 		msg.LastName,

@@ -18,16 +18,12 @@ type UserQueryService struct {
 	db *sql.DB
 }
 
-func NewUserQueryService() (*UserQueryService, error) {
-	db, err := InitDB()
-
-	if err != nil {
-		return nil, err
-	}
+func NewUserQueryService() *UserQueryService {
+	db := InitDB()
 
 	return &UserQueryService{
 		db: db,
-	}, nil
+	}
 }
 
 func (pq *UserQueryService) GetById(id uuid.UUID) (*entity.User, error) {
@@ -40,6 +36,10 @@ func (pq *UserQueryService) GetById(id uuid.UUID) (*entity.User, error) {
 }
 func (pq *UserQueryService) GetByMail(mail string) (*entity.User, error) {
 	user, err := models.Users(models.UserWhere.Mail.EQ(mail)).One(context.Background(), pq.db)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+
 	if err != nil {
 		return nil, err
 	}

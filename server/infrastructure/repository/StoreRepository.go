@@ -17,16 +17,12 @@ type StoreRepository struct {
 	db *sql.DB
 }
 
-func NewStoreRepository() (*StoreRepository, error) {
-	db, err := InitDB()
-
-	if err != nil {
-		return nil, err
-	}
+func NewStoreRepository() *StoreRepository {
+	db := InitDB()
 
 	return &StoreRepository{
 		db: db,
-	}, nil
+	}
 }
 
 func (pr *StoreRepository) Save(updateStore *entity.Store) error {

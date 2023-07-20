@@ -18,16 +18,12 @@ type PostQueryService struct {
 	db *sql.DB
 }
 
-func NewPostQueryService() (*PostQueryService, error) {
-	db, err := InitDB()
-
-	if err != nil {
-		return nil, err
-	}
+func NewPostQueryService() *PostQueryService {
+	db := InitDB()
 
 	return &PostQueryService{
 		db: db,
-	}, nil
+	}
 }
 
 func (pq *PostQueryService) GetById(id uuid.UUID) (*entity.Post, error) {

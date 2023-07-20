@@ -3,19 +3,19 @@ package repository
 import (
 	"database/sql"
 	"fmt"
-	"log"
 	"os"
+	"server/infrastructure/logger"
 
 	_ "github.com/lib/pq"
 )
 
 var Conn *sql.DB
 
-func InitDB() (*sql.DB, error) {
+func InitDB() *sql.DB {
 	var err error
 
 	if Conn != nil {
-		return Conn, nil
+		return Conn
 	}
 
 	// err = godotenv.Load(".env")
@@ -34,14 +34,14 @@ func InitDB() (*sql.DB, error) {
 		fmt.Sprintf("postgresql://%s:%s@%s:%s/%s?sslmode=disable", user, password, host, port, database))
 
 	if err != nil {
-		log.Fatal("OpenError: ", err)
-		return nil, err
+		logger.Fatalf("OpenError: %v", err)
+		panic("DB couldn't initialize!")
 	}
 
 	if err = Conn.Ping(); err != nil {
-		log.Fatal("PingError: ", err)
-		return nil, err
+		logger.Fatalf("PingError: %v", err)
+		panic("DB couldn't initialize!")
 	}
 
-	return Conn, nil
+	return Conn
 }

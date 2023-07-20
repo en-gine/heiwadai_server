@@ -18,16 +18,12 @@ type UserRepository struct {
 	db *sql.DB
 }
 
-func NewUserRepository() (*UserRepository, error) {
-	db, err := InitDB()
-
-	if err != nil {
-		return nil, err
-	}
+func NewUserRepository() *UserRepository {
+	db := InitDB()
 
 	return &UserRepository{
 		db: db,
-	}, nil
+	}
 }
 
 func (pr *UserRepository) Save(updateUser *entity.User) error {
