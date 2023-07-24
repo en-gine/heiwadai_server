@@ -12,14 +12,14 @@ import (
 
 	controller "server/controller/user"
 
-	connect_go "github.com/bufbuild/connect-go"
+	"github.com/bufbuild/connect-go"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
-const (
-	address = "localhost:3000"
-)
+// const (
+// 	address = "localhost:3000"
+// )
 
 func TestAuthController_Register(t *testing.T) {
 	t.Parallel()
@@ -62,21 +62,21 @@ func TestAuthController_Register(t *testing.T) {
 	}
 
 	t.Run("register", func(t *testing.T) {
-		req := &connect_go.Request[pb.UserRegisterRequest]{Msg: msg}
+		req := &connect.Request[pb.UserRegisterRequest]{Msg: msg}
 		res, err := client.Register(context.Background(), req)
 		t.Log(res, err)
 		assert.Equal(t, res.Msg, emptypb.Empty{})
 	})
 
 	t.Run("duplicate register", func(t *testing.T) {
-		req := &connect_go.Request[pb.UserRegisterRequest]{Msg: msg}
+		req := &connect.Request[pb.UserRegisterRequest]{Msg: msg}
 		res, err := client.Register(context.Background(), req)
 		t.Log(res, err)
 		assert.NotNil(t, err)
 	})
 
 	t.Run("try sign up", func(t *testing.T) {
-		res, err := client.SignUp(context.Background(), &connect_go.Request[pb.UserAuthRequest]{Msg: &pb.UserAuthRequest{
+		res, err := client.SignUp(context.Background(), &connect.Request[pb.UserAuthRequest]{Msg: &pb.UserAuthRequest{
 			Email:    "test@example.com",
 			Password: "password",
 		}})

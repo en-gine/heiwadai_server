@@ -45,7 +45,7 @@ func (u *MailMagazineUsecase) Create(title string, content string, auther entity
 
 func (u *MailMagazineUsecase) Update(title *string, content *string, auther entity.Admin, mailMagazineId uuid.UUID) (*entity.MailMagazine, *errors.DomainError) {
 
-	oldMailMagazine, err := u.mailMagazineQuery.GetById(mailMagazineId)
+	oldMailMagazine, err := u.mailMagazineQuery.GetByID(mailMagazineId)
 
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())
@@ -83,7 +83,7 @@ func (u *MailMagazineUsecase) Update(title *string, content *string, auther enti
 }
 
 func (u *MailMagazineUsecase) Delete(mailMagazineId uuid.UUID) (*entity.MailMagazine, *errors.DomainError) {
-	deleteMailMagazine, err := u.mailMagazineQuery.GetById(mailMagazineId)
+	deleteMailMagazine, err := u.mailMagazineQuery.GetByID(mailMagazineId)
 
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())

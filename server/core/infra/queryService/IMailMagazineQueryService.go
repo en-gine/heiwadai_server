@@ -8,6 +8,6 @@ import (
 )
 
 type IMailMagazineQueryService interface {
-	GetById(id uuid.UUID) (*entity.MailMagazine, error)
+	GetByID(id uuid.UUID) (*entity.MailMagazine, error)
 	GetAll(pager *types.PageQuery) ([]*entity.MailMagazine, error) //statusは不問
 }

@@ -29,7 +29,6 @@ func (u *PlanUsecase) Search(
 ) ([]*entity.Plan, *errors.DomainError) {
 
 	plans, err := u.planQuery.Search(
-
 		stayStore,
 		stayFrom,
 		stayTo,

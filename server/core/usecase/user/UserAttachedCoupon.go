@@ -30,8 +30,8 @@ func (u *UserAttachedCouponUsecase) GetMyList(AuthUser *entity.User) ([]*entity.
 	return usercoupons, nil
 }
 
-func (u *UserAttachedCouponUsecase) UseMyCoupon(AuthUser *entity.User, couponId uuid.UUID) *errors.DomainError {
-	coupon, err := u.usercouponQuery.GetById(AuthUser, couponId)
+func (u *UserAttachedCouponUsecase) UseMyCoupon(AuthUser *entity.User, couponID uuid.UUID) error {
+	coupon, err := u.usercouponQuery.GetByID(AuthUser, couponID)
 
 	if err != nil {
 		return errors.NewDomainError(errors.QueryError, err.Error())

@@ -38,8 +38,8 @@ func (pr *PostRepository) Save(updatePost *entity.Post) error {
 	return err
 }
 
-func (pr *PostRepository) Delete(postId uuid.UUID) error {
-	deletePost, err := models.FindPost(context.Background(), pr.db, postId.String())
+func (pr *PostRepository) Delete(postID uuid.UUID) error {
+	deletePost, err := models.FindPost(context.Background(), pr.db, postID.String())
 	if err != nil {
 		return err
 	}

@@ -47,8 +47,8 @@ func (pr *UserRepository) Save(updateUser *entity.User) error {
 	return err
 }
 
-func (pr *UserRepository) Delete(postId uuid.UUID) error {
-	deleteUser, err := models.FindUser(context.Background(), pr.db, postId.String())
+func (pr *UserRepository) Delete(postID uuid.UUID) error {
+	deleteUser, err := models.FindUser(context.Background(), pr.db, postID.String())
 	if err != nil {
 		return err
 	}

@@ -60,14 +60,14 @@ func (u *AuthUsecase) Register(
 	}
 
 	// 招待メール送信
-	newId, err := u.authAction.InviteUserByEmail(Mail)
+	newID, err := u.authAction.InviteUserByEmail(Mail)
 
 	if err != nil {
 		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
 	}
 
 	userData := entity.CreateUser(
-		newId,
+		newID,
 		FirstName,
 		LastName,
 		FirstNameKana,
@@ -94,7 +94,7 @@ func (u *AuthUsecase) Register(
 func (u *AuthUsecase) SignUp(
 	Mail string,
 	Password string,
-) *errors.DomainError {
+) error {
 	err := u.authAction.SignUp(Mail, Password)
 	if err != nil {
 		return errors.NewDomainError(errors.RepositoryError, err.Error())
@@ -115,7 +115,7 @@ func (u *AuthUsecase) SignIn(
 
 func (u *AuthUsecase) ResetPasswordMail(
 	Mail string,
-) *errors.DomainError {
+) error {
 	err := u.authAction.ResetPasswordMail(Mail)
 	if err != nil {
 		return errors.NewDomainError(errors.RepositoryError, err.Error())
@@ -126,7 +126,7 @@ func (u *AuthUsecase) ResetPasswordMail(
 func (u *AuthUsecase) UpdatePassword(
 	Password string,
 	Token string,
-) *errors.DomainError {
+) error {
 	err := u.authAction.UpdatePassword(Password, Token)
 	if err != nil {
 		return errors.NewDomainError(errors.RepositoryError, err.Error())
@@ -137,7 +137,7 @@ func (u *AuthUsecase) UpdatePassword(
 func (u *AuthUsecase) UpdateEmail(
 	Mail string,
 	Token string,
-) *errors.DomainError {
+) error {
 	err := u.authAction.UpdateEmail(Mail, Token)
 	if err != nil {
 		return errors.NewDomainError(errors.RepositoryError, err.Error())

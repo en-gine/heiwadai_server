@@ -1,6 +1,8 @@
 package entity
 
 import (
+	"regexp"
+	"server/core/errors"
 	"time"
 
 	"github.com/google/uuid"
@@ -10,7 +12,7 @@ type Reservation struct {
 	ID           uuid.UUID
 	CheckInDate  time.Time
 	CheckOutDate time.Time
-	ChackInTime  time.Time
+	CheckInTime  CheckInTime
 	Content      string
 	Cost         int
 	Payment      string
@@ -36,10 +38,27 @@ type StayCustomer struct {
 	Mail          string
 }
 
+type CheckInTime string
+
+func NewCheckInTime(s string) (*CheckInTime, *errors.DomainError) {
+	if IsValidTimeFormat(s) {
+		return nil, errors.NewDomainError(errors.InvalidParameter, "CheckInTimeの形式が正しくありません。")
+	}
+	result := CheckInTime(s)
+	return &result, nil
+}
+
+func IsValidTimeFormat(s string) bool {
+	// パターンは 00~23の時と 00~59の分にマッチします
+	pattern := `^([01]?[0-9]|2[0-3]):[0-5][0-9]$`
+	match, _ := regexp.MatchString(pattern, s)
+	return match
+}
+
 func CreateReservation(
 	CheckInDate time.Time,
 	CheckOutDate time.Time,
-	ChackInTime time.Time,
+	CheckInTime CheckInTime,
 	Content string,
 	Cost int,
 	Payment string,
@@ -53,7 +72,7 @@ func CreateReservation(
 		ID:           uuid.New(),
 		CheckInDate:  CheckInDate,
 		CheckOutDate: CheckOutDate,
-		ChackInTime:  ChackInTime,
+		CheckInTime:  CheckInTime,
 		Content:      Content,
 		Cost:         Cost,
 		Payment:      Payment,

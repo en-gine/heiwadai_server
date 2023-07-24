@@ -26,7 +26,7 @@ func NewUserQueryService() *UserQueryService {
 	}
 }
 
-func (pq *UserQueryService) GetById(id uuid.UUID) (*entity.User, error) {
+func (pq *UserQueryService) GetByID(id uuid.UUID) (*entity.User, error) {
 	user, err := models.FindUser(context.Background(), pq.db, id.String())
 	if err != nil {
 		return nil, err

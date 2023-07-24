@@ -8,7 +8,7 @@ import (
 )
 
 type IBannerQueryService interface {
-	GetById(id uuid.UUID) (*entity.Banner, error)
+	GetByID(id uuid.UUID) (*entity.Banner, error)
 	GetActiveAll(pager *types.PageQuery) ([]*entity.Banner, error)
 	GetAll(pager *types.PageQuery) ([]*entity.Banner, error) //statusは不問
 }

@@ -26,7 +26,7 @@ func NewCouponQueryService() *CouponQueryService {
 	}
 }
 
-func (pq *CouponQueryService) GetById(id uuid.UUID) (*entity.Coupon, error) {
+func (pq *CouponQueryService) GetByID(id uuid.UUID) (*entity.Coupon, error) {
 	coupon, err := models.FindCoupon(context.Background(), pq.db, id.String())
 	if err != nil {
 		return nil, err

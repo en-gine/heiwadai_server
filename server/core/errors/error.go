@@ -18,11 +18,18 @@ const (
 	QueryDataNotFoundError
 )
 
-func (e *DomainError) Error() string {
+func (e DomainError) Error() string {
 	return e.err.Error()
 }
 
-// 受取側でTypeの判断できるようErrorTypeとエラーオブジェクトを返しています。
+func (e DomainError) Unwrap() error {
+	return e.err
+}
+
+func (e DomainError) GetType() ErrorType {
+	return e.ErrType
+}
+
 func NewDomainError(errType ErrorType, message string) *DomainError {
 	return &DomainError{ErrType: errType, err: errors.New(message)}
 }

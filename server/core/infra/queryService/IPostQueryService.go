@@ -8,7 +8,7 @@ import (
 )
 
 type IPostQueryService interface {
-	GetById(id uuid.UUID) (*entity.Post, error)
+	GetByID(id uuid.UUID) (*entity.Post, error)
 	GetActiveAll(pager *types.PageQuery) ([]*entity.Post, error)
 	GetAll(pager *types.PageQuery) ([]*entity.Post, error) //statusは不問
 }

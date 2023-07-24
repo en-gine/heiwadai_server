@@ -17,8 +17,8 @@ import (
 	"golang.org/x/net/http2/h2c"
 )
 
-// リフレクション設定
 func NewConnectReflection() *http.ServeMux {
+	// リフレクション設定
 	mux := http.NewServeMux()
 	reflector := grpcreflect.NewStaticReflector(
 		"user.v1.UserServer", // 作成したサービスを指定

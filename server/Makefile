@@ -25,6 +25,9 @@ init-db:
 	@make migrate-up
 	@make sqlboiler
 
+install-migrate:
+	go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+
 migrate-up:
 	migrate -path=db/migrations -database postgres://${PSQL_USER}:${PSQL_PASS}@${PSQL_HOST}:${PSQL_PORT}/${PSQL_DBNAME}?sslmode=disable up
 
@@ -41,5 +44,10 @@ install-sqlboiler:
 sqlboiler:#sqlboilerでmodelを自動生成
 	sqlboiler psql --wipe
 
-install-wire:
-	go install github.com/google/wire/cmd/wire@latest
+install-devtools:
+	go install -v github.com/ramya-rao-a/go-outline@latest & \
+	go install -v github.com/rogpeppe/godef@latest & \
+	go install -v github.com/stamblerre/gocode@latest & \
+	go install -v golang.org/x/tools/cmd/goimports@latest & \
+	go install -v golang.org/x/tools/gopls@latest
+

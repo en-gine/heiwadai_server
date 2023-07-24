@@ -9,7 +9,7 @@ import (
 type Banner struct {
 	ID        uuid.UUID
 	ImageURL  string
-	Url       string
+	URL       string
 	Status    BannerStatus
 	CreateAt  time.Time
 	UpdatedAt time.Time
@@ -35,12 +35,12 @@ func (b BannerStatus) String() string {
 
 func CreateBanner(
 	ImageURL string,
-	Url string,
+	URL string,
 ) *Banner {
 	return &Banner{
 		ID:        uuid.New(),
 		ImageURL:  ImageURL,
-		Url:       Url,
+		URL:       URL,
 		Status:    BannerDraft,
 		CreateAt:  time.Now(),
 		UpdatedAt: time.Now(),
@@ -50,7 +50,7 @@ func CreateBanner(
 func RegenBanner(
 	ID uuid.UUID,
 	ImageURL string,
-	Url string,
+	URL string,
 	Status BannerStatus,
 	CreateAt time.Time,
 	UpdatedAt time.Time,
@@ -58,7 +58,7 @@ func RegenBanner(
 	return &Banner{
 		ID:        uuid.New(),
 		ImageURL:  ImageURL,
-		Url:       Url,
+		URL:       URL,
 		Status:    BannerDraft,
 		CreateAt:  CreateAt,
 		UpdatedAt: UpdatedAt,

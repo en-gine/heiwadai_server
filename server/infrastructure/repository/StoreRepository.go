@@ -41,8 +41,8 @@ func (pr *StoreRepository) Save(updateStore *entity.Store) error {
 	return err
 }
 
-func (pr *StoreRepository) Delete(storeId uuid.UUID) error {
-	deleteStore, err := models.FindStore(context.Background(), pr.db, storeId.String())
+func (pr *StoreRepository) Delete(storeID uuid.UUID) error {
+	deleteStore, err := models.FindStore(context.Background(), pr.db, storeID.String())
 	if err != nil {
 		return err
 	}

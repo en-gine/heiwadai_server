@@ -44,9 +44,9 @@ func (u *PostUsecase) Create(title string, content string, postDate time.Time, a
 	return post, nil
 }
 
-func (u *PostUsecase) Update(title *string, content *string, postDate *time.Time, auther entity.Admin, postId uuid.UUID) (*entity.Post, *errors.DomainError) {
+func (u *PostUsecase) Update(title *string, content *string, postDate *time.Time, auther entity.Admin, postID uuid.UUID) (*entity.Post, *errors.DomainError) {
 
-	oldPost, err := u.postQuery.GetById(postId)
+	oldPost, err := u.postQuery.GetByID(postID)
 
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())
@@ -76,7 +76,7 @@ func (u *PostUsecase) Update(title *string, content *string, postDate *time.Time
 		updatePostDate = oldPost.PostDate
 	}
 
-	updatePost := entity.UpdatePost(postId, updateTitle, updateContent, updatePostDate, auther)
+	updatePost := entity.UpdatePost(postID, updateTitle, updateContent, updatePostDate, auther)
 
 	err = u.postRepository.Save(updatePost)
 	if err != nil {
@@ -86,8 +86,8 @@ func (u *PostUsecase) Update(title *string, content *string, postDate *time.Time
 	return updatePost, nil
 }
 
-func (u *PostUsecase) Delete(postId uuid.UUID) (*entity.Post, *errors.DomainError) {
-	deletePost, err := u.postQuery.GetById(postId)
+func (u *PostUsecase) Delete(postID uuid.UUID) (*entity.Post, *errors.DomainError) {
+	deletePost, err := u.postQuery.GetByID(postID)
 
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())
@@ -97,7 +97,7 @@ func (u *PostUsecase) Delete(postId uuid.UUID) (*entity.Post, *errors.DomainErro
 		return nil, errors.NewDomainError(errors.QueryDataNotFoundError, "対象の投稿が見つかりません")
 	}
 
-	err = u.postRepository.Delete(postId)
+	err = u.postRepository.Delete(postID)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
 	}

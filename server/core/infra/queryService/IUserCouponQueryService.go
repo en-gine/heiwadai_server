@@ -8,7 +8,7 @@ import (
 )
 
 type IUserCouponQueryService interface {
-	GetById(user *entity.User, couponid uuid.UUID) (*entity.UserAttachedCoupon, error)
+	GetByID(user *entity.User, couponid uuid.UUID) (*entity.UserAttachedCoupon, error)
 	GetActiveAll(user *entity.User) ([]*entity.UserAttachedCoupon, error)
 	GetAll(user *entity.User, pager *types.PageQuery) ([]*entity.UserAttachedCoupon, error) //使用済かどうか不問
 }

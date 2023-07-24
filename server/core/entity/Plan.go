@@ -8,10 +8,31 @@ type Plan struct {
 	ID        uuid.UUID
 	Title     string
 	Price     uint
+	ImageURL  string
 	RoomType  RoomType
 	MealType  MealType
 	SmokeType SmokeType
 	OverView  string
+}
+
+type MealType struct {
+	Morning bool
+	Dinner  bool
+}
+
+func (m MealType) String() string {
+	var mealType string
+
+	morning := "朝食なし"
+	dinner := "夕食なし"
+	if m.Morning {
+		morning = "朝食あり"
+	}
+	if m.Dinner {
+		dinner = "夕食あり"
+	}
+	mealType = morning + dinner
+	return mealType
 }
 
 type RoomType int
@@ -59,27 +80,10 @@ func (s SmokeType) String() string {
 	}
 }
 
-type MealType int
-
-const (
-	Morning MealType = iota
-	Dinner
-)
-
-func (s MealType) String() string {
-	switch s {
-	case Morning:
-		return "朝食あり"
-	case Dinner:
-		return "夕食あり"
-	default:
-		return "Unknown"
-	}
-}
-
 func RegenPlan(
 	RoomType RoomType,
 	MealType MealType,
+	ImageURL string,
 	SmokeType SmokeType,
 	OverView string,
 
@@ -87,6 +91,8 @@ func RegenPlan(
 	return &Plan{
 		ID:        uuid.New(),
 		RoomType:  RoomType,
+		MealType:  MealType,
+		ImageURL:  ImageURL,
 		SmokeType: Smoking,
 		OverView:  OverView,
 	}

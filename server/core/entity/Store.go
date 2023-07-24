@@ -13,7 +13,7 @@ type Store struct {
 	Tel             string
 	Parking         string
 	AccessInfo      string
-	StampImageUrl   *string
+	StampImageURL   *string
 	IsActive        bool
 	Stayable        bool //宿泊施設かどうか
 	QRCode          uuid.UUID
@@ -27,7 +27,7 @@ func CreateStore(
 	Tel string,
 	Parking string,
 	AccessInfo string,
-	StampImageUrl *string,
+	StampImageURL *string,
 ) *Store {
 	return &Store{
 		ID:              uuid.New(),
@@ -37,7 +37,7 @@ func CreateStore(
 		Tel:             Tel,
 		Parking:         Parking,
 		AccessInfo:      AccessInfo,
-		StampImageUrl:   StampImageUrl,
+		StampImageURL:   StampImageURL,
 		IsActive:        true,
 		QRCode:          uuid.New(),
 		UnLimitedQRCode: uuid.New(),
@@ -52,7 +52,7 @@ func RegenStore(
 	Tel string,
 	Parking string,
 	AccessInfo string,
-	StampImageUrl *string,
+	StampImageURL *string,
 	IsActive bool,
 	QRCode uuid.UUID,
 	UnLimitedQRCode uuid.UUID,
@@ -65,7 +65,7 @@ func RegenStore(
 		Tel:             Tel,
 		Parking:         Parking,
 		AccessInfo:      AccessInfo,
-		StampImageUrl:   StampImageUrl,
+		StampImageURL:   StampImageURL,
 		IsActive:        IsActive,
 		QRCode:          QRCode,
 		UnLimitedQRCode: UnLimitedQRCode,

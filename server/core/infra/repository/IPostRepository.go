@@ -8,5 +8,5 @@ import (
 
 type IPostRepository interface {
 	Save(updatePost *entity.Post) error
-	Delete(postId uuid.UUID) error
+	Delete(postID uuid.UUID) error
 }

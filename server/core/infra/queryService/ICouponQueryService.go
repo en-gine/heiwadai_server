@@ -8,7 +8,7 @@ import (
 )
 
 type ICouponQueryService interface {
-	GetById(id uuid.UUID) (*entity.Coupon, error)
+	GetByID(id uuid.UUID) (*entity.Coupon, error)
 	GetCouponByType(couponType entity.CouponType) (*entity.Coupon, error)
 	GetCouponListByType(couponType entity.CouponType, pager *types.PageQuery) ([]*entity.Coupon, error)
 }

@@ -29,15 +29,15 @@ func (pr *BannerRepository) Save(updateBanner *entity.Banner) error {
 	banner := models.Banner{
 		ID:       updateBanner.ID.String(),
 		ImageURL: updateBanner.ImageURL,
-		URL:      updateBanner.Url,
+		URL:      updateBanner.URL,
 		Status:   int(updateBanner.Status),
 	}
 	err := banner.Upsert(context.Background(), pr.db, true, []string{"id"}, boil.Infer(), boil.Infer())
 	return err
 }
 
-func (pr *BannerRepository) Delete(bannerId uuid.UUID) error {
-	deleteBanner, err := models.FindBanner(context.Background(), pr.db, bannerId.String())
+func (pr *BannerRepository) Delete(bannerID uuid.UUID) error {
+	deleteBanner, err := models.FindBanner(context.Background(), pr.db, bannerID.String())
 	if err != nil {
 		return err
 	}

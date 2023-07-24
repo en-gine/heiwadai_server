@@ -24,7 +24,7 @@ func NewStoreQueryService() *StoreQueryService {
 	}
 }
 
-func (pq *StoreQueryService) GetById(id uuid.UUID) (*entity.Store, error) {
+func (pq *StoreQueryService) GetByID(id uuid.UUID) (*entity.Store, error) {
 	store, err := models.FindStore(context.Background(), pq.db, id.String())
 	if err != nil {
 		return nil, err

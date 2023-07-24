@@ -8,6 +8,7 @@ services:
       context: .
       dockerfile: ./docker/Dockerfile/server/Dockerfile
     volumes:
+      - ./docker/data/server/bin:/go/bin:Z
       - ./server:/server
     ports:
       - 3000:3000

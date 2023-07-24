@@ -54,11 +54,16 @@ func (au *AuthClient) SignIn(email string, password string) (*types.Token, error
 		Email:    email,
 		Password: password,
 	})
+
+	if err != nil {
+		return nil, errors.New("Error SignIn" + err.Error())
+	}
+
 	return &types.Token{
 		AccessToken:  auth.AccessToken,
 		RefreshToken: &auth.RefreshToken,
 		ExpiresIn:    &auth.ExpiresIn,
-	}, err
+	}, nil
 }
 
 func (au *AuthClient) Refresh(token *types.Token) (*types.Token, error) {

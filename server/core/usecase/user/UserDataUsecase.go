@@ -39,7 +39,7 @@ func (u *UserDataUsecase) Update(
 	AcceptMail bool, // メルマガ配信可
 ) (*entity.User, *errors.DomainError) {
 
-	existUser, err := u.userQuery.GetById(ID)
+	existUser, err := u.userQuery.GetByID(ID)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())
 	}

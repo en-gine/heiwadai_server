@@ -55,8 +55,8 @@ func (u *UserCheckinUsecase) GetStampCard(user *entity.User) (*entity.StampCard,
 	return entity.NewStampCard(userCheckins)
 }
 
-// チェックインによってクーポンが付与された場合クーポンを返す
 func (u *UserCheckinUsecase) Checkin(AuthUser *entity.User, QrHash uuid.UUID) (*entity.UserAttachedCoupon, *errors.DomainError) {
+	// チェックインによってクーポンが付与された場合クーポンを返す
 
 	allStores, err := u.storeQuery.GetActiveAll()
 	if err != nil {

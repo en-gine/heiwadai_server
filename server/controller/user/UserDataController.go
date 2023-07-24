@@ -2,8 +2,10 @@ package user
 
 import (
 	"context"
+	"errors"
 	userv1 "server/api/v1/user"
 	userv1connect "server/api/v1/user/userconnect"
+	"server/controller"
 	usecase "server/core/usecase/user"
 
 	"github.com/Songmu/go-httpdate"
@@ -27,10 +29,10 @@ func (u *UserDataController) Update(ctx context.Context, req *connect.Request[us
 	msg := req.Msg
 	birth, err := httpdate.Str2Time(msg.BirthDate, nil)
 	if err != nil {
-		return nil, err
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("誕生日の形式が不正です"))
 	}
 
-	user, err := u.usecase.Update(
+	user, domainErr := u.usecase.Update(
 		uuid.MustParse(msg.ID),
 		msg.FirstName,
 		msg.LastName,
@@ -46,7 +48,9 @@ func (u *UserDataController) Update(ctx context.Context, req *connect.Request[us
 		msg.Mail,
 		msg.AcceptMail,
 	)
-
+	if domainErr != nil {
+		return nil, controller.ErrorHandler(domainErr)
+	}
 	res := connect.NewResponse(&userv1.UserDataResponse{
 		FirstName:     user.FirstName,
 		LastName:      user.LastName,

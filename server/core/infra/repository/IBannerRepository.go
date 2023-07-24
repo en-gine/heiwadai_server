@@ -8,5 +8,5 @@ import (
 
 type IBannerRepository interface {
 	Save(updateBanner *entity.Banner) error
-	Delete(bannerId uuid.UUID) error
+	Delete(bannerID uuid.UUID) error
 }

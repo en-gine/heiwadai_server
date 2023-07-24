@@ -26,15 +26,15 @@ func NewPostQueryService() *PostQueryService {
 	}
 }
 
-func (pq *PostQueryService) GetById(id uuid.UUID) (*entity.Post, error) {
+func (pq *PostQueryService) GetByID(id uuid.UUID) (*entity.Post, error) {
 	post, err := models.FindPost(context.Background(), pq.db, id.String())
 	if err != nil {
 		return nil, err
 	}
-	postId := uuid.MustParse(post.ID)
+	postID := uuid.MustParse(post.ID)
 
 	return &entity.Post{
-		ID:         postId,
+		ID:         postID,
 		Title:      post.Title,
 		Content:    post.Content,
 		PostStatus: entity.PostStatus(post.PostStatus),
@@ -50,9 +50,9 @@ func (pq *PostQueryService) GetActiveAll(pager *types.PageQuery) ([]*entity.Post
 	}
 	var result []*entity.Post
 	for _, post := range posts {
-		postId := uuid.MustParse(post.ID)
+		postID := uuid.MustParse(post.ID)
 		result = append(result, &entity.Post{
-			ID:         postId,
+			ID:         postID,
 			Title:      post.Title,
 			Content:    post.Content,
 			PostStatus: entity.PostStatus(post.PostStatus),
@@ -70,9 +70,9 @@ func (pq *PostQueryService) GetAll(pager *types.PageQuery) ([]*entity.Post, erro
 	}
 	var result []*entity.Post
 	for _, post := range posts {
-		postId := uuid.MustParse(post.ID)
+		postID := uuid.MustParse(post.ID)
 		result = append(result, &entity.Post{
-			ID:         postId,
+			ID:         postID,
 			Title:      post.Title,
 			Content:    post.Content,
 			PostStatus: entity.PostStatus(post.PostStatus),

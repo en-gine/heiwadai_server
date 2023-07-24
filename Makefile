@@ -14,3 +14,6 @@ restart:
 
 run: 
 	docker compose exec server go run main.go
+
+reload-env:
+	docker-compose --env-file .env up -d
