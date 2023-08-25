@@ -12,7 +12,6 @@ message StoreRegisterRequest {
   string Parking = 5;
   string AccessInfo = 6;
   bool IsActive = 7;
-  bool Stayable = 8;
   string QRCode = 9;
   string UnLimitedQRCode = 10;
 }
@@ -26,7 +25,6 @@ message StoreUpdateRequest {
   string Parking = 6;
   string AccessInfo = 7;
   bool IsActive = 8;
-  bool Stayable = 9;
   string QRCode = 10;
   string UnLimitedQRCode = 11;
 }

@@ -29,9 +29,9 @@ type Coupon struct {
 	DiscountAmount    int       `boil:"discount_amount" json:"discount_amount" toml:"discount_amount" yaml:"discount_amount"`
 	ExpireAt          time.Time `boil:"expire_at" json:"expire_at" toml:"expire_at" yaml:"expire_at"`
 	IsCombinationable bool      `boil:"is_combinationable" json:"is_combinationable" toml:"is_combinationable" yaml:"is_combinationable"`
+	CouponStatus      int       `boil:"coupon_status" json:"coupon_status" toml:"coupon_status" yaml:"coupon_status"`
 	CreateAt          time.Time `boil:"create_at" json:"create_at" toml:"create_at" yaml:"create_at"`
 	UpdateAt          time.Time `boil:"update_at" json:"update_at" toml:"update_at" yaml:"update_at"`
-	CouponStatus      int       `boil:"coupon_status" json:"coupon_status" toml:"coupon_status" yaml:"coupon_status"`
 
 	R *couponR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L couponL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -44,9 +44,9 @@ var CouponColumns = struct {
 	DiscountAmount    string
 	ExpireAt          string
 	IsCombinationable string
+	CouponStatus      string
 	CreateAt          string
 	UpdateAt          string
-	CouponStatus      string
 }{
 	ID:                "id",
 	Name:              "name",
@@ -54,9 +54,9 @@ var CouponColumns = struct {
 	DiscountAmount:    "discount_amount",
 	ExpireAt:          "expire_at",
 	IsCombinationable: "is_combinationable",
+	CouponStatus:      "coupon_status",
 	CreateAt:          "create_at",
 	UpdateAt:          "update_at",
-	CouponStatus:      "coupon_status",
 }
 
 var CouponTableColumns = struct {
@@ -66,9 +66,9 @@ var CouponTableColumns = struct {
 	DiscountAmount    string
 	ExpireAt          string
 	IsCombinationable string
+	CouponStatus      string
 	CreateAt          string
 	UpdateAt          string
-	CouponStatus      string
 }{
 	ID:                "coupon.id",
 	Name:              "coupon.name",
@@ -76,9 +76,9 @@ var CouponTableColumns = struct {
 	DiscountAmount:    "coupon.discount_amount",
 	ExpireAt:          "coupon.expire_at",
 	IsCombinationable: "coupon.is_combinationable",
+	CouponStatus:      "coupon.coupon_status",
 	CreateAt:          "coupon.create_at",
 	UpdateAt:          "coupon.update_at",
-	CouponStatus:      "coupon.coupon_status",
 }
 
 // Generated where
@@ -90,9 +90,9 @@ var CouponWhere = struct {
 	DiscountAmount    whereHelperint
 	ExpireAt          whereHelpertime_Time
 	IsCombinationable whereHelperbool
+	CouponStatus      whereHelperint
 	CreateAt          whereHelpertime_Time
 	UpdateAt          whereHelpertime_Time
-	CouponStatus      whereHelperint
 }{
 	ID:                whereHelperstring{field: "\"coupon\".\"id\""},
 	Name:              whereHelperstring{field: "\"coupon\".\"name\""},
@@ -100,9 +100,9 @@ var CouponWhere = struct {
 	DiscountAmount:    whereHelperint{field: "\"coupon\".\"discount_amount\""},
 	ExpireAt:          whereHelpertime_Time{field: "\"coupon\".\"expire_at\""},
 	IsCombinationable: whereHelperbool{field: "\"coupon\".\"is_combinationable\""},
+	CouponStatus:      whereHelperint{field: "\"coupon\".\"coupon_status\""},
 	CreateAt:          whereHelpertime_Time{field: "\"coupon\".\"create_at\""},
 	UpdateAt:          whereHelpertime_Time{field: "\"coupon\".\"update_at\""},
-	CouponStatus:      whereHelperint{field: "\"coupon\".\"coupon_status\""},
 }
 
 // CouponRels is where relationship names are stored.
@@ -153,7 +153,7 @@ func (r *couponR) GetCouponAttachedUsers() CouponAttachedUserSlice {
 type couponL struct{}
 
 var (
-	couponAllColumns            = []string{"id", "name", "coupon_type", "discount_amount", "expire_at", "is_combinationable", "create_at", "update_at", "coupon_status"}
+	couponAllColumns            = []string{"id", "name", "coupon_type", "discount_amount", "expire_at", "is_combinationable", "coupon_status", "create_at", "update_at"}
 	couponColumnsWithoutDefault = []string{"id", "name", "coupon_type", "discount_amount", "expire_at", "is_combinationable", "coupon_status"}
 	couponColumnsWithDefault    = []string{"create_at", "update_at"}
 	couponPrimaryKeyColumns     = []string{"id"}

@@ -1,3 +1,5 @@
+PSQL_PASS_ENCODED := $(shell echo -n ${PSQL_PASS} | python3 -c "import urllib.parse; import sys; print(urllib.parse.quote(sys.stdin.read(), safe=''))")
+
 buf: #protoファイルからapiコードを自動生成
 	rm -rf ./api/v1/* && \
 	buf generate
@@ -8,6 +10,13 @@ run:
 test-all:
 	go test -v ./test/...
 
+install-devtools:
+	go install -v github.com/ramya-rao-a/go-outline@latest & \
+	go install -v github.com/rogpeppe/godef@latest & \
+	go install -v github.com/stamblerre/gocode@latest & \
+	go install -v golang.org/x/tools/cmd/goimports@latest & \
+	go install -v golang.org/x/tools/gopls@latest
+	
 install-buf:
 	go install github.com/bufbuild/buf/cmd/buf@latest & \
   go install github.com/fullstorydev/grpcurl/cmd/grpcurl@latest & \
@@ -29,13 +38,13 @@ install-migrate:
 	go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
 
 migrate-up:
-	migrate -path=db/migrations -database postgres://${PSQL_USER}:${PSQL_PASS}@${PSQL_HOST}:${PSQL_PORT}/${PSQL_DBNAME}?sslmode=disable up
+	migrate -path=db/migrations -database postgres://${PSQL_USER}:${PSQL_PASS_ENCODED}@${PSQL_HOST}:${PSQL_PORT}/${PSQL_DBNAME}?sslmode=disable up
 
 migrate-down:
-	migrate -path=db/migrations -database postgres://${PSQL_USER}:${PSQL_PASS}@${PSQL_HOST}:${PSQL_PORT}/${PSQL_DBNAME}?sslmode=disable down
+	migrate -path=db/migrations -database postgres://${PSQL_USER}:${PSQL_PASS_ENCODED}@${PSQL_HOST}:${PSQL_PORT}/${PSQL_DBNAME}?sslmode=disable down
 
 migrate-drop:
-	migrate -database postgres://${PSQL_USER}:${PSQL_PASS}@${PSQL_HOST}:${PSQL_PORT}/${PSQL_DBNAME}?sslmode=disable drop
+	migrate -database postgres://${PSQL_USER}:${PSQL_PASS_ENCODED}@${PSQL_HOST}:${PSQL_PORT}/${PSQL_DBNAME}?sslmode=disable drop
 
 install-sqlboiler:
 	go install github.com/volatiletech/sqlboiler/v4@latest
@@ -44,10 +53,6 @@ install-sqlboiler:
 sqlboiler:#sqlboilerでmodelを自動生成
 	sqlboiler psql --wipe
 
-install-devtools:
-	go install -v github.com/ramya-rao-a/go-outline@latest & \
-	go install -v github.com/rogpeppe/godef@latest & \
-	go install -v github.com/stamblerre/gocode@latest & \
-	go install -v golang.org/x/tools/cmd/goimports@latest & \
-	go install -v golang.org/x/tools/gopls@latest
+seeder:
+	cd /server/db/seeder && go run .
 

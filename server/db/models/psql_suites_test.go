@@ -26,6 +26,8 @@ func TestUpsert(t *testing.T) {
 
 	t.Run("SchemaMigrations", testSchemaMigrationsUpsert)
 
+	t.Run("StayableStoreInfos", testStayableStoreInfosUpsert)
+
 	t.Run("Stores", testStoresUpsert)
 
 	t.Run("Users", testUsersUpsert)

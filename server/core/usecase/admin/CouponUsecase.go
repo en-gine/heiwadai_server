@@ -29,8 +29,8 @@ func NewAdminCouponUsecase(couponRepository repository.ICouponRepository, coupon
 	}
 }
 
-// Seederで叩く想定。デフォルトのクーポンをDB生成＆保持
 func (u *AdminCouponUsecase) CreateDefaultCoupon() *errors.DomainError {
+	// Seederで叩く想定。デフォルトのクーポンをDB生成＆保持
 	store, err := u.storeQuery.GetActiveAll()
 	if err != nil {
 		return errors.NewDomainError(errors.RepositoryError, err.Error())

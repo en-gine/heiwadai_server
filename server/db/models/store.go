@@ -27,13 +27,13 @@ type Store struct {
 	ID              string      `boil:"id" json:"id" toml:"id" yaml:"id"`
 	Name            string      `boil:"name" json:"name" toml:"name" yaml:"name"`
 	BranchName      null.String `boil:"branch_name" json:"branch_name,omitempty" toml:"branch_name" yaml:"branch_name,omitempty"`
+	ZipCode         string      `boil:"zip_code" json:"zip_code" toml:"zip_code" yaml:"zip_code"`
 	Address         string      `boil:"address" json:"address" toml:"address" yaml:"address"`
 	Tel             string      `boil:"tel" json:"tel" toml:"tel" yaml:"tel"`
-	Parking         string      `boil:"parking" json:"parking" toml:"parking" yaml:"parking"`
-	AccessInfo      string      `boil:"access_info" json:"access_info" toml:"access_info" yaml:"access_info"`
-	IsActive        bool        `boil:"is_active" json:"is_active" toml:"is_active" yaml:"is_active"`
-	StampImageURL   null.String `boil:"stamp_image_url" json:"stamp_image_url,omitempty" toml:"stamp_image_url" yaml:"stamp_image_url,omitempty"`
+	SiteURL         string      `boil:"site_url" json:"site_url" toml:"site_url" yaml:"site_url"`
+	StampImageURL   string      `boil:"stamp_image_url" json:"stamp_image_url" toml:"stamp_image_url" yaml:"stamp_image_url"`
 	Stayable        bool        `boil:"stayable" json:"stayable" toml:"stayable" yaml:"stayable"`
+	IsActive        bool        `boil:"is_active" json:"is_active" toml:"is_active" yaml:"is_active"`
 	QRCode          string      `boil:"qr_code" json:"qr_code" toml:"qr_code" yaml:"qr_code"`
 	UnLimitedQRCode string      `boil:"un_limited_qr_code" json:"un_limited_qr_code" toml:"un_limited_qr_code" yaml:"un_limited_qr_code"`
 	CreateAt        time.Time   `boil:"create_at" json:"create_at" toml:"create_at" yaml:"create_at"`
@@ -47,13 +47,13 @@ var StoreColumns = struct {
 	ID              string
 	Name            string
 	BranchName      string
+	ZipCode         string
 	Address         string
 	Tel             string
-	Parking         string
-	AccessInfo      string
-	IsActive        string
+	SiteURL         string
 	StampImageURL   string
 	Stayable        string
+	IsActive        string
 	QRCode          string
 	UnLimitedQRCode string
 	CreateAt        string
@@ -62,13 +62,13 @@ var StoreColumns = struct {
 	ID:              "id",
 	Name:            "name",
 	BranchName:      "branch_name",
+	ZipCode:         "zip_code",
 	Address:         "address",
 	Tel:             "tel",
-	Parking:         "parking",
-	AccessInfo:      "access_info",
-	IsActive:        "is_active",
+	SiteURL:         "site_url",
 	StampImageURL:   "stamp_image_url",
 	Stayable:        "stayable",
+	IsActive:        "is_active",
 	QRCode:          "qr_code",
 	UnLimitedQRCode: "un_limited_qr_code",
 	CreateAt:        "create_at",
@@ -79,13 +79,13 @@ var StoreTableColumns = struct {
 	ID              string
 	Name            string
 	BranchName      string
+	ZipCode         string
 	Address         string
 	Tel             string
-	Parking         string
-	AccessInfo      string
-	IsActive        string
+	SiteURL         string
 	StampImageURL   string
 	Stayable        string
+	IsActive        string
 	QRCode          string
 	UnLimitedQRCode string
 	CreateAt        string
@@ -94,13 +94,13 @@ var StoreTableColumns = struct {
 	ID:              "store.id",
 	Name:            "store.name",
 	BranchName:      "store.branch_name",
+	ZipCode:         "store.zip_code",
 	Address:         "store.address",
 	Tel:             "store.tel",
-	Parking:         "store.parking",
-	AccessInfo:      "store.access_info",
-	IsActive:        "store.is_active",
+	SiteURL:         "store.site_url",
 	StampImageURL:   "store.stamp_image_url",
 	Stayable:        "store.stayable",
+	IsActive:        "store.is_active",
 	QRCode:          "store.qr_code",
 	UnLimitedQRCode: "store.un_limited_qr_code",
 	CreateAt:        "store.create_at",
@@ -113,13 +113,13 @@ var StoreWhere = struct {
 	ID              whereHelperstring
 	Name            whereHelperstring
 	BranchName      whereHelpernull_String
+	ZipCode         whereHelperstring
 	Address         whereHelperstring
 	Tel             whereHelperstring
-	Parking         whereHelperstring
-	AccessInfo      whereHelperstring
-	IsActive        whereHelperbool
-	StampImageURL   whereHelpernull_String
+	SiteURL         whereHelperstring
+	StampImageURL   whereHelperstring
 	Stayable        whereHelperbool
+	IsActive        whereHelperbool
 	QRCode          whereHelperstring
 	UnLimitedQRCode whereHelperstring
 	CreateAt        whereHelpertime_Time
@@ -128,13 +128,13 @@ var StoreWhere = struct {
 	ID:              whereHelperstring{field: "\"store\".\"id\""},
 	Name:            whereHelperstring{field: "\"store\".\"name\""},
 	BranchName:      whereHelpernull_String{field: "\"store\".\"branch_name\""},
+	ZipCode:         whereHelperstring{field: "\"store\".\"zip_code\""},
 	Address:         whereHelperstring{field: "\"store\".\"address\""},
 	Tel:             whereHelperstring{field: "\"store\".\"tel\""},
-	Parking:         whereHelperstring{field: "\"store\".\"parking\""},
-	AccessInfo:      whereHelperstring{field: "\"store\".\"access_info\""},
-	IsActive:        whereHelperbool{field: "\"store\".\"is_active\""},
-	StampImageURL:   whereHelpernull_String{field: "\"store\".\"stamp_image_url\""},
+	SiteURL:         whereHelperstring{field: "\"store\".\"site_url\""},
+	StampImageURL:   whereHelperstring{field: "\"store\".\"stamp_image_url\""},
 	Stayable:        whereHelperbool{field: "\"store\".\"stayable\""},
+	IsActive:        whereHelperbool{field: "\"store\".\"is_active\""},
 	QRCode:          whereHelperstring{field: "\"store\".\"qr_code\""},
 	UnLimitedQRCode: whereHelperstring{field: "\"store\".\"un_limited_qr_code\""},
 	CreateAt:        whereHelpertime_Time{field: "\"store\".\"create_at\""},
@@ -143,25 +143,35 @@ var StoreWhere = struct {
 
 // StoreRels is where relationship names are stored.
 var StoreRels = struct {
-	BelongToAdmins string
-	Checkins       string
-	CouponStores   string
+	StayableStoreInfo string
+	BelongToAdmins    string
+	Checkins          string
+	CouponStores      string
 }{
-	BelongToAdmins: "BelongToAdmins",
-	Checkins:       "Checkins",
-	CouponStores:   "CouponStores",
+	StayableStoreInfo: "StayableStoreInfo",
+	BelongToAdmins:    "BelongToAdmins",
+	Checkins:          "Checkins",
+	CouponStores:      "CouponStores",
 }
 
 // storeR is where relationships are stored.
 type storeR struct {
-	BelongToAdmins AdminSlice       `boil:"BelongToAdmins" json:"BelongToAdmins" toml:"BelongToAdmins" yaml:"BelongToAdmins"`
-	Checkins       CheckinSlice     `boil:"Checkins" json:"Checkins" toml:"Checkins" yaml:"Checkins"`
-	CouponStores   CouponStoreSlice `boil:"CouponStores" json:"CouponStores" toml:"CouponStores" yaml:"CouponStores"`
+	StayableStoreInfo *StayableStoreInfo `boil:"StayableStoreInfo" json:"StayableStoreInfo" toml:"StayableStoreInfo" yaml:"StayableStoreInfo"`
+	BelongToAdmins    AdminSlice         `boil:"BelongToAdmins" json:"BelongToAdmins" toml:"BelongToAdmins" yaml:"BelongToAdmins"`
+	Checkins          CheckinSlice       `boil:"Checkins" json:"Checkins" toml:"Checkins" yaml:"Checkins"`
+	CouponStores      CouponStoreSlice   `boil:"CouponStores" json:"CouponStores" toml:"CouponStores" yaml:"CouponStores"`
 }
 
 // NewStruct creates a new relationship struct
 func (*storeR) NewStruct() *storeR {
 	return &storeR{}
+}
+
+func (r *storeR) GetStayableStoreInfo() *StayableStoreInfo {
+	if r == nil {
+		return nil
+	}
+	return r.StayableStoreInfo
 }
 
 func (r *storeR) GetBelongToAdmins() AdminSlice {
@@ -189,9 +199,9 @@ func (r *storeR) GetCouponStores() CouponStoreSlice {
 type storeL struct{}
 
 var (
-	storeAllColumns            = []string{"id", "name", "branch_name", "address", "tel", "parking", "access_info", "is_active", "stamp_image_url", "stayable", "qr_code", "un_limited_qr_code", "create_at", "update_at"}
-	storeColumnsWithoutDefault = []string{"id", "name", "address", "tel", "parking", "access_info", "is_active", "stayable", "qr_code", "un_limited_qr_code"}
-	storeColumnsWithDefault    = []string{"branch_name", "stamp_image_url", "create_at", "update_at"}
+	storeAllColumns            = []string{"id", "name", "branch_name", "zip_code", "address", "tel", "site_url", "stamp_image_url", "stayable", "is_active", "qr_code", "un_limited_qr_code", "create_at", "update_at"}
+	storeColumnsWithoutDefault = []string{"id", "name", "zip_code", "address", "tel", "site_url", "stamp_image_url", "stayable", "is_active", "qr_code", "un_limited_qr_code"}
+	storeColumnsWithDefault    = []string{"branch_name", "create_at", "update_at"}
 	storePrimaryKeyColumns     = []string{"id"}
 	storeGeneratedColumns      = []string{}
 )
@@ -474,6 +484,17 @@ func (q storeQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bool
 	return count > 0, nil
 }
 
+// StayableStoreInfo pointed to by the foreign key.
+func (o *Store) StayableStoreInfo(mods ...qm.QueryMod) stayableStoreInfoQuery {
+	queryMods := []qm.QueryMod{
+		qm.Where("\"store_id\" = ?", o.ID),
+	}
+
+	queryMods = append(queryMods, mods...)
+
+	return StayableStoreInfos(queryMods...)
+}
+
 // BelongToAdmins retrieves all the admin's Admins with an executor via belong_to column.
 func (o *Store) BelongToAdmins(mods ...qm.QueryMod) adminQuery {
 	var queryMods []qm.QueryMod
@@ -514,6 +535,123 @@ func (o *Store) CouponStores(mods ...qm.QueryMod) couponStoreQuery {
 	)
 
 	return CouponStores(queryMods...)
+}
+
+// LoadStayableStoreInfo allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-1 relationship.
+func (storeL) LoadStayableStoreInfo(ctx context.Context, e boil.ContextExecutor, singular bool, maybeStore interface{}, mods queries.Applicator) error {
+	var slice []*Store
+	var object *Store
+
+	if singular {
+		var ok bool
+		object, ok = maybeStore.(*Store)
+		if !ok {
+			object = new(Store)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeStore)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeStore))
+			}
+		}
+	} else {
+		s, ok := maybeStore.(*[]*Store)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeStore)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeStore))
+			}
+		}
+	}
+
+	args := make([]interface{}, 0, 1)
+	if singular {
+		if object.R == nil {
+			object.R = &storeR{}
+		}
+		args = append(args, object.ID)
+	} else {
+	Outer:
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &storeR{}
+			}
+
+			for _, a := range args {
+				if a == obj.ID {
+					continue Outer
+				}
+			}
+
+			args = append(args, obj.ID)
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	query := NewQuery(
+		qm.From(`stayable_store_info`),
+		qm.WhereIn(`stayable_store_info.store_id in ?`, args...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load StayableStoreInfo")
+	}
+
+	var resultSlice []*StayableStoreInfo
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice StayableStoreInfo")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results of eager load for stayable_store_info")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for stayable_store_info")
+	}
+
+	if len(stayableStoreInfoAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+
+	if len(resultSlice) == 0 {
+		return nil
+	}
+
+	if singular {
+		foreign := resultSlice[0]
+		object.R.StayableStoreInfo = foreign
+		if foreign.R == nil {
+			foreign.R = &stayableStoreInfoR{}
+		}
+		foreign.R.Store = object
+	}
+
+	for _, local := range slice {
+		for _, foreign := range resultSlice {
+			if local.ID == foreign.StoreID {
+				local.R.StayableStoreInfo = foreign
+				if foreign.R == nil {
+					foreign.R = &stayableStoreInfoR{}
+				}
+				foreign.R.Store = local
+				break
+			}
+		}
+	}
+
+	return nil
 }
 
 // LoadBelongToAdmins allows an eager lookup of values, cached into the
@@ -855,6 +993,56 @@ func (storeL) LoadCouponStores(ctx context.Context, e boil.ContextExecutor, sing
 		}
 	}
 
+	return nil
+}
+
+// SetStayableStoreInfo of the store to the related item.
+// Sets o.R.StayableStoreInfo to related.
+// Adds o to related.R.Store.
+func (o *Store) SetStayableStoreInfo(ctx context.Context, exec boil.ContextExecutor, insert bool, related *StayableStoreInfo) error {
+	var err error
+
+	if insert {
+		related.StoreID = o.ID
+
+		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
+			return errors.Wrap(err, "failed to insert into foreign table")
+		}
+	} else {
+		updateQuery := fmt.Sprintf(
+			"UPDATE \"stayable_store_info\" SET %s WHERE %s",
+			strmangle.SetParamNames("\"", "\"", 1, []string{"store_id"}),
+			strmangle.WhereClause("\"", "\"", 2, stayableStoreInfoPrimaryKeyColumns),
+		)
+		values := []interface{}{o.ID, related.StoreID}
+
+		if boil.IsDebug(ctx) {
+			writer := boil.DebugWriterFrom(ctx)
+			fmt.Fprintln(writer, updateQuery)
+			fmt.Fprintln(writer, values)
+		}
+		if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+			return errors.Wrap(err, "failed to update foreign table")
+		}
+
+		related.StoreID = o.ID
+	}
+
+	if o.R == nil {
+		o.R = &storeR{
+			StayableStoreInfo: related,
+		}
+	} else {
+		o.R.StayableStoreInfo = related
+	}
+
+	if related.R == nil {
+		related.R = &stayableStoreInfoR{
+			Store: o,
+		}
+	} else {
+		related.R.Store = o
+	}
 	return nil
 }
 

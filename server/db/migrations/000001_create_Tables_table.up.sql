@@ -28,20 +28,33 @@ CREATE TABLE user_option (
 );
 
 CREATE TABLE store (
-    id UUID PRIMARY KEY,
-    name VARCHAR NOT NULL,
-    branch_name VARCHAR,
-    address VARCHAR NOT NULL,
-	tel VARCHAR NOT NULL,
-	parking VARCHAR NOT NULL,
-	access_info VARCHAR NOT NULL,
-    is_active BOOLEAN NOT NULL,
-    stamp_image_url VARCHAR,
-    stayable BOOLEAN NOT NULL,
-    qr_code UUID NOT NULL,
+    id                UUID PRIMARY KEY,
+    name              VARCHAR NOT NULL,
+    branch_name       VARCHAR,
+    zip_code          VARCHAR NOT NULL,
+    address           VARCHAR NOT NULL,
+    tel               VARCHAR NOT NULL,
+    site_url          VARCHAR NOT NULL,
+    stamp_image_url   VARCHAR NOT NULL,
+    stayable          BOOLEAN NOT NULL,
+    is_active         BOOLEAN NOT NULL,
+    qr_code           UUID NOT NULL,
     un_limited_qr_code UUID NOT NULL,
     create_at TIMESTAMPTZ NOT NULL default now(),
     update_at TIMESTAMPTZ NOT NULL default now()
+);
+
+CREATE TABLE stayable_store_info (
+    store_id         UUID PRIMARY KEY,
+    parking          VARCHAR NOT NULL,
+    latitude double precision NOT NULL,
+    longitude double precision NOT NULL,
+    access_info      VARCHAR NOT NULL,
+    rest_api_url     VARCHAR NOT NULL,
+    booking_system_id VARCHAR NOT NULL,
+    create_at TIMESTAMPTZ NOT NULL default now(),
+    update_at TIMESTAMPTZ NOT NULL default now(),
+    FOREIGN KEY (store_id) REFERENCES "store" (id)
 );
 
 CREATE TABLE admin (
@@ -72,9 +85,9 @@ CREATE TABLE coupon (
     discount_amount INTEGER NOT NULL,
     expire_at TIMESTAMPTZ NOT NULL,
     is_combinationable BOOLEAN NOT NULL,
+    coupon_status int NOT NULL,
     create_at TIMESTAMPTZ NOT NULL default now(),
-    update_at TIMESTAMPTZ NOT NULL default now(),
-    coupon_status int NOT NULL
+    update_at TIMESTAMPTZ NOT NULL default now()
 );
 
 CREATE TABLE coupon_notices (

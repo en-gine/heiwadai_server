@@ -494,6 +494,128 @@ func testStoresInsertWhitelist(t *testing.T) {
 	}
 }
 
+func testStoreOneToOneStayableStoreInfoUsingStayableStoreInfo(t *testing.T) {
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+
+	var foreign StayableStoreInfo
+	var local Store
+
+	seed := randomize.NewSeed()
+	if err := randomize.Struct(seed, &foreign, stayableStoreInfoDBTypes, true, stayableStoreInfoColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize StayableStoreInfo struct: %s", err)
+	}
+	if err := randomize.Struct(seed, &local, storeDBTypes, true, storeColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Store struct: %s", err)
+	}
+
+	if err := local.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	foreign.StoreID = local.ID
+	if err := foreign.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	check, err := local.StayableStoreInfo().One(ctx, tx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if check.StoreID != foreign.StoreID {
+		t.Errorf("want: %v, got %v", foreign.StoreID, check.StoreID)
+	}
+
+	ranAfterSelectHook := false
+	AddStayableStoreInfoHook(boil.AfterSelectHook, func(ctx context.Context, e boil.ContextExecutor, o *StayableStoreInfo) error {
+		ranAfterSelectHook = true
+		return nil
+	})
+
+	slice := StoreSlice{&local}
+	if err = local.L.LoadStayableStoreInfo(ctx, tx, false, (*[]*Store)(&slice), nil); err != nil {
+		t.Fatal(err)
+	}
+	if local.R.StayableStoreInfo == nil {
+		t.Error("struct should have been eager loaded")
+	}
+
+	local.R.StayableStoreInfo = nil
+	if err = local.L.LoadStayableStoreInfo(ctx, tx, true, &local, nil); err != nil {
+		t.Fatal(err)
+	}
+	if local.R.StayableStoreInfo == nil {
+		t.Error("struct should have been eager loaded")
+	}
+
+	if !ranAfterSelectHook {
+		t.Error("failed to run AfterSelect hook for relationship")
+	}
+}
+
+func testStoreOneToOneSetOpStayableStoreInfoUsingStayableStoreInfo(t *testing.T) {
+	var err error
+
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+
+	var a Store
+	var b, c StayableStoreInfo
+
+	seed := randomize.NewSeed()
+	if err = randomize.Struct(seed, &a, storeDBTypes, false, strmangle.SetComplement(storePrimaryKeyColumns, storeColumnsWithoutDefault)...); err != nil {
+		t.Fatal(err)
+	}
+	if err = randomize.Struct(seed, &b, stayableStoreInfoDBTypes, false, strmangle.SetComplement(stayableStoreInfoPrimaryKeyColumns, stayableStoreInfoColumnsWithoutDefault)...); err != nil {
+		t.Fatal(err)
+	}
+	if err = randomize.Struct(seed, &c, stayableStoreInfoDBTypes, false, strmangle.SetComplement(stayableStoreInfoPrimaryKeyColumns, stayableStoreInfoColumnsWithoutDefault)...); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	for i, x := range []*StayableStoreInfo{&b, &c} {
+		err = a.SetStayableStoreInfo(ctx, tx, i != 0, x)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if a.R.StayableStoreInfo != x {
+			t.Error("relationship struct not set to correct value")
+		}
+		if x.R.Store != &a {
+			t.Error("failed to append to foreign relationship struct")
+		}
+
+		if a.ID != x.StoreID {
+			t.Error("foreign key was wrong value", a.ID)
+		}
+
+		if exists, err := StayableStoreInfoExists(ctx, tx, x.StoreID); err != nil {
+			t.Fatal(err)
+		} else if !exists {
+			t.Error("want 'x' to exist")
+		}
+
+		if a.ID != x.StoreID {
+			t.Error("foreign key was wrong value", a.ID, x.StoreID)
+		}
+
+		if _, err = x.Delete(ctx, tx); err != nil {
+			t.Fatal("failed to delete x", err)
+		}
+	}
+}
+
 func testStoreToManyBelongToAdmins(t *testing.T) {
 	var err error
 	ctx := context.Background()
@@ -1378,7 +1500,7 @@ func testStoresSelect(t *testing.T) {
 }
 
 var (
-	storeDBTypes = map[string]string{`ID`: `uuid`, `Name`: `character varying`, `BranchName`: `character varying`, `Address`: `character varying`, `Tel`: `character varying`, `Parking`: `character varying`, `AccessInfo`: `character varying`, `IsActive`: `boolean`, `StampImageURL`: `character varying`, `Stayable`: `boolean`, `QRCode`: `uuid`, `UnLimitedQRCode`: `uuid`, `CreateAt`: `timestamp with time zone`, `UpdateAt`: `timestamp with time zone`}
+	storeDBTypes = map[string]string{`ID`: `uuid`, `Name`: `character varying`, `BranchName`: `character varying`, `ZipCode`: `character varying`, `Address`: `character varying`, `Tel`: `character varying`, `SiteURL`: `character varying`, `StampImageURL`: `character varying`, `Stayable`: `boolean`, `IsActive`: `boolean`, `QRCode`: `uuid`, `UnLimitedQRCode`: `uuid`, `CreateAt`: `timestamp with time zone`, `UpdateAt`: `timestamp with time zone`}
 	_            = bytes.MinRead
 )
 

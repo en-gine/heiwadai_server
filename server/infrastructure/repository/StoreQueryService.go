@@ -59,15 +59,26 @@ func (pq *StoreQueryService) GetAll() ([]*entity.Store, error) {
 }
 
 func StoreModelToEntity(model *models.Store) *entity.Store {
+	infoModel, _ := model.StayableStoreInfo().One(context.Background(), InitDB())
+	stayableStoreInfo := entity.RegenStayableStoreInfo(
+		infoModel.Parking,
+		infoModel.Latitude,
+		infoModel.Longitude,
+		infoModel.AccessInfo,
+		infoModel.RestAPIURL,
+		infoModel.BookingSystemID,
+	)
 	return entity.RegenStore(
 		uuid.MustParse(model.ID),
 		model.Name,
 		model.BranchName.Ptr(),
+		model.ZipCode,
 		model.Address,
 		model.Tel,
-		model.Parking,
-		model.AccessInfo,
-		model.StampImageURL.Ptr(),
+		model.SiteURL,
+		model.StampImageURL,
+		model.Stayable,
+		stayableStoreInfo,
 		model.IsActive,
 		uuid.MustParse(model.QRCode),
 		uuid.MustParse(model.UnLimitedQRCode),

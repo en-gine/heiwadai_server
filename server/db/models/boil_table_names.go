@@ -14,6 +14,7 @@ var TableNames = struct {
 	MailMagazine       string
 	Post               string
 	SchemaMigrations   string
+	StayableStoreInfo  string
 	Store              string
 	User               string
 	UserOption         string
@@ -28,6 +29,7 @@ var TableNames = struct {
 	MailMagazine:       "mail_magazine",
 	Post:               "post",
 	SchemaMigrations:   "schema_migrations",
+	StayableStoreInfo:  "stayable_store_info",
 	Store:              "store",
 	User:               "user",
 	UserOption:         "user_option",

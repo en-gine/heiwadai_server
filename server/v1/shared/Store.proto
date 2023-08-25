@@ -10,7 +10,6 @@ message StoreResponse {
   string Parking = 5;
   string AccessInfo = 6;
   bool IsActive = 7;
-  bool Stayable = 8;
   string QRCode = 9;
   string UnLimitedQRCode = 10;
 }

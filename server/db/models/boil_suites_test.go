@@ -22,6 +22,7 @@ func TestParent(t *testing.T) {
 	t.Run("MailMagazines", testMailMagazines)
 	t.Run("Posts", testPosts)
 	t.Run("SchemaMigrations", testSchemaMigrations)
+	t.Run("StayableStoreInfos", testStayableStoreInfos)
 	t.Run("Stores", testStores)
 	t.Run("Users", testUsers)
 	t.Run("UserOptions", testUserOptions)
@@ -38,6 +39,7 @@ func TestDelete(t *testing.T) {
 	t.Run("MailMagazines", testMailMagazinesDelete)
 	t.Run("Posts", testPostsDelete)
 	t.Run("SchemaMigrations", testSchemaMigrationsDelete)
+	t.Run("StayableStoreInfos", testStayableStoreInfosDelete)
 	t.Run("Stores", testStoresDelete)
 	t.Run("Users", testUsersDelete)
 	t.Run("UserOptions", testUserOptionsDelete)
@@ -54,6 +56,7 @@ func TestQueryDeleteAll(t *testing.T) {
 	t.Run("MailMagazines", testMailMagazinesQueryDeleteAll)
 	t.Run("Posts", testPostsQueryDeleteAll)
 	t.Run("SchemaMigrations", testSchemaMigrationsQueryDeleteAll)
+	t.Run("StayableStoreInfos", testStayableStoreInfosQueryDeleteAll)
 	t.Run("Stores", testStoresQueryDeleteAll)
 	t.Run("Users", testUsersQueryDeleteAll)
 	t.Run("UserOptions", testUserOptionsQueryDeleteAll)
@@ -70,6 +73,7 @@ func TestSliceDeleteAll(t *testing.T) {
 	t.Run("MailMagazines", testMailMagazinesSliceDeleteAll)
 	t.Run("Posts", testPostsSliceDeleteAll)
 	t.Run("SchemaMigrations", testSchemaMigrationsSliceDeleteAll)
+	t.Run("StayableStoreInfos", testStayableStoreInfosSliceDeleteAll)
 	t.Run("Stores", testStoresSliceDeleteAll)
 	t.Run("Users", testUsersSliceDeleteAll)
 	t.Run("UserOptions", testUserOptionsSliceDeleteAll)
@@ -86,6 +90,7 @@ func TestExists(t *testing.T) {
 	t.Run("MailMagazines", testMailMagazinesExists)
 	t.Run("Posts", testPostsExists)
 	t.Run("SchemaMigrations", testSchemaMigrationsExists)
+	t.Run("StayableStoreInfos", testStayableStoreInfosExists)
 	t.Run("Stores", testStoresExists)
 	t.Run("Users", testUsersExists)
 	t.Run("UserOptions", testUserOptionsExists)
@@ -102,6 +107,7 @@ func TestFind(t *testing.T) {
 	t.Run("MailMagazines", testMailMagazinesFind)
 	t.Run("Posts", testPostsFind)
 	t.Run("SchemaMigrations", testSchemaMigrationsFind)
+	t.Run("StayableStoreInfos", testStayableStoreInfosFind)
 	t.Run("Stores", testStoresFind)
 	t.Run("Users", testUsersFind)
 	t.Run("UserOptions", testUserOptionsFind)
@@ -118,6 +124,7 @@ func TestBind(t *testing.T) {
 	t.Run("MailMagazines", testMailMagazinesBind)
 	t.Run("Posts", testPostsBind)
 	t.Run("SchemaMigrations", testSchemaMigrationsBind)
+	t.Run("StayableStoreInfos", testStayableStoreInfosBind)
 	t.Run("Stores", testStoresBind)
 	t.Run("Users", testUsersBind)
 	t.Run("UserOptions", testUserOptionsBind)
@@ -134,6 +141,7 @@ func TestOne(t *testing.T) {
 	t.Run("MailMagazines", testMailMagazinesOne)
 	t.Run("Posts", testPostsOne)
 	t.Run("SchemaMigrations", testSchemaMigrationsOne)
+	t.Run("StayableStoreInfos", testStayableStoreInfosOne)
 	t.Run("Stores", testStoresOne)
 	t.Run("Users", testUsersOne)
 	t.Run("UserOptions", testUserOptionsOne)
@@ -150,6 +158,7 @@ func TestAll(t *testing.T) {
 	t.Run("MailMagazines", testMailMagazinesAll)
 	t.Run("Posts", testPostsAll)
 	t.Run("SchemaMigrations", testSchemaMigrationsAll)
+	t.Run("StayableStoreInfos", testStayableStoreInfosAll)
 	t.Run("Stores", testStoresAll)
 	t.Run("Users", testUsersAll)
 	t.Run("UserOptions", testUserOptionsAll)
@@ -166,6 +175,7 @@ func TestCount(t *testing.T) {
 	t.Run("MailMagazines", testMailMagazinesCount)
 	t.Run("Posts", testPostsCount)
 	t.Run("SchemaMigrations", testSchemaMigrationsCount)
+	t.Run("StayableStoreInfos", testStayableStoreInfosCount)
 	t.Run("Stores", testStoresCount)
 	t.Run("Users", testUsersCount)
 	t.Run("UserOptions", testUserOptionsCount)
@@ -182,6 +192,7 @@ func TestHooks(t *testing.T) {
 	t.Run("MailMagazines", testMailMagazinesHooks)
 	t.Run("Posts", testPostsHooks)
 	t.Run("SchemaMigrations", testSchemaMigrationsHooks)
+	t.Run("StayableStoreInfos", testStayableStoreInfosHooks)
 	t.Run("Stores", testStoresHooks)
 	t.Run("Users", testUsersHooks)
 	t.Run("UserOptions", testUserOptionsHooks)
@@ -208,6 +219,8 @@ func TestInsert(t *testing.T) {
 	t.Run("Posts", testPostsInsertWhitelist)
 	t.Run("SchemaMigrations", testSchemaMigrationsInsert)
 	t.Run("SchemaMigrations", testSchemaMigrationsInsertWhitelist)
+	t.Run("StayableStoreInfos", testStayableStoreInfosInsert)
+	t.Run("StayableStoreInfos", testStayableStoreInfosInsertWhitelist)
 	t.Run("Stores", testStoresInsert)
 	t.Run("Stores", testStoresInsertWhitelist)
 	t.Run("Users", testUsersInsert)
@@ -229,6 +242,7 @@ func TestToOne(t *testing.T) {
 	t.Run("CouponStoreToStoreUsingStore", testCouponStoreToOneStoreUsingStore)
 	t.Run("MailMagazineToAdminUsingAuthorAdmin", testMailMagazineToOneAdminUsingAuthorAdmin)
 	t.Run("PostToAdminUsingAuthorAdmin", testPostToOneAdminUsingAuthorAdmin)
+	t.Run("StayableStoreInfoToStoreUsingStore", testStayableStoreInfoToOneStoreUsingStore)
 	t.Run("UserOptionToUserUsingUser", testUserOptionToOneUserUsingUser)
 }
 
@@ -237,6 +251,7 @@ func TestToOne(t *testing.T) {
 func TestOneToOne(t *testing.T) {
 	t.Run("CouponToCouponNoticeUsingCouponNotice", testCouponOneToOneCouponNoticeUsingCouponNotice)
 	t.Run("CouponToCouponStoreUsingCouponStore", testCouponOneToOneCouponStoreUsingCouponStore)
+	t.Run("StoreToStayableStoreInfoUsingStayableStoreInfo", testStoreOneToOneStayableStoreInfoUsingStayableStoreInfo)
 }
 
 // TestToMany tests cannot be run in parallel
@@ -266,6 +281,7 @@ func TestToOneSet(t *testing.T) {
 	t.Run("CouponStoreToStoreUsingCouponStores", testCouponStoreToOneSetOpStoreUsingStore)
 	t.Run("MailMagazineToAdminUsingAuthorMailMagazines", testMailMagazineToOneSetOpAdminUsingAuthorAdmin)
 	t.Run("PostToAdminUsingAuthorPosts", testPostToOneSetOpAdminUsingAuthorAdmin)
+	t.Run("StayableStoreInfoToStoreUsingStayableStoreInfo", testStayableStoreInfoToOneSetOpStoreUsingStore)
 	t.Run("UserOptionToUserUsingUserOptions", testUserOptionToOneSetOpUserUsingUser)
 }
 
@@ -285,6 +301,7 @@ func TestToOneRemove(t *testing.T) {
 func TestOneToOneSet(t *testing.T) {
 	t.Run("CouponToCouponNoticeUsingCouponNotice", testCouponOneToOneSetOpCouponNoticeUsingCouponNotice)
 	t.Run("CouponToCouponStoreUsingCouponStore", testCouponOneToOneSetOpCouponStoreUsingCouponStore)
+	t.Run("StoreToStayableStoreInfoUsingStayableStoreInfo", testStoreOneToOneSetOpStayableStoreInfoUsingStayableStoreInfo)
 }
 
 // TestOneToOneRemove tests cannot be run in parallel
@@ -338,6 +355,7 @@ func TestReload(t *testing.T) {
 	t.Run("MailMagazines", testMailMagazinesReload)
 	t.Run("Posts", testPostsReload)
 	t.Run("SchemaMigrations", testSchemaMigrationsReload)
+	t.Run("StayableStoreInfos", testStayableStoreInfosReload)
 	t.Run("Stores", testStoresReload)
 	t.Run("Users", testUsersReload)
 	t.Run("UserOptions", testUserOptionsReload)
@@ -354,6 +372,7 @@ func TestReloadAll(t *testing.T) {
 	t.Run("MailMagazines", testMailMagazinesReloadAll)
 	t.Run("Posts", testPostsReloadAll)
 	t.Run("SchemaMigrations", testSchemaMigrationsReloadAll)
+	t.Run("StayableStoreInfos", testStayableStoreInfosReloadAll)
 	t.Run("Stores", testStoresReloadAll)
 	t.Run("Users", testUsersReloadAll)
 	t.Run("UserOptions", testUserOptionsReloadAll)
@@ -370,6 +389,7 @@ func TestSelect(t *testing.T) {
 	t.Run("MailMagazines", testMailMagazinesSelect)
 	t.Run("Posts", testPostsSelect)
 	t.Run("SchemaMigrations", testSchemaMigrationsSelect)
+	t.Run("StayableStoreInfos", testStayableStoreInfosSelect)
 	t.Run("Stores", testStoresSelect)
 	t.Run("Users", testUsersSelect)
 	t.Run("UserOptions", testUserOptionsSelect)
@@ -386,6 +406,7 @@ func TestUpdate(t *testing.T) {
 	t.Run("MailMagazines", testMailMagazinesUpdate)
 	t.Run("Posts", testPostsUpdate)
 	t.Run("SchemaMigrations", testSchemaMigrationsUpdate)
+	t.Run("StayableStoreInfos", testStayableStoreInfosUpdate)
 	t.Run("Stores", testStoresUpdate)
 	t.Run("Users", testUsersUpdate)
 	t.Run("UserOptions", testUserOptionsUpdate)
@@ -402,6 +423,7 @@ func TestSliceUpdateAll(t *testing.T) {
 	t.Run("MailMagazines", testMailMagazinesSliceUpdateAll)
 	t.Run("Posts", testPostsSliceUpdateAll)
 	t.Run("SchemaMigrations", testSchemaMigrationsSliceUpdateAll)
+	t.Run("StayableStoreInfos", testStayableStoreInfosSliceUpdateAll)
 	t.Run("Stores", testStoresSliceUpdateAll)
 	t.Run("Users", testUsersSliceUpdateAll)
 	t.Run("UserOptions", testUserOptionsSliceUpdateAll)

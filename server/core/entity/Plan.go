@@ -38,46 +38,64 @@ func (m MealType) String() string {
 type RoomType int
 
 const (
-	Single RoomType = iota
-	SemiDouble
-	Double
-	Twin
-	Forth
+	RoomTypeSingle RoomType = iota
+	RoomTypeSemiDouble
+	RoomTypeDouble
+	RoomTypeTwin
+	RoomTypeFourth
 )
 
 func (s RoomType) String() string {
 	switch s {
-	case Single:
+	case RoomTypeSingle:
 		return "シングル"
-	case SemiDouble:
+	case RoomTypeSemiDouble:
 		return "セミダブル"
-	case Double:
+	case RoomTypeDouble:
 		return "ダブル"
-	case Twin:
+	case RoomTypeTwin:
 		return "ツイン"
-	case Forth:
+	case RoomTypeFourth:
 		return "フォース"
 	default:
 		return "Unknown"
 	}
 }
 
+func IncludeRoomType(roomType *[]RoomType, target RoomType) bool {
+	for _, v := range *roomType {
+		if v == target {
+			return true
+		}
+	}
+	return false
+}
+
 type SmokeType int
 
 const (
-	NonSmoking SmokeType = iota
-	Smoking
+	SmokeTypeNonSmoking SmokeType = iota
+	SmokeTypeSmoking
 )
 
 func (s SmokeType) String() string {
 	switch s {
-	case NonSmoking:
+	case SmokeTypeNonSmoking:
 		return "禁煙"
-	case Smoking:
+	case SmokeTypeSmoking:
 		return "喫煙"
 	default:
 		return "Unknown"
 	}
+}
+
+func IncludeSmokeType(smokeType *[]SmokeType, target SmokeType) bool {
+	for _, v := range *smokeType {
+		if v == target {
+			return true
+		}
+	}
+	return false
 }
 
 func RegenPlan(
@@ -93,7 +111,7 @@ func RegenPlan(
 		RoomType:  RoomType,
 		MealType:  MealType,
 		ImageURL:  ImageURL,
-		SmokeType: Smoking,
+		SmokeType: SmokeType,
 		OverView:  OverView,
 	}
 }

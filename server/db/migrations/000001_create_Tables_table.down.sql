@@ -19,6 +19,8 @@ DROP TABLE IF EXISTS mail_magazine;
 
 DROP TABLE IF EXISTS admin;
 
+DROP TABLE IF EXISTS stayable_store_info;
+
 DROP TABLE IF EXISTS store;
 
 DROP TABLE IF EXISTS "user";
@@ -31,4 +33,4 @@ DROP trigger if exists on_auth_user_updated on auth.users;
 
 DROP function if exists public.handle_user_email_update;
 
-DROP TABLE IF EXISTS schema_migrations;
+-- DROP TABLE IF EXISTS schema_migrations;

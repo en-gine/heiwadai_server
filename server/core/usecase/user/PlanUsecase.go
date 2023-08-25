@@ -4,7 +4,6 @@ import (
 	"server/core/entity"
 	"server/core/errors"
 	queryservice "server/core/infra/queryService"
-	"server/core/infra/queryService/types"
 	"time"
 )
 
@@ -22,10 +21,12 @@ func (u *PlanUsecase) Search(
 	stayStore []entity.Store,
 	stayFrom time.Time,
 	stayTo time.Time,
-	adult uint8,
-	child uint8,
-	roomType []entity.RoomType,
-	pager *types.PageQuery,
+	adult int,
+	child int,
+	roomCount int,
+	smokeTypes []entity.SmokeType,
+	mealType entity.MealType,
+	roomTypes []entity.RoomType,
 ) ([]*entity.Plan, *errors.DomainError) {
 
 	plans, err := u.planQuery.Search(
@@ -34,8 +35,10 @@ func (u *PlanUsecase) Search(
 		stayTo,
 		adult,
 		child,
-		roomType,
-		pager,
+		roomCount,
+		&smokeTypes,
+		&mealType,
+		&roomTypes,
 	)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())

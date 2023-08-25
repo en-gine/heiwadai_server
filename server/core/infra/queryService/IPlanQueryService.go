@@ -2,7 +2,6 @@ package queryservice
 
 import (
 	"server/core/entity"
-	"server/core/infra/queryService/types"
 	"time"
 )
 
@@ -11,8 +10,11 @@ type IPlanQueryService interface {
 		stayStore []entity.Store,
 		stayFrom time.Time,
 		stayTo time.Time,
-		adult uint8,
-		child uint8,
-		roomType []entity.RoomType,
-		pager *types.PageQuery) ([]*entity.Plan, error)
+		adult int,
+		child int,
+		roomCount int,
+		smokeTypes *[]entity.SmokeType,
+		mealType *entity.MealType,
+		roomTypes *[]entity.RoomType,
+	) ([]*entity.Plan, error)
 }

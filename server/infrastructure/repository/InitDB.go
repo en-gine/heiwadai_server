@@ -18,12 +18,6 @@ func InitDB() *sql.DB {
 		return Conn
 	}
 
-	// err = godotenv.Load(".env")
-	// if err != nil {
-	// 	log.Fatal("failed to load .env file: ", err)
-	// 	return nil, err
-	// }
-
 	user := os.Getenv("PSQL_USER")
 	password := os.Getenv("PSQL_PASS")
 	host := os.Getenv("PSQL_HOST")

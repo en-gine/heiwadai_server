@@ -1,7 +1,8 @@
 package main
 
 import (
-	usecase "server/core/usecase/user"
+	usecaseAdmin "server/core/usecase/admin"
+	usecaseUser "server/core/usecase/user"
 
 	action "server/infrastructure/action"
 	implements "server/infrastructure/repository"
@@ -10,11 +11,17 @@ import (
 var userRepo = implements.NewUserRepository()
 var userQueryService = implements.NewUserQueryService()
 var authAction = action.NewAuthClient()
+var storeRepo = implements.NewStoreRepository()
+var storeQueryService = implements.NewStoreQueryService()
 
-func InitializeUserUsecase() *usecase.UserDataUsecase {
-	return usecase.NewUserDataUsecase(userRepo, userQueryService)
+func InitializeUserUsecase() *usecaseUser.UserDataUsecase {
+	return usecaseUser.NewUserDataUsecase(userRepo, userQueryService)
 }
 
-func InitializeAuthUsecase() *usecase.AuthUsecase {
-	return usecase.NewAuthUsecase(userRepo, userQueryService, &authAction)
+func InitializeAuthUsecase() *usecaseUser.AuthUsecase {
+	return usecaseUser.NewAuthUsecase(userRepo, userQueryService, &authAction)
+}
+
+func InitializeStoreUsecase() *usecaseAdmin.StoreUsecase {
+	return usecaseAdmin.NewStoreUsecase(storeRepo, storeQueryService)
 }

@@ -1,4 +1,4 @@
-package controller
+package user
 
 import (
 	usecase "server/core/usecase/user"
