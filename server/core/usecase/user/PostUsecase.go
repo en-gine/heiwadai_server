@@ -19,9 +19,9 @@ func NewPostUsecase(postRepository repository.IPostRepository, postQuery queryse
 	}
 }
 
-func (u *PostUsecase) GetActiveList() ([]*entity.Post, *errors.DomainError) {
+func (u *PostUsecase) GetList() ([]*entity.Post, *errors.DomainError) {
 
-	posts, err := u.postQuery.GetActiveAll(nil)
+	posts, err := u.postQuery.GetAll()
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())
 	}

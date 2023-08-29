@@ -1,7 +1,6 @@
 package booking
 
 import (
-	"fmt"
 	"reflect"
 	"server/core/entity"
 	queryservice "server/core/infra/queryService"
@@ -59,10 +58,11 @@ func (p *PlanQuery) Search(
 		roomTypes,
 	)
 
-	res, err := Request[avail.OTAHotelAvailRQ, avail.OTAHotelAvailRS](reqBody)
-	fmt.Print(res)
-
-	return nil, err
+	_, err := Request[avail.OTAHotelAvailRQ, avail.OTAHotelAvailRS](reqBody)
+	if err != nil {
+		return nil, err
+	}
+	return nil, nil
 }
 
 func NewOTAHotelAvailRQ(

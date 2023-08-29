@@ -1,9 +1,10 @@
-package repository
+package redis
 
 import (
 	"context"
 	"os"
 	"server/core/infra/repository"
+	"time"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -32,13 +33,19 @@ func NewMemoryRepository() (*MemoryRepository, error) {
 	}, nil
 }
 
-func (mr *MemoryRepository) Get(key string) (string, error) {
-	value, err := mr.rdb.Get(context.Background(), key).Result()
-	return value, err
+func (mr *MemoryRepository) Get(key string) (*[]byte, error) {
+	value, err := mr.rdb.Get(context.Background(), key).Bytes()
+	if err == redis.Nil {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &value, err
 }
 
-func (mr *MemoryRepository) Save(key string, value string) error {
-	err := mr.rdb.Set(context.Background(), key, value, 0).Err()
+func (mr *MemoryRepository) Set(key string, value []byte, expire time.Duration) error {
+	err := mr.rdb.Set(context.Background(), key, value, expire).Err()
 	return err
 }
 

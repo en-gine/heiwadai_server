@@ -24,7 +24,7 @@ func Request[TRequestType any, TResultType any](reqBody *TRequestType) (*TResult
 	req.Header.Add("Content-Type", "text/xml; charset=utf-8")
 	req.Header.Add("Accept-Encoding", "gzip")
 
-	fmt.Print(req)
+	fmt.Print(req.Body)
 	client := &http.Client{}
 	res, err := client.Do(req)
 	if err != nil {
@@ -47,6 +47,7 @@ func Request[TRequestType any, TResultType any](reqBody *TRequestType) (*TResult
 		logger.Errorf("XML Unmarshal error: %s", err)
 		return nil, errors.New("予約サーバーからのレスポンスの解析に失敗しました。")
 	}
+	fmt.Print(result)
 
 	return result, nil
 }

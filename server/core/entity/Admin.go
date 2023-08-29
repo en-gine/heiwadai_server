@@ -5,18 +5,18 @@ import (
 )
 
 type Admin struct {
-	ID       uuid.UUID
-	Name     string
-	BelongTo Store
+	ID          uuid.UUID
+	Name        string
+	BelongStore Store
 }
 
 func CreateAdmin(
 	Name string,
-	BelongTo Store,
+	BelongStore Store,
 ) *Admin {
 	return &Admin{
-		ID:       uuid.New(),
-		Name:     Name,
-		BelongTo: BelongTo,
+		ID:          uuid.New(),
+		Name:        Name,
+		BelongStore: BelongStore,
 	}
 }

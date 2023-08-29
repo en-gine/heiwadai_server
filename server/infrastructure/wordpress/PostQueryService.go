@@ -1,15 +1,16 @@
-package repository
+package wordpress
 
 import (
 	"server/core/entity"
 	queryservice "server/core/infra/queryService"
-	"server/core/infra/queryService/types"
-	"server/db/models"
-
-	"github.com/google/uuid"
+	"server/infrastructure/logger"
+	"server/infrastructure/wordpress/api"
+	"server/infrastructure/wordpress/types"
 )
 
 var _ queryservice.IPostQueryService = &PostQueryService{}
+
+const APIURL = "https://www.heiwadai-hotel.co.jp/wp-json/wp/v2/posts?_embed"
 
 type PostQueryService struct {
 }
@@ -19,30 +20,34 @@ func NewPostQueryService() *PostQueryService {
 	return &PostQueryService{}
 }
 
-func (pq *PostQueryService) GetByID(id uuid.UUID) (*entity.Post, error) {
-
-	return &entity.Post{}, nil
+func (pq *PostQueryService) GetByID(id int) (*entity.Post, error) {
+	wppost, err := api.GetWPPost(uint(id))
+	if err != nil {
+		logger.Errorf("Error: %v\n", err)
+		return nil, err
+	}
+	return WPPostToEntity(wppost), nil
 }
 
-func (pq *PostQueryService) GetActiveAll(pager *types.PageQuery) ([]*entity.Post, error) {
-
-	return nil, nil
+func (pq *PostQueryService) GetAll() ([]*entity.Post, error) {
+	wpposts, err := api.GetWPPosts()
+	if err != nil {
+		logger.Errorf("Error: %v\n", err)
+		return nil, err
+	}
+	var entities []*entity.Post
+	for _, wppost := range *wpposts {
+		entities = append(entities, WPPostToEntity(&wppost))
+	}
+	return entities, nil
 }
 
-func (pq *PostQueryService) GetAll(pager *types.PageQuery) ([]*entity.Post, error) {
-	return nil, nil
-
-}
-
-func PostModelToEntity(post *models.Post, author entity.Admin) *entity.Post {
-	return entity.RegenPost(
-		uuid.MustParse(post.ID),
-		post.Title,
-		post.Content,
-		author,
-		entity.PostStatus(post.PostStatus),
-		post.PostDate,
-		post.CreateAt,
-		post.UpdateAt,
-	)
+func WPPostToEntity(wppost *types.WPPost) (entitie *entity.Post) {
+	entity := &entity.Post{
+		ID:      wppost.ID,
+		Title:   wppost.Title.Rendered,
+		Content: wppost.Content.Rendered,
+		Author:  wppost.Embedded.Author[0].Name,
+	}
+	return entity
 }

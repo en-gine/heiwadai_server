@@ -8,5 +8,5 @@ import (
 
 type IMailMagazineRepository interface {
 	Save(updateMailMagazine *entity.MailMagazine) error
-	Delete(magazineId uuid.UUID) error
+	Delete(magazineID uuid.UUID) error
 }

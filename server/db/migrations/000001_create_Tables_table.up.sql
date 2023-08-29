@@ -109,26 +109,6 @@ CREATE TABLE coupon_attached_user (
     PRIMARY KEY(coupon_id, user_id)
 );
 
-CREATE TABLE banner (
-    id UUID PRIMARY KEY,
-    image_url VARCHAR NOT NULL,
-    url VARCHAR NOT NULL,
-    status int NOT NULL,
-    create_at TIMESTAMPTZ NOT NULL default now(),
-    update_at TIMESTAMPTZ NOT NULL default now()
-);
-
-CREATE TABLE post (
-    id UUID PRIMARY KEY,
-    title VARCHAR NOT NULL,
-    content VARCHAR NOT NULL,
-    author UUID,
-    post_date TIMESTAMPTZ NOT NULL,
-    post_status int NOT NULL,
-    create_at TIMESTAMPTZ NOT NULL default now(),
-    update_at TIMESTAMPTZ NOT NULL default now(),
-    FOREIGN KEY (author) REFERENCES admin (id)
-);
 
 CREATE TABLE mail_magazine (
     id UUID PRIMARY KEY,
