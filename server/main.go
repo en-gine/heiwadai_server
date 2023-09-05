@@ -14,7 +14,9 @@ import (
 )
 
 func main() {
-	// booking.PlanQueryTest()
+	if err != nil {
+		fmt.Println(err)
+	}
 	mux := http.NewServeMux()
 	userRouter.NewUserServer(mux)
 	adminRouter.NewAdminServer(mux)

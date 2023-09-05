@@ -10,8 +10,6 @@ import (
 
 var _ queryservice.IPostQueryService = &PostQueryService{}
 
-const APIURL = "https://www.heiwadai-hotel.co.jp/wp-json/wp/v2/posts?_embed"
-
 type PostQueryService struct {
 }
 

@@ -149,7 +149,7 @@ func testUserOptionsExists(t *testing.T) {
 		t.Error(err)
 	}
 
-	e, err := UserOptionExists(ctx, tx, o.ID)
+	e, err := UserOptionExists(ctx, tx, o.UserID)
 	if err != nil {
 		t.Errorf("Unable to check if UserOption exists: %s", err)
 	}
@@ -175,7 +175,7 @@ func testUserOptionsFind(t *testing.T) {
 		t.Error(err)
 	}
 
-	userOptionFound, err := FindUserOption(ctx, tx, o.ID)
+	userOptionFound, err := FindUserOption(ctx, tx, o.UserID)
 	if err != nil {
 		t.Error(err)
 	}
@@ -494,27 +494,27 @@ func testUserOptionsInsertWhitelist(t *testing.T) {
 	}
 }
 
-func testUserOptionToOneUserUsingUser(t *testing.T) {
+func testUserOptionToOneUserDatumUsingUser(t *testing.T) {
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
 
 	var local UserOption
-	var foreign User
+	var foreign UserDatum
 
 	seed := randomize.NewSeed()
-	if err := randomize.Struct(seed, &local, userOptionDBTypes, true, userOptionColumnsWithDefault...); err != nil {
+	if err := randomize.Struct(seed, &local, userOptionDBTypes, false, userOptionColumnsWithDefault...); err != nil {
 		t.Errorf("Unable to randomize UserOption struct: %s", err)
 	}
-	if err := randomize.Struct(seed, &foreign, userDBTypes, false, userColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize User struct: %s", err)
+	if err := randomize.Struct(seed, &foreign, userDatumDBTypes, false, userDatumColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize UserDatum struct: %s", err)
 	}
 
 	if err := foreign.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Fatal(err)
 	}
 
-	queries.Assign(&local.UserID, foreign.ID)
+	local.UserID = foreign.UserID
 	if err := local.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Fatal(err)
 	}
@@ -524,12 +524,12 @@ func testUserOptionToOneUserUsingUser(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if !queries.Equal(check.ID, foreign.ID) {
-		t.Errorf("want: %v, got %v", foreign.ID, check.ID)
+	if check.UserID != foreign.UserID {
+		t.Errorf("want: %v, got %v", foreign.UserID, check.UserID)
 	}
 
 	ranAfterSelectHook := false
-	AddUserHook(boil.AfterSelectHook, func(ctx context.Context, e boil.ContextExecutor, o *User) error {
+	AddUserDatumHook(boil.AfterSelectHook, func(ctx context.Context, e boil.ContextExecutor, o *UserDatum) error {
 		ranAfterSelectHook = true
 		return nil
 	})
@@ -555,7 +555,7 @@ func testUserOptionToOneUserUsingUser(t *testing.T) {
 	}
 }
 
-func testUserOptionToOneSetOpUserUsingUser(t *testing.T) {
+func testUserOptionToOneSetOpUserDatumUsingUser(t *testing.T) {
 	var err error
 
 	ctx := context.Background()
@@ -563,16 +563,16 @@ func testUserOptionToOneSetOpUserUsingUser(t *testing.T) {
 	defer func() { _ = tx.Rollback() }()
 
 	var a UserOption
-	var b, c User
+	var b, c UserDatum
 
 	seed := randomize.NewSeed()
 	if err = randomize.Struct(seed, &a, userOptionDBTypes, false, strmangle.SetComplement(userOptionPrimaryKeyColumns, userOptionColumnsWithoutDefault)...); err != nil {
 		t.Fatal(err)
 	}
-	if err = randomize.Struct(seed, &b, userDBTypes, false, strmangle.SetComplement(userPrimaryKeyColumns, userColumnsWithoutDefault)...); err != nil {
+	if err = randomize.Struct(seed, &b, userDatumDBTypes, false, strmangle.SetComplement(userDatumPrimaryKeyColumns, userDatumColumnsWithoutDefault)...); err != nil {
 		t.Fatal(err)
 	}
-	if err = randomize.Struct(seed, &c, userDBTypes, false, strmangle.SetComplement(userPrimaryKeyColumns, userColumnsWithoutDefault)...); err != nil {
+	if err = randomize.Struct(seed, &c, userDatumDBTypes, false, strmangle.SetComplement(userDatumPrimaryKeyColumns, userDatumColumnsWithoutDefault)...); err != nil {
 		t.Fatal(err)
 	}
 
@@ -583,7 +583,7 @@ func testUserOptionToOneSetOpUserUsingUser(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	for i, x := range []*User{&b, &c} {
+	for i, x := range []*UserDatum{&b, &c} {
 		err = a.SetUser(ctx, tx, i != 0, x)
 		if err != nil {
 			t.Fatal(err)
@@ -593,74 +593,19 @@ func testUserOptionToOneSetOpUserUsingUser(t *testing.T) {
 			t.Error("relationship struct not set to correct value")
 		}
 
-		if x.R.UserOptions[0] != &a {
+		if x.R.UserUserOption != &a {
 			t.Error("failed to append to foreign relationship struct")
 		}
-		if !queries.Equal(a.UserID, x.ID) {
+		if a.UserID != x.UserID {
 			t.Error("foreign key was wrong value", a.UserID)
 		}
 
-		zero := reflect.Zero(reflect.TypeOf(a.UserID))
-		reflect.Indirect(reflect.ValueOf(&a.UserID)).Set(zero)
-
-		if err = a.Reload(ctx, tx); err != nil {
-			t.Fatal("failed to reload", err)
+		if exists, err := UserOptionExists(ctx, tx, a.UserID); err != nil {
+			t.Fatal(err)
+		} else if !exists {
+			t.Error("want 'a' to exist")
 		}
 
-		if !queries.Equal(a.UserID, x.ID) {
-			t.Error("foreign key was wrong value", a.UserID, x.ID)
-		}
-	}
-}
-
-func testUserOptionToOneRemoveOpUserUsingUser(t *testing.T) {
-	var err error
-
-	ctx := context.Background()
-	tx := MustTx(boil.BeginTx(ctx, nil))
-	defer func() { _ = tx.Rollback() }()
-
-	var a UserOption
-	var b User
-
-	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, &a, userOptionDBTypes, false, strmangle.SetComplement(userOptionPrimaryKeyColumns, userOptionColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
-	}
-	if err = randomize.Struct(seed, &b, userDBTypes, false, strmangle.SetComplement(userPrimaryKeyColumns, userColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
-	}
-
-	if err = a.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-
-	if err = a.SetUser(ctx, tx, true, &b); err != nil {
-		t.Fatal(err)
-	}
-
-	if err = a.RemoveUser(ctx, tx, &b); err != nil {
-		t.Error("failed to remove relationship")
-	}
-
-	count, err := a.User().Count(ctx, tx)
-	if err != nil {
-		t.Error(err)
-	}
-	if count != 0 {
-		t.Error("want no relationships remaining")
-	}
-
-	if a.R.User != nil {
-		t.Error("R struct entry should be nil")
-	}
-
-	if !queries.IsValuerNil(a.UserID) {
-		t.Error("foreign key value should be nil")
-	}
-
-	if len(b.R.UserOptions) != 0 {
-		t.Error("failed to remove a from b's relationships")
 	}
 }
 
@@ -738,7 +683,7 @@ func testUserOptionsSelect(t *testing.T) {
 }
 
 var (
-	userOptionDBTypes = map[string]string{`ID`: `uuid`, `InnerNote`: `character varying`, `IsBlackCustomer`: `boolean`, `UserID`: `uuid`, `CreateAt`: `timestamp with time zone`, `UpdateAt`: `timestamp with time zone`}
+	userOptionDBTypes = map[string]string{`UserID`: `uuid`, `InnerNote`: `character varying`, `IsBlackCustomer`: `boolean`, `CreateAt`: `timestamp with time zone`, `UpdateAt`: `timestamp with time zone`}
 	_                 = bytes.MinRead
 )
 

@@ -8,9 +8,9 @@ import (
 	implements "server/infrastructure/repository"
 )
 
+var authAction = action.NewAuthClient()
 var userRepo = implements.NewUserRepository()
 var userQueryService = implements.NewUserQueryService()
-var authAction = action.NewAuthClient()
 var storeRepo = implements.NewStoreRepository()
 var storeQueryService = implements.NewStoreQueryService()
 
@@ -19,7 +19,7 @@ func InitializeUserUsecase() *usecaseUser.UserDataUsecase {
 }
 
 func InitializeAuthUsecase() *usecaseUser.AuthUsecase {
-	return usecaseUser.NewAuthUsecase(userRepo, userQueryService, &authAction)
+	return usecaseUser.NewAuthUsecase(userRepo, userQueryService, authAction)
 }
 
 func InitializeStoreUsecase() *usecaseAdmin.StoreUsecase {

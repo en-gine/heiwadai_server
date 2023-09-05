@@ -14,7 +14,6 @@ import (
 	"time"
 
 	"github.com/friendsofgo/errors"
-	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -24,40 +23,45 @@ import (
 
 // Admin is an object representing the database table.
 type Admin struct {
-	ID       string      `boil:"id" json:"id" toml:"id" yaml:"id"`
-	Name     string      `boil:"name" json:"name" toml:"name" yaml:"name"`
-	BelongTo null.String `boil:"belong_to" json:"belong_to,omitempty" toml:"belong_to" yaml:"belong_to,omitempty"`
-	CreateAt time.Time   `boil:"create_at" json:"create_at" toml:"create_at" yaml:"create_at"`
-	UpdateAt time.Time   `boil:"update_at" json:"update_at" toml:"update_at" yaml:"update_at"`
+	AdminID  string    `boil:"admin_id" json:"admin_id" toml:"admin_id" yaml:"admin_id"`
+	Name     string    `boil:"name" json:"name" toml:"name" yaml:"name"`
+	BelongTo string    `boil:"belong_to" json:"belong_to" toml:"belong_to" yaml:"belong_to"`
+	IsActive bool      `boil:"is_active" json:"is_active" toml:"is_active" yaml:"is_active"`
+	CreateAt time.Time `boil:"create_at" json:"create_at" toml:"create_at" yaml:"create_at"`
+	UpdateAt time.Time `boil:"update_at" json:"update_at" toml:"update_at" yaml:"update_at"`
 
 	R *adminR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L adminL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
 var AdminColumns = struct {
-	ID       string
+	AdminID  string
 	Name     string
 	BelongTo string
+	IsActive string
 	CreateAt string
 	UpdateAt string
 }{
-	ID:       "id",
+	AdminID:  "admin_id",
 	Name:     "name",
 	BelongTo: "belong_to",
+	IsActive: "is_active",
 	CreateAt: "create_at",
 	UpdateAt: "update_at",
 }
 
 var AdminTableColumns = struct {
-	ID       string
+	AdminID  string
 	Name     string
 	BelongTo string
+	IsActive string
 	CreateAt string
 	UpdateAt string
 }{
-	ID:       "admin.id",
+	AdminID:  "admin.admin_id",
 	Name:     "admin.name",
 	BelongTo: "admin.belong_to",
+	IsActive: "admin.is_active",
 	CreateAt: "admin.create_at",
 	UpdateAt: "admin.update_at",
 }
@@ -87,43 +91,14 @@ func (w whereHelperstring) NIN(slice []string) qm.QueryMod {
 	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
 }
 
-type whereHelpernull_String struct{ field string }
+type whereHelperbool struct{ field string }
 
-func (w whereHelpernull_String) EQ(x null.String) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, false, x)
-}
-func (w whereHelpernull_String) NEQ(x null.String) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, true, x)
-}
-func (w whereHelpernull_String) LT(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LT, x)
-}
-func (w whereHelpernull_String) LTE(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LTE, x)
-}
-func (w whereHelpernull_String) GT(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GT, x)
-}
-func (w whereHelpernull_String) GTE(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GTE, x)
-}
-func (w whereHelpernull_String) IN(slice []string) qm.QueryMod {
-	values := make([]interface{}, 0, len(slice))
-	for _, value := range slice {
-		values = append(values, value)
-	}
-	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
-}
-func (w whereHelpernull_String) NIN(slice []string) qm.QueryMod {
-	values := make([]interface{}, 0, len(slice))
-	for _, value := range slice {
-		values = append(values, value)
-	}
-	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
-}
-
-func (w whereHelpernull_String) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
-func (w whereHelpernull_String) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
+func (w whereHelperbool) EQ(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
+func (w whereHelperbool) NEQ(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
+func (w whereHelperbool) LT(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
+func (w whereHelperbool) LTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
+func (w whereHelperbool) GT(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
+func (w whereHelperbool) GTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
 
 type whereHelpertime_Time struct{ field string }
 
@@ -147,40 +122,49 @@ func (w whereHelpertime_Time) GTE(x time.Time) qm.QueryMod {
 }
 
 var AdminWhere = struct {
-	ID       whereHelperstring
+	AdminID  whereHelperstring
 	Name     whereHelperstring
-	BelongTo whereHelpernull_String
+	BelongTo whereHelperstring
+	IsActive whereHelperbool
 	CreateAt whereHelpertime_Time
 	UpdateAt whereHelpertime_Time
 }{
-	ID:       whereHelperstring{field: "\"admin\".\"id\""},
+	AdminID:  whereHelperstring{field: "\"admin\".\"admin_id\""},
 	Name:     whereHelperstring{field: "\"admin\".\"name\""},
-	BelongTo: whereHelpernull_String{field: "\"admin\".\"belong_to\""},
+	BelongTo: whereHelperstring{field: "\"admin\".\"belong_to\""},
+	IsActive: whereHelperbool{field: "\"admin\".\"is_active\""},
 	CreateAt: whereHelpertime_Time{field: "\"admin\".\"create_at\""},
 	UpdateAt: whereHelpertime_Time{field: "\"admin\".\"update_at\""},
 }
 
 // AdminRels is where relationship names are stored.
 var AdminRels = struct {
+	Admin               string
 	BelongToStore       string
 	AuthorMailMagazines string
-	AuthorPosts         string
 }{
+	Admin:               "Admin",
 	BelongToStore:       "BelongToStore",
 	AuthorMailMagazines: "AuthorMailMagazines",
-	AuthorPosts:         "AuthorPosts",
 }
 
 // adminR is where relationships are stored.
 type adminR struct {
+	Admin               *UserManager      `boil:"Admin" json:"Admin" toml:"Admin" yaml:"Admin"`
 	BelongToStore       *Store            `boil:"BelongToStore" json:"BelongToStore" toml:"BelongToStore" yaml:"BelongToStore"`
 	AuthorMailMagazines MailMagazineSlice `boil:"AuthorMailMagazines" json:"AuthorMailMagazines" toml:"AuthorMailMagazines" yaml:"AuthorMailMagazines"`
-	AuthorPosts         PostSlice         `boil:"AuthorPosts" json:"AuthorPosts" toml:"AuthorPosts" yaml:"AuthorPosts"`
 }
 
 // NewStruct creates a new relationship struct
 func (*adminR) NewStruct() *adminR {
 	return &adminR{}
+}
+
+func (r *adminR) GetAdmin() *UserManager {
+	if r == nil {
+		return nil
+	}
+	return r.Admin
 }
 
 func (r *adminR) GetBelongToStore() *Store {
@@ -197,21 +181,14 @@ func (r *adminR) GetAuthorMailMagazines() MailMagazineSlice {
 	return r.AuthorMailMagazines
 }
 
-func (r *adminR) GetAuthorPosts() PostSlice {
-	if r == nil {
-		return nil
-	}
-	return r.AuthorPosts
-}
-
 // adminL is where Load methods for each relationship are stored.
 type adminL struct{}
 
 var (
-	adminAllColumns            = []string{"id", "name", "belong_to", "create_at", "update_at"}
-	adminColumnsWithoutDefault = []string{"id", "name"}
-	adminColumnsWithDefault    = []string{"belong_to", "create_at", "update_at"}
-	adminPrimaryKeyColumns     = []string{"id"}
+	adminAllColumns            = []string{"admin_id", "name", "belong_to", "is_active", "create_at", "update_at"}
+	adminColumnsWithoutDefault = []string{"admin_id", "name", "belong_to"}
+	adminColumnsWithDefault    = []string{"is_active", "create_at", "update_at"}
+	adminPrimaryKeyColumns     = []string{"admin_id"}
 	adminGeneratedColumns      = []string{}
 )
 
@@ -493,6 +470,17 @@ func (q adminQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bool
 	return count > 0, nil
 }
 
+// Admin pointed to by the foreign key.
+func (o *Admin) Admin(mods ...qm.QueryMod) userManagerQuery {
+	queryMods := []qm.QueryMod{
+		qm.Where("\"id\" = ?", o.AdminID),
+	}
+
+	queryMods = append(queryMods, mods...)
+
+	return UserManagers(queryMods...)
+}
+
 // BelongToStore pointed to by the foreign key.
 func (o *Admin) BelongToStore(mods ...qm.QueryMod) storeQuery {
 	queryMods := []qm.QueryMod{
@@ -512,24 +500,130 @@ func (o *Admin) AuthorMailMagazines(mods ...qm.QueryMod) mailMagazineQuery {
 	}
 
 	queryMods = append(queryMods,
-		qm.Where("\"mail_magazine\".\"author\"=?", o.ID),
+		qm.Where("\"mail_magazine\".\"author\"=?", o.AdminID),
 	)
 
 	return MailMagazines(queryMods...)
 }
 
-// AuthorPosts retrieves all the post's Posts with an executor via author column.
-func (o *Admin) AuthorPosts(mods ...qm.QueryMod) postQuery {
-	var queryMods []qm.QueryMod
-	if len(mods) != 0 {
-		queryMods = append(queryMods, mods...)
+// LoadAdmin allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for an N-1 relationship.
+func (adminL) LoadAdmin(ctx context.Context, e boil.ContextExecutor, singular bool, maybeAdmin interface{}, mods queries.Applicator) error {
+	var slice []*Admin
+	var object *Admin
+
+	if singular {
+		var ok bool
+		object, ok = maybeAdmin.(*Admin)
+		if !ok {
+			object = new(Admin)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeAdmin)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeAdmin))
+			}
+		}
+	} else {
+		s, ok := maybeAdmin.(*[]*Admin)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeAdmin)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeAdmin))
+			}
+		}
 	}
 
-	queryMods = append(queryMods,
-		qm.Where("\"post\".\"author\"=?", o.ID),
-	)
+	args := make([]interface{}, 0, 1)
+	if singular {
+		if object.R == nil {
+			object.R = &adminR{}
+		}
+		args = append(args, object.AdminID)
 
-	return Posts(queryMods...)
+	} else {
+	Outer:
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &adminR{}
+			}
+
+			for _, a := range args {
+				if a == obj.AdminID {
+					continue Outer
+				}
+			}
+
+			args = append(args, obj.AdminID)
+
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	query := NewQuery(
+		qm.From(`user_manager`),
+		qm.WhereIn(`user_manager.id in ?`, args...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load UserManager")
+	}
+
+	var resultSlice []*UserManager
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice UserManager")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results of eager load for user_manager")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for user_manager")
+	}
+
+	if len(userManagerAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+
+	if len(resultSlice) == 0 {
+		return nil
+	}
+
+	if singular {
+		foreign := resultSlice[0]
+		object.R.Admin = foreign
+		if foreign.R == nil {
+			foreign.R = &userManagerR{}
+		}
+		foreign.R.AdminAdmin = object
+		return nil
+	}
+
+	for _, local := range slice {
+		for _, foreign := range resultSlice {
+			if local.AdminID == foreign.ID {
+				local.R.Admin = foreign
+				if foreign.R == nil {
+					foreign.R = &userManagerR{}
+				}
+				foreign.R.AdminAdmin = local
+				break
+			}
+		}
+	}
+
+	return nil
 }
 
 // LoadBelongToStore allows an eager lookup of values, cached into the
@@ -565,9 +659,7 @@ func (adminL) LoadBelongToStore(ctx context.Context, e boil.ContextExecutor, sin
 		if object.R == nil {
 			object.R = &adminR{}
 		}
-		if !queries.IsNil(object.BelongTo) {
-			args = append(args, object.BelongTo)
-		}
+		args = append(args, object.BelongTo)
 
 	} else {
 	Outer:
@@ -577,14 +669,12 @@ func (adminL) LoadBelongToStore(ctx context.Context, e boil.ContextExecutor, sin
 			}
 
 			for _, a := range args {
-				if queries.Equal(a, obj.BelongTo) {
+				if a == obj.BelongTo {
 					continue Outer
 				}
 			}
 
-			if !queries.IsNil(obj.BelongTo) {
-				args = append(args, obj.BelongTo)
-			}
+			args = append(args, obj.BelongTo)
 
 		}
 	}
@@ -642,7 +732,7 @@ func (adminL) LoadBelongToStore(ctx context.Context, e boil.ContextExecutor, sin
 
 	for _, local := range slice {
 		for _, foreign := range resultSlice {
-			if queries.Equal(local.BelongTo, foreign.ID) {
+			if local.BelongTo == foreign.ID {
 				local.R.BelongToStore = foreign
 				if foreign.R == nil {
 					foreign.R = &storeR{}
@@ -689,7 +779,7 @@ func (adminL) LoadAuthorMailMagazines(ctx context.Context, e boil.ContextExecuto
 		if object.R == nil {
 			object.R = &adminR{}
 		}
-		args = append(args, object.ID)
+		args = append(args, object.AdminID)
 	} else {
 	Outer:
 		for _, obj := range slice {
@@ -698,12 +788,12 @@ func (adminL) LoadAuthorMailMagazines(ctx context.Context, e boil.ContextExecuto
 			}
 
 			for _, a := range args {
-				if queries.Equal(a, obj.ID) {
+				if queries.Equal(a, obj.AdminID) {
 					continue Outer
 				}
 			}
 
-			args = append(args, obj.ID)
+			args = append(args, obj.AdminID)
 		}
 	}
 
@@ -756,7 +846,7 @@ func (adminL) LoadAuthorMailMagazines(ctx context.Context, e boil.ContextExecuto
 
 	for _, foreign := range resultSlice {
 		for _, local := range slice {
-			if queries.Equal(local.ID, foreign.Author) {
+			if queries.Equal(local.AdminID, foreign.Author) {
 				local.R.AuthorMailMagazines = append(local.R.AuthorMailMagazines, foreign)
 				if foreign.R == nil {
 					foreign.R = &mailMagazineR{}
@@ -770,115 +860,48 @@ func (adminL) LoadAuthorMailMagazines(ctx context.Context, e boil.ContextExecuto
 	return nil
 }
 
-// LoadAuthorPosts allows an eager lookup of values, cached into the
-// loaded structs of the objects. This is for a 1-M or N-M relationship.
-func (adminL) LoadAuthorPosts(ctx context.Context, e boil.ContextExecutor, singular bool, maybeAdmin interface{}, mods queries.Applicator) error {
-	var slice []*Admin
-	var object *Admin
-
-	if singular {
-		var ok bool
-		object, ok = maybeAdmin.(*Admin)
-		if !ok {
-			object = new(Admin)
-			ok = queries.SetFromEmbeddedStruct(&object, &maybeAdmin)
-			if !ok {
-				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeAdmin))
-			}
-		}
-	} else {
-		s, ok := maybeAdmin.(*[]*Admin)
-		if ok {
-			slice = *s
-		} else {
-			ok = queries.SetFromEmbeddedStruct(&slice, maybeAdmin)
-			if !ok {
-				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeAdmin))
-			}
+// SetAdmin of the admin to the related item.
+// Sets o.R.Admin to related.
+// Adds o to related.R.AdminAdmin.
+func (o *Admin) SetAdmin(ctx context.Context, exec boil.ContextExecutor, insert bool, related *UserManager) error {
+	var err error
+	if insert {
+		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
+			return errors.Wrap(err, "failed to insert into foreign table")
 		}
 	}
 
-	args := make([]interface{}, 0, 1)
-	if singular {
-		if object.R == nil {
-			object.R = &adminR{}
-		}
-		args = append(args, object.ID)
-	} else {
-	Outer:
-		for _, obj := range slice {
-			if obj.R == nil {
-				obj.R = &adminR{}
-			}
-
-			for _, a := range args {
-				if queries.Equal(a, obj.ID) {
-					continue Outer
-				}
-			}
-
-			args = append(args, obj.ID)
-		}
-	}
-
-	if len(args) == 0 {
-		return nil
-	}
-
-	query := NewQuery(
-		qm.From(`post`),
-		qm.WhereIn(`post.author in ?`, args...),
+	updateQuery := fmt.Sprintf(
+		"UPDATE \"admin\" SET %s WHERE %s",
+		strmangle.SetParamNames("\"", "\"", 1, []string{"admin_id"}),
+		strmangle.WhereClause("\"", "\"", 2, adminPrimaryKeyColumns),
 	)
-	if mods != nil {
-		mods.Apply(query)
+	values := []interface{}{related.ID, o.AdminID}
+
+	if boil.IsDebug(ctx) {
+		writer := boil.DebugWriterFrom(ctx)
+		fmt.Fprintln(writer, updateQuery)
+		fmt.Fprintln(writer, values)
+	}
+	if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+		return errors.Wrap(err, "failed to update local table")
 	}
 
-	results, err := query.QueryContext(ctx, e)
-	if err != nil {
-		return errors.Wrap(err, "failed to eager load post")
-	}
-
-	var resultSlice []*Post
-	if err = queries.Bind(results, &resultSlice); err != nil {
-		return errors.Wrap(err, "failed to bind eager loaded slice post")
-	}
-
-	if err = results.Close(); err != nil {
-		return errors.Wrap(err, "failed to close results in eager load on post")
-	}
-	if err = results.Err(); err != nil {
-		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for post")
-	}
-
-	if len(postAfterSelectHooks) != 0 {
-		for _, obj := range resultSlice {
-			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
-				return err
-			}
+	o.AdminID = related.ID
+	if o.R == nil {
+		o.R = &adminR{
+			Admin: related,
 		}
-	}
-	if singular {
-		object.R.AuthorPosts = resultSlice
-		for _, foreign := range resultSlice {
-			if foreign.R == nil {
-				foreign.R = &postR{}
-			}
-			foreign.R.AuthorAdmin = object
-		}
-		return nil
+	} else {
+		o.R.Admin = related
 	}
 
-	for _, foreign := range resultSlice {
-		for _, local := range slice {
-			if queries.Equal(local.ID, foreign.Author) {
-				local.R.AuthorPosts = append(local.R.AuthorPosts, foreign)
-				if foreign.R == nil {
-					foreign.R = &postR{}
-				}
-				foreign.R.AuthorAdmin = local
-				break
-			}
+	if related.R == nil {
+		related.R = &userManagerR{
+			AdminAdmin: o,
 		}
+	} else {
+		related.R.AdminAdmin = o
 	}
 
 	return nil
@@ -900,7 +923,7 @@ func (o *Admin) SetBelongToStore(ctx context.Context, exec boil.ContextExecutor,
 		strmangle.SetParamNames("\"", "\"", 1, []string{"belong_to"}),
 		strmangle.WhereClause("\"", "\"", 2, adminPrimaryKeyColumns),
 	)
-	values := []interface{}{related.ID, o.ID}
+	values := []interface{}{related.ID, o.AdminID}
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -911,7 +934,7 @@ func (o *Admin) SetBelongToStore(ctx context.Context, exec boil.ContextExecutor,
 		return errors.Wrap(err, "failed to update local table")
 	}
 
-	queries.Assign(&o.BelongTo, related.ID)
+	o.BelongTo = related.ID
 	if o.R == nil {
 		o.R = &adminR{
 			BelongToStore: related,
@@ -931,39 +954,6 @@ func (o *Admin) SetBelongToStore(ctx context.Context, exec boil.ContextExecutor,
 	return nil
 }
 
-// RemoveBelongToStore relationship.
-// Sets o.R.BelongToStore to nil.
-// Removes o from all passed in related items' relationships struct.
-func (o *Admin) RemoveBelongToStore(ctx context.Context, exec boil.ContextExecutor, related *Store) error {
-	var err error
-
-	queries.SetScanner(&o.BelongTo, nil)
-	if _, err = o.Update(ctx, exec, boil.Whitelist("belong_to")); err != nil {
-		return errors.Wrap(err, "failed to update local table")
-	}
-
-	if o.R != nil {
-		o.R.BelongToStore = nil
-	}
-	if related == nil || related.R == nil {
-		return nil
-	}
-
-	for i, ri := range related.R.BelongToAdmins {
-		if queries.Equal(o.BelongTo, ri.BelongTo) {
-			continue
-		}
-
-		ln := len(related.R.BelongToAdmins)
-		if ln > 1 && i < ln-1 {
-			related.R.BelongToAdmins[i] = related.R.BelongToAdmins[ln-1]
-		}
-		related.R.BelongToAdmins = related.R.BelongToAdmins[:ln-1]
-		break
-	}
-	return nil
-}
-
 // AddAuthorMailMagazines adds the given related objects to the existing relationships
 // of the admin, optionally inserting them as new records.
 // Appends related to o.R.AuthorMailMagazines.
@@ -972,7 +962,7 @@ func (o *Admin) AddAuthorMailMagazines(ctx context.Context, exec boil.ContextExe
 	var err error
 	for _, rel := range related {
 		if insert {
-			queries.Assign(&rel.Author, o.ID)
+			queries.Assign(&rel.Author, o.AdminID)
 			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
 				return errors.Wrap(err, "failed to insert into foreign table")
 			}
@@ -982,7 +972,7 @@ func (o *Admin) AddAuthorMailMagazines(ctx context.Context, exec boil.ContextExe
 				strmangle.SetParamNames("\"", "\"", 1, []string{"author"}),
 				strmangle.WhereClause("\"", "\"", 2, mailMagazinePrimaryKeyColumns),
 			)
-			values := []interface{}{o.ID, rel.ID}
+			values := []interface{}{o.AdminID, rel.ID}
 
 			if boil.IsDebug(ctx) {
 				writer := boil.DebugWriterFrom(ctx)
@@ -993,7 +983,7 @@ func (o *Admin) AddAuthorMailMagazines(ctx context.Context, exec boil.ContextExe
 				return errors.Wrap(err, "failed to update foreign table")
 			}
 
-			queries.Assign(&rel.Author, o.ID)
+			queries.Assign(&rel.Author, o.AdminID)
 		}
 	}
 
@@ -1025,7 +1015,7 @@ func (o *Admin) AddAuthorMailMagazines(ctx context.Context, exec boil.ContextExe
 // Sets related.R.AuthorAdmin's AuthorMailMagazines accordingly.
 func (o *Admin) SetAuthorMailMagazines(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*MailMagazine) error {
 	query := "update \"mail_magazine\" set \"author\" = null where \"author\" = $1"
-	values := []interface{}{o.ID}
+	values := []interface{}{o.AdminID}
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
 		fmt.Fprintln(writer, query)
@@ -1091,133 +1081,6 @@ func (o *Admin) RemoveAuthorMailMagazines(ctx context.Context, exec boil.Context
 	return nil
 }
 
-// AddAuthorPosts adds the given related objects to the existing relationships
-// of the admin, optionally inserting them as new records.
-// Appends related to o.R.AuthorPosts.
-// Sets related.R.AuthorAdmin appropriately.
-func (o *Admin) AddAuthorPosts(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Post) error {
-	var err error
-	for _, rel := range related {
-		if insert {
-			queries.Assign(&rel.Author, o.ID)
-			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
-				return errors.Wrap(err, "failed to insert into foreign table")
-			}
-		} else {
-			updateQuery := fmt.Sprintf(
-				"UPDATE \"post\" SET %s WHERE %s",
-				strmangle.SetParamNames("\"", "\"", 1, []string{"author"}),
-				strmangle.WhereClause("\"", "\"", 2, postPrimaryKeyColumns),
-			)
-			values := []interface{}{o.ID, rel.ID}
-
-			if boil.IsDebug(ctx) {
-				writer := boil.DebugWriterFrom(ctx)
-				fmt.Fprintln(writer, updateQuery)
-				fmt.Fprintln(writer, values)
-			}
-			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
-				return errors.Wrap(err, "failed to update foreign table")
-			}
-
-			queries.Assign(&rel.Author, o.ID)
-		}
-	}
-
-	if o.R == nil {
-		o.R = &adminR{
-			AuthorPosts: related,
-		}
-	} else {
-		o.R.AuthorPosts = append(o.R.AuthorPosts, related...)
-	}
-
-	for _, rel := range related {
-		if rel.R == nil {
-			rel.R = &postR{
-				AuthorAdmin: o,
-			}
-		} else {
-			rel.R.AuthorAdmin = o
-		}
-	}
-	return nil
-}
-
-// SetAuthorPosts removes all previously related items of the
-// admin replacing them completely with the passed
-// in related items, optionally inserting them as new records.
-// Sets o.R.AuthorAdmin's AuthorPosts accordingly.
-// Replaces o.R.AuthorPosts with related.
-// Sets related.R.AuthorAdmin's AuthorPosts accordingly.
-func (o *Admin) SetAuthorPosts(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Post) error {
-	query := "update \"post\" set \"author\" = null where \"author\" = $1"
-	values := []interface{}{o.ID}
-	if boil.IsDebug(ctx) {
-		writer := boil.DebugWriterFrom(ctx)
-		fmt.Fprintln(writer, query)
-		fmt.Fprintln(writer, values)
-	}
-	_, err := exec.ExecContext(ctx, query, values...)
-	if err != nil {
-		return errors.Wrap(err, "failed to remove relationships before set")
-	}
-
-	if o.R != nil {
-		for _, rel := range o.R.AuthorPosts {
-			queries.SetScanner(&rel.Author, nil)
-			if rel.R == nil {
-				continue
-			}
-
-			rel.R.AuthorAdmin = nil
-		}
-		o.R.AuthorPosts = nil
-	}
-
-	return o.AddAuthorPosts(ctx, exec, insert, related...)
-}
-
-// RemoveAuthorPosts relationships from objects passed in.
-// Removes related items from R.AuthorPosts (uses pointer comparison, removal does not keep order)
-// Sets related.R.AuthorAdmin.
-func (o *Admin) RemoveAuthorPosts(ctx context.Context, exec boil.ContextExecutor, related ...*Post) error {
-	if len(related) == 0 {
-		return nil
-	}
-
-	var err error
-	for _, rel := range related {
-		queries.SetScanner(&rel.Author, nil)
-		if rel.R != nil {
-			rel.R.AuthorAdmin = nil
-		}
-		if _, err = rel.Update(ctx, exec, boil.Whitelist("author")); err != nil {
-			return err
-		}
-	}
-	if o.R == nil {
-		return nil
-	}
-
-	for _, rel := range related {
-		for i, ri := range o.R.AuthorPosts {
-			if rel != ri {
-				continue
-			}
-
-			ln := len(o.R.AuthorPosts)
-			if ln > 1 && i < ln-1 {
-				o.R.AuthorPosts[i] = o.R.AuthorPosts[ln-1]
-			}
-			o.R.AuthorPosts = o.R.AuthorPosts[:ln-1]
-			break
-		}
-	}
-
-	return nil
-}
-
 // Admins retrieves all the records using an executor.
 func Admins(mods ...qm.QueryMod) adminQuery {
 	mods = append(mods, qm.From("\"admin\""))
@@ -1231,7 +1094,7 @@ func Admins(mods ...qm.QueryMod) adminQuery {
 
 // FindAdmin retrieves a single record by ID with an executor.
 // If selectCols is empty Find will return all columns.
-func FindAdmin(ctx context.Context, exec boil.ContextExecutor, iD string, selectCols ...string) (*Admin, error) {
+func FindAdmin(ctx context.Context, exec boil.ContextExecutor, adminID string, selectCols ...string) (*Admin, error) {
 	adminObj := &Admin{}
 
 	sel := "*"
@@ -1239,10 +1102,10 @@ func FindAdmin(ctx context.Context, exec boil.ContextExecutor, iD string, select
 		sel = strings.Join(strmangle.IdentQuoteSlice(dialect.LQ, dialect.RQ, selectCols), ",")
 	}
 	query := fmt.Sprintf(
-		"select %s from \"admin\" where \"id\"=$1", sel,
+		"select %s from \"admin\" where \"admin_id\"=$1", sel,
 	)
 
-	q := queries.Raw(query, iD)
+	q := queries.Raw(query, adminID)
 
 	err := q.Bind(ctx, exec, adminObj)
 	if err != nil {
@@ -1618,7 +1481,7 @@ func (o *Admin) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, e
 	}
 
 	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), adminPrimaryKeyMapping)
-	sql := "DELETE FROM \"admin\" WHERE \"id\"=$1"
+	sql := "DELETE FROM \"admin\" WHERE \"admin_id\"=$1"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -1715,7 +1578,7 @@ func (o AdminSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (i
 // Reload refetches the object from the database
 // using the primary keys with an executor.
 func (o *Admin) Reload(ctx context.Context, exec boil.ContextExecutor) error {
-	ret, err := FindAdmin(ctx, exec, o.ID)
+	ret, err := FindAdmin(ctx, exec, o.AdminID)
 	if err != nil {
 		return err
 	}
@@ -1754,16 +1617,16 @@ func (o *AdminSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) e
 }
 
 // AdminExists checks if the Admin row exists.
-func AdminExists(ctx context.Context, exec boil.ContextExecutor, iD string) (bool, error) {
+func AdminExists(ctx context.Context, exec boil.ContextExecutor, adminID string) (bool, error) {
 	var exists bool
-	sql := "select exists(select 1 from \"admin\" where \"id\"=$1 limit 1)"
+	sql := "select exists(select 1 from \"admin\" where \"admin_id\"=$1 limit 1)"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
 		fmt.Fprintln(writer, sql)
-		fmt.Fprintln(writer, iD)
+		fmt.Fprintln(writer, adminID)
 	}
-	row := exec.QueryRowContext(ctx, sql, iD)
+	row := exec.QueryRowContext(ctx, sql, adminID)
 
 	err := row.Scan(&exists)
 	if err != nil {
@@ -1775,5 +1638,5 @@ func AdminExists(ctx context.Context, exec boil.ContextExecutor, iD string) (boo
 
 // Exists checks if the Admin row exists.
 func (o *Admin) Exists(ctx context.Context, exec boil.ContextExecutor) (bool, error) {
-	return AdminExists(ctx, exec, o.ID)
+	return AdminExists(ctx, exec, o.AdminID)
 }

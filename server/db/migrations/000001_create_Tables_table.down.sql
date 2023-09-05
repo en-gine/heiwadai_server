@@ -17,13 +17,17 @@ DROP TABLE IF EXISTS post;
 
 DROP TABLE IF EXISTS mail_magazine;
 
+DROP TABLE IF EXISTS admin_login_log;
+
 DROP TABLE IF EXISTS admin;
 
 DROP TABLE IF EXISTS stayable_store_info;
 
 DROP TABLE IF EXISTS store;
 
-DROP TABLE IF EXISTS "user";
+DROP TABLE IF EXISTS user_data;
+
+DROP TABLE IF EXISTS user_manager;
 
 DROP trigger if exists on_auth_user_created on auth.users;
 

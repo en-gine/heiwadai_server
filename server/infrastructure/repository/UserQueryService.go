@@ -27,15 +27,15 @@ func NewUserQueryService() *UserQueryService {
 }
 
 func (pq *UserQueryService) GetByID(id uuid.UUID) (*entity.User, error) {
-	user, err := models.FindUser(context.Background(), pq.db, id.String())
+	user, err := models.FindUserDatum(context.Background(), pq.db, id.String())
 	if err != nil {
 		return nil, err
 	}
 
-	return UserModelToEntity(user), nil
+	return UserModelToEntity(user, user.R.User.Email), nil
 }
 func (pq *UserQueryService) GetByMail(mail string) (*entity.User, error) {
-	user, err := models.Users(models.UserWhere.Mail.EQ(mail)).One(context.Background(), pq.db)
+	usermanager, err := models.UserManagers(models.UserManagerWhere.Email.EQ(mail)).One(context.Background(), pq.db)
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}
@@ -44,7 +44,7 @@ func (pq *UserQueryService) GetByMail(mail string) (*entity.User, error) {
 		return nil, err
 	}
 
-	return UserModelToEntity(user), nil
+	return UserModelToEntity(usermanager.R.UserUserDatum, usermanager.Email), nil
 }
 
 func (pq *UserQueryService) GetUserByPrefecture(prefectures []*entity.Prefecture) ([]*entity.User, error) {
@@ -53,13 +53,13 @@ func (pq *UserQueryService) GetUserByPrefecture(prefectures []*entity.Prefecture
 		preIds = append(preIds, prefecture.ToInt())
 	}
 
-	users, err := models.Users(models.UserWhere.Prefecture.IN(preIds)).All(context.Background(), pq.db)
+	users, err := models.UserData(models.UserDatumWhere.Prefecture.IN(preIds)).All(context.Background(), pq.db)
 	if err != nil {
 		return nil, err
 	}
 	var entities []*entity.User
-	for _, u := range users {
-		entity := UserModelToEntity(u)
+	for _, user := range users {
+		entity := UserModelToEntity(user, user.R.User.Email)
 		entities = append(entities, entity)
 	}
 	return entities, nil
@@ -67,21 +67,20 @@ func (pq *UserQueryService) GetUserByPrefecture(prefectures []*entity.Prefecture
 }
 
 func (pq *UserQueryService) GetAll(pager *types.PageQuery) ([]*entity.User, error) {
-	users, err := models.Users(qm.Limit(pager.Offset()), qm.Offset(pager.Offset())).All(context.Background(), pq.db)
+	userManagers, err := models.UserManagers(models.UserManagerWhere.IsAdmin.EQ(false), qm.Limit(pager.Offset()), qm.Offset(pager.Offset())).All(context.Background(), pq.db)
 	if err != nil {
 		return nil, err
 	}
 	var result []*entity.User
-	for _, user := range users {
-		result = append(result, UserModelToEntity(user))
+	for _, user := range userManagers {
+		result = append(result, UserModelToEntity(user.R.UserUserDatum, user.Email))
 	}
 	return result, nil
-
 }
 
-func UserModelToEntity(model *models.User) *entity.User {
+func UserModelToEntity(model *models.UserDatum, email string) *entity.User {
 	return entity.RegenUser(
-		uuid.MustParse(model.ID),
+		uuid.MustParse(model.UserID),
 		model.FirstName,
 		model.LastName,
 		model.FirstNameKana,
@@ -93,7 +92,7 @@ func UserModelToEntity(model *models.User) *entity.User {
 		model.City.Ptr(),
 		model.Address.Ptr(),
 		model.Tel.Ptr(),
-		model.Mail,
+		email,
 		model.AcceptMail,
 	)
 }

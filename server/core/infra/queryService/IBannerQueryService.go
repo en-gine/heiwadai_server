@@ -5,6 +5,5 @@ import (
 )
 
 type IBannerQueryService interface {
-	GetByID(id int) (*entity.Banner, error)
-	GetAll() ([]*entity.Banner, error) //statusは不問
+	GetAll() ([]*entity.Banner, error)
 }

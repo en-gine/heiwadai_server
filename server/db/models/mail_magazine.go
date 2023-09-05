@@ -460,7 +460,7 @@ func (q mailMagazineQuery) Exists(ctx context.Context, exec boil.ContextExecutor
 // AuthorAdmin pointed to by the foreign key.
 func (o *MailMagazine) AuthorAdmin(mods ...qm.QueryMod) adminQuery {
 	queryMods := []qm.QueryMod{
-		qm.Where("\"id\" = ?", o.Author),
+		qm.Where("\"admin_id\" = ?", o.Author),
 	}
 
 	queryMods = append(queryMods, mods...)
@@ -531,7 +531,7 @@ func (mailMagazineL) LoadAuthorAdmin(ctx context.Context, e boil.ContextExecutor
 
 	query := NewQuery(
 		qm.From(`admin`),
-		qm.WhereIn(`admin.id in ?`, args...),
+		qm.WhereIn(`admin.admin_id in ?`, args...),
 	)
 	if mods != nil {
 		mods.Apply(query)
@@ -578,7 +578,7 @@ func (mailMagazineL) LoadAuthorAdmin(ctx context.Context, e boil.ContextExecutor
 
 	for _, local := range slice {
 		for _, foreign := range resultSlice {
-			if queries.Equal(local.Author, foreign.ID) {
+			if queries.Equal(local.Author, foreign.AdminID) {
 				local.R.AuthorAdmin = foreign
 				if foreign.R == nil {
 					foreign.R = &adminR{}
@@ -608,7 +608,7 @@ func (o *MailMagazine) SetAuthorAdmin(ctx context.Context, exec boil.ContextExec
 		strmangle.SetParamNames("\"", "\"", 1, []string{"author"}),
 		strmangle.WhereClause("\"", "\"", 2, mailMagazinePrimaryKeyColumns),
 	)
-	values := []interface{}{related.ID, o.ID}
+	values := []interface{}{related.AdminID, o.ID}
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -619,7 +619,7 @@ func (o *MailMagazine) SetAuthorAdmin(ctx context.Context, exec boil.ContextExec
 		return errors.Wrap(err, "failed to update local table")
 	}
 
-	queries.Assign(&o.Author, related.ID)
+	queries.Assign(&o.Author, related.AdminID)
 	if o.R == nil {
 		o.R = &mailMagazineR{
 			AuthorAdmin: related,

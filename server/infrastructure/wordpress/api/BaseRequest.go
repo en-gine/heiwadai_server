@@ -10,7 +10,7 @@ import (
 
 var rdb, _ = redis.NewMemoryRepository()
 
-func FetchJsonData[T any](APIURL string) (*T, error) {
+func FetchJSONData[T any](APIURL string) (*T, error) {
 	res, err := http.Get(APIURL)
 	if err != nil {
 		return nil, err
@@ -46,7 +46,7 @@ func Request[T any](APIURL string, cacheKey string, cacheExpire time.Duration) (
 		}
 		return data, nil
 	} else {
-		data, err = FetchJsonData[T](APIURL)
+		data, err = FetchJSONData[T](APIURL)
 		if err != nil {
 			return nil, err
 		}

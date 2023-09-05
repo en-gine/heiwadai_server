@@ -6,8 +6,19 @@ import (
 	"github.com/google/uuid"
 )
 
+type UserType string
+
+const (
+	UserTypeAdmin UserType = "admin"
+	UserTypeUser  UserType = "user"
+)
+
+func (ut UserType) String() string {
+	return string(ut)
+}
+
 type IAuthAction interface {
-	SignUp(email string, password string) error
+	SignUp(email string, password string, userType UserType) error
 	SignIn(email string, password string) (*types.Token, error)
 	ResetPasswordMail(email string) error
 	UpdatePassword(password string, token string) error

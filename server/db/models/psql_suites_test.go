@@ -8,8 +8,6 @@ import "testing"
 func TestUpsert(t *testing.T) {
 	t.Run("Admins", testAdminsUpsert)
 
-	t.Run("Banners", testBannersUpsert)
-
 	t.Run("Checkins", testCheckinsUpsert)
 
 	t.Run("Coupons", testCouponsUpsert)
@@ -22,15 +20,15 @@ func TestUpsert(t *testing.T) {
 
 	t.Run("MailMagazines", testMailMagazinesUpsert)
 
-	t.Run("Posts", testPostsUpsert)
-
 	t.Run("SchemaMigrations", testSchemaMigrationsUpsert)
 
 	t.Run("StayableStoreInfos", testStayableStoreInfosUpsert)
 
 	t.Run("Stores", testStoresUpsert)
 
-	t.Run("Users", testUsersUpsert)
+	t.Run("UserData", testUserDataUpsert)
+
+	t.Run("UserManagers", testUserManagersUpsert)
 
 	t.Run("UserOptions", testUserOptionsUpsert)
 }

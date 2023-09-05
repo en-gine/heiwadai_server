@@ -555,27 +555,27 @@ func testCheckinToOneStoreUsingStore(t *testing.T) {
 	}
 }
 
-func testCheckinToOneUserUsingUser(t *testing.T) {
+func testCheckinToOneUserDatumUsingUser(t *testing.T) {
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
 
 	var local Checkin
-	var foreign User
+	var foreign UserDatum
 
 	seed := randomize.NewSeed()
 	if err := randomize.Struct(seed, &local, checkinDBTypes, true, checkinColumnsWithDefault...); err != nil {
 		t.Errorf("Unable to randomize Checkin struct: %s", err)
 	}
-	if err := randomize.Struct(seed, &foreign, userDBTypes, false, userColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize User struct: %s", err)
+	if err := randomize.Struct(seed, &foreign, userDatumDBTypes, false, userDatumColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize UserDatum struct: %s", err)
 	}
 
 	if err := foreign.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Fatal(err)
 	}
 
-	queries.Assign(&local.UserID, foreign.ID)
+	queries.Assign(&local.UserID, foreign.UserID)
 	if err := local.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Fatal(err)
 	}
@@ -585,12 +585,12 @@ func testCheckinToOneUserUsingUser(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if !queries.Equal(check.ID, foreign.ID) {
-		t.Errorf("want: %v, got %v", foreign.ID, check.ID)
+	if !queries.Equal(check.UserID, foreign.UserID) {
+		t.Errorf("want: %v, got %v", foreign.UserID, check.UserID)
 	}
 
 	ranAfterSelectHook := false
-	AddUserHook(boil.AfterSelectHook, func(ctx context.Context, e boil.ContextExecutor, o *User) error {
+	AddUserDatumHook(boil.AfterSelectHook, func(ctx context.Context, e boil.ContextExecutor, o *UserDatum) error {
 		ranAfterSelectHook = true
 		return nil
 	})
@@ -725,7 +725,7 @@ func testCheckinToOneRemoveOpStoreUsingStore(t *testing.T) {
 	}
 }
 
-func testCheckinToOneSetOpUserUsingUser(t *testing.T) {
+func testCheckinToOneSetOpUserDatumUsingUser(t *testing.T) {
 	var err error
 
 	ctx := context.Background()
@@ -733,16 +733,16 @@ func testCheckinToOneSetOpUserUsingUser(t *testing.T) {
 	defer func() { _ = tx.Rollback() }()
 
 	var a Checkin
-	var b, c User
+	var b, c UserDatum
 
 	seed := randomize.NewSeed()
 	if err = randomize.Struct(seed, &a, checkinDBTypes, false, strmangle.SetComplement(checkinPrimaryKeyColumns, checkinColumnsWithoutDefault)...); err != nil {
 		t.Fatal(err)
 	}
-	if err = randomize.Struct(seed, &b, userDBTypes, false, strmangle.SetComplement(userPrimaryKeyColumns, userColumnsWithoutDefault)...); err != nil {
+	if err = randomize.Struct(seed, &b, userDatumDBTypes, false, strmangle.SetComplement(userDatumPrimaryKeyColumns, userDatumColumnsWithoutDefault)...); err != nil {
 		t.Fatal(err)
 	}
-	if err = randomize.Struct(seed, &c, userDBTypes, false, strmangle.SetComplement(userPrimaryKeyColumns, userColumnsWithoutDefault)...); err != nil {
+	if err = randomize.Struct(seed, &c, userDatumDBTypes, false, strmangle.SetComplement(userDatumPrimaryKeyColumns, userDatumColumnsWithoutDefault)...); err != nil {
 		t.Fatal(err)
 	}
 
@@ -753,7 +753,7 @@ func testCheckinToOneSetOpUserUsingUser(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	for i, x := range []*User{&b, &c} {
+	for i, x := range []*UserDatum{&b, &c} {
 		err = a.SetUser(ctx, tx, i != 0, x)
 		if err != nil {
 			t.Fatal(err)
@@ -763,10 +763,10 @@ func testCheckinToOneSetOpUserUsingUser(t *testing.T) {
 			t.Error("relationship struct not set to correct value")
 		}
 
-		if x.R.Checkins[0] != &a {
+		if x.R.UserCheckins[0] != &a {
 			t.Error("failed to append to foreign relationship struct")
 		}
-		if !queries.Equal(a.UserID, x.ID) {
+		if !queries.Equal(a.UserID, x.UserID) {
 			t.Error("foreign key was wrong value", a.UserID)
 		}
 
@@ -777,13 +777,13 @@ func testCheckinToOneSetOpUserUsingUser(t *testing.T) {
 			t.Fatal("failed to reload", err)
 		}
 
-		if !queries.Equal(a.UserID, x.ID) {
-			t.Error("foreign key was wrong value", a.UserID, x.ID)
+		if !queries.Equal(a.UserID, x.UserID) {
+			t.Error("foreign key was wrong value", a.UserID, x.UserID)
 		}
 	}
 }
 
-func testCheckinToOneRemoveOpUserUsingUser(t *testing.T) {
+func testCheckinToOneRemoveOpUserDatumUsingUser(t *testing.T) {
 	var err error
 
 	ctx := context.Background()
@@ -791,13 +791,13 @@ func testCheckinToOneRemoveOpUserUsingUser(t *testing.T) {
 	defer func() { _ = tx.Rollback() }()
 
 	var a Checkin
-	var b User
+	var b UserDatum
 
 	seed := randomize.NewSeed()
 	if err = randomize.Struct(seed, &a, checkinDBTypes, false, strmangle.SetComplement(checkinPrimaryKeyColumns, checkinColumnsWithoutDefault)...); err != nil {
 		t.Fatal(err)
 	}
-	if err = randomize.Struct(seed, &b, userDBTypes, false, strmangle.SetComplement(userPrimaryKeyColumns, userColumnsWithoutDefault)...); err != nil {
+	if err = randomize.Struct(seed, &b, userDatumDBTypes, false, strmangle.SetComplement(userDatumPrimaryKeyColumns, userDatumColumnsWithoutDefault)...); err != nil {
 		t.Fatal(err)
 	}
 
@@ -829,7 +829,7 @@ func testCheckinToOneRemoveOpUserUsingUser(t *testing.T) {
 		t.Error("foreign key value should be nil")
 	}
 
-	if len(b.R.Checkins) != 0 {
+	if len(b.R.UserCheckins) != 0 {
 		t.Error("failed to remove a from b's relationships")
 	}
 }

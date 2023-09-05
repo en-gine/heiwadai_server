@@ -43,9 +43,9 @@ func (u *MailMagazineUsecase) Create(title string, content string, auther entity
 	return mailMagazine, nil
 }
 
-func (u *MailMagazineUsecase) Update(title *string, content *string, auther entity.Admin, mailMagazineId uuid.UUID) (*entity.MailMagazine, *errors.DomainError) {
+func (u *MailMagazineUsecase) Update(title *string, content *string, auther entity.Admin, mailMagazineID uuid.UUID) (*entity.MailMagazine, *errors.DomainError) {
 
-	oldMailMagazine, err := u.mailMagazineQuery.GetByID(mailMagazineId)
+	oldMailMagazine, err := u.mailMagazineQuery.GetByID(mailMagazineID)
 
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())
@@ -68,7 +68,7 @@ func (u *MailMagazineUsecase) Update(title *string, content *string, auther enti
 		updateContent = oldMailMagazine.Content
 	}
 
-	updateMailMagazine := entity.UpdateMailMagazine(mailMagazineId, updateTitle, updateContent, auther)
+	updateMailMagazine := entity.UpdateMailMagazine(mailMagazineID, updateTitle, updateContent, auther)
 
 	if updateMailMagazine.MailMagazineStatus == entity.MailMagazineSent {
 		return nil, errors.NewDomainError(errors.QueryDataNotFoundError, "送信済みのため編集できません")
@@ -82,8 +82,8 @@ func (u *MailMagazineUsecase) Update(title *string, content *string, auther enti
 	return updateMailMagazine, nil
 }
 
-func (u *MailMagazineUsecase) Delete(mailMagazineId uuid.UUID) (*entity.MailMagazine, *errors.DomainError) {
-	deleteMailMagazine, err := u.mailMagazineQuery.GetByID(mailMagazineId)
+func (u *MailMagazineUsecase) Delete(mailMagazineID uuid.UUID) (*entity.MailMagazine, *errors.DomainError) {
+	deleteMailMagazine, err := u.mailMagazineQuery.GetByID(mailMagazineID)
 
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())
@@ -97,7 +97,7 @@ func (u *MailMagazineUsecase) Delete(mailMagazineId uuid.UUID) (*entity.MailMaga
 		return nil, errors.NewDomainError(errors.QueryDataNotFoundError, "送信済みのため削除できません")
 	}
 
-	err = u.mailMagazineRepository.Delete(mailMagazineId)
+	err = u.mailMagazineRepository.Delete(mailMagazineID)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
 	}

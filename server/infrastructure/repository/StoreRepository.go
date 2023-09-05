@@ -33,6 +33,7 @@ func (pr *StoreRepository) Save(updateStore *entity.Store) error {
 		ID:              updateStore.ID.String(),
 		Name:            updateStore.Name,
 		BranchName:      null.StringFromPtr(updateStore.BranchName),
+		ZipCode:         updateStore.ZipCode,
 		Address:         updateStore.Address,
 		Tel:             updateStore.Tel,
 		SiteURL:         updateStore.SiteURL,

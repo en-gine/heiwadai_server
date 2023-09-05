@@ -53,6 +53,14 @@ install-sqlboiler:
 sqlboiler:#sqlboilerでmodelを自動生成
 	sqlboiler psql --wipe
 
-seeder:
-	cd /server/db/seeder && go run .
+seeder-store:
+	cd /server/db/seeder && go run . -StoreSeeder
 
+seeder-user:
+	cd /server/db/seeder && go run . -UserSeeder
+
+seeder-admin:
+	cd /server/db/seeder && go run . -AdminSeeder
+
+seeder-server:
+	cd /server/db/seeder && go run . -OnlyServer

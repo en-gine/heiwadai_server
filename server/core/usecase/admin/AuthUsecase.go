@@ -1,4 +1,4 @@
-package user
+package admin
 
 import (
 	"server/core/entity"
@@ -7,95 +7,81 @@ import (
 	queryservice "server/core/infra/queryService"
 	"server/core/infra/repository"
 	"server/core/infra/types"
-	"time"
+
+	"github.com/google/uuid"
 )
 
 type AuthUsecase struct {
-	userRepository repository.IUserRepository
-	userQuery      queryservice.IUserQueryService
-	authAction     action.IAuthAction
+	adminRepository repository.IAdminRepository
+	adminQuery      queryservice.IAdminQueryService
+	storeQuery      queryservice.IStoreQueryService
+	authAction      action.IAuthAction
 }
 
-func NewAuthUsecase(userRepository repository.IUserRepository, userQuery queryservice.IUserQueryService, authAction action.IAuthAction) *AuthUsecase {
+func NewAuthUsecase(adminRepository repository.IAdminRepository, adminQuery queryservice.IAdminQueryService,
+	storeQuery queryservice.IStoreQueryService, authAction action.IAuthAction) *AuthUsecase {
 	return &AuthUsecase{
-		userRepository: userRepository,
-		userQuery:      userQuery,
-		authAction:     authAction,
+		adminRepository: adminRepository,
+		adminQuery:      adminQuery,
+		storeQuery:      storeQuery,
+		authAction:      authAction,
 	}
 }
 
 func (u *AuthUsecase) Register(
-	FirstName string,
-	LastName string,
-	FirstNameKana string,
-	LastNameKana string,
-	CompanyName *string,
-	BirthDate time.Time,
-	ZipCode *string,
-	Prefecture string,
-	City *string,
-	Address *string,
-	Tel *string,
-	Mail string,
-	AcceptMail bool, // メルマガ配信可
-	AcceptTerm bool, // 利用規約に同意
-) (*entity.User, *errors.DomainError) {
+	name string,
+	storeID uuid.UUID,
+	email string,
+) (*entity.Admin, *errors.DomainError) {
 
-	if !AcceptTerm {
-		return nil, errors.NewDomainError(errors.UnPemitedOperation, "利用規約に同意してください")
-	}
+	existAdmin, err := u.adminQuery.GetByMail(email)
 
-	existUser, err := u.userQuery.GetByMail(Mail)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryDataNotFoundError, "ユーザーの検索に失敗しました")
 	}
 
-	if existUser != nil {
+	if existAdmin != nil {
 		return nil, errors.NewDomainError(errors.UnPemitedOperation, "既に登録されているメールアドレスです")
 	}
 
-	prefecture, domainErr := entity.StringToPrefecture(Prefecture)
-	if domainErr != nil {
-		return nil, domainErr
-	}
-
 	// 招待メール送信
-	newID, err := u.authAction.InviteUserByEmail(Mail)
+	newID, err := u.authAction.InviteUserByEmail(email)
 
 	if err != nil {
 		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
 	}
 
-	userData := entity.CreateUser(
+	belongStore, err := u.storeQuery.GetByID(storeID)
+	if err != nil {
+		return nil, errors.NewDomainError(errors.QueryDataNotFoundError, "店舗の検索に失敗しました")
+	}
+
+	if belongStore == nil {
+		return nil, errors.NewDomainError(errors.QueryDataNotFoundError, "IDで指定された店舗が見つかりません")
+
+	}
+
+	adminData := entity.RegenAdmin(
 		newID,
-		FirstName,
-		LastName,
-		FirstNameKana,
-		LastNameKana,
-		CompanyName,
-		BirthDate,
-		ZipCode,
-		prefecture,
-		City,
-		Address,
-		Tel,
-		Mail,
-		AcceptMail,
+		name,
+		email,
+		true,
+		belongStore,
 	)
 
-	err = u.userRepository.Save(userData, nil)
+	err = u.adminRepository.Insert(adminData)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
 	}
 
-	return userData, nil
+	return adminData, nil
 }
 
 func (u *AuthUsecase) SignUp(
 	Mail string,
 	Password string,
 ) error {
-	err := u.authAction.SignUp(Mail, Password, "user")
+	err := u.authAction.SignUp(Mail, Password, "admin")
 	if err != nil {
 		return errors.NewDomainError(errors.RepositoryError, err.Error())
 	}
@@ -106,14 +92,13 @@ func (u *AuthUsecase) SignIn(
 	Mail string,
 	Password string,
 ) (*types.Token, *errors.DomainError) {
-	existUser, err := u.userQuery.GetByMail(Mail)
+	existUser, err := u.adminQuery.GetByMail(Mail)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())
 	}
 	if existUser == nil {
 		return nil, errors.NewDomainError(errors.QueryDataNotFoundError, "このアドレスで登録されているユーザーが存在しません")
 	}
-
 	token, err := u.authAction.SignIn(Mail, Password)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
@@ -135,7 +120,6 @@ func (u *AuthUsecase) UpdatePassword(
 	Password string,
 	Token string,
 ) error {
-
 	err := u.authAction.UpdatePassword(Password, Token)
 	if err != nil {
 		return errors.NewDomainError(errors.RepositoryError, err.Error())

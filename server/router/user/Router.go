@@ -25,7 +25,7 @@ func RegisterGRPCService(mux *http.ServeMux) *http.ServeMux {
 func NewUserServer(mux *http.ServeMux) {
 
 	authClient := action.NewAuthClient()
-	requireAuth := router.NewAuthentificatable(&authClient)
+	requireAuth := router.NewAuthentificatable(authClient)
 
 	authUsecase := InitializeAuthUsecase()
 	authContoroller := usercontroller.NewAuthController(authUsecase)

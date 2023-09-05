@@ -1,5 +1,15 @@
-CREATE TABLE "user" (
+CREATE TABLE user_manager (
     id UUID PRIMARY KEY,
+    email VARCHAR NOT NULL UNIQUE,
+    is_admin BOOLEAN NOT NULL DEFAULT false,
+    create_at TIMESTAMPTZ NOT NULL default now(),
+    update_at TIMESTAMPTZ NOT NULL default now(),
+    FOREIGN KEY (id) REFERENCES auth.users (id) ON DELETE CASCADE
+);
+
+
+CREATE TABLE user_data (
+    user_id UUID PRIMARY KEY,
     first_name VARCHAR NOT NULL,
     last_name VARCHAR NOT NULL,
     first_name_kana VARCHAR NOT NULL,
@@ -11,20 +21,19 @@ CREATE TABLE "user" (
     city VARCHAR,
     address VARCHAR,
     tel VARCHAR,
-    mail VARCHAR NOT NULL,
     accept_mail BOOLEAN NOT NULL,
     create_at TIMESTAMPTZ NOT NULL default now(),
-    update_at TIMESTAMPTZ NOT NULL default now()
+    update_at TIMESTAMPTZ NOT NULL default now(),
+    FOREIGN KEY (user_id) REFERENCES user_manager (id) ON DELETE CASCADE
 );
 
 CREATE TABLE user_option (
-    id UUID PRIMARY KEY,
+    user_id UUID PRIMARY KEY,
     inner_note VARCHAR NOT NULL,
     is_black_customer BOOLEAN NOT NULL,
-    user_id UUID,
     create_at TIMESTAMPTZ NOT NULL default now(),
     update_at TIMESTAMPTZ NOT NULL default now(),
-    FOREIGN KEY (user_id) REFERENCES "user" (id)
+    FOREIGN KEY (user_id) REFERENCES user_data (user_id) ON DELETE CASCADE
 );
 
 CREATE TABLE store (
@@ -54,17 +63,20 @@ CREATE TABLE stayable_store_info (
     booking_system_id VARCHAR NOT NULL,
     create_at TIMESTAMPTZ NOT NULL default now(),
     update_at TIMESTAMPTZ NOT NULL default now(),
-    FOREIGN KEY (store_id) REFERENCES "store" (id)
+    FOREIGN KEY (store_id) REFERENCES store (id)
 );
 
 CREATE TABLE admin (
-    id UUID PRIMARY KEY,
+    admin_id UUID PRIMARY KEY,
     name VARCHAR NOT NULL,
-    belong_to UUID,
+    belong_to UUID NOT NULL,
+    is_active BOOLEAN NOT NULL DEFAULT true,
     create_at TIMESTAMPTZ NOT NULL default now(),
     update_at TIMESTAMPTZ NOT NULL default now(),
-    FOREIGN KEY (belong_to) REFERENCES store (id)
+    FOREIGN KEY (belong_to) REFERENCES store (id),
+    FOREIGN KEY (admin_id) REFERENCES user_manager (id) ON DELETE CASCADE
 );
+
 
 CREATE TABLE checkin (
     id UUID PRIMARY KEY,
@@ -75,7 +87,7 @@ CREATE TABLE checkin (
     create_at TIMESTAMPTZ NOT NULL default now(),
     update_at TIMESTAMPTZ NOT NULL default now(),
     FOREIGN KEY (store_id) REFERENCES store (id),
-    FOREIGN KEY (user_id) REFERENCES "user" (id)
+    FOREIGN KEY (user_id) REFERENCES user_data (user_id)
 );
 
 CREATE TABLE coupon (
@@ -105,7 +117,7 @@ CREATE TABLE coupon_attached_user (
     used_at TIMESTAMPTZ,
     user_id UUID,
     FOREIGN KEY (coupon_id) REFERENCES coupon(id),
-    FOREIGN KEY (user_id) REFERENCES "user" (id),
+    FOREIGN KEY (user_id) REFERENCES user_data (user_id),
     PRIMARY KEY(coupon_id, user_id)
 );
 
@@ -120,13 +132,13 @@ CREATE TABLE mail_magazine (
     mail_magazine_status int NOT NULL,
     create_at TIMESTAMPTZ NOT NULL default now(),
     update_at TIMESTAMPTZ NOT NULL default now(),
-    FOREIGN KEY (author) REFERENCES admin (id)
+    FOREIGN KEY (author) REFERENCES admin (admin_id)
 );
 --- userが作成されるたびに、userテーブルにもidとemailをinsertする
 create or replace function public.handle_new_user() 
 returns trigger as $$
 begin
-  insert into public.user (id, email)
+  insert into public.user_manager (id, email)
   values (new.id, new.email);
   return new;
 end;
@@ -140,7 +152,7 @@ create trigger on_auth_user_created
 create or replace function public.handle_user_email_update() 
 returns trigger as $$
 begin
-  update public.user
+  update public.user_manager
   set email = new.email
   where id = new.id;
   

@@ -6,7 +6,8 @@ import (
 	"github.com/google/uuid"
 )
 
-type IUserRepository interface {
-	Save(user *entity.User, userOption *entity.UserOption) error
+type IAdminRepository interface {
+	Insert(admin *entity.Admin) error
+	Update(admin *entity.Admin) error
 	Delete(id uuid.UUID) error
 }

@@ -43,10 +43,18 @@ func (u *UserDataUsecase) Update(
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())
 	}
-
 	if existUser == nil {
 		return nil, errors.NewDomainError(errors.QueryDataNotFoundError, "登録されているユーザーが存在しません")
 	}
+
+	existUser, err = u.userQuery.GetByMail(Mail)
+	if err != nil {
+		return nil, errors.NewDomainError(errors.QueryError, err.Error())
+	}
+	if existUser == nil {
+		return nil, errors.NewDomainError(errors.QueryDataNotFoundError, "このアドレスで登録されているユーザーが存在しません")
+	}
+
 	prefecture, domainErr := entity.StringToPrefecture(Prefecture)
 	if domainErr != nil {
 		return nil, domainErr
@@ -68,7 +76,7 @@ func (u *UserDataUsecase) Update(
 		Mail,
 		AcceptMail,
 	)
-	err = u.userRepository.Save(updateData)
+	err = u.userRepository.Save(updateData, nil)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
 	}

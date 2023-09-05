@@ -641,8 +641,9 @@ func testStoreToManyBelongToAdmins(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	queries.Assign(&b.BelongTo, a.ID)
-	queries.Assign(&c.BelongTo, a.ID)
+	b.BelongTo = a.ID
+	c.BelongTo = a.ID
+
 	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Fatal(err)
 	}
@@ -657,10 +658,10 @@ func testStoreToManyBelongToAdmins(t *testing.T) {
 
 	bFound, cFound := false, false
 	for _, v := range check {
-		if queries.Equal(v.BelongTo, b.BelongTo) {
+		if v.BelongTo == b.BelongTo {
 			bFound = true
 		}
-		if queries.Equal(v.BelongTo, c.BelongTo) {
+		if v.BelongTo == c.BelongTo {
 			cFound = true
 		}
 	}
@@ -893,10 +894,10 @@ func testStoreToManyAddOpBelongToAdmins(t *testing.T) {
 		first := x[0]
 		second := x[1]
 
-		if !queries.Equal(a.ID, first.BelongTo) {
+		if a.ID != first.BelongTo {
 			t.Error("foreign key was wrong value", a.ID, first.BelongTo)
 		}
-		if !queries.Equal(a.ID, second.BelongTo) {
+		if a.ID != second.BelongTo {
 			t.Error("foreign key was wrong value", a.ID, second.BelongTo)
 		}
 
@@ -923,182 +924,6 @@ func testStoreToManyAddOpBelongToAdmins(t *testing.T) {
 		}
 	}
 }
-
-func testStoreToManySetOpBelongToAdmins(t *testing.T) {
-	var err error
-
-	ctx := context.Background()
-	tx := MustTx(boil.BeginTx(ctx, nil))
-	defer func() { _ = tx.Rollback() }()
-
-	var a Store
-	var b, c, d, e Admin
-
-	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, &a, storeDBTypes, false, strmangle.SetComplement(storePrimaryKeyColumns, storeColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
-	}
-	foreigners := []*Admin{&b, &c, &d, &e}
-	for _, x := range foreigners {
-		if err = randomize.Struct(seed, x, adminDBTypes, false, strmangle.SetComplement(adminPrimaryKeyColumns, adminColumnsWithoutDefault)...); err != nil {
-			t.Fatal(err)
-		}
-	}
-
-	if err = a.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-	if err = c.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-
-	err = a.SetBelongToAdmins(ctx, tx, false, &b, &c)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	count, err := a.BelongToAdmins().Count(ctx, tx)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if count != 2 {
-		t.Error("count was wrong:", count)
-	}
-
-	err = a.SetBelongToAdmins(ctx, tx, true, &d, &e)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	count, err = a.BelongToAdmins().Count(ctx, tx)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if count != 2 {
-		t.Error("count was wrong:", count)
-	}
-
-	if !queries.IsValuerNil(b.BelongTo) {
-		t.Error("want b's foreign key value to be nil")
-	}
-	if !queries.IsValuerNil(c.BelongTo) {
-		t.Error("want c's foreign key value to be nil")
-	}
-	if !queries.Equal(a.ID, d.BelongTo) {
-		t.Error("foreign key was wrong value", a.ID, d.BelongTo)
-	}
-	if !queries.Equal(a.ID, e.BelongTo) {
-		t.Error("foreign key was wrong value", a.ID, e.BelongTo)
-	}
-
-	if b.R.BelongToStore != nil {
-		t.Error("relationship was not removed properly from the foreign struct")
-	}
-	if c.R.BelongToStore != nil {
-		t.Error("relationship was not removed properly from the foreign struct")
-	}
-	if d.R.BelongToStore != &a {
-		t.Error("relationship was not added properly to the foreign struct")
-	}
-	if e.R.BelongToStore != &a {
-		t.Error("relationship was not added properly to the foreign struct")
-	}
-
-	if a.R.BelongToAdmins[0] != &d {
-		t.Error("relationship struct slice not set to correct value")
-	}
-	if a.R.BelongToAdmins[1] != &e {
-		t.Error("relationship struct slice not set to correct value")
-	}
-}
-
-func testStoreToManyRemoveOpBelongToAdmins(t *testing.T) {
-	var err error
-
-	ctx := context.Background()
-	tx := MustTx(boil.BeginTx(ctx, nil))
-	defer func() { _ = tx.Rollback() }()
-
-	var a Store
-	var b, c, d, e Admin
-
-	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, &a, storeDBTypes, false, strmangle.SetComplement(storePrimaryKeyColumns, storeColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
-	}
-	foreigners := []*Admin{&b, &c, &d, &e}
-	for _, x := range foreigners {
-		if err = randomize.Struct(seed, x, adminDBTypes, false, strmangle.SetComplement(adminPrimaryKeyColumns, adminColumnsWithoutDefault)...); err != nil {
-			t.Fatal(err)
-		}
-	}
-
-	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-
-	err = a.AddBelongToAdmins(ctx, tx, true, foreigners...)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	count, err := a.BelongToAdmins().Count(ctx, tx)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if count != 4 {
-		t.Error("count was wrong:", count)
-	}
-
-	err = a.RemoveBelongToAdmins(ctx, tx, foreigners[:2]...)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	count, err = a.BelongToAdmins().Count(ctx, tx)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if count != 2 {
-		t.Error("count was wrong:", count)
-	}
-
-	if !queries.IsValuerNil(b.BelongTo) {
-		t.Error("want b's foreign key value to be nil")
-	}
-	if !queries.IsValuerNil(c.BelongTo) {
-		t.Error("want c's foreign key value to be nil")
-	}
-
-	if b.R.BelongToStore != nil {
-		t.Error("relationship was not removed properly from the foreign struct")
-	}
-	if c.R.BelongToStore != nil {
-		t.Error("relationship was not removed properly from the foreign struct")
-	}
-	if d.R.BelongToStore != &a {
-		t.Error("relationship to a should have been preserved")
-	}
-	if e.R.BelongToStore != &a {
-		t.Error("relationship to a should have been preserved")
-	}
-
-	if len(a.R.BelongToAdmins) != 2 {
-		t.Error("should have preserved two relationships")
-	}
-
-	// Removal doesn't do a stable deletion for performance so we have to flip the order
-	if a.R.BelongToAdmins[1] != &d {
-		t.Error("relationship to d should have been preserved")
-	}
-	if a.R.BelongToAdmins[0] != &e {
-		t.Error("relationship to e should have been preserved")
-	}
-}
-
 func testStoreToManyAddOpCheckins(t *testing.T) {
 	var err error
 

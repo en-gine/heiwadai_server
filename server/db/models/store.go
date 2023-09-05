@@ -696,7 +696,7 @@ func (storeL) LoadBelongToAdmins(ctx context.Context, e boil.ContextExecutor, si
 			}
 
 			for _, a := range args {
-				if queries.Equal(a, obj.ID) {
+				if a == obj.ID {
 					continue Outer
 				}
 			}
@@ -754,7 +754,7 @@ func (storeL) LoadBelongToAdmins(ctx context.Context, e boil.ContextExecutor, si
 
 	for _, foreign := range resultSlice {
 		for _, local := range slice {
-			if queries.Equal(local.ID, foreign.BelongTo) {
+			if local.ID == foreign.BelongTo {
 				local.R.BelongToAdmins = append(local.R.BelongToAdmins, foreign)
 				if foreign.R == nil {
 					foreign.R = &adminR{}
@@ -1054,7 +1054,7 @@ func (o *Store) AddBelongToAdmins(ctx context.Context, exec boil.ContextExecutor
 	var err error
 	for _, rel := range related {
 		if insert {
-			queries.Assign(&rel.BelongTo, o.ID)
+			rel.BelongTo = o.ID
 			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
 				return errors.Wrap(err, "failed to insert into foreign table")
 			}
@@ -1064,7 +1064,7 @@ func (o *Store) AddBelongToAdmins(ctx context.Context, exec boil.ContextExecutor
 				strmangle.SetParamNames("\"", "\"", 1, []string{"belong_to"}),
 				strmangle.WhereClause("\"", "\"", 2, adminPrimaryKeyColumns),
 			)
-			values := []interface{}{o.ID, rel.ID}
+			values := []interface{}{o.ID, rel.AdminID}
 
 			if boil.IsDebug(ctx) {
 				writer := boil.DebugWriterFrom(ctx)
@@ -1075,7 +1075,7 @@ func (o *Store) AddBelongToAdmins(ctx context.Context, exec boil.ContextExecutor
 				return errors.Wrap(err, "failed to update foreign table")
 			}
 
-			queries.Assign(&rel.BelongTo, o.ID)
+			rel.BelongTo = o.ID
 		}
 	}
 
@@ -1096,80 +1096,6 @@ func (o *Store) AddBelongToAdmins(ctx context.Context, exec boil.ContextExecutor
 			rel.R.BelongToStore = o
 		}
 	}
-	return nil
-}
-
-// SetBelongToAdmins removes all previously related items of the
-// store replacing them completely with the passed
-// in related items, optionally inserting them as new records.
-// Sets o.R.BelongToStore's BelongToAdmins accordingly.
-// Replaces o.R.BelongToAdmins with related.
-// Sets related.R.BelongToStore's BelongToAdmins accordingly.
-func (o *Store) SetBelongToAdmins(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Admin) error {
-	query := "update \"admin\" set \"belong_to\" = null where \"belong_to\" = $1"
-	values := []interface{}{o.ID}
-	if boil.IsDebug(ctx) {
-		writer := boil.DebugWriterFrom(ctx)
-		fmt.Fprintln(writer, query)
-		fmt.Fprintln(writer, values)
-	}
-	_, err := exec.ExecContext(ctx, query, values...)
-	if err != nil {
-		return errors.Wrap(err, "failed to remove relationships before set")
-	}
-
-	if o.R != nil {
-		for _, rel := range o.R.BelongToAdmins {
-			queries.SetScanner(&rel.BelongTo, nil)
-			if rel.R == nil {
-				continue
-			}
-
-			rel.R.BelongToStore = nil
-		}
-		o.R.BelongToAdmins = nil
-	}
-
-	return o.AddBelongToAdmins(ctx, exec, insert, related...)
-}
-
-// RemoveBelongToAdmins relationships from objects passed in.
-// Removes related items from R.BelongToAdmins (uses pointer comparison, removal does not keep order)
-// Sets related.R.BelongToStore.
-func (o *Store) RemoveBelongToAdmins(ctx context.Context, exec boil.ContextExecutor, related ...*Admin) error {
-	if len(related) == 0 {
-		return nil
-	}
-
-	var err error
-	for _, rel := range related {
-		queries.SetScanner(&rel.BelongTo, nil)
-		if rel.R != nil {
-			rel.R.BelongToStore = nil
-		}
-		if _, err = rel.Update(ctx, exec, boil.Whitelist("belong_to")); err != nil {
-			return err
-		}
-	}
-	if o.R == nil {
-		return nil
-	}
-
-	for _, rel := range related {
-		for i, ri := range o.R.BelongToAdmins {
-			if rel != ri {
-				continue
-			}
-
-			ln := len(o.R.BelongToAdmins)
-			if ln > 1 && i < ln-1 {
-				o.R.BelongToAdmins[i] = o.R.BelongToAdmins[ln-1]
-			}
-			o.R.BelongToAdmins = o.R.BelongToAdmins[:ln-1]
-			break
-		}
-	}
-
 	return nil
 }
 

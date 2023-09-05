@@ -16,5 +16,5 @@ func InitializeUserUsecase() *usecase.UserDataUsecase {
 }
 
 func InitializeAuthUsecase() *usecase.AuthUsecase {
-	return usecase.NewAuthUsecase(userRepo, userQueryService, &authAction)
+	return usecase.NewAuthUsecase(userRepo, userQueryService, authAction)
 }

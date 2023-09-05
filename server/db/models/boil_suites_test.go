@@ -13,196 +13,183 @@ import "testing"
 // Separating the tests thusly grants avoidance of Postgres deadlocks.
 func TestParent(t *testing.T) {
 	t.Run("Admins", testAdmins)
-	t.Run("Banners", testBanners)
 	t.Run("Checkins", testCheckins)
 	t.Run("Coupons", testCoupons)
 	t.Run("CouponAttachedUsers", testCouponAttachedUsers)
 	t.Run("CouponNotices", testCouponNotices)
 	t.Run("CouponStores", testCouponStores)
 	t.Run("MailMagazines", testMailMagazines)
-	t.Run("Posts", testPosts)
 	t.Run("SchemaMigrations", testSchemaMigrations)
 	t.Run("StayableStoreInfos", testStayableStoreInfos)
 	t.Run("Stores", testStores)
-	t.Run("Users", testUsers)
+	t.Run("UserData", testUserData)
+	t.Run("UserManagers", testUserManagers)
 	t.Run("UserOptions", testUserOptions)
 }
 
 func TestDelete(t *testing.T) {
 	t.Run("Admins", testAdminsDelete)
-	t.Run("Banners", testBannersDelete)
 	t.Run("Checkins", testCheckinsDelete)
 	t.Run("Coupons", testCouponsDelete)
 	t.Run("CouponAttachedUsers", testCouponAttachedUsersDelete)
 	t.Run("CouponNotices", testCouponNoticesDelete)
 	t.Run("CouponStores", testCouponStoresDelete)
 	t.Run("MailMagazines", testMailMagazinesDelete)
-	t.Run("Posts", testPostsDelete)
 	t.Run("SchemaMigrations", testSchemaMigrationsDelete)
 	t.Run("StayableStoreInfos", testStayableStoreInfosDelete)
 	t.Run("Stores", testStoresDelete)
-	t.Run("Users", testUsersDelete)
+	t.Run("UserData", testUserDataDelete)
+	t.Run("UserManagers", testUserManagersDelete)
 	t.Run("UserOptions", testUserOptionsDelete)
 }
 
 func TestQueryDeleteAll(t *testing.T) {
 	t.Run("Admins", testAdminsQueryDeleteAll)
-	t.Run("Banners", testBannersQueryDeleteAll)
 	t.Run("Checkins", testCheckinsQueryDeleteAll)
 	t.Run("Coupons", testCouponsQueryDeleteAll)
 	t.Run("CouponAttachedUsers", testCouponAttachedUsersQueryDeleteAll)
 	t.Run("CouponNotices", testCouponNoticesQueryDeleteAll)
 	t.Run("CouponStores", testCouponStoresQueryDeleteAll)
 	t.Run("MailMagazines", testMailMagazinesQueryDeleteAll)
-	t.Run("Posts", testPostsQueryDeleteAll)
 	t.Run("SchemaMigrations", testSchemaMigrationsQueryDeleteAll)
 	t.Run("StayableStoreInfos", testStayableStoreInfosQueryDeleteAll)
 	t.Run("Stores", testStoresQueryDeleteAll)
-	t.Run("Users", testUsersQueryDeleteAll)
+	t.Run("UserData", testUserDataQueryDeleteAll)
+	t.Run("UserManagers", testUserManagersQueryDeleteAll)
 	t.Run("UserOptions", testUserOptionsQueryDeleteAll)
 }
 
 func TestSliceDeleteAll(t *testing.T) {
 	t.Run("Admins", testAdminsSliceDeleteAll)
-	t.Run("Banners", testBannersSliceDeleteAll)
 	t.Run("Checkins", testCheckinsSliceDeleteAll)
 	t.Run("Coupons", testCouponsSliceDeleteAll)
 	t.Run("CouponAttachedUsers", testCouponAttachedUsersSliceDeleteAll)
 	t.Run("CouponNotices", testCouponNoticesSliceDeleteAll)
 	t.Run("CouponStores", testCouponStoresSliceDeleteAll)
 	t.Run("MailMagazines", testMailMagazinesSliceDeleteAll)
-	t.Run("Posts", testPostsSliceDeleteAll)
 	t.Run("SchemaMigrations", testSchemaMigrationsSliceDeleteAll)
 	t.Run("StayableStoreInfos", testStayableStoreInfosSliceDeleteAll)
 	t.Run("Stores", testStoresSliceDeleteAll)
-	t.Run("Users", testUsersSliceDeleteAll)
+	t.Run("UserData", testUserDataSliceDeleteAll)
+	t.Run("UserManagers", testUserManagersSliceDeleteAll)
 	t.Run("UserOptions", testUserOptionsSliceDeleteAll)
 }
 
 func TestExists(t *testing.T) {
 	t.Run("Admins", testAdminsExists)
-	t.Run("Banners", testBannersExists)
 	t.Run("Checkins", testCheckinsExists)
 	t.Run("Coupons", testCouponsExists)
 	t.Run("CouponAttachedUsers", testCouponAttachedUsersExists)
 	t.Run("CouponNotices", testCouponNoticesExists)
 	t.Run("CouponStores", testCouponStoresExists)
 	t.Run("MailMagazines", testMailMagazinesExists)
-	t.Run("Posts", testPostsExists)
 	t.Run("SchemaMigrations", testSchemaMigrationsExists)
 	t.Run("StayableStoreInfos", testStayableStoreInfosExists)
 	t.Run("Stores", testStoresExists)
-	t.Run("Users", testUsersExists)
+	t.Run("UserData", testUserDataExists)
+	t.Run("UserManagers", testUserManagersExists)
 	t.Run("UserOptions", testUserOptionsExists)
 }
 
 func TestFind(t *testing.T) {
 	t.Run("Admins", testAdminsFind)
-	t.Run("Banners", testBannersFind)
 	t.Run("Checkins", testCheckinsFind)
 	t.Run("Coupons", testCouponsFind)
 	t.Run("CouponAttachedUsers", testCouponAttachedUsersFind)
 	t.Run("CouponNotices", testCouponNoticesFind)
 	t.Run("CouponStores", testCouponStoresFind)
 	t.Run("MailMagazines", testMailMagazinesFind)
-	t.Run("Posts", testPostsFind)
 	t.Run("SchemaMigrations", testSchemaMigrationsFind)
 	t.Run("StayableStoreInfos", testStayableStoreInfosFind)
 	t.Run("Stores", testStoresFind)
-	t.Run("Users", testUsersFind)
+	t.Run("UserData", testUserDataFind)
+	t.Run("UserManagers", testUserManagersFind)
 	t.Run("UserOptions", testUserOptionsFind)
 }
 
 func TestBind(t *testing.T) {
 	t.Run("Admins", testAdminsBind)
-	t.Run("Banners", testBannersBind)
 	t.Run("Checkins", testCheckinsBind)
 	t.Run("Coupons", testCouponsBind)
 	t.Run("CouponAttachedUsers", testCouponAttachedUsersBind)
 	t.Run("CouponNotices", testCouponNoticesBind)
 	t.Run("CouponStores", testCouponStoresBind)
 	t.Run("MailMagazines", testMailMagazinesBind)
-	t.Run("Posts", testPostsBind)
 	t.Run("SchemaMigrations", testSchemaMigrationsBind)
 	t.Run("StayableStoreInfos", testStayableStoreInfosBind)
 	t.Run("Stores", testStoresBind)
-	t.Run("Users", testUsersBind)
+	t.Run("UserData", testUserDataBind)
+	t.Run("UserManagers", testUserManagersBind)
 	t.Run("UserOptions", testUserOptionsBind)
 }
 
 func TestOne(t *testing.T) {
 	t.Run("Admins", testAdminsOne)
-	t.Run("Banners", testBannersOne)
 	t.Run("Checkins", testCheckinsOne)
 	t.Run("Coupons", testCouponsOne)
 	t.Run("CouponAttachedUsers", testCouponAttachedUsersOne)
 	t.Run("CouponNotices", testCouponNoticesOne)
 	t.Run("CouponStores", testCouponStoresOne)
 	t.Run("MailMagazines", testMailMagazinesOne)
-	t.Run("Posts", testPostsOne)
 	t.Run("SchemaMigrations", testSchemaMigrationsOne)
 	t.Run("StayableStoreInfos", testStayableStoreInfosOne)
 	t.Run("Stores", testStoresOne)
-	t.Run("Users", testUsersOne)
+	t.Run("UserData", testUserDataOne)
+	t.Run("UserManagers", testUserManagersOne)
 	t.Run("UserOptions", testUserOptionsOne)
 }
 
 func TestAll(t *testing.T) {
 	t.Run("Admins", testAdminsAll)
-	t.Run("Banners", testBannersAll)
 	t.Run("Checkins", testCheckinsAll)
 	t.Run("Coupons", testCouponsAll)
 	t.Run("CouponAttachedUsers", testCouponAttachedUsersAll)
 	t.Run("CouponNotices", testCouponNoticesAll)
 	t.Run("CouponStores", testCouponStoresAll)
 	t.Run("MailMagazines", testMailMagazinesAll)
-	t.Run("Posts", testPostsAll)
 	t.Run("SchemaMigrations", testSchemaMigrationsAll)
 	t.Run("StayableStoreInfos", testStayableStoreInfosAll)
 	t.Run("Stores", testStoresAll)
-	t.Run("Users", testUsersAll)
+	t.Run("UserData", testUserDataAll)
+	t.Run("UserManagers", testUserManagersAll)
 	t.Run("UserOptions", testUserOptionsAll)
 }
 
 func TestCount(t *testing.T) {
 	t.Run("Admins", testAdminsCount)
-	t.Run("Banners", testBannersCount)
 	t.Run("Checkins", testCheckinsCount)
 	t.Run("Coupons", testCouponsCount)
 	t.Run("CouponAttachedUsers", testCouponAttachedUsersCount)
 	t.Run("CouponNotices", testCouponNoticesCount)
 	t.Run("CouponStores", testCouponStoresCount)
 	t.Run("MailMagazines", testMailMagazinesCount)
-	t.Run("Posts", testPostsCount)
 	t.Run("SchemaMigrations", testSchemaMigrationsCount)
 	t.Run("StayableStoreInfos", testStayableStoreInfosCount)
 	t.Run("Stores", testStoresCount)
-	t.Run("Users", testUsersCount)
+	t.Run("UserData", testUserDataCount)
+	t.Run("UserManagers", testUserManagersCount)
 	t.Run("UserOptions", testUserOptionsCount)
 }
 
 func TestHooks(t *testing.T) {
 	t.Run("Admins", testAdminsHooks)
-	t.Run("Banners", testBannersHooks)
 	t.Run("Checkins", testCheckinsHooks)
 	t.Run("Coupons", testCouponsHooks)
 	t.Run("CouponAttachedUsers", testCouponAttachedUsersHooks)
 	t.Run("CouponNotices", testCouponNoticesHooks)
 	t.Run("CouponStores", testCouponStoresHooks)
 	t.Run("MailMagazines", testMailMagazinesHooks)
-	t.Run("Posts", testPostsHooks)
 	t.Run("SchemaMigrations", testSchemaMigrationsHooks)
 	t.Run("StayableStoreInfos", testStayableStoreInfosHooks)
 	t.Run("Stores", testStoresHooks)
-	t.Run("Users", testUsersHooks)
+	t.Run("UserData", testUserDataHooks)
+	t.Run("UserManagers", testUserManagersHooks)
 	t.Run("UserOptions", testUserOptionsHooks)
 }
 
 func TestInsert(t *testing.T) {
 	t.Run("Admins", testAdminsInsert)
 	t.Run("Admins", testAdminsInsertWhitelist)
-	t.Run("Banners", testBannersInsert)
-	t.Run("Banners", testBannersInsertWhitelist)
 	t.Run("Checkins", testCheckinsInsert)
 	t.Run("Checkins", testCheckinsInsertWhitelist)
 	t.Run("Coupons", testCouponsInsert)
@@ -215,16 +202,16 @@ func TestInsert(t *testing.T) {
 	t.Run("CouponStores", testCouponStoresInsertWhitelist)
 	t.Run("MailMagazines", testMailMagazinesInsert)
 	t.Run("MailMagazines", testMailMagazinesInsertWhitelist)
-	t.Run("Posts", testPostsInsert)
-	t.Run("Posts", testPostsInsertWhitelist)
 	t.Run("SchemaMigrations", testSchemaMigrationsInsert)
 	t.Run("SchemaMigrations", testSchemaMigrationsInsertWhitelist)
 	t.Run("StayableStoreInfos", testStayableStoreInfosInsert)
 	t.Run("StayableStoreInfos", testStayableStoreInfosInsertWhitelist)
 	t.Run("Stores", testStoresInsert)
 	t.Run("Stores", testStoresInsertWhitelist)
-	t.Run("Users", testUsersInsert)
-	t.Run("Users", testUsersInsertWhitelist)
+	t.Run("UserData", testUserDataInsert)
+	t.Run("UserData", testUserDataInsertWhitelist)
+	t.Run("UserManagers", testUserManagersInsert)
+	t.Run("UserManagers", testUserManagersInsertWhitelist)
 	t.Run("UserOptions", testUserOptionsInsert)
 	t.Run("UserOptions", testUserOptionsInsertWhitelist)
 }
@@ -232,18 +219,19 @@ func TestInsert(t *testing.T) {
 // TestToOne tests cannot be run in parallel
 // or deadlocks can occur.
 func TestToOne(t *testing.T) {
+	t.Run("AdminToUserManagerUsingAdmin", testAdminToOneUserManagerUsingAdmin)
 	t.Run("AdminToStoreUsingBelongToStore", testAdminToOneStoreUsingBelongToStore)
 	t.Run("CheckinToStoreUsingStore", testCheckinToOneStoreUsingStore)
-	t.Run("CheckinToUserUsingUser", testCheckinToOneUserUsingUser)
+	t.Run("CheckinToUserDatumUsingUser", testCheckinToOneUserDatumUsingUser)
 	t.Run("CouponAttachedUserToCouponUsingCoupon", testCouponAttachedUserToOneCouponUsingCoupon)
-	t.Run("CouponAttachedUserToUserUsingUser", testCouponAttachedUserToOneUserUsingUser)
+	t.Run("CouponAttachedUserToUserDatumUsingUser", testCouponAttachedUserToOneUserDatumUsingUser)
 	t.Run("CouponNoticeToCouponUsingCoupon", testCouponNoticeToOneCouponUsingCoupon)
 	t.Run("CouponStoreToCouponUsingCoupon", testCouponStoreToOneCouponUsingCoupon)
 	t.Run("CouponStoreToStoreUsingStore", testCouponStoreToOneStoreUsingStore)
 	t.Run("MailMagazineToAdminUsingAuthorAdmin", testMailMagazineToOneAdminUsingAuthorAdmin)
-	t.Run("PostToAdminUsingAuthorAdmin", testPostToOneAdminUsingAuthorAdmin)
 	t.Run("StayableStoreInfoToStoreUsingStore", testStayableStoreInfoToOneStoreUsingStore)
-	t.Run("UserOptionToUserUsingUser", testUserOptionToOneUserUsingUser)
+	t.Run("UserDatumToUserManagerUsingUser", testUserDatumToOneUserManagerUsingUser)
+	t.Run("UserOptionToUserDatumUsingUser", testUserOptionToOneUserDatumUsingUser)
 }
 
 // TestOneToOne tests cannot be run in parallel
@@ -252,48 +240,47 @@ func TestOneToOne(t *testing.T) {
 	t.Run("CouponToCouponNoticeUsingCouponNotice", testCouponOneToOneCouponNoticeUsingCouponNotice)
 	t.Run("CouponToCouponStoreUsingCouponStore", testCouponOneToOneCouponStoreUsingCouponStore)
 	t.Run("StoreToStayableStoreInfoUsingStayableStoreInfo", testStoreOneToOneStayableStoreInfoUsingStayableStoreInfo)
+	t.Run("UserDatumToUserOptionUsingUserUserOption", testUserDatumOneToOneUserOptionUsingUserUserOption)
+	t.Run("UserManagerToAdminUsingAdminAdmin", testUserManagerOneToOneAdminUsingAdminAdmin)
+	t.Run("UserManagerToUserDatumUsingUserUserDatum", testUserManagerOneToOneUserDatumUsingUserUserDatum)
 }
 
 // TestToMany tests cannot be run in parallel
 // or deadlocks can occur.
 func TestToMany(t *testing.T) {
 	t.Run("AdminToAuthorMailMagazines", testAdminToManyAuthorMailMagazines)
-	t.Run("AdminToAuthorPosts", testAdminToManyAuthorPosts)
 	t.Run("CouponToCouponAttachedUsers", testCouponToManyCouponAttachedUsers)
 	t.Run("StoreToBelongToAdmins", testStoreToManyBelongToAdmins)
 	t.Run("StoreToCheckins", testStoreToManyCheckins)
 	t.Run("StoreToCouponStores", testStoreToManyCouponStores)
-	t.Run("UserToCheckins", testUserToManyCheckins)
-	t.Run("UserToCouponAttachedUsers", testUserToManyCouponAttachedUsers)
-	t.Run("UserToUserOptions", testUserToManyUserOptions)
+	t.Run("UserDatumToUserCheckins", testUserDatumToManyUserCheckins)
+	t.Run("UserDatumToUserCouponAttachedUsers", testUserDatumToManyUserCouponAttachedUsers)
 }
 
 // TestToOneSet tests cannot be run in parallel
 // or deadlocks can occur.
 func TestToOneSet(t *testing.T) {
+	t.Run("AdminToUserManagerUsingAdminAdmin", testAdminToOneSetOpUserManagerUsingAdmin)
 	t.Run("AdminToStoreUsingBelongToAdmins", testAdminToOneSetOpStoreUsingBelongToStore)
 	t.Run("CheckinToStoreUsingCheckins", testCheckinToOneSetOpStoreUsingStore)
-	t.Run("CheckinToUserUsingCheckins", testCheckinToOneSetOpUserUsingUser)
+	t.Run("CheckinToUserDatumUsingUserCheckins", testCheckinToOneSetOpUserDatumUsingUser)
 	t.Run("CouponAttachedUserToCouponUsingCouponAttachedUsers", testCouponAttachedUserToOneSetOpCouponUsingCoupon)
-	t.Run("CouponAttachedUserToUserUsingCouponAttachedUsers", testCouponAttachedUserToOneSetOpUserUsingUser)
+	t.Run("CouponAttachedUserToUserDatumUsingUserCouponAttachedUsers", testCouponAttachedUserToOneSetOpUserDatumUsingUser)
 	t.Run("CouponNoticeToCouponUsingCouponNotice", testCouponNoticeToOneSetOpCouponUsingCoupon)
 	t.Run("CouponStoreToCouponUsingCouponStore", testCouponStoreToOneSetOpCouponUsingCoupon)
 	t.Run("CouponStoreToStoreUsingCouponStores", testCouponStoreToOneSetOpStoreUsingStore)
 	t.Run("MailMagazineToAdminUsingAuthorMailMagazines", testMailMagazineToOneSetOpAdminUsingAuthorAdmin)
-	t.Run("PostToAdminUsingAuthorPosts", testPostToOneSetOpAdminUsingAuthorAdmin)
 	t.Run("StayableStoreInfoToStoreUsingStayableStoreInfo", testStayableStoreInfoToOneSetOpStoreUsingStore)
-	t.Run("UserOptionToUserUsingUserOptions", testUserOptionToOneSetOpUserUsingUser)
+	t.Run("UserDatumToUserManagerUsingUserUserDatum", testUserDatumToOneSetOpUserManagerUsingUser)
+	t.Run("UserOptionToUserDatumUsingUserUserOption", testUserOptionToOneSetOpUserDatumUsingUser)
 }
 
 // TestToOneRemove tests cannot be run in parallel
 // or deadlocks can occur.
 func TestToOneRemove(t *testing.T) {
-	t.Run("AdminToStoreUsingBelongToAdmins", testAdminToOneRemoveOpStoreUsingBelongToStore)
 	t.Run("CheckinToStoreUsingCheckins", testCheckinToOneRemoveOpStoreUsingStore)
-	t.Run("CheckinToUserUsingCheckins", testCheckinToOneRemoveOpUserUsingUser)
+	t.Run("CheckinToUserDatumUsingUserCheckins", testCheckinToOneRemoveOpUserDatumUsingUser)
 	t.Run("MailMagazineToAdminUsingAuthorMailMagazines", testMailMagazineToOneRemoveOpAdminUsingAuthorAdmin)
-	t.Run("PostToAdminUsingAuthorPosts", testPostToOneRemoveOpAdminUsingAuthorAdmin)
-	t.Run("UserOptionToUserUsingUserOptions", testUserOptionToOneRemoveOpUserUsingUser)
 }
 
 // TestOneToOneSet tests cannot be run in parallel
@@ -302,6 +289,9 @@ func TestOneToOneSet(t *testing.T) {
 	t.Run("CouponToCouponNoticeUsingCouponNotice", testCouponOneToOneSetOpCouponNoticeUsingCouponNotice)
 	t.Run("CouponToCouponStoreUsingCouponStore", testCouponOneToOneSetOpCouponStoreUsingCouponStore)
 	t.Run("StoreToStayableStoreInfoUsingStayableStoreInfo", testStoreOneToOneSetOpStayableStoreInfoUsingStayableStoreInfo)
+	t.Run("UserDatumToUserOptionUsingUserUserOption", testUserDatumOneToOneSetOpUserOptionUsingUserUserOption)
+	t.Run("UserManagerToAdminUsingAdminAdmin", testUserManagerOneToOneSetOpAdminUsingAdminAdmin)
+	t.Run("UserManagerToUserDatumUsingUserUserDatum", testUserManagerOneToOneSetOpUserDatumUsingUserUserDatum)
 }
 
 // TestOneToOneRemove tests cannot be run in parallel
@@ -312,119 +302,106 @@ func TestOneToOneRemove(t *testing.T) {}
 // or deadlocks can occur.
 func TestToManyAdd(t *testing.T) {
 	t.Run("AdminToAuthorMailMagazines", testAdminToManyAddOpAuthorMailMagazines)
-	t.Run("AdminToAuthorPosts", testAdminToManyAddOpAuthorPosts)
 	t.Run("CouponToCouponAttachedUsers", testCouponToManyAddOpCouponAttachedUsers)
 	t.Run("StoreToBelongToAdmins", testStoreToManyAddOpBelongToAdmins)
 	t.Run("StoreToCheckins", testStoreToManyAddOpCheckins)
 	t.Run("StoreToCouponStores", testStoreToManyAddOpCouponStores)
-	t.Run("UserToCheckins", testUserToManyAddOpCheckins)
-	t.Run("UserToCouponAttachedUsers", testUserToManyAddOpCouponAttachedUsers)
-	t.Run("UserToUserOptions", testUserToManyAddOpUserOptions)
+	t.Run("UserDatumToUserCheckins", testUserDatumToManyAddOpUserCheckins)
+	t.Run("UserDatumToUserCouponAttachedUsers", testUserDatumToManyAddOpUserCouponAttachedUsers)
 }
 
 // TestToManySet tests cannot be run in parallel
 // or deadlocks can occur.
 func TestToManySet(t *testing.T) {
 	t.Run("AdminToAuthorMailMagazines", testAdminToManySetOpAuthorMailMagazines)
-	t.Run("AdminToAuthorPosts", testAdminToManySetOpAuthorPosts)
-	t.Run("StoreToBelongToAdmins", testStoreToManySetOpBelongToAdmins)
 	t.Run("StoreToCheckins", testStoreToManySetOpCheckins)
-	t.Run("UserToCheckins", testUserToManySetOpCheckins)
-	t.Run("UserToUserOptions", testUserToManySetOpUserOptions)
+	t.Run("UserDatumToUserCheckins", testUserDatumToManySetOpUserCheckins)
 }
 
 // TestToManyRemove tests cannot be run in parallel
 // or deadlocks can occur.
 func TestToManyRemove(t *testing.T) {
 	t.Run("AdminToAuthorMailMagazines", testAdminToManyRemoveOpAuthorMailMagazines)
-	t.Run("AdminToAuthorPosts", testAdminToManyRemoveOpAuthorPosts)
-	t.Run("StoreToBelongToAdmins", testStoreToManyRemoveOpBelongToAdmins)
 	t.Run("StoreToCheckins", testStoreToManyRemoveOpCheckins)
-	t.Run("UserToCheckins", testUserToManyRemoveOpCheckins)
-	t.Run("UserToUserOptions", testUserToManyRemoveOpUserOptions)
+	t.Run("UserDatumToUserCheckins", testUserDatumToManyRemoveOpUserCheckins)
 }
 
 func TestReload(t *testing.T) {
 	t.Run("Admins", testAdminsReload)
-	t.Run("Banners", testBannersReload)
 	t.Run("Checkins", testCheckinsReload)
 	t.Run("Coupons", testCouponsReload)
 	t.Run("CouponAttachedUsers", testCouponAttachedUsersReload)
 	t.Run("CouponNotices", testCouponNoticesReload)
 	t.Run("CouponStores", testCouponStoresReload)
 	t.Run("MailMagazines", testMailMagazinesReload)
-	t.Run("Posts", testPostsReload)
 	t.Run("SchemaMigrations", testSchemaMigrationsReload)
 	t.Run("StayableStoreInfos", testStayableStoreInfosReload)
 	t.Run("Stores", testStoresReload)
-	t.Run("Users", testUsersReload)
+	t.Run("UserData", testUserDataReload)
+	t.Run("UserManagers", testUserManagersReload)
 	t.Run("UserOptions", testUserOptionsReload)
 }
 
 func TestReloadAll(t *testing.T) {
 	t.Run("Admins", testAdminsReloadAll)
-	t.Run("Banners", testBannersReloadAll)
 	t.Run("Checkins", testCheckinsReloadAll)
 	t.Run("Coupons", testCouponsReloadAll)
 	t.Run("CouponAttachedUsers", testCouponAttachedUsersReloadAll)
 	t.Run("CouponNotices", testCouponNoticesReloadAll)
 	t.Run("CouponStores", testCouponStoresReloadAll)
 	t.Run("MailMagazines", testMailMagazinesReloadAll)
-	t.Run("Posts", testPostsReloadAll)
 	t.Run("SchemaMigrations", testSchemaMigrationsReloadAll)
 	t.Run("StayableStoreInfos", testStayableStoreInfosReloadAll)
 	t.Run("Stores", testStoresReloadAll)
-	t.Run("Users", testUsersReloadAll)
+	t.Run("UserData", testUserDataReloadAll)
+	t.Run("UserManagers", testUserManagersReloadAll)
 	t.Run("UserOptions", testUserOptionsReloadAll)
 }
 
 func TestSelect(t *testing.T) {
 	t.Run("Admins", testAdminsSelect)
-	t.Run("Banners", testBannersSelect)
 	t.Run("Checkins", testCheckinsSelect)
 	t.Run("Coupons", testCouponsSelect)
 	t.Run("CouponAttachedUsers", testCouponAttachedUsersSelect)
 	t.Run("CouponNotices", testCouponNoticesSelect)
 	t.Run("CouponStores", testCouponStoresSelect)
 	t.Run("MailMagazines", testMailMagazinesSelect)
-	t.Run("Posts", testPostsSelect)
 	t.Run("SchemaMigrations", testSchemaMigrationsSelect)
 	t.Run("StayableStoreInfos", testStayableStoreInfosSelect)
 	t.Run("Stores", testStoresSelect)
-	t.Run("Users", testUsersSelect)
+	t.Run("UserData", testUserDataSelect)
+	t.Run("UserManagers", testUserManagersSelect)
 	t.Run("UserOptions", testUserOptionsSelect)
 }
 
 func TestUpdate(t *testing.T) {
 	t.Run("Admins", testAdminsUpdate)
-	t.Run("Banners", testBannersUpdate)
 	t.Run("Checkins", testCheckinsUpdate)
 	t.Run("Coupons", testCouponsUpdate)
 	t.Run("CouponAttachedUsers", testCouponAttachedUsersUpdate)
 	t.Run("CouponNotices", testCouponNoticesUpdate)
 	t.Run("CouponStores", testCouponStoresUpdate)
 	t.Run("MailMagazines", testMailMagazinesUpdate)
-	t.Run("Posts", testPostsUpdate)
 	t.Run("SchemaMigrations", testSchemaMigrationsUpdate)
 	t.Run("StayableStoreInfos", testStayableStoreInfosUpdate)
 	t.Run("Stores", testStoresUpdate)
-	t.Run("Users", testUsersUpdate)
+	t.Run("UserData", testUserDataUpdate)
+	t.Run("UserManagers", testUserManagersUpdate)
 	t.Run("UserOptions", testUserOptionsUpdate)
 }
 
 func TestSliceUpdateAll(t *testing.T) {
 	t.Run("Admins", testAdminsSliceUpdateAll)
-	t.Run("Banners", testBannersSliceUpdateAll)
 	t.Run("Checkins", testCheckinsSliceUpdateAll)
 	t.Run("Coupons", testCouponsSliceUpdateAll)
 	t.Run("CouponAttachedUsers", testCouponAttachedUsersSliceUpdateAll)
 	t.Run("CouponNotices", testCouponNoticesSliceUpdateAll)
 	t.Run("CouponStores", testCouponStoresSliceUpdateAll)
 	t.Run("MailMagazines", testMailMagazinesSliceUpdateAll)
-	t.Run("Posts", testPostsSliceUpdateAll)
 	t.Run("SchemaMigrations", testSchemaMigrationsSliceUpdateAll)
 	t.Run("StayableStoreInfos", testStayableStoreInfosSliceUpdateAll)
 	t.Run("Stores", testStoresSliceUpdateAll)
-	t.Run("Users", testUsersSliceUpdateAll)
+	t.Run("UserData", testUserDataSliceUpdateAll)
+	t.Run("UserManagers", testUserManagersSliceUpdateAll)
 	t.Run("UserOptions", testUserOptionsSliceUpdateAll)
 }

@@ -514,7 +514,7 @@ func testMailMagazineToOneAdminUsingAuthorAdmin(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	queries.Assign(&local.Author, foreign.ID)
+	queries.Assign(&local.Author, foreign.AdminID)
 	if err := local.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Fatal(err)
 	}
@@ -524,8 +524,8 @@ func testMailMagazineToOneAdminUsingAuthorAdmin(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if !queries.Equal(check.ID, foreign.ID) {
-		t.Errorf("want: %v, got %v", foreign.ID, check.ID)
+	if !queries.Equal(check.AdminID, foreign.AdminID) {
+		t.Errorf("want: %v, got %v", foreign.AdminID, check.AdminID)
 	}
 
 	ranAfterSelectHook := false
@@ -596,7 +596,7 @@ func testMailMagazineToOneSetOpAdminUsingAuthorAdmin(t *testing.T) {
 		if x.R.AuthorMailMagazines[0] != &a {
 			t.Error("failed to append to foreign relationship struct")
 		}
-		if !queries.Equal(a.Author, x.ID) {
+		if !queries.Equal(a.Author, x.AdminID) {
 			t.Error("foreign key was wrong value", a.Author)
 		}
 
@@ -607,8 +607,8 @@ func testMailMagazineToOneSetOpAdminUsingAuthorAdmin(t *testing.T) {
 			t.Fatal("failed to reload", err)
 		}
 
-		if !queries.Equal(a.Author, x.ID) {
-			t.Error("foreign key was wrong value", a.Author, x.ID)
+		if !queries.Equal(a.Author, x.AdminID) {
+			t.Error("foreign key was wrong value", a.Author, x.AdminID)
 		}
 	}
 }

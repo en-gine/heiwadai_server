@@ -14,7 +14,6 @@ import (
 	"time"
 
 	"github.com/friendsofgo/errors"
-	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -24,45 +23,40 @@ import (
 
 // UserOption is an object representing the database table.
 type UserOption struct {
-	ID              string      `boil:"id" json:"id" toml:"id" yaml:"id"`
-	InnerNote       string      `boil:"inner_note" json:"inner_note" toml:"inner_note" yaml:"inner_note"`
-	IsBlackCustomer bool        `boil:"is_black_customer" json:"is_black_customer" toml:"is_black_customer" yaml:"is_black_customer"`
-	UserID          null.String `boil:"user_id" json:"user_id,omitempty" toml:"user_id" yaml:"user_id,omitempty"`
-	CreateAt        time.Time   `boil:"create_at" json:"create_at" toml:"create_at" yaml:"create_at"`
-	UpdateAt        time.Time   `boil:"update_at" json:"update_at" toml:"update_at" yaml:"update_at"`
+	UserID          string    `boil:"user_id" json:"user_id" toml:"user_id" yaml:"user_id"`
+	InnerNote       string    `boil:"inner_note" json:"inner_note" toml:"inner_note" yaml:"inner_note"`
+	IsBlackCustomer bool      `boil:"is_black_customer" json:"is_black_customer" toml:"is_black_customer" yaml:"is_black_customer"`
+	CreateAt        time.Time `boil:"create_at" json:"create_at" toml:"create_at" yaml:"create_at"`
+	UpdateAt        time.Time `boil:"update_at" json:"update_at" toml:"update_at" yaml:"update_at"`
 
 	R *userOptionR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L userOptionL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
 var UserOptionColumns = struct {
-	ID              string
+	UserID          string
 	InnerNote       string
 	IsBlackCustomer string
-	UserID          string
 	CreateAt        string
 	UpdateAt        string
 }{
-	ID:              "id",
+	UserID:          "user_id",
 	InnerNote:       "inner_note",
 	IsBlackCustomer: "is_black_customer",
-	UserID:          "user_id",
 	CreateAt:        "create_at",
 	UpdateAt:        "update_at",
 }
 
 var UserOptionTableColumns = struct {
-	ID              string
+	UserID          string
 	InnerNote       string
 	IsBlackCustomer string
-	UserID          string
 	CreateAt        string
 	UpdateAt        string
 }{
-	ID:              "user_option.id",
+	UserID:          "user_option.user_id",
 	InnerNote:       "user_option.inner_note",
 	IsBlackCustomer: "user_option.is_black_customer",
-	UserID:          "user_option.user_id",
 	CreateAt:        "user_option.create_at",
 	UpdateAt:        "user_option.update_at",
 }
@@ -70,17 +64,15 @@ var UserOptionTableColumns = struct {
 // Generated where
 
 var UserOptionWhere = struct {
-	ID              whereHelperstring
+	UserID          whereHelperstring
 	InnerNote       whereHelperstring
 	IsBlackCustomer whereHelperbool
-	UserID          whereHelpernull_String
 	CreateAt        whereHelpertime_Time
 	UpdateAt        whereHelpertime_Time
 }{
-	ID:              whereHelperstring{field: "\"user_option\".\"id\""},
+	UserID:          whereHelperstring{field: "\"user_option\".\"user_id\""},
 	InnerNote:       whereHelperstring{field: "\"user_option\".\"inner_note\""},
 	IsBlackCustomer: whereHelperbool{field: "\"user_option\".\"is_black_customer\""},
-	UserID:          whereHelpernull_String{field: "\"user_option\".\"user_id\""},
 	CreateAt:        whereHelpertime_Time{field: "\"user_option\".\"create_at\""},
 	UpdateAt:        whereHelpertime_Time{field: "\"user_option\".\"update_at\""},
 }
@@ -94,7 +86,7 @@ var UserOptionRels = struct {
 
 // userOptionR is where relationships are stored.
 type userOptionR struct {
-	User *User `boil:"User" json:"User" toml:"User" yaml:"User"`
+	User *UserDatum `boil:"User" json:"User" toml:"User" yaml:"User"`
 }
 
 // NewStruct creates a new relationship struct
@@ -102,7 +94,7 @@ func (*userOptionR) NewStruct() *userOptionR {
 	return &userOptionR{}
 }
 
-func (r *userOptionR) GetUser() *User {
+func (r *userOptionR) GetUser() *UserDatum {
 	if r == nil {
 		return nil
 	}
@@ -113,10 +105,10 @@ func (r *userOptionR) GetUser() *User {
 type userOptionL struct{}
 
 var (
-	userOptionAllColumns            = []string{"id", "inner_note", "is_black_customer", "user_id", "create_at", "update_at"}
-	userOptionColumnsWithoutDefault = []string{"id", "inner_note", "is_black_customer"}
-	userOptionColumnsWithDefault    = []string{"user_id", "create_at", "update_at"}
-	userOptionPrimaryKeyColumns     = []string{"id"}
+	userOptionAllColumns            = []string{"user_id", "inner_note", "is_black_customer", "create_at", "update_at"}
+	userOptionColumnsWithoutDefault = []string{"user_id", "inner_note", "is_black_customer"}
+	userOptionColumnsWithDefault    = []string{"create_at", "update_at"}
+	userOptionPrimaryKeyColumns     = []string{"user_id"}
 	userOptionGeneratedColumns      = []string{}
 )
 
@@ -399,14 +391,14 @@ func (q userOptionQuery) Exists(ctx context.Context, exec boil.ContextExecutor) 
 }
 
 // User pointed to by the foreign key.
-func (o *UserOption) User(mods ...qm.QueryMod) userQuery {
+func (o *UserOption) User(mods ...qm.QueryMod) userDatumQuery {
 	queryMods := []qm.QueryMod{
-		qm.Where("\"id\" = ?", o.UserID),
+		qm.Where("\"user_id\" = ?", o.UserID),
 	}
 
 	queryMods = append(queryMods, mods...)
 
-	return Users(queryMods...)
+	return UserData(queryMods...)
 }
 
 // LoadUser allows an eager lookup of values, cached into the
@@ -442,9 +434,7 @@ func (userOptionL) LoadUser(ctx context.Context, e boil.ContextExecutor, singula
 		if object.R == nil {
 			object.R = &userOptionR{}
 		}
-		if !queries.IsNil(object.UserID) {
-			args = append(args, object.UserID)
-		}
+		args = append(args, object.UserID)
 
 	} else {
 	Outer:
@@ -454,14 +444,12 @@ func (userOptionL) LoadUser(ctx context.Context, e boil.ContextExecutor, singula
 			}
 
 			for _, a := range args {
-				if queries.Equal(a, obj.UserID) {
+				if a == obj.UserID {
 					continue Outer
 				}
 			}
 
-			if !queries.IsNil(obj.UserID) {
-				args = append(args, obj.UserID)
-			}
+			args = append(args, obj.UserID)
 
 		}
 	}
@@ -471,8 +459,8 @@ func (userOptionL) LoadUser(ctx context.Context, e boil.ContextExecutor, singula
 	}
 
 	query := NewQuery(
-		qm.From(`user`),
-		qm.WhereIn(`user.id in ?`, args...),
+		qm.From(`user_data`),
+		qm.WhereIn(`user_data.user_id in ?`, args...),
 	)
 	if mods != nil {
 		mods.Apply(query)
@@ -480,22 +468,22 @@ func (userOptionL) LoadUser(ctx context.Context, e boil.ContextExecutor, singula
 
 	results, err := query.QueryContext(ctx, e)
 	if err != nil {
-		return errors.Wrap(err, "failed to eager load User")
+		return errors.Wrap(err, "failed to eager load UserDatum")
 	}
 
-	var resultSlice []*User
+	var resultSlice []*UserDatum
 	if err = queries.Bind(results, &resultSlice); err != nil {
-		return errors.Wrap(err, "failed to bind eager loaded slice User")
+		return errors.Wrap(err, "failed to bind eager loaded slice UserDatum")
 	}
 
 	if err = results.Close(); err != nil {
-		return errors.Wrap(err, "failed to close results of eager load for user")
+		return errors.Wrap(err, "failed to close results of eager load for user_data")
 	}
 	if err = results.Err(); err != nil {
-		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for user")
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for user_data")
 	}
 
-	if len(userAfterSelectHooks) != 0 {
+	if len(userDatumAfterSelectHooks) != 0 {
 		for _, obj := range resultSlice {
 			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
 				return err
@@ -511,20 +499,20 @@ func (userOptionL) LoadUser(ctx context.Context, e boil.ContextExecutor, singula
 		foreign := resultSlice[0]
 		object.R.User = foreign
 		if foreign.R == nil {
-			foreign.R = &userR{}
+			foreign.R = &userDatumR{}
 		}
-		foreign.R.UserOptions = append(foreign.R.UserOptions, object)
+		foreign.R.UserUserOption = object
 		return nil
 	}
 
 	for _, local := range slice {
 		for _, foreign := range resultSlice {
-			if queries.Equal(local.UserID, foreign.ID) {
+			if local.UserID == foreign.UserID {
 				local.R.User = foreign
 				if foreign.R == nil {
-					foreign.R = &userR{}
+					foreign.R = &userDatumR{}
 				}
-				foreign.R.UserOptions = append(foreign.R.UserOptions, local)
+				foreign.R.UserUserOption = local
 				break
 			}
 		}
@@ -535,8 +523,8 @@ func (userOptionL) LoadUser(ctx context.Context, e boil.ContextExecutor, singula
 
 // SetUser of the userOption to the related item.
 // Sets o.R.User to related.
-// Adds o to related.R.UserOptions.
-func (o *UserOption) SetUser(ctx context.Context, exec boil.ContextExecutor, insert bool, related *User) error {
+// Adds o to related.R.UserUserOption.
+func (o *UserOption) SetUser(ctx context.Context, exec boil.ContextExecutor, insert bool, related *UserDatum) error {
 	var err error
 	if insert {
 		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
@@ -549,7 +537,7 @@ func (o *UserOption) SetUser(ctx context.Context, exec boil.ContextExecutor, ins
 		strmangle.SetParamNames("\"", "\"", 1, []string{"user_id"}),
 		strmangle.WhereClause("\"", "\"", 2, userOptionPrimaryKeyColumns),
 	)
-	values := []interface{}{related.ID, o.ID}
+	values := []interface{}{related.UserID, o.UserID}
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -560,7 +548,7 @@ func (o *UserOption) SetUser(ctx context.Context, exec boil.ContextExecutor, ins
 		return errors.Wrap(err, "failed to update local table")
 	}
 
-	queries.Assign(&o.UserID, related.ID)
+	o.UserID = related.UserID
 	if o.R == nil {
 		o.R = &userOptionR{
 			User: related,
@@ -570,46 +558,13 @@ func (o *UserOption) SetUser(ctx context.Context, exec boil.ContextExecutor, ins
 	}
 
 	if related.R == nil {
-		related.R = &userR{
-			UserOptions: UserOptionSlice{o},
+		related.R = &userDatumR{
+			UserUserOption: o,
 		}
 	} else {
-		related.R.UserOptions = append(related.R.UserOptions, o)
+		related.R.UserUserOption = o
 	}
 
-	return nil
-}
-
-// RemoveUser relationship.
-// Sets o.R.User to nil.
-// Removes o from all passed in related items' relationships struct.
-func (o *UserOption) RemoveUser(ctx context.Context, exec boil.ContextExecutor, related *User) error {
-	var err error
-
-	queries.SetScanner(&o.UserID, nil)
-	if _, err = o.Update(ctx, exec, boil.Whitelist("user_id")); err != nil {
-		return errors.Wrap(err, "failed to update local table")
-	}
-
-	if o.R != nil {
-		o.R.User = nil
-	}
-	if related == nil || related.R == nil {
-		return nil
-	}
-
-	for i, ri := range related.R.UserOptions {
-		if queries.Equal(o.UserID, ri.UserID) {
-			continue
-		}
-
-		ln := len(related.R.UserOptions)
-		if ln > 1 && i < ln-1 {
-			related.R.UserOptions[i] = related.R.UserOptions[ln-1]
-		}
-		related.R.UserOptions = related.R.UserOptions[:ln-1]
-		break
-	}
 	return nil
 }
 
@@ -626,7 +581,7 @@ func UserOptions(mods ...qm.QueryMod) userOptionQuery {
 
 // FindUserOption retrieves a single record by ID with an executor.
 // If selectCols is empty Find will return all columns.
-func FindUserOption(ctx context.Context, exec boil.ContextExecutor, iD string, selectCols ...string) (*UserOption, error) {
+func FindUserOption(ctx context.Context, exec boil.ContextExecutor, userID string, selectCols ...string) (*UserOption, error) {
 	userOptionObj := &UserOption{}
 
 	sel := "*"
@@ -634,10 +589,10 @@ func FindUserOption(ctx context.Context, exec boil.ContextExecutor, iD string, s
 		sel = strings.Join(strmangle.IdentQuoteSlice(dialect.LQ, dialect.RQ, selectCols), ",")
 	}
 	query := fmt.Sprintf(
-		"select %s from \"user_option\" where \"id\"=$1", sel,
+		"select %s from \"user_option\" where \"user_id\"=$1", sel,
 	)
 
-	q := queries.Raw(query, iD)
+	q := queries.Raw(query, userID)
 
 	err := q.Bind(ctx, exec, userOptionObj)
 	if err != nil {
@@ -1013,7 +968,7 @@ func (o *UserOption) Delete(ctx context.Context, exec boil.ContextExecutor) (int
 	}
 
 	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), userOptionPrimaryKeyMapping)
-	sql := "DELETE FROM \"user_option\" WHERE \"id\"=$1"
+	sql := "DELETE FROM \"user_option\" WHERE \"user_id\"=$1"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -1110,7 +1065,7 @@ func (o UserOptionSlice) DeleteAll(ctx context.Context, exec boil.ContextExecuto
 // Reload refetches the object from the database
 // using the primary keys with an executor.
 func (o *UserOption) Reload(ctx context.Context, exec boil.ContextExecutor) error {
-	ret, err := FindUserOption(ctx, exec, o.ID)
+	ret, err := FindUserOption(ctx, exec, o.UserID)
 	if err != nil {
 		return err
 	}
@@ -1149,16 +1104,16 @@ func (o *UserOptionSlice) ReloadAll(ctx context.Context, exec boil.ContextExecut
 }
 
 // UserOptionExists checks if the UserOption row exists.
-func UserOptionExists(ctx context.Context, exec boil.ContextExecutor, iD string) (bool, error) {
+func UserOptionExists(ctx context.Context, exec boil.ContextExecutor, userID string) (bool, error) {
 	var exists bool
-	sql := "select exists(select 1 from \"user_option\" where \"id\"=$1 limit 1)"
+	sql := "select exists(select 1 from \"user_option\" where \"user_id\"=$1 limit 1)"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
 		fmt.Fprintln(writer, sql)
-		fmt.Fprintln(writer, iD)
+		fmt.Fprintln(writer, userID)
 	}
-	row := exec.QueryRowContext(ctx, sql, iD)
+	row := exec.QueryRowContext(ctx, sql, userID)
 
 	err := row.Scan(&exists)
 	if err != nil {
@@ -1170,5 +1125,5 @@ func UserOptionExists(ctx context.Context, exec boil.ContextExecutor, iD string)
 
 // Exists checks if the UserOption row exists.
 func (o *UserOption) Exists(ctx context.Context, exec boil.ContextExecutor) (bool, error) {
-	return UserOptionExists(ctx, exec, o.ID)
+	return UserOptionExists(ctx, exec, o.UserID)
 }

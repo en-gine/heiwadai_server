@@ -87,8 +87,8 @@ func (u *AdminCouponUsecase) CreateCustomCoupon(
 
 	return customCoupon, nil
 }
-func (u *AdminCouponUsecase) SaveCustomCoupon(couponId uuid.UUID) error {
-	coupon, err := u.couponQuery.GetByID(couponId)
+func (u *AdminCouponUsecase) SaveCustomCoupon(couponID uuid.UUID) error {
+	coupon, err := u.couponQuery.GetByID(couponID)
 
 	if err != nil {
 		return errors.NewDomainError(errors.QueryError, err.Error())
@@ -112,8 +112,8 @@ func (u *AdminCouponUsecase) SaveCustomCoupon(couponId uuid.UUID) error {
 	}
 	return nil
 }
-func (u *AdminCouponUsecase) AttachCustomCouponToAllUser(couponId uuid.UUID) (*int, *errors.DomainError) {
-	coupon, err := u.couponQuery.GetByID(couponId)
+func (u *AdminCouponUsecase) AttachCustomCouponToAllUser(couponID uuid.UUID) (*int, *errors.DomainError) {
+	coupon, err := u.couponQuery.GetByID(couponID)
 
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())

@@ -17,7 +17,7 @@ type AuthClient struct {
 	client *supa.Client
 }
 
-func NewAuthClient() AuthClient {
+func NewAuthClient() *AuthClient {
 	authURL := os.Getenv("SUPABASE_URL")
 	authKey := os.Getenv("SUPABASE_KEY")
 	if authURL == "" {
@@ -28,17 +28,18 @@ func NewAuthClient() AuthClient {
 	}
 	client := supa.CreateClient(authURL, authKey)
 
-	return AuthClient{
+	return &AuthClient{
 		client: client,
 	}
 }
 
-func (au *AuthClient) SignUp(email string, password string) error {
+func (au *AuthClient) SignUp(email string, password string, userType action.UserType) error {
 
 	ctx := context.Background()
 	_, err := au.client.Auth.SignUp(ctx, supa.UserCredentials{
 		Email:    email,
 		Password: password,
+		Data:     map[string]string{"userType": userType.String()},
 	})
 	if err != nil {
 		return errors.New("Error SignUp" + err.Error())
@@ -92,7 +93,10 @@ func (au *AuthClient) UpdatePassword(password string, token string) error {
 	_, err := au.client.Auth.UpdateUser(ctx, token, map[string]interface{}{
 		"password": password,
 	})
-	return err
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (au *AuthClient) InviteUserByEmail(email string) (uuid.UUID, error) {

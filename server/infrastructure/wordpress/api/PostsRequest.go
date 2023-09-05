@@ -5,9 +5,11 @@ import (
 	"time"
 )
 
+var WPPOSTURL = "https://www.heiwadai-hotel.co.jp/wp-json/wp/v2/posts/"
+
 func GetWPPosts() (*[]types.WPPost, error) {
 	var CacheKey = "wp_posts_cache"
-	var APIURL = "https://www.heiwadai-hotel.co.jp/wp-json/wp/v2/posts/?_embed"
+	var APIURL = WPPOSTURL + "?_embed"
 	var CacheExpiry = 60 * time.Minute
 
 	posts, err := Request[[]types.WPPost](APIURL, CacheKey, CacheExpiry)
@@ -19,7 +21,7 @@ func GetWPPosts() (*[]types.WPPost, error) {
 
 func GetWPPost(id uint) (*types.WPPost, error) {
 	var CacheKey = "wp_post_cache_" + string(rune(id))
-	var APIURL = "https://www.heiwadai-hotel.co.jp/wp-json/wp/v2/posts/" + string(rune(id)) + "?_embed"
+	var APIURL = WPPOSTURL + string(rune(id)) + "?_embed"
 	var CacheExpiry = 60 * time.Minute
 
 	post, err := Request[types.WPPost](APIURL, CacheKey, CacheExpiry)

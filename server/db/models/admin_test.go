@@ -149,7 +149,7 @@ func testAdminsExists(t *testing.T) {
 		t.Error(err)
 	}
 
-	e, err := AdminExists(ctx, tx, o.ID)
+	e, err := AdminExists(ctx, tx, o.AdminID)
 	if err != nil {
 		t.Errorf("Unable to check if Admin exists: %s", err)
 	}
@@ -175,7 +175,7 @@ func testAdminsFind(t *testing.T) {
 		t.Error(err)
 	}
 
-	adminFound, err := FindAdmin(ctx, tx, o.ID)
+	adminFound, err := FindAdmin(ctx, tx, o.AdminID)
 	if err != nil {
 		t.Error(err)
 	}
@@ -519,8 +519,8 @@ func testAdminToManyAuthorMailMagazines(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	queries.Assign(&b.Author, a.ID)
-	queries.Assign(&c.Author, a.ID)
+	queries.Assign(&b.Author, a.AdminID)
+	queries.Assign(&c.Author, a.AdminID)
 	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Fatal(err)
 	}
@@ -563,83 +563,6 @@ func testAdminToManyAuthorMailMagazines(t *testing.T) {
 		t.Fatal(err)
 	}
 	if got := len(a.R.AuthorMailMagazines); got != 2 {
-		t.Error("number of eager loaded records wrong, got:", got)
-	}
-
-	if t.Failed() {
-		t.Logf("%#v", check)
-	}
-}
-
-func testAdminToManyAuthorPosts(t *testing.T) {
-	var err error
-	ctx := context.Background()
-	tx := MustTx(boil.BeginTx(ctx, nil))
-	defer func() { _ = tx.Rollback() }()
-
-	var a Admin
-	var b, c Post
-
-	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, &a, adminDBTypes, true, adminColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Admin struct: %s", err)
-	}
-
-	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-
-	if err = randomize.Struct(seed, &b, postDBTypes, false, postColumnsWithDefault...); err != nil {
-		t.Fatal(err)
-	}
-	if err = randomize.Struct(seed, &c, postDBTypes, false, postColumnsWithDefault...); err != nil {
-		t.Fatal(err)
-	}
-
-	queries.Assign(&b.Author, a.ID)
-	queries.Assign(&c.Author, a.ID)
-	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-	if err = c.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-
-	check, err := a.AuthorPosts().All(ctx, tx)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	bFound, cFound := false, false
-	for _, v := range check {
-		if queries.Equal(v.Author, b.Author) {
-			bFound = true
-		}
-		if queries.Equal(v.Author, c.Author) {
-			cFound = true
-		}
-	}
-
-	if !bFound {
-		t.Error("expected to find b")
-	}
-	if !cFound {
-		t.Error("expected to find c")
-	}
-
-	slice := AdminSlice{&a}
-	if err = a.L.LoadAuthorPosts(ctx, tx, false, (*[]*Admin)(&slice), nil); err != nil {
-		t.Fatal(err)
-	}
-	if got := len(a.R.AuthorPosts); got != 2 {
-		t.Error("number of eager loaded records wrong, got:", got)
-	}
-
-	a.R.AuthorPosts = nil
-	if err = a.L.LoadAuthorPosts(ctx, tx, true, &a, nil); err != nil {
-		t.Fatal(err)
-	}
-	if got := len(a.R.AuthorPosts); got != 2 {
 		t.Error("number of eager loaded records wrong, got:", got)
 	}
 
@@ -693,11 +616,11 @@ func testAdminToManyAddOpAuthorMailMagazines(t *testing.T) {
 		first := x[0]
 		second := x[1]
 
-		if !queries.Equal(a.ID, first.Author) {
-			t.Error("foreign key was wrong value", a.ID, first.Author)
+		if !queries.Equal(a.AdminID, first.Author) {
+			t.Error("foreign key was wrong value", a.AdminID, first.Author)
 		}
-		if !queries.Equal(a.ID, second.Author) {
-			t.Error("foreign key was wrong value", a.ID, second.Author)
+		if !queries.Equal(a.AdminID, second.Author) {
+			t.Error("foreign key was wrong value", a.AdminID, second.Author)
 		}
 
 		if first.R.AuthorAdmin != &a {
@@ -787,11 +710,11 @@ func testAdminToManySetOpAuthorMailMagazines(t *testing.T) {
 	if !queries.IsValuerNil(c.Author) {
 		t.Error("want c's foreign key value to be nil")
 	}
-	if !queries.Equal(a.ID, d.Author) {
-		t.Error("foreign key was wrong value", a.ID, d.Author)
+	if !queries.Equal(a.AdminID, d.Author) {
+		t.Error("foreign key was wrong value", a.AdminID, d.Author)
 	}
-	if !queries.Equal(a.ID, e.Author) {
-		t.Error("foreign key was wrong value", a.ID, e.Author)
+	if !queries.Equal(a.AdminID, e.Author) {
+		t.Error("foreign key was wrong value", a.AdminID, e.Author)
 	}
 
 	if b.R.AuthorAdmin != nil {
@@ -899,254 +822,64 @@ func testAdminToManyRemoveOpAuthorMailMagazines(t *testing.T) {
 	}
 }
 
-func testAdminToManyAddOpAuthorPosts(t *testing.T) {
-	var err error
-
+func testAdminToOneUserManagerUsingAdmin(t *testing.T) {
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
 
-	var a Admin
-	var b, c, d, e Post
+	var local Admin
+	var foreign UserManager
 
 	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, &a, adminDBTypes, false, strmangle.SetComplement(adminPrimaryKeyColumns, adminColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
+	if err := randomize.Struct(seed, &local, adminDBTypes, false, adminColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Admin struct: %s", err)
 	}
-	foreigners := []*Post{&b, &c, &d, &e}
-	for _, x := range foreigners {
-		if err = randomize.Struct(seed, x, postDBTypes, false, strmangle.SetComplement(postPrimaryKeyColumns, postColumnsWithoutDefault)...); err != nil {
-			t.Fatal(err)
-		}
+	if err := randomize.Struct(seed, &foreign, userManagerDBTypes, false, userManagerColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize UserManager struct: %s", err)
 	}
 
-	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-	if err = c.Insert(ctx, tx, boil.Infer()); err != nil {
+	if err := foreign.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Fatal(err)
 	}
 
-	foreignersSplitByInsertion := [][]*Post{
-		{&b, &c},
-		{&d, &e},
-	}
-
-	for i, x := range foreignersSplitByInsertion {
-		err = a.AddAuthorPosts(ctx, tx, i != 0, x...)
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		first := x[0]
-		second := x[1]
-
-		if !queries.Equal(a.ID, first.Author) {
-			t.Error("foreign key was wrong value", a.ID, first.Author)
-		}
-		if !queries.Equal(a.ID, second.Author) {
-			t.Error("foreign key was wrong value", a.ID, second.Author)
-		}
-
-		if first.R.AuthorAdmin != &a {
-			t.Error("relationship was not added properly to the foreign slice")
-		}
-		if second.R.AuthorAdmin != &a {
-			t.Error("relationship was not added properly to the foreign slice")
-		}
-
-		if a.R.AuthorPosts[i*2] != first {
-			t.Error("relationship struct slice not set to correct value")
-		}
-		if a.R.AuthorPosts[i*2+1] != second {
-			t.Error("relationship struct slice not set to correct value")
-		}
-
-		count, err := a.AuthorPosts().Count(ctx, tx)
-		if err != nil {
-			t.Fatal(err)
-		}
-		if want := int64((i + 1) * 2); count != want {
-			t.Error("want", want, "got", count)
-		}
-	}
-}
-
-func testAdminToManySetOpAuthorPosts(t *testing.T) {
-	var err error
-
-	ctx := context.Background()
-	tx := MustTx(boil.BeginTx(ctx, nil))
-	defer func() { _ = tx.Rollback() }()
-
-	var a Admin
-	var b, c, d, e Post
-
-	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, &a, adminDBTypes, false, strmangle.SetComplement(adminPrimaryKeyColumns, adminColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
-	}
-	foreigners := []*Post{&b, &c, &d, &e}
-	for _, x := range foreigners {
-		if err = randomize.Struct(seed, x, postDBTypes, false, strmangle.SetComplement(postPrimaryKeyColumns, postColumnsWithoutDefault)...); err != nil {
-			t.Fatal(err)
-		}
-	}
-
-	if err = a.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-	if err = c.Insert(ctx, tx, boil.Infer()); err != nil {
+	local.AdminID = foreign.ID
+	if err := local.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Fatal(err)
 	}
 
-	err = a.SetAuthorPosts(ctx, tx, false, &b, &c)
+	check, err := local.Admin().One(ctx, tx)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	count, err := a.AuthorPosts().Count(ctx, tx)
-	if err != nil {
+	if check.ID != foreign.ID {
+		t.Errorf("want: %v, got %v", foreign.ID, check.ID)
+	}
+
+	ranAfterSelectHook := false
+	AddUserManagerHook(boil.AfterSelectHook, func(ctx context.Context, e boil.ContextExecutor, o *UserManager) error {
+		ranAfterSelectHook = true
+		return nil
+	})
+
+	slice := AdminSlice{&local}
+	if err = local.L.LoadAdmin(ctx, tx, false, (*[]*Admin)(&slice), nil); err != nil {
 		t.Fatal(err)
 	}
-	if count != 2 {
-		t.Error("count was wrong:", count)
+	if local.R.Admin == nil {
+		t.Error("struct should have been eager loaded")
 	}
 
-	err = a.SetAuthorPosts(ctx, tx, true, &d, &e)
-	if err != nil {
+	local.R.Admin = nil
+	if err = local.L.LoadAdmin(ctx, tx, true, &local, nil); err != nil {
 		t.Fatal(err)
 	}
-
-	count, err = a.AuthorPosts().Count(ctx, tx)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if count != 2 {
-		t.Error("count was wrong:", count)
+	if local.R.Admin == nil {
+		t.Error("struct should have been eager loaded")
 	}
 
-	if !queries.IsValuerNil(b.Author) {
-		t.Error("want b's foreign key value to be nil")
-	}
-	if !queries.IsValuerNil(c.Author) {
-		t.Error("want c's foreign key value to be nil")
-	}
-	if !queries.Equal(a.ID, d.Author) {
-		t.Error("foreign key was wrong value", a.ID, d.Author)
-	}
-	if !queries.Equal(a.ID, e.Author) {
-		t.Error("foreign key was wrong value", a.ID, e.Author)
-	}
-
-	if b.R.AuthorAdmin != nil {
-		t.Error("relationship was not removed properly from the foreign struct")
-	}
-	if c.R.AuthorAdmin != nil {
-		t.Error("relationship was not removed properly from the foreign struct")
-	}
-	if d.R.AuthorAdmin != &a {
-		t.Error("relationship was not added properly to the foreign struct")
-	}
-	if e.R.AuthorAdmin != &a {
-		t.Error("relationship was not added properly to the foreign struct")
-	}
-
-	if a.R.AuthorPosts[0] != &d {
-		t.Error("relationship struct slice not set to correct value")
-	}
-	if a.R.AuthorPosts[1] != &e {
-		t.Error("relationship struct slice not set to correct value")
-	}
-}
-
-func testAdminToManyRemoveOpAuthorPosts(t *testing.T) {
-	var err error
-
-	ctx := context.Background()
-	tx := MustTx(boil.BeginTx(ctx, nil))
-	defer func() { _ = tx.Rollback() }()
-
-	var a Admin
-	var b, c, d, e Post
-
-	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, &a, adminDBTypes, false, strmangle.SetComplement(adminPrimaryKeyColumns, adminColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
-	}
-	foreigners := []*Post{&b, &c, &d, &e}
-	for _, x := range foreigners {
-		if err = randomize.Struct(seed, x, postDBTypes, false, strmangle.SetComplement(postPrimaryKeyColumns, postColumnsWithoutDefault)...); err != nil {
-			t.Fatal(err)
-		}
-	}
-
-	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-
-	err = a.AddAuthorPosts(ctx, tx, true, foreigners...)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	count, err := a.AuthorPosts().Count(ctx, tx)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if count != 4 {
-		t.Error("count was wrong:", count)
-	}
-
-	err = a.RemoveAuthorPosts(ctx, tx, foreigners[:2]...)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	count, err = a.AuthorPosts().Count(ctx, tx)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if count != 2 {
-		t.Error("count was wrong:", count)
-	}
-
-	if !queries.IsValuerNil(b.Author) {
-		t.Error("want b's foreign key value to be nil")
-	}
-	if !queries.IsValuerNil(c.Author) {
-		t.Error("want c's foreign key value to be nil")
-	}
-
-	if b.R.AuthorAdmin != nil {
-		t.Error("relationship was not removed properly from the foreign struct")
-	}
-	if c.R.AuthorAdmin != nil {
-		t.Error("relationship was not removed properly from the foreign struct")
-	}
-	if d.R.AuthorAdmin != &a {
-		t.Error("relationship to a should have been preserved")
-	}
-	if e.R.AuthorAdmin != &a {
-		t.Error("relationship to a should have been preserved")
-	}
-
-	if len(a.R.AuthorPosts) != 2 {
-		t.Error("should have preserved two relationships")
-	}
-
-	// Removal doesn't do a stable deletion for performance so we have to flip the order
-	if a.R.AuthorPosts[1] != &d {
-		t.Error("relationship to d should have been preserved")
-	}
-	if a.R.AuthorPosts[0] != &e {
-		t.Error("relationship to e should have been preserved")
+	if !ranAfterSelectHook {
+		t.Error("failed to run AfterSelect hook for relationship")
 	}
 }
 
@@ -1159,7 +892,7 @@ func testAdminToOneStoreUsingBelongToStore(t *testing.T) {
 	var foreign Store
 
 	seed := randomize.NewSeed()
-	if err := randomize.Struct(seed, &local, adminDBTypes, true, adminColumnsWithDefault...); err != nil {
+	if err := randomize.Struct(seed, &local, adminDBTypes, false, adminColumnsWithDefault...); err != nil {
 		t.Errorf("Unable to randomize Admin struct: %s", err)
 	}
 	if err := randomize.Struct(seed, &foreign, storeDBTypes, false, storeColumnsWithDefault...); err != nil {
@@ -1170,7 +903,7 @@ func testAdminToOneStoreUsingBelongToStore(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	queries.Assign(&local.BelongTo, foreign.ID)
+	local.BelongTo = foreign.ID
 	if err := local.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Fatal(err)
 	}
@@ -1180,7 +913,7 @@ func testAdminToOneStoreUsingBelongToStore(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if !queries.Equal(check.ID, foreign.ID) {
+	if check.ID != foreign.ID {
 		t.Errorf("want: %v, got %v", foreign.ID, check.ID)
 	}
 
@@ -1211,6 +944,59 @@ func testAdminToOneStoreUsingBelongToStore(t *testing.T) {
 	}
 }
 
+func testAdminToOneSetOpUserManagerUsingAdmin(t *testing.T) {
+	var err error
+
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+
+	var a Admin
+	var b, c UserManager
+
+	seed := randomize.NewSeed()
+	if err = randomize.Struct(seed, &a, adminDBTypes, false, strmangle.SetComplement(adminPrimaryKeyColumns, adminColumnsWithoutDefault)...); err != nil {
+		t.Fatal(err)
+	}
+	if err = randomize.Struct(seed, &b, userManagerDBTypes, false, strmangle.SetComplement(userManagerPrimaryKeyColumns, userManagerColumnsWithoutDefault)...); err != nil {
+		t.Fatal(err)
+	}
+	if err = randomize.Struct(seed, &c, userManagerDBTypes, false, strmangle.SetComplement(userManagerPrimaryKeyColumns, userManagerColumnsWithoutDefault)...); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	for i, x := range []*UserManager{&b, &c} {
+		err = a.SetAdmin(ctx, tx, i != 0, x)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if a.R.Admin != x {
+			t.Error("relationship struct not set to correct value")
+		}
+
+		if x.R.AdminAdmin != &a {
+			t.Error("failed to append to foreign relationship struct")
+		}
+		if a.AdminID != x.ID {
+			t.Error("foreign key was wrong value", a.AdminID)
+		}
+
+		if exists, err := AdminExists(ctx, tx, a.AdminID); err != nil {
+			t.Fatal(err)
+		} else if !exists {
+			t.Error("want 'a' to exist")
+		}
+
+	}
+}
 func testAdminToOneSetOpStoreUsingBelongToStore(t *testing.T) {
 	var err error
 
@@ -1252,7 +1038,7 @@ func testAdminToOneSetOpStoreUsingBelongToStore(t *testing.T) {
 		if x.R.BelongToAdmins[0] != &a {
 			t.Error("failed to append to foreign relationship struct")
 		}
-		if !queries.Equal(a.BelongTo, x.ID) {
+		if a.BelongTo != x.ID {
 			t.Error("foreign key was wrong value", a.BelongTo)
 		}
 
@@ -1263,60 +1049,9 @@ func testAdminToOneSetOpStoreUsingBelongToStore(t *testing.T) {
 			t.Fatal("failed to reload", err)
 		}
 
-		if !queries.Equal(a.BelongTo, x.ID) {
+		if a.BelongTo != x.ID {
 			t.Error("foreign key was wrong value", a.BelongTo, x.ID)
 		}
-	}
-}
-
-func testAdminToOneRemoveOpStoreUsingBelongToStore(t *testing.T) {
-	var err error
-
-	ctx := context.Background()
-	tx := MustTx(boil.BeginTx(ctx, nil))
-	defer func() { _ = tx.Rollback() }()
-
-	var a Admin
-	var b Store
-
-	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, &a, adminDBTypes, false, strmangle.SetComplement(adminPrimaryKeyColumns, adminColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
-	}
-	if err = randomize.Struct(seed, &b, storeDBTypes, false, strmangle.SetComplement(storePrimaryKeyColumns, storeColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
-	}
-
-	if err = a.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-
-	if err = a.SetBelongToStore(ctx, tx, true, &b); err != nil {
-		t.Fatal(err)
-	}
-
-	if err = a.RemoveBelongToStore(ctx, tx, &b); err != nil {
-		t.Error("failed to remove relationship")
-	}
-
-	count, err := a.BelongToStore().Count(ctx, tx)
-	if err != nil {
-		t.Error(err)
-	}
-	if count != 0 {
-		t.Error("want no relationships remaining")
-	}
-
-	if a.R.BelongToStore != nil {
-		t.Error("R struct entry should be nil")
-	}
-
-	if !queries.IsValuerNil(a.BelongTo) {
-		t.Error("foreign key value should be nil")
-	}
-
-	if len(b.R.BelongToAdmins) != 0 {
-		t.Error("failed to remove a from b's relationships")
 	}
 }
 
@@ -1394,7 +1129,7 @@ func testAdminsSelect(t *testing.T) {
 }
 
 var (
-	adminDBTypes = map[string]string{`ID`: `uuid`, `Name`: `character varying`, `BelongTo`: `uuid`, `CreateAt`: `timestamp with time zone`, `UpdateAt`: `timestamp with time zone`}
+	adminDBTypes = map[string]string{`AdminID`: `uuid`, `Name`: `character varying`, `BelongTo`: `uuid`, `IsActive`: `boolean`, `CreateAt`: `timestamp with time zone`, `UpdateAt`: `timestamp with time zone`}
 	_            = bytes.MinRead
 )
 

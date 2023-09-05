@@ -555,27 +555,27 @@ func testCouponAttachedUserToOneCouponUsingCoupon(t *testing.T) {
 	}
 }
 
-func testCouponAttachedUserToOneUserUsingUser(t *testing.T) {
+func testCouponAttachedUserToOneUserDatumUsingUser(t *testing.T) {
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
 
 	var local CouponAttachedUser
-	var foreign User
+	var foreign UserDatum
 
 	seed := randomize.NewSeed()
 	if err := randomize.Struct(seed, &local, couponAttachedUserDBTypes, false, couponAttachedUserColumnsWithDefault...); err != nil {
 		t.Errorf("Unable to randomize CouponAttachedUser struct: %s", err)
 	}
-	if err := randomize.Struct(seed, &foreign, userDBTypes, false, userColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize User struct: %s", err)
+	if err := randomize.Struct(seed, &foreign, userDatumDBTypes, false, userDatumColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize UserDatum struct: %s", err)
 	}
 
 	if err := foreign.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Fatal(err)
 	}
 
-	local.UserID = foreign.ID
+	local.UserID = foreign.UserID
 	if err := local.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Fatal(err)
 	}
@@ -585,12 +585,12 @@ func testCouponAttachedUserToOneUserUsingUser(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if check.ID != foreign.ID {
-		t.Errorf("want: %v, got %v", foreign.ID, check.ID)
+	if check.UserID != foreign.UserID {
+		t.Errorf("want: %v, got %v", foreign.UserID, check.UserID)
 	}
 
 	ranAfterSelectHook := false
-	AddUserHook(boil.AfterSelectHook, func(ctx context.Context, e boil.ContextExecutor, o *User) error {
+	AddUserDatumHook(boil.AfterSelectHook, func(ctx context.Context, e boil.ContextExecutor, o *UserDatum) error {
 		ranAfterSelectHook = true
 		return nil
 	})
@@ -669,7 +669,7 @@ func testCouponAttachedUserToOneSetOpCouponUsingCoupon(t *testing.T) {
 
 	}
 }
-func testCouponAttachedUserToOneSetOpUserUsingUser(t *testing.T) {
+func testCouponAttachedUserToOneSetOpUserDatumUsingUser(t *testing.T) {
 	var err error
 
 	ctx := context.Background()
@@ -677,16 +677,16 @@ func testCouponAttachedUserToOneSetOpUserUsingUser(t *testing.T) {
 	defer func() { _ = tx.Rollback() }()
 
 	var a CouponAttachedUser
-	var b, c User
+	var b, c UserDatum
 
 	seed := randomize.NewSeed()
 	if err = randomize.Struct(seed, &a, couponAttachedUserDBTypes, false, strmangle.SetComplement(couponAttachedUserPrimaryKeyColumns, couponAttachedUserColumnsWithoutDefault)...); err != nil {
 		t.Fatal(err)
 	}
-	if err = randomize.Struct(seed, &b, userDBTypes, false, strmangle.SetComplement(userPrimaryKeyColumns, userColumnsWithoutDefault)...); err != nil {
+	if err = randomize.Struct(seed, &b, userDatumDBTypes, false, strmangle.SetComplement(userDatumPrimaryKeyColumns, userDatumColumnsWithoutDefault)...); err != nil {
 		t.Fatal(err)
 	}
-	if err = randomize.Struct(seed, &c, userDBTypes, false, strmangle.SetComplement(userPrimaryKeyColumns, userColumnsWithoutDefault)...); err != nil {
+	if err = randomize.Struct(seed, &c, userDatumDBTypes, false, strmangle.SetComplement(userDatumPrimaryKeyColumns, userDatumColumnsWithoutDefault)...); err != nil {
 		t.Fatal(err)
 	}
 
@@ -697,7 +697,7 @@ func testCouponAttachedUserToOneSetOpUserUsingUser(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	for i, x := range []*User{&b, &c} {
+	for i, x := range []*UserDatum{&b, &c} {
 		err = a.SetUser(ctx, tx, i != 0, x)
 		if err != nil {
 			t.Fatal(err)
@@ -707,10 +707,10 @@ func testCouponAttachedUserToOneSetOpUserUsingUser(t *testing.T) {
 			t.Error("relationship struct not set to correct value")
 		}
 
-		if x.R.CouponAttachedUsers[0] != &a {
+		if x.R.UserCouponAttachedUsers[0] != &a {
 			t.Error("failed to append to foreign relationship struct")
 		}
-		if a.UserID != x.ID {
+		if a.UserID != x.UserID {
 			t.Error("foreign key was wrong value", a.UserID)
 		}
 
