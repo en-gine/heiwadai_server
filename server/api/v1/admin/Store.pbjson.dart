@@ -21,14 +21,13 @@ const StoreRegisterRequest$json = const {
     const {'1': 'Parking', '3': 5, '4': 1, '5': 9, '10': 'Parking'},
     const {'1': 'AccessInfo', '3': 6, '4': 1, '5': 9, '10': 'AccessInfo'},
     const {'1': 'IsActive', '3': 7, '4': 1, '5': 8, '10': 'IsActive'},
-    const {'1': 'Stayable', '3': 8, '4': 1, '5': 8, '10': 'Stayable'},
     const {'1': 'QRCode', '3': 9, '4': 1, '5': 9, '10': 'QRCode'},
     const {'1': 'UnLimitedQRCode', '3': 10, '4': 1, '5': 9, '10': 'UnLimitedQRCode'},
   ],
 };
 
 /// Descriptor for `StoreRegisterRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List storeRegisterRequestDescriptor = $convert.base64Decode('ChRTdG9yZVJlZ2lzdGVyUmVxdWVzdBISCgROYW1lGAEgASgJUgROYW1lEhgKB1ppcENvZGUYAiABKAlSB1ppcENvZGUSGAoHQWRkcmVzcxgDIAEoCVIHQWRkcmVzcxIQCgNUZWwYBCABKAlSA1RlbBIYCgdQYXJraW5nGAUgASgJUgdQYXJraW5nEh4KCkFjY2Vzc0luZm8YBiABKAlSCkFjY2Vzc0luZm8SGgoISXNBY3RpdmUYByABKAhSCElzQWN0aXZlEhoKCFN0YXlhYmxlGAggASgIUghTdGF5YWJsZRIWCgZRUkNvZGUYCSABKAlSBlFSQ29kZRIoCg9VbkxpbWl0ZWRRUkNvZGUYCiABKAlSD1VuTGltaXRlZFFSQ29kZQ==');
+final $typed_data.Uint8List storeRegisterRequestDescriptor = $convert.base64Decode('ChRTdG9yZVJlZ2lzdGVyUmVxdWVzdBISCgROYW1lGAEgASgJUgROYW1lEhgKB1ppcENvZGUYAiABKAlSB1ppcENvZGUSGAoHQWRkcmVzcxgDIAEoCVIHQWRkcmVzcxIQCgNUZWwYBCABKAlSA1RlbBIYCgdQYXJraW5nGAUgASgJUgdQYXJraW5nEh4KCkFjY2Vzc0luZm8YBiABKAlSCkFjY2Vzc0luZm8SGgoISXNBY3RpdmUYByABKAhSCElzQWN0aXZlEhYKBlFSQ29kZRgJIAEoCVIGUVJDb2RlEigKD1VuTGltaXRlZFFSQ29kZRgKIAEoCVIPVW5MaW1pdGVkUVJDb2Rl');
 @$core.Deprecated('Use storeUpdateRequestDescriptor instead')
 const StoreUpdateRequest$json = const {
   '1': 'StoreUpdateRequest',
@@ -41,14 +40,13 @@ const StoreUpdateRequest$json = const {
     const {'1': 'Parking', '3': 6, '4': 1, '5': 9, '10': 'Parking'},
     const {'1': 'AccessInfo', '3': 7, '4': 1, '5': 9, '10': 'AccessInfo'},
     const {'1': 'IsActive', '3': 8, '4': 1, '5': 8, '10': 'IsActive'},
-    const {'1': 'Stayable', '3': 9, '4': 1, '5': 8, '10': 'Stayable'},
     const {'1': 'QRCode', '3': 10, '4': 1, '5': 9, '10': 'QRCode'},
     const {'1': 'UnLimitedQRCode', '3': 11, '4': 1, '5': 9, '10': 'UnLimitedQRCode'},
   ],
 };
 
 /// Descriptor for `StoreUpdateRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List storeUpdateRequestDescriptor = $convert.base64Decode('ChJTdG9yZVVwZGF0ZVJlcXVlc3QSDgoCSUQYASABKAlSAklEEhIKBE5hbWUYAiABKAlSBE5hbWUSGAoHWmlwQ29kZRgDIAEoCVIHWmlwQ29kZRIYCgdBZGRyZXNzGAQgASgJUgdBZGRyZXNzEhAKA1RlbBgFIAEoCVIDVGVsEhgKB1BhcmtpbmcYBiABKAlSB1BhcmtpbmcSHgoKQWNjZXNzSW5mbxgHIAEoCVIKQWNjZXNzSW5mbxIaCghJc0FjdGl2ZRgIIAEoCFIISXNBY3RpdmUSGgoIU3RheWFibGUYCSABKAhSCFN0YXlhYmxlEhYKBlFSQ29kZRgKIAEoCVIGUVJDb2RlEigKD1VuTGltaXRlZFFSQ29kZRgLIAEoCVIPVW5MaW1pdGVkUVJDb2Rl');
+final $typed_data.Uint8List storeUpdateRequestDescriptor = $convert.base64Decode('ChJTdG9yZVVwZGF0ZVJlcXVlc3QSDgoCSUQYASABKAlSAklEEhIKBE5hbWUYAiABKAlSBE5hbWUSGAoHWmlwQ29kZRgDIAEoCVIHWmlwQ29kZRIYCgdBZGRyZXNzGAQgASgJUgdBZGRyZXNzEhAKA1RlbBgFIAEoCVIDVGVsEhgKB1BhcmtpbmcYBiABKAlSB1BhcmtpbmcSHgoKQWNjZXNzSW5mbxgHIAEoCVIKQWNjZXNzSW5mbxIaCghJc0FjdGl2ZRgIIAEoCFIISXNBY3RpdmUSFgoGUVJDb2RlGAogASgJUgZRUkNvZGUSKAoPVW5MaW1pdGVkUVJDb2RlGAsgASgJUg9VbkxpbWl0ZWRRUkNvZGU=');
 const $core.Map<$core.String, $core.dynamic> StoreControllerServiceBase$json = const {
   '1': 'StoreController',
   '2': const [

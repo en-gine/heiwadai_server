@@ -19,11 +19,10 @@ const StoreResponse$json = const {
     const {'1': 'Parking', '3': 5, '4': 1, '5': 9, '10': 'Parking'},
     const {'1': 'AccessInfo', '3': 6, '4': 1, '5': 9, '10': 'AccessInfo'},
     const {'1': 'IsActive', '3': 7, '4': 1, '5': 8, '10': 'IsActive'},
-    const {'1': 'Stayable', '3': 8, '4': 1, '5': 8, '10': 'Stayable'},
     const {'1': 'QRCode', '3': 9, '4': 1, '5': 9, '10': 'QRCode'},
     const {'1': 'UnLimitedQRCode', '3': 10, '4': 1, '5': 9, '10': 'UnLimitedQRCode'},
   ],
 };
 
 /// Descriptor for `StoreResponse`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List storeResponseDescriptor = $convert.base64Decode('Cg1TdG9yZVJlc3BvbnNlEhIKBE5hbWUYASABKAlSBE5hbWUSGAoHWmlwQ29kZRgCIAEoCVIHWmlwQ29kZRIYCgdBZGRyZXNzGAMgASgJUgdBZGRyZXNzEhAKA1RlbBgEIAEoCVIDVGVsEhgKB1BhcmtpbmcYBSABKAlSB1BhcmtpbmcSHgoKQWNjZXNzSW5mbxgGIAEoCVIKQWNjZXNzSW5mbxIaCghJc0FjdGl2ZRgHIAEoCFIISXNBY3RpdmUSGgoIU3RheWFibGUYCCABKAhSCFN0YXlhYmxlEhYKBlFSQ29kZRgJIAEoCVIGUVJDb2RlEigKD1VuTGltaXRlZFFSQ29kZRgKIAEoCVIPVW5MaW1pdGVkUVJDb2Rl');
+final $typed_data.Uint8List storeResponseDescriptor = $convert.base64Decode('Cg1TdG9yZVJlc3BvbnNlEhIKBE5hbWUYASABKAlSBE5hbWUSGAoHWmlwQ29kZRgCIAEoCVIHWmlwQ29kZRIYCgdBZGRyZXNzGAMgASgJUgdBZGRyZXNzEhAKA1RlbBgEIAEoCVIDVGVsEhgKB1BhcmtpbmcYBSABKAlSB1BhcmtpbmcSHgoKQWNjZXNzSW5mbxgGIAEoCVIKQWNjZXNzSW5mbxIaCghJc0FjdGl2ZRgHIAEoCFIISXNBY3RpdmUSFgoGUVJDb2RlGAkgASgJUgZRUkNvZGUSKAoPVW5MaW1pdGVkUVJDb2RlGAogASgJUg9VbkxpbWl0ZWRRUkNvZGU=');

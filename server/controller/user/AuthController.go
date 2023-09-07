@@ -9,7 +9,7 @@ import (
 	"server/infrastructure/logger"
 
 	"github.com/Songmu/go-httpdate"
-	"github.com/bufbuild/connect-go"
+	connect "github.com/bufbuild/connect-go"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 

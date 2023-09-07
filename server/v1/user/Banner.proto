@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package server.user;
+
+import "google/protobuf/empty.proto";
+
+option go_package = "server/api/v1";
+
+message Banner {
+  string ImageURL = 1;
+  string URL = 2;
+}
+
+message BannerResponse {
+  repeated Banner banners = 1;
+}
+
+service BannerController {
+  rpc GetBanner(google.protobuf.Empty) returns (BannerResponse) {}
+}

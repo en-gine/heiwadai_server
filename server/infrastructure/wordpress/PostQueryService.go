@@ -6,6 +6,7 @@ import (
 	"server/infrastructure/logger"
 	"server/infrastructure/wordpress/api"
 	"server/infrastructure/wordpress/types"
+	"time"
 )
 
 var _ queryservice.IPostQueryService = &PostQueryService{}
@@ -41,11 +42,13 @@ func (pq *PostQueryService) GetAll() ([]*entity.Post, error) {
 }
 
 func WPPostToEntity(wppost *types.WPPost) (entitie *entity.Post) {
+	postDate, _ := time.Parse("2006-01-02T15:04:05", wppost.Date)
 	entity := &entity.Post{
-		ID:      wppost.ID,
-		Title:   wppost.Title.Rendered,
-		Content: wppost.Content.Rendered,
-		Author:  wppost.Embedded.Author[0].Name,
+		ID:       wppost.ID,
+		Title:    wppost.Title.Rendered,
+		Content:  wppost.Content.Rendered,
+		Author:   wppost.Embedded.Author[0].Name,
+		PostDate: postDate,
 	}
 	return entity
 }

@@ -18,7 +18,6 @@ class StoreResponse extends $pb.GeneratedMessage {
     ..aOS(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'Parking', protoName: 'Parking')
     ..aOS(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'AccessInfo', protoName: 'AccessInfo')
     ..aOB(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'IsActive', protoName: 'IsActive')
-    ..aOB(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'Stayable', protoName: 'Stayable')
     ..aOS(9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'QRCode', protoName: 'QRCode')
     ..aOS(10, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'UnLimitedQRCode', protoName: 'UnLimitedQRCode')
     ..hasRequiredFields = false
@@ -33,7 +32,6 @@ class StoreResponse extends $pb.GeneratedMessage {
     $core.String? parking,
     $core.String? accessInfo,
     $core.bool? isActive,
-    $core.bool? stayable,
     $core.String? qRCode,
     $core.String? unLimitedQRCode,
   }) {
@@ -58,9 +56,6 @@ class StoreResponse extends $pb.GeneratedMessage {
     }
     if (isActive != null) {
       _result.isActive = isActive;
-    }
-    if (stayable != null) {
-      _result.stayable = stayable;
     }
     if (qRCode != null) {
       _result.qRCode = qRCode;
@@ -154,30 +149,21 @@ class StoreResponse extends $pb.GeneratedMessage {
   @$pb.TagNumber(7)
   void clearIsActive() => clearField(7);
 
-  @$pb.TagNumber(8)
-  $core.bool get stayable => $_getBF(7);
-  @$pb.TagNumber(8)
-  set stayable($core.bool v) { $_setBool(7, v); }
-  @$pb.TagNumber(8)
-  $core.bool hasStayable() => $_has(7);
-  @$pb.TagNumber(8)
-  void clearStayable() => clearField(8);
-
   @$pb.TagNumber(9)
-  $core.String get qRCode => $_getSZ(8);
+  $core.String get qRCode => $_getSZ(7);
   @$pb.TagNumber(9)
-  set qRCode($core.String v) { $_setString(8, v); }
+  set qRCode($core.String v) { $_setString(7, v); }
   @$pb.TagNumber(9)
-  $core.bool hasQRCode() => $_has(8);
+  $core.bool hasQRCode() => $_has(7);
   @$pb.TagNumber(9)
   void clearQRCode() => clearField(9);
 
   @$pb.TagNumber(10)
-  $core.String get unLimitedQRCode => $_getSZ(9);
+  $core.String get unLimitedQRCode => $_getSZ(8);
   @$pb.TagNumber(10)
-  set unLimitedQRCode($core.String v) { $_setString(9, v); }
+  set unLimitedQRCode($core.String v) { $_setString(8, v); }
   @$pb.TagNumber(10)
-  $core.bool hasUnLimitedQRCode() => $_has(9);
+  $core.bool hasUnLimitedQRCode() => $_has(8);
   @$pb.TagNumber(10)
   void clearUnLimitedQRCode() => clearField(10);
 }
