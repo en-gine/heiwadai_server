@@ -7,19 +7,18 @@ import (
 )
 
 type Store struct {
-	ID                uuid.UUID
-	Name              string
-	BranchName        *string
-	ZipCode           string
-	Address           string
-	Tel               string
-	SiteURL           string
-	StampImageURL     string
-	Stayable          bool
-	StayableStoreInfo *StayableStoreInfo
-	IsActive          bool
-	QRCode            uuid.UUID
-	UnLimitedQRCode   uuid.UUID
+	ID              uuid.UUID
+	Name            string
+	BranchName      *string
+	ZipCode         string
+	Address         string
+	Tel             string
+	SiteURL         string
+	StampImageURL   string
+	Stayable        bool
+	IsActive        bool
+	QRCode          uuid.UUID
+	UnLimitedQRCode uuid.UUID
 }
 
 type StayableStoreInfo struct {
@@ -29,6 +28,11 @@ type StayableStoreInfo struct {
 	AccessInfo      string
 	RestAPIURL      string
 	BookingSystemID string
+}
+
+type StayableStore struct {
+	*Store
+	*StayableStoreInfo
 }
 
 func CreateStore(
@@ -42,23 +46,19 @@ func CreateStore(
 	Stayable bool,
 	StayableStoreInfo *StayableStoreInfo,
 ) (*Store, *errors.DomainError) {
-	if Stayable && StayableStoreInfo == nil {
-		return nil, errors.NewDomainError(errors.InvalidParameter, "Stayableがtrueの場合、StayableStoreInfoは必須です。")
-	}
 	return &Store{
-		ID:                uuid.New(),
-		Name:              Name,
-		BranchName:        BranchName,
-		ZipCode:           ZipCode,
-		Address:           Address,
-		Tel:               Tel,
-		SiteURL:           SiteURL,
-		StampImageURL:     StampImageURL,
-		Stayable:          Stayable,
-		StayableStoreInfo: StayableStoreInfo,
-		IsActive:          true,
-		QRCode:            uuid.New(),
-		UnLimitedQRCode:   uuid.New(),
+		ID:              uuid.New(),
+		Name:            Name,
+		BranchName:      BranchName,
+		ZipCode:         ZipCode,
+		Address:         Address,
+		Tel:             Tel,
+		SiteURL:         SiteURL,
+		StampImageURL:   StampImageURL,
+		Stayable:        Stayable,
+		IsActive:        true,
+		QRCode:          uuid.New(),
+		UnLimitedQRCode: uuid.New(),
 	}, nil
 }
 
@@ -80,6 +80,25 @@ func CreateStayableStoreInfo(
 	}
 }
 
+func CreateStayableStore(
+	Store *Store,
+	StayableInfo *StayableStoreInfo,
+) (*StayableStore, *errors.DomainError) {
+	if Store == nil {
+		return nil, errors.NewDomainError(errors.InvalidParameter, "Storeがnilです。")
+	}
+	if StayableInfo == nil {
+		return nil, errors.NewDomainError(errors.InvalidParameter, "StayableInfoがnilです。")
+	}
+	if !Store.Stayable {
+		return nil, errors.NewDomainError(errors.InvalidParameter, "Stayableがtrueである必要があります。")
+	}
+	return &StayableStore{
+		Store,
+		StayableInfo,
+	}, nil
+}
+
 func RegenStore(
 	ID uuid.UUID,
 	Name string,
@@ -90,25 +109,23 @@ func RegenStore(
 	SiteURL string,
 	StampImageURL string,
 	Stayable bool,
-	StayableStoreInfo *StayableStoreInfo,
 	IsActive bool,
 	QRCode uuid.UUID,
 	UnLimitedQRCode uuid.UUID,
 ) *Store {
 	return &Store{
-		ID:                ID,
-		Name:              Name,
-		BranchName:        BranchName,
-		ZipCode:           ZipCode,
-		Address:           Address,
-		Tel:               Tel,
-		SiteURL:           SiteURL,
-		StampImageURL:     StampImageURL,
-		Stayable:          Stayable,
-		StayableStoreInfo: StayableStoreInfo,
-		IsActive:          IsActive,
-		QRCode:            QRCode,
-		UnLimitedQRCode:   UnLimitedQRCode,
+		ID:              ID,
+		Name:            Name,
+		BranchName:      BranchName,
+		ZipCode:         ZipCode,
+		Address:         Address,
+		Tel:             Tel,
+		SiteURL:         SiteURL,
+		StampImageURL:   StampImageURL,
+		Stayable:        Stayable,
+		IsActive:        IsActive,
+		QRCode:          QRCode,
+		UnLimitedQRCode: UnLimitedQRCode,
 	}
 }
 
@@ -130,14 +147,12 @@ func RegenStayableStoreInfo(
 	}
 }
 
-func (s *Store) StayableStore(
-	Stores []*Store,
-) []*Store {
-	var stayableStore []*Store
-	for _, store := range Stores {
-		if store.Stayable {
-			stayableStore = append(stayableStore, store)
-		}
+func RegenStayableStore(
+	Store *Store,
+	StayableInfo *StayableStoreInfo,
+) *StayableStore {
+	return &StayableStore{
+		Store,
+		StayableInfo,
 	}
-	return stayableStore
 }

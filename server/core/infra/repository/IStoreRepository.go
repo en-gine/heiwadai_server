@@ -5,5 +5,5 @@ import (
 )
 
 type IStoreRepository interface {
-	Save(store *entity.Store) error
+	Save(store *entity.Store, stayableInfo *entity.StayableStoreInfo) error
 }

@@ -91,7 +91,7 @@ func (u *StoreUsecase) Create(
 	if domainErr != nil {
 		return nil, domainErr
 	}
-	err := u.storeRepository.Save(store)
+	err := u.storeRepository.Save(store, stayableInfo)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
 	}
@@ -168,13 +168,12 @@ func (u *StoreUsecase) Update(
 		SiteURL,
 		StampImageURL,
 		Stayable,
-		stayableInfo,
 		IsActive,
 		QRCode,
 		UnLimitedQRCode,
 	)
 
-	err = u.storeRepository.Save(updateStore)
+	err = u.storeRepository.Save(updateStore, stayableInfo)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
 	}

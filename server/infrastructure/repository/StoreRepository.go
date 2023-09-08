@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"server/core/entity"
 	"server/core/infra/repository"
 	"server/db/models"
@@ -27,7 +26,7 @@ func NewStoreRepository() *StoreRepository {
 	}
 }
 
-func (pr *StoreRepository) Save(updateStore *entity.Store) error {
+func (pr *StoreRepository) Save(updateStore *entity.Store, stayableInfo *entity.StayableStoreInfo) error {
 
 	store := models.Store{
 		ID:              updateStore.ID.String(),
@@ -51,16 +50,16 @@ func (pr *StoreRepository) Save(updateStore *entity.Store) error {
 		tran.Rollback()
 		return err
 	}
-	fmt.Println("updateStore.StayableStoreInfo", updateStore.StayableStoreInfo)
-	if updateStore.StayableStoreInfo != nil {
+
+	if stayableInfo != nil {
 		StayableStoreInfo := &models.StayableStoreInfo{
 			StoreID:         updateStore.ID.String(),
-			Parking:         updateStore.StayableStoreInfo.Parking,
-			Latitude:        updateStore.StayableStoreInfo.Latitude,
-			Longitude:       updateStore.StayableStoreInfo.Longitude,
-			AccessInfo:      updateStore.StayableStoreInfo.AccessInfo,
-			RestAPIURL:      updateStore.StayableStoreInfo.RestAPIURL,
-			BookingSystemID: updateStore.StayableStoreInfo.BookingSystemID,
+			Parking:         stayableInfo.Parking,
+			Latitude:        stayableInfo.Latitude,
+			Longitude:       stayableInfo.Longitude,
+			AccessInfo:      stayableInfo.AccessInfo,
+			RestAPIURL:      stayableInfo.RestAPIURL,
+			BookingSystemID: stayableInfo.BookingSystemID,
 		}
 		err = StayableStoreInfo.Upsert(context.Background(), pr.db, true, []string{"store_id"}, boil.Infer(), boil.Infer())
 		if err != nil {
