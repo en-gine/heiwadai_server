@@ -10,25 +10,25 @@ import 'dart:async' as $async;
 import 'package:protobuf/protobuf.dart' as $pb;
 
 import 'dart:core' as $core;
-import '../../google/protobuf/empty.pb.dart' as $3;
-import 'Reservation.pb.dart' as $8;
+import '../../google/protobuf/empty.pb.dart' as $1;
+import 'Reservation.pb.dart' as $10;
 import 'Reservation.pbjson.dart';
 
 export 'Reservation.pb.dart';
 
 abstract class ReservationControllerServiceBase extends $pb.GeneratedService {
-  $async.Future<$8.ReservationResponse> getReservation($pb.ServerContext ctx, $3.Empty request);
+  $async.Future<$10.ReservationResponse> getReservation($pb.ServerContext ctx, $1.Empty request);
 
   $pb.GeneratedMessage createRequest($core.String method) {
     switch (method) {
-      case 'GetReservation': return $3.Empty();
+      case 'GetReservation': return $1.Empty();
       default: throw $core.ArgumentError('Unknown method: $method');
     }
   }
 
   $async.Future<$pb.GeneratedMessage> handleCall($pb.ServerContext ctx, $core.String method, $pb.GeneratedMessage request) {
     switch (method) {
-      case 'GetReservation': return this.getReservation(ctx, request as $3.Empty);
+      case 'GetReservation': return this.getReservation(ctx, request as $1.Empty);
       default: throw $core.ArgumentError('Unknown method: $method');
     }
   }

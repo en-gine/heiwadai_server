@@ -2,14 +2,39 @@ syntax = "proto3";
 
 package server.shared;
 
-message StoreResponse {
-  string Name = 1;
-  string ZipCode = 2;
-  string Address = 3;
-  string Tel = 4;
-  string Parking = 5;
-  string AccessInfo = 6;
-  bool IsActive = 7;
-  string QRCode = 9;
-  string UnLimitedQRCode = 10;
+message Store {
+  string ID = 1; // uuid.UUID
+  string Name = 2;
+  string BranchName = 3; 
+  string ZipCode = 4;
+  string Address = 5;
+  string Tel = 6;
+  string SiteURL = 7;
+  string StampImageURL = 8;
+  bool Stayable = 9;
+  bool IsActive = 10;
+  string QRCode = 11; // uuid.UUID
+  string UnLimitedQRCode = 12; // uuid.UUID
+}
+
+message Stores {
+  repeated Store Stores = 1;
+}
+
+message StayableStoreInfo {
+  string Parking = 1;
+  double Latitude = 2; 
+  double Longitude = 3; 
+  string AccessInfo = 4;
+  string RestAPIURL = 5;
+  string BookingSystemID = 6;
+}
+
+message StayableStore {
+  Store Store = 1;
+  StayableStoreInfo Info = 2;
+}
+
+message StayableStores {
+  repeated StayableStore StayableStores = 1;
 }

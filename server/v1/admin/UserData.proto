@@ -47,6 +47,6 @@ message UserDeleteRequest{
 }
 
 service UserDataController {
-  rpc Update(UserUpdateDataRequest) returns (UserDataResponse) {}
+  rpc Update(UserUpdateDataRequest) returns (google.protobuf.Empty) {}
   rpc Delete(UserDeleteRequest) returns (google.protobuf.Empty) {}
 }

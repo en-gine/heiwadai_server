@@ -3,34 +3,50 @@ syntax = "proto3";
 package server.admin;
 
 import "v1/shared/Store.proto";
+import "google/protobuf/empty.proto";
 
 message StoreRegisterRequest {
   string Name = 1;
-  string ZipCode = 2;
-  string Address = 3;
-  string Tel = 4;
-  string Parking = 5;
-  string AccessInfo = 6;
-  bool IsActive = 7;
-  string QRCode = 9;
-  string UnLimitedQRCode = 10;
+  string BranchName = 2;
+  string ZipCode = 3;
+  string Address = 4;
+  string Tel = 5;
+  string SiteURL = 6;
+  string StampImageURL = 7;
+  bool Stayable = 8;
+  bool IsActive = 9;
+  string QRCode = 10; 
+  string UnLimitedQRCode = 11;
+  StayableInfo StayableInfo = 12;
 }
 
 message StoreUpdateRequest {
   string ID = 1;
   string Name = 2;
-  string ZipCode = 3;
-  string Address = 4;
-  string Tel = 5;
-  string Parking = 6;
-  string AccessInfo = 7;
-  bool IsActive = 8;
-  string QRCode = 10;
-  string UnLimitedQRCode = 11;
+  string BranchName = 3; 
+  string ZipCode = 4;
+  string Address = 5;
+  string Tel = 6;
+  string SiteURL = 7;
+  string StampImageURL = 8;
+  bool Stayable = 9;
+  bool IsActive = 10;
+  string QRCode = 11;
+  string UnLimitedQRCode = 12;
+  StayableInfo StayableInfo = 13;
+}
+
+message StayableInfo {
+  string Parking = 1;
+  double Latitude = 2; 
+  double Longitude = 3; 
+  string AccessInfo = 4;
+  string RestAPIURL = 5;
+  string BookingSystemID = 6;
 }
 
 service StoreController {
-  rpc Register(StoreRegisterRequest) returns (server.shared.StoreResponse) {}
-  rpc Update(StoreUpdateRequest) returns (server.shared.StoreResponse) {}
+  rpc Register(StoreRegisterRequest) returns (google.protobuf.Empty) {}
+  rpc Update(StoreUpdateRequest) returns (google.protobuf.Empty) {}
 }
 

@@ -27,14 +27,24 @@ func (u *StoreUsecase) GetAll() ([]*entity.Store, *errors.DomainError) {
 	return stores, nil
 }
 
-func (u *StoreUsecase) GetStayables() ([]*entity.Store, *errors.DomainError) {
+func (u *StoreUsecase) GetStayables() ([]*entity.StayableStore, *errors.DomainError) {
 
-	stores, err := u.storeQuery.GetActiveAll()
+	stores, err := u.storeQuery.GetStayables()
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())
 	}
 
 	return stores, nil
+}
+
+func (u *StoreUsecase) GetStayableByID(id uuid.UUID) (*entity.StayableStore, *errors.DomainError) {
+
+	stayableStore, err := u.storeQuery.GetStayableByID(id)
+	if err != nil {
+		return nil, errors.NewDomainError(errors.QueryError, err.Error())
+	}
+
+	return stayableStore, nil
 }
 
 func (u *StoreUsecase) GetByID(ID uuid.UUID) (*entity.Store, *errors.DomainError) {

@@ -1,34 +1,38 @@
 package entity
 
-import "time"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 type UserAttachedCoupon struct {
-	*User
+	UserID uuid.UUID
 	*Coupon
 	UsedAt *time.Time
 }
 
-func CreateUserAttachedCoupon(user *User, coupon *Coupon) *UserAttachedCoupon {
+func CreateUserAttachedCoupon(userID uuid.UUID, coupon *Coupon) *UserAttachedCoupon {
 	return &UserAttachedCoupon{
-		User:   user,
+		UserID: userID,
 		Coupon: coupon,
 		UsedAt: nil,
 	}
 }
 
-func UseUserAttachedCoupon(user *User, coupon *Coupon) *UserAttachedCoupon {
+func UseUserAttachedCoupon(userID uuid.UUID, coupon *Coupon) *UserAttachedCoupon {
 	now := time.Now()
 	return &UserAttachedCoupon{
-		User:   user,
+		UserID: userID,
 		Coupon: coupon,
 		UsedAt: &now,
 	}
 }
 
-func RegenUserAttachedCoupon(user *User, coupon *Coupon, useAt *time.Time) *UserAttachedCoupon {
+func RegenUserAttachedCoupon(userID uuid.UUID, coupon *Coupon, useAt *time.Time) *UserAttachedCoupon {
 
 	return &UserAttachedCoupon{
-		User:   user,
+		UserID: userID,
 		Coupon: coupon,
 		UsedAt: useAt,
 	}

@@ -8,7 +8,7 @@
 import 'dart:core' as $core;
 import 'dart:convert' as $convert;
 import 'dart:typed_data' as $typed_data;
-import '../../google/protobuf/empty.pbjson.dart' as $3;
+import '../../google/protobuf/empty.pbjson.dart' as $1;
 
 @$core.Deprecated('Use bannerDescriptor instead')
 const Banner$json = const {
@@ -40,7 +40,7 @@ const $core.Map<$core.String, $core.dynamic> BannerControllerServiceBase$json = 
 
 @$core.Deprecated('Use bannerControllerServiceDescriptor instead')
 const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>> BannerControllerServiceBase$messageJson = const {
-  '.google.protobuf.Empty': $3.Empty$json,
+  '.google.protobuf.Empty': $1.Empty$json,
   '.server.user.BannerResponse': BannerResponse$json,
   '.server.user.Banner': Banner$json,
 };

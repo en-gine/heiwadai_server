@@ -47,9 +47,9 @@ func (u *AdminCouponUsecase) CreateDefaultCoupon() *errors.DomainError {
 	return nil
 }
 
-func (u *AdminCouponUsecase) GetUsersCouponList(User *entity.User) ([]*entity.UserAttachedCoupon, *errors.DomainError) {
+func (u *AdminCouponUsecase) GetUsersCouponList(UserID uuid.UUID) ([]*entity.UserAttachedCoupon, *errors.DomainError) {
 
-	coupons, err := u.userCouponQuery.GetActiveAll(User)
+	coupons, err := u.userCouponQuery.GetActiveAll(UserID)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())
 	}

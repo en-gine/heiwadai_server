@@ -44,7 +44,7 @@ const (
 
 // UserDataControllerClient is a client for the server.admin.UserDataController service.
 type UserDataControllerClient interface {
-	Update(context.Context, *connect_go.Request[admin.UserUpdateDataRequest]) (*connect_go.Response[admin.UserDataResponse], error)
+	Update(context.Context, *connect_go.Request[admin.UserUpdateDataRequest]) (*connect_go.Response[emptypb.Empty], error)
 	Delete(context.Context, *connect_go.Request[admin.UserDeleteRequest]) (*connect_go.Response[emptypb.Empty], error)
 }
 
@@ -58,7 +58,7 @@ type UserDataControllerClient interface {
 func NewUserDataControllerClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) UserDataControllerClient {
 	baseURL = strings.TrimRight(baseURL, "/")
 	return &userDataControllerClient{
-		update: connect_go.NewClient[admin.UserUpdateDataRequest, admin.UserDataResponse](
+		update: connect_go.NewClient[admin.UserUpdateDataRequest, emptypb.Empty](
 			httpClient,
 			baseURL+UserDataControllerUpdateProcedure,
 			opts...,
@@ -73,12 +73,12 @@ func NewUserDataControllerClient(httpClient connect_go.HTTPClient, baseURL strin
 
 // userDataControllerClient implements UserDataControllerClient.
 type userDataControllerClient struct {
-	update *connect_go.Client[admin.UserUpdateDataRequest, admin.UserDataResponse]
+	update *connect_go.Client[admin.UserUpdateDataRequest, emptypb.Empty]
 	delete *connect_go.Client[admin.UserDeleteRequest, emptypb.Empty]
 }
 
 // Update calls server.admin.UserDataController.Update.
-func (c *userDataControllerClient) Update(ctx context.Context, req *connect_go.Request[admin.UserUpdateDataRequest]) (*connect_go.Response[admin.UserDataResponse], error) {
+func (c *userDataControllerClient) Update(ctx context.Context, req *connect_go.Request[admin.UserUpdateDataRequest]) (*connect_go.Response[emptypb.Empty], error) {
 	return c.update.CallUnary(ctx, req)
 }
 
@@ -89,7 +89,7 @@ func (c *userDataControllerClient) Delete(ctx context.Context, req *connect_go.R
 
 // UserDataControllerHandler is an implementation of the server.admin.UserDataController service.
 type UserDataControllerHandler interface {
-	Update(context.Context, *connect_go.Request[admin.UserUpdateDataRequest]) (*connect_go.Response[admin.UserDataResponse], error)
+	Update(context.Context, *connect_go.Request[admin.UserUpdateDataRequest]) (*connect_go.Response[emptypb.Empty], error)
 	Delete(context.Context, *connect_go.Request[admin.UserDeleteRequest]) (*connect_go.Response[emptypb.Empty], error)
 }
 
@@ -124,7 +124,7 @@ func NewUserDataControllerHandler(svc UserDataControllerHandler, opts ...connect
 // UnimplementedUserDataControllerHandler returns CodeUnimplemented from all methods.
 type UnimplementedUserDataControllerHandler struct{}
 
-func (UnimplementedUserDataControllerHandler) Update(context.Context, *connect_go.Request[admin.UserUpdateDataRequest]) (*connect_go.Response[admin.UserDataResponse], error) {
+func (UnimplementedUserDataControllerHandler) Update(context.Context, *connect_go.Request[admin.UserUpdateDataRequest]) (*connect_go.Response[emptypb.Empty], error) {
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.UserDataController.Update is not implemented"))
 }
 

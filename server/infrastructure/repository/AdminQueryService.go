@@ -29,6 +29,9 @@ func (pq *AdminQueryService) GetByID(id uuid.UUID) (*entity.Admin, error) {
 	if err != nil {
 		return nil, err
 	}
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
 	store := StoreModelToEntity(admin.R.BelongToStore)
 	return AdminModelToEntity(admin, store, admin.R.Admin.Email), nil
 }
@@ -52,6 +55,9 @@ func (pq *AdminQueryService) GetAll() ([]*entity.Admin, error) {
 	admins, err := models.Admins(models.UserManagerWhere.IsAdmin.EQ(true)).All(context.Background(), pq.db)
 	if err != nil {
 		return nil, err
+	}
+	if err == sql.ErrNoRows {
+		return nil, nil
 	}
 	var result []*entity.Admin
 	for _, admin := range admins {

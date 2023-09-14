@@ -31,7 +31,9 @@ func (pq *UserQueryService) GetByID(id uuid.UUID) (*entity.User, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
 	return UserModelToEntity(user, user.R.User.Email), nil
 }
 func (pq *UserQueryService) GetByMail(mail string) (*entity.User, error) {
@@ -57,6 +59,9 @@ func (pq *UserQueryService) GetUserByPrefecture(prefectures []*entity.Prefecture
 	if err != nil {
 		return nil, err
 	}
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
 	var entities []*entity.User
 	for _, user := range users {
 		entity := UserModelToEntity(user, user.R.User.Email)
@@ -70,6 +75,9 @@ func (pq *UserQueryService) GetAll(pager *types.PageQuery) ([]*entity.User, erro
 	userManagers, err := models.UserManagers(models.UserManagerWhere.IsAdmin.EQ(false), qm.Limit(pager.Offset()), qm.Offset(pager.Offset())).All(context.Background(), pq.db)
 	if err != nil {
 		return nil, err
+	}
+	if err == sql.ErrNoRows {
+		return nil, nil
 	}
 	var result []*entity.User
 	for _, user := range userManagers {

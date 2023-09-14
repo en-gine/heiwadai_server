@@ -32,6 +32,9 @@ func (pq *CheckinQueryService) GetActiveCheckin(user *entity.User) ([]*entity.Ch
 	if err != nil {
 		return nil, err
 	}
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
 	var result []*entity.Checkin
 
 	for _, coupon := range checkins {
@@ -58,6 +61,9 @@ func (pq *CheckinQueryService) GetAllCheckin(user *entity.User, pager *types.Pag
 	checkins, err := models.Checkins(models.CheckinWhere.UserID.EQ(null.StringFrom(user.ID.String())), qm.Load(models.CheckinRels.User), qm.Load(models.CheckinRels.Store), qm.Limit(pager.Offset()), qm.Offset(pager.Offset())).All(context.Background(), pq.db)
 	if err != nil {
 		return nil, err
+	}
+	if err == sql.ErrNoRows {
+		return nil, nil
 	}
 	var result []*entity.Checkin
 	for _, coupon := range checkins {

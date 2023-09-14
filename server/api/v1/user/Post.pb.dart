@@ -10,7 +10,7 @@ import 'dart:core' as $core;
 
 import 'package:protobuf/protobuf.dart' as $pb;
 
-import '../../google/protobuf/empty.pb.dart' as $3;
+import '../../google/protobuf/empty.pb.dart' as $1;
 
 class PostRequest extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'PostRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'server.user'), createEmptyInstance: create)
@@ -211,7 +211,7 @@ class PostControllerApi {
     var emptyResponse = PostResponse();
     return _client.invoke<PostResponse>(ctx, 'PostController', 'GetPostByID', request, emptyResponse);
   }
-  $async.Future<PostsResponse> getPosts($pb.ClientContext? ctx, $3.Empty request) {
+  $async.Future<PostsResponse> getPosts($pb.ClientContext? ctx, $1.Empty request) {
     var emptyResponse = PostsResponse();
     return _client.invoke<PostsResponse>(ctx, 'PostController', 'GetPosts', request, emptyResponse);
   }

@@ -21,17 +21,26 @@ func NewUserAttachedCouponUsecase(usercouponRepository repository.IUserCouponRep
 	}
 }
 
-func (u *UserAttachedCouponUsecase) GetMyList(AuthUser *entity.User) ([]*entity.UserAttachedCoupon, *errors.DomainError) {
+func (u *UserAttachedCouponUsecase) GetByID(AuthUserID uuid.UUID, couponID uuid.UUID) (*entity.UserAttachedCoupon, *errors.DomainError) {
 
-	usercoupons, err := u.usercouponQuery.GetActiveAll(AuthUser)
+	usercoupon, err := u.usercouponQuery.GetByID(AuthUserID, couponID)
+	if err != nil {
+		return nil, errors.NewDomainError(errors.QueryError, err.Error())
+	}
+	return usercoupon, nil
+}
+
+func (u *UserAttachedCouponUsecase) GetMyList(AuthUserID uuid.UUID) ([]*entity.UserAttachedCoupon, *errors.DomainError) {
+
+	usercoupons, err := u.usercouponQuery.GetActiveAll(AuthUserID)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())
 	}
 	return usercoupons, nil
 }
 
-func (u *UserAttachedCouponUsecase) UseMyCoupon(AuthUser *entity.User, couponID uuid.UUID) error {
-	coupon, err := u.usercouponQuery.GetByID(AuthUser, couponID)
+func (u *UserAttachedCouponUsecase) UseMyCoupon(AuthUserID uuid.UUID, couponID uuid.UUID) *errors.DomainError {
+	coupon, err := u.usercouponQuery.GetByID(AuthUserID, couponID)
 
 	if err != nil {
 		return errors.NewDomainError(errors.QueryError, err.Error())
@@ -39,7 +48,7 @@ func (u *UserAttachedCouponUsecase) UseMyCoupon(AuthUser *entity.User, couponID 
 	if coupon == nil {
 		return errors.NewDomainError(errors.QueryDataNotFoundError, "該当のクーポンIDが見つかりません。")
 	}
-	if AuthUser.ID != coupon.User.ID {
+	if AuthUserID != coupon.UserID {
 		return errors.NewDomainError(errors.InvalidParameter, "ユーザー自身のクーポンではありません。")
 	}
 	if coupon.Status != entity.CouponIssued {
@@ -51,7 +60,7 @@ func (u *UserAttachedCouponUsecase) UseMyCoupon(AuthUser *entity.User, couponID 
 	}
 
 	usedCoupon := entity.UseUserAttachedCoupon(
-		AuthUser,
+		AuthUserID,
 		coupon.Coupon,
 	)
 	err = u.usercouponRepository.Save(usedCoupon)

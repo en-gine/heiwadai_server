@@ -10,25 +10,25 @@ import 'dart:async' as $async;
 import 'package:protobuf/protobuf.dart' as $pb;
 
 import 'dart:core' as $core;
-import '../../google/protobuf/empty.pb.dart' as $3;
-import 'Banner.pb.dart' as $6;
+import '../../google/protobuf/empty.pb.dart' as $1;
+import 'Banner.pb.dart' as $5;
 import 'Banner.pbjson.dart';
 
 export 'Banner.pb.dart';
 
 abstract class BannerControllerServiceBase extends $pb.GeneratedService {
-  $async.Future<$6.BannerResponse> getBanner($pb.ServerContext ctx, $3.Empty request);
+  $async.Future<$5.BannerResponse> getBanner($pb.ServerContext ctx, $1.Empty request);
 
   $pb.GeneratedMessage createRequest($core.String method) {
     switch (method) {
-      case 'GetBanner': return $3.Empty();
+      case 'GetBanner': return $1.Empty();
       default: throw $core.ArgumentError('Unknown method: $method');
     }
   }
 
   $async.Future<$pb.GeneratedMessage> handleCall($pb.ServerContext ctx, $core.String method, $pb.GeneratedMessage request) {
     switch (method) {
-      case 'GetBanner': return this.getBanner(ctx, request as $3.Empty);
+      case 'GetBanner': return this.getBanner(ctx, request as $1.Empty);
       default: throw $core.ArgumentError('Unknown method: $method');
     }
   }

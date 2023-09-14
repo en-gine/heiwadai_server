@@ -33,13 +33,12 @@ func NewAuthClient() *AuthClient {
 	}
 }
 
-func (au *AuthClient) SignUp(email string, password string, userType action.UserType) error {
+func (au *AuthClient) SignUp(email string, password string) error {
 
 	ctx := context.Background()
 	_, err := au.client.Auth.SignUp(ctx, supa.UserCredentials{
 		Email:    email,
 		Password: password,
-		Data:     map[string]string{"userType": userType.String()},
 	})
 	if err != nil {
 		return errors.New("Error SignUp" + err.Error())
@@ -67,10 +66,10 @@ func (au *AuthClient) SignIn(email string, password string) (*types.Token, error
 	}, nil
 }
 
-func (au *AuthClient) Refresh(token *types.Token) (*types.Token, error) {
+func (au *AuthClient) Refresh(token string, refreshToken string) (*types.Token, error) {
 
 	ctx := context.Background()
-	data, err := au.client.Auth.RefreshUser(ctx, token.AccessToken, *token.RefreshToken)
+	data, err := au.client.Auth.RefreshUser(ctx, token, refreshToken)
 	if err != nil {
 		return nil, errors.New("Error Refreshing Token" + err.Error())
 	}
@@ -115,4 +114,15 @@ func (au *AuthClient) UpdateEmail(email string, token string) error {
 		"email": email,
 	})
 	return err
+}
+
+func (au *AuthClient) GetUserID(token string) (*uuid.UUID, error) {
+	ctx := context.Background()
+	user, err := au.client.Auth.User(ctx, token)
+	if err != nil {
+		return nil, err
+	}
+	userID := uuid.MustParse(user.ID)
+
+	return &userID, nil
 }

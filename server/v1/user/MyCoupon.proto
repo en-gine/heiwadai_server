@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package server.user;
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+import "v1/shared/Store.proto";
+option go_package = "server/api/v1";
+
+message CouponIDRequest{
+  string ID = 1;
+}
+enum CouponType {
+  COUPON_STANDARD = 0;
+  COUPON_CUSTOM = 1;
+  COUPON_BIRTHDAY = 2;
+}
+
+message Coupon {
+  string ID = 1; 
+  string Name = 2;
+  CouponType CouponType = 3;
+  uint32 DiscountAmount = 4; 
+  google.protobuf.Timestamp ExpireAt = 5; // time.Time
+  bool IsCombinationable = 6; 
+  repeated string Notices = 7;
+  repeated shared.Store TargetStore = 8;
+}
+message MyCouponsResponse{
+  repeated Coupon Coupons = 1;
+}
+service MyCouponController {
+  rpc GetDetail(CouponIDRequest) returns (Coupon) {}
+  rpc GetList(google.protobuf.Empty) returns (MyCouponsResponse) {}
+  rpc Use(CouponIDRequest) returns (google.protobuf.Empty) {}
+}

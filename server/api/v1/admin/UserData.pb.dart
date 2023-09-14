@@ -10,7 +10,7 @@ import 'dart:core' as $core;
 
 import 'package:protobuf/protobuf.dart' as $pb;
 
-import '../../google/protobuf/empty.pb.dart' as $3;
+import '../../google/protobuf/empty.pb.dart' as $1;
 
 class UserUpdateDataRequest extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'UserUpdateDataRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'server.admin'), createEmptyInstance: create)
@@ -577,13 +577,13 @@ class UserDataControllerApi {
   $pb.RpcClient _client;
   UserDataControllerApi(this._client);
 
-  $async.Future<UserDataResponse> update($pb.ClientContext? ctx, UserUpdateDataRequest request) {
-    var emptyResponse = UserDataResponse();
-    return _client.invoke<UserDataResponse>(ctx, 'UserDataController', 'Update', request, emptyResponse);
+  $async.Future<$1.Empty> update($pb.ClientContext? ctx, UserUpdateDataRequest request) {
+    var emptyResponse = $1.Empty();
+    return _client.invoke<$1.Empty>(ctx, 'UserDataController', 'Update', request, emptyResponse);
   }
-  $async.Future<$3.Empty> delete($pb.ClientContext? ctx, UserDeleteRequest request) {
-    var emptyResponse = $3.Empty();
-    return _client.invoke<$3.Empty>(ctx, 'UserDataController', 'Delete', request, emptyResponse);
+  $async.Future<$1.Empty> delete($pb.ClientContext? ctx, UserDeleteRequest request) {
+    var emptyResponse = $1.Empty();
+    return _client.invoke<$1.Empty>(ctx, 'UserDataController', 'Delete', request, emptyResponse);
   }
 }
 

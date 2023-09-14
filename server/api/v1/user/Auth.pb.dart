@@ -11,7 +11,7 @@ import 'dart:core' as $core;
 import 'package:fixnum/fixnum.dart' as $fixnum;
 import 'package:protobuf/protobuf.dart' as $pb;
 
-import '../../google/protobuf/empty.pb.dart' as $3;
+import '../../google/protobuf/empty.pb.dart' as $1;
 
 class UserRegisterRequest extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'UserRegisterRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'server.user'), createEmptyInstance: create)
@@ -551,29 +551,29 @@ class AuthControllerApi {
   $pb.RpcClient _client;
   AuthControllerApi(this._client);
 
-  $async.Future<$3.Empty> register($pb.ClientContext? ctx, UserRegisterRequest request) {
-    var emptyResponse = $3.Empty();
-    return _client.invoke<$3.Empty>(ctx, 'AuthController', 'Register', request, emptyResponse);
+  $async.Future<$1.Empty> register($pb.ClientContext? ctx, UserRegisterRequest request) {
+    var emptyResponse = $1.Empty();
+    return _client.invoke<$1.Empty>(ctx, 'AuthController', 'Register', request, emptyResponse);
   }
-  $async.Future<$3.Empty> signUp($pb.ClientContext? ctx, UserAuthRequest request) {
-    var emptyResponse = $3.Empty();
-    return _client.invoke<$3.Empty>(ctx, 'AuthController', 'SignUp', request, emptyResponse);
+  $async.Future<$1.Empty> signUp($pb.ClientContext? ctx, UserAuthRequest request) {
+    var emptyResponse = $1.Empty();
+    return _client.invoke<$1.Empty>(ctx, 'AuthController', 'SignUp', request, emptyResponse);
   }
   $async.Future<UserAuthResponse> signIn($pb.ClientContext? ctx, UserAuthRequest request) {
     var emptyResponse = UserAuthResponse();
     return _client.invoke<UserAuthResponse>(ctx, 'AuthController', 'SignIn', request, emptyResponse);
   }
-  $async.Future<$3.Empty> resetPasswordMail($pb.ClientContext? ctx, ResetPasswordRequest request) {
-    var emptyResponse = $3.Empty();
-    return _client.invoke<$3.Empty>(ctx, 'AuthController', 'ResetPasswordMail', request, emptyResponse);
+  $async.Future<$1.Empty> resetPasswordMail($pb.ClientContext? ctx, ResetPasswordRequest request) {
+    var emptyResponse = $1.Empty();
+    return _client.invoke<$1.Empty>(ctx, 'AuthController', 'ResetPasswordMail', request, emptyResponse);
   }
-  $async.Future<$3.Empty> updatePassword($pb.ClientContext? ctx, UpdatePasswordRequest request) {
-    var emptyResponse = $3.Empty();
-    return _client.invoke<$3.Empty>(ctx, 'AuthController', 'UpdatePassword', request, emptyResponse);
+  $async.Future<$1.Empty> updatePassword($pb.ClientContext? ctx, UpdatePasswordRequest request) {
+    var emptyResponse = $1.Empty();
+    return _client.invoke<$1.Empty>(ctx, 'AuthController', 'UpdatePassword', request, emptyResponse);
   }
-  $async.Future<$3.Empty> updateEmail($pb.ClientContext? ctx, UpdateEmailRequest request) {
-    var emptyResponse = $3.Empty();
-    return _client.invoke<$3.Empty>(ctx, 'AuthController', 'UpdateEmail', request, emptyResponse);
+  $async.Future<$1.Empty> updateEmail($pb.ClientContext? ctx, UpdateEmailRequest request) {
+    var emptyResponse = $1.Empty();
+    return _client.invoke<$1.Empty>(ctx, 'AuthController', 'UpdateEmail', request, emptyResponse);
   }
 }
 

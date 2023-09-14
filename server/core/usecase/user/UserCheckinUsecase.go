@@ -107,7 +107,7 @@ func (u *UserCheckinUsecase) Checkin(AuthUser *entity.User, QrHash uuid.UUID) (*
 			u.transaction.Rollback()
 			return nil, errors.NewDomainError(errors.QueryError, err.Error())
 		}
-		userAttachedCoupon := entity.CreateUserAttachedCoupon(AuthUser, standardCoupon)
+		userAttachedCoupon := entity.CreateUserAttachedCoupon(AuthUser.ID, standardCoupon)
 
 		err = u.usercouponRepository.Save(userAttachedCoupon)
 		if err != nil {

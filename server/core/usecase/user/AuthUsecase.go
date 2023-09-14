@@ -95,7 +95,7 @@ func (u *AuthUsecase) SignUp(
 	Mail string,
 	Password string,
 ) error {
-	err := u.authAction.SignUp(Mail, Password, "user")
+	err := u.authAction.SignUp(Mail, Password)
 	if err != nil {
 		return errors.NewDomainError(errors.RepositoryError, err.Error())
 	}

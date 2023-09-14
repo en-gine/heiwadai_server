@@ -8,7 +8,7 @@
 import 'dart:core' as $core;
 import 'dart:convert' as $convert;
 import 'dart:typed_data' as $typed_data;
-import '../../google/protobuf/empty.pbjson.dart' as $3;
+import '../../google/protobuf/empty.pbjson.dart' as $1;
 
 @$core.Deprecated('Use userUpdateDataRequestDescriptor instead')
 const UserUpdateDataRequest$json = const {
@@ -73,7 +73,7 @@ final $typed_data.Uint8List userDeleteRequestDescriptor = $convert.base64Decode(
 const $core.Map<$core.String, $core.dynamic> UserDataControllerServiceBase$json = const {
   '1': 'UserDataController',
   '2': const [
-    const {'1': 'Update', '2': '.server.admin.UserUpdateDataRequest', '3': '.server.admin.UserDataResponse', '4': const {}},
+    const {'1': 'Update', '2': '.server.admin.UserUpdateDataRequest', '3': '.google.protobuf.Empty', '4': const {}},
     const {'1': 'Delete', '2': '.server.admin.UserDeleteRequest', '3': '.google.protobuf.Empty', '4': const {}},
   ],
 };
@@ -81,10 +81,9 @@ const $core.Map<$core.String, $core.dynamic> UserDataControllerServiceBase$json 
 @$core.Deprecated('Use userDataControllerServiceDescriptor instead')
 const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>> UserDataControllerServiceBase$messageJson = const {
   '.server.admin.UserUpdateDataRequest': UserUpdateDataRequest$json,
-  '.server.admin.UserDataResponse': UserDataResponse$json,
+  '.google.protobuf.Empty': $1.Empty$json,
   '.server.admin.UserDeleteRequest': UserDeleteRequest$json,
-  '.google.protobuf.Empty': $3.Empty$json,
 };
 
 /// Descriptor for `UserDataController`. Decode as a `google.protobuf.ServiceDescriptorProto`.
-final $typed_data.Uint8List userDataControllerServiceDescriptor = $convert.base64Decode('ChJVc2VyRGF0YUNvbnRyb2xsZXISTwoGVXBkYXRlEiMuc2VydmVyLmFkbWluLlVzZXJVcGRhdGVEYXRhUmVxdWVzdBoeLnNlcnZlci5hZG1pbi5Vc2VyRGF0YVJlc3BvbnNlIgASQwoGRGVsZXRlEh8uc2VydmVyLmFkbWluLlVzZXJEZWxldGVSZXF1ZXN0GhYuZ29vZ2xlLnByb3RvYnVmLkVtcHR5IgA=');
+final $typed_data.Uint8List userDataControllerServiceDescriptor = $convert.base64Decode('ChJVc2VyRGF0YUNvbnRyb2xsZXISRwoGVXBkYXRlEiMuc2VydmVyLmFkbWluLlVzZXJVcGRhdGVEYXRhUmVxdWVzdBoWLmdvb2dsZS5wcm90b2J1Zi5FbXB0eSIAEkMKBkRlbGV0ZRIfLnNlcnZlci5hZG1pbi5Vc2VyRGVsZXRlUmVxdWVzdBoWLmdvb2dsZS5wcm90b2J1Zi5FbXB0eSIA');

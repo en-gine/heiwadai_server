@@ -4,6 +4,7 @@ import (
 	"context"
 	"server/api/v1/user"
 	userv1connect "server/api/v1/user/userconnect"
+	"server/controller"
 	usecase "server/core/usecase/user"
 
 	"github.com/bufbuild/connect-go"
@@ -26,17 +27,25 @@ func (ac *PostController) GetPostByID(ctx context.Context, req *connect.Request[
 	postID := msg.ID
 
 	post, domaiErr := ac.postUseCase.GetByID(postID)
+
+	if domaiErr != nil {
+		return nil, controller.ErrorHandler(domaiErr)
+	}
+
 	return connect.NewResponse(&user.PostResponse{
 		ID:       uint32(post.ID),
 		Title:    post.Title,
 		Content:  post.Content,
 		Author:   post.Author,
 		PostDate: post.PostDate.String(),
-	}), domaiErr
+	}), nil
 }
 
 func (ac *PostController) GetPosts(ctx context.Context, req *connect.Request[emptypb.Empty]) (*connect.Response[user.PostsResponse], error) {
 	posts, domaiErr := ac.postUseCase.GetList()
+	if domaiErr != nil {
+		return nil, controller.ErrorHandler(domaiErr)
+	}
 
 	var resPosts []*user.PostResponse
 	for _, post := range posts {
@@ -51,5 +60,5 @@ func (ac *PostController) GetPosts(ctx context.Context, req *connect.Request[emp
 
 	return connect.NewResponse(&user.PostsResponse{
 		Posts: resPosts,
-	}), domaiErr
+	}), nil
 }

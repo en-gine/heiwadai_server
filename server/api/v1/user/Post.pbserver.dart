@@ -10,28 +10,28 @@ import 'dart:async' as $async;
 import 'package:protobuf/protobuf.dart' as $pb;
 
 import 'dart:core' as $core;
-import 'Post.pb.dart' as $7;
-import '../../google/protobuf/empty.pb.dart' as $3;
+import 'Post.pb.dart' as $9;
+import '../../google/protobuf/empty.pb.dart' as $1;
 import 'Post.pbjson.dart';
 
 export 'Post.pb.dart';
 
 abstract class PostControllerServiceBase extends $pb.GeneratedService {
-  $async.Future<$7.PostResponse> getPostByID($pb.ServerContext ctx, $7.PostRequest request);
-  $async.Future<$7.PostsResponse> getPosts($pb.ServerContext ctx, $3.Empty request);
+  $async.Future<$9.PostResponse> getPostByID($pb.ServerContext ctx, $9.PostRequest request);
+  $async.Future<$9.PostsResponse> getPosts($pb.ServerContext ctx, $1.Empty request);
 
   $pb.GeneratedMessage createRequest($core.String method) {
     switch (method) {
-      case 'GetPostByID': return $7.PostRequest();
-      case 'GetPosts': return $3.Empty();
+      case 'GetPostByID': return $9.PostRequest();
+      case 'GetPosts': return $1.Empty();
       default: throw $core.ArgumentError('Unknown method: $method');
     }
   }
 
   $async.Future<$pb.GeneratedMessage> handleCall($pb.ServerContext ctx, $core.String method, $pb.GeneratedMessage request) {
     switch (method) {
-      case 'GetPostByID': return this.getPostByID(ctx, request as $7.PostRequest);
-      case 'GetPosts': return this.getPosts(ctx, request as $3.Empty);
+      case 'GetPostByID': return this.getPostByID(ctx, request as $9.PostRequest);
+      case 'GetPosts': return this.getPosts(ctx, request as $1.Empty);
       default: throw $core.ArgumentError('Unknown method: $method');
     }
   }

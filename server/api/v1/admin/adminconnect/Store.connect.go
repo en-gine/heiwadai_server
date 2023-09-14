@@ -8,9 +8,9 @@ import (
 	context "context"
 	errors "errors"
 	connect_go "github.com/bufbuild/connect-go"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	http "net/http"
 	admin "server/api/v1/admin"
-	shared "server/api/v1/shared"
 	strings "strings"
 )
 
@@ -43,8 +43,8 @@ const (
 
 // StoreControllerClient is a client for the server.admin.StoreController service.
 type StoreControllerClient interface {
-	Register(context.Context, *connect_go.Request[admin.StoreRegisterRequest]) (*connect_go.Response[shared.StoreResponse], error)
-	Update(context.Context, *connect_go.Request[admin.StoreUpdateRequest]) (*connect_go.Response[shared.StoreResponse], error)
+	Register(context.Context, *connect_go.Request[admin.StoreRegisterRequest]) (*connect_go.Response[emptypb.Empty], error)
+	Update(context.Context, *connect_go.Request[admin.StoreUpdateRequest]) (*connect_go.Response[emptypb.Empty], error)
 }
 
 // NewStoreControllerClient constructs a client for the server.admin.StoreController service. By
@@ -57,12 +57,12 @@ type StoreControllerClient interface {
 func NewStoreControllerClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) StoreControllerClient {
 	baseURL = strings.TrimRight(baseURL, "/")
 	return &storeControllerClient{
-		register: connect_go.NewClient[admin.StoreRegisterRequest, shared.StoreResponse](
+		register: connect_go.NewClient[admin.StoreRegisterRequest, emptypb.Empty](
 			httpClient,
 			baseURL+StoreControllerRegisterProcedure,
 			opts...,
 		),
-		update: connect_go.NewClient[admin.StoreUpdateRequest, shared.StoreResponse](
+		update: connect_go.NewClient[admin.StoreUpdateRequest, emptypb.Empty](
 			httpClient,
 			baseURL+StoreControllerUpdateProcedure,
 			opts...,
@@ -72,24 +72,24 @@ func NewStoreControllerClient(httpClient connect_go.HTTPClient, baseURL string, 
 
 // storeControllerClient implements StoreControllerClient.
 type storeControllerClient struct {
-	register *connect_go.Client[admin.StoreRegisterRequest, shared.StoreResponse]
-	update   *connect_go.Client[admin.StoreUpdateRequest, shared.StoreResponse]
+	register *connect_go.Client[admin.StoreRegisterRequest, emptypb.Empty]
+	update   *connect_go.Client[admin.StoreUpdateRequest, emptypb.Empty]
 }
 
 // Register calls server.admin.StoreController.Register.
-func (c *storeControllerClient) Register(ctx context.Context, req *connect_go.Request[admin.StoreRegisterRequest]) (*connect_go.Response[shared.StoreResponse], error) {
+func (c *storeControllerClient) Register(ctx context.Context, req *connect_go.Request[admin.StoreRegisterRequest]) (*connect_go.Response[emptypb.Empty], error) {
 	return c.register.CallUnary(ctx, req)
 }
 
 // Update calls server.admin.StoreController.Update.
-func (c *storeControllerClient) Update(ctx context.Context, req *connect_go.Request[admin.StoreUpdateRequest]) (*connect_go.Response[shared.StoreResponse], error) {
+func (c *storeControllerClient) Update(ctx context.Context, req *connect_go.Request[admin.StoreUpdateRequest]) (*connect_go.Response[emptypb.Empty], error) {
 	return c.update.CallUnary(ctx, req)
 }
 
 // StoreControllerHandler is an implementation of the server.admin.StoreController service.
 type StoreControllerHandler interface {
-	Register(context.Context, *connect_go.Request[admin.StoreRegisterRequest]) (*connect_go.Response[shared.StoreResponse], error)
-	Update(context.Context, *connect_go.Request[admin.StoreUpdateRequest]) (*connect_go.Response[shared.StoreResponse], error)
+	Register(context.Context, *connect_go.Request[admin.StoreRegisterRequest]) (*connect_go.Response[emptypb.Empty], error)
+	Update(context.Context, *connect_go.Request[admin.StoreUpdateRequest]) (*connect_go.Response[emptypb.Empty], error)
 }
 
 // NewStoreControllerHandler builds an HTTP handler from the service implementation. It returns the
@@ -123,10 +123,10 @@ func NewStoreControllerHandler(svc StoreControllerHandler, opts ...connect_go.Ha
 // UnimplementedStoreControllerHandler returns CodeUnimplemented from all methods.
 type UnimplementedStoreControllerHandler struct{}
 
-func (UnimplementedStoreControllerHandler) Register(context.Context, *connect_go.Request[admin.StoreRegisterRequest]) (*connect_go.Response[shared.StoreResponse], error) {
+func (UnimplementedStoreControllerHandler) Register(context.Context, *connect_go.Request[admin.StoreRegisterRequest]) (*connect_go.Response[emptypb.Empty], error) {
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.StoreController.Register is not implemented"))
 }
 
-func (UnimplementedStoreControllerHandler) Update(context.Context, *connect_go.Request[admin.StoreUpdateRequest]) (*connect_go.Response[shared.StoreResponse], error) {
+func (UnimplementedStoreControllerHandler) Update(context.Context, *connect_go.Request[admin.StoreUpdateRequest]) (*connect_go.Response[emptypb.Empty], error) {
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.StoreController.Update is not implemented"))
 }

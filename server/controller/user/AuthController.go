@@ -61,9 +61,9 @@ func (ac *AuthController) SignUp(ctx context.Context, req *connect.Request[user.
 }
 func (ac *AuthController) SignIn(ctx context.Context, req *connect.Request[user.UserAuthRequest]) (*connect.Response[user.UserAuthResponse], error) {
 	msg := req.Msg
-	token, err := ac.authUseCase.SignIn(msg.Email, msg.Password)
-	if err != nil {
-		return nil, err
+	token, domainErr := ac.authUseCase.SignIn(msg.Email, msg.Password)
+	if domainErr != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("サインインに失敗しました。"))
 	}
 	return connect.NewResponse(&user.UserAuthResponse{
 		AccessToken:  token.AccessToken,
@@ -75,7 +75,7 @@ func (ac *AuthController) ResetPasswordMail(ctx context.Context, req *connect.Re
 	msg := req.Msg
 	err := ac.authUseCase.ResetPasswordMail(msg.Email)
 	if err != nil {
-		return nil, err
+		return nil, connect.NewError(connect.CodeUnavailable, errors.New("リセットメールの送信に失敗しました。"))
 	}
 	return connect.NewResponse(&emptypb.Empty{}), nil
 }
@@ -84,15 +84,16 @@ func (ac *AuthController) UpdatePassword(ctx context.Context, req *connect.Reque
 	msg := req.Msg
 	err := ac.authUseCase.UpdatePassword(msg.Password, msg.Token)
 	if err != nil {
-		return nil, err
+		return nil, connect.NewError(connect.CodeUnavailable, errors.New("パスワードの変更に失敗しました。\nネットワークの問題や同じパスワードに変更した、などの理由が考えられます。"))
 	}
+
 	return connect.NewResponse(&emptypb.Empty{}), nil
 }
 func (ac *AuthController) UpdateEmail(ctx context.Context, req *connect.Request[user.UpdateEmailRequest]) (*connect.Response[emptypb.Empty], error) {
 	msg := req.Msg
 	err := ac.authUseCase.UpdateEmail(msg.Email, msg.Token)
 	if err != nil {
-		return nil, err
+		return nil, connect.NewError(connect.CodeUnavailable, errors.New("メールアドレスの変更に失敗しました。"))
 	}
 	return connect.NewResponse(&emptypb.Empty{}), nil
 }

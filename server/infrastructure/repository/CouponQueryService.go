@@ -31,6 +31,9 @@ func (pq *CouponQueryService) GetByID(id uuid.UUID) (*entity.Coupon, error) {
 	if err != nil {
 		return nil, err
 	}
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
 	sotres, err := coupon.CouponStore(qm.Load(models.CouponStoreRels.Store)).All(context.Background(), pq.db)
 	if err != nil {
 		return nil, err
@@ -57,6 +60,9 @@ func (pq *CouponQueryService) GetCouponListByType(couponType entity.CouponType, 
 	coupons, err := models.Coupons(models.CouponWhere.CouponType.EQ(couponType.ToInt()), qm.Limit(pager.Offset()), qm.Offset(pager.Offset())).All(context.Background(), pq.db)
 	if err != nil {
 		return nil, err
+	}
+	if err == sql.ErrNoRows {
+		return nil, nil
 	}
 	var result []*entity.Coupon
 	for _, coupon := range coupons {
