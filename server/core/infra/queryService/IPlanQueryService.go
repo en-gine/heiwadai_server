@@ -3,6 +3,8 @@ package queryservice
 import (
 	"server/core/entity"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type IPlanQueryService interface {
@@ -17,4 +19,5 @@ type IPlanQueryService interface {
 		mealType *entity.MealType,
 		roomTypes *[]entity.RoomType,
 	) ([]*entity.Plan, error)
+	GetMyBooking(userID uuid.UUID) ([]*entity.Plan, error)
 }

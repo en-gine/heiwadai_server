@@ -9,7 +9,7 @@ import "v1/shared/Coupon.proto";
 option go_package = "server/api/v1";
 
 message CheckinRequest {
-  string qr_hash = 1;
+  string qrHash = 1;
 }
 message CheckinStamp{
   string ID = 1;

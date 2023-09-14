@@ -37,4 +37,34 @@ func NewUserServer(mux *http.ServeMux) {
 	path, handler = userv1connect.NewUserDataControllerHandler(userContoroller, requireAuth)
 	mux.Handle(path, handler)
 
+	bannerUsecase := InitializeBannerUsecase()
+	bannerContoroller := usercontroller.NewBannerController(bannerUsecase)
+	path, handler = userv1connect.NewBannerControllerHandler(bannerContoroller, requireAuth)
+	mux.Handle(path, handler)
+
+	postUsecase := InitializePostUsecase()
+	postContoroller := usercontroller.NewPostController(postUsecase)
+	path, handler = userv1connect.NewPostControllerHandler(postContoroller, requireAuth)
+	mux.Handle(path, handler)
+
+	storeUsecase := InitializeStoreUsecase()
+	storeContoroller := usercontroller.NewStoreController(storeUsecase)
+	path, handler = userv1connect.NewStoreControllerHandler(storeContoroller, requireAuth)
+	mux.Handle(path, handler)
+
+	couponUsecase := InitializeUserCouponUsecase()
+	couponContoroller := usercontroller.NewMyCouponController(couponUsecase)
+	path, handler = userv1connect.NewMyCouponControllerHandler(couponContoroller, requireAuth)
+	mux.Handle(path, handler)
+
+	checkinUsecase := InitializeUserCheckinUsecase()
+	checkinContoroller := usercontroller.NewCheckInController(checkinUsecase)
+	path, handler = userv1connect.NewCheckinControllerHandler(checkinContoroller, requireAuth)
+	mux.Handle(path, handler)
+
+	// planUsecase := InitializePlanUsecase()
+	// checkinContoroller := usercontroller.NewCheckInController(checkinUsecase)
+	// path, handler = userv1connect.NewCheckinControllerHandler(checkinContoroller, requireAuth)
+	// mux.Handle(path, handler)
+
 }

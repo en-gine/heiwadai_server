@@ -46,6 +46,8 @@ message StayableInfo {
 }
 
 service StoreController {
+  rpc GetByID(SoreIDRequest) returns (server.shared.Store) {}
+  rpc GetAll(google.protobuf.Empty) returns (server.shared.Stores) {}
   rpc Register(StoreRegisterRequest) returns (google.protobuf.Empty) {}
   rpc Update(StoreUpdateRequest) returns (google.protobuf.Empty) {}
 }

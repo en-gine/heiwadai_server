@@ -7,6 +7,8 @@ import (
 	"server/infrastructure/booking/avail"
 	"server/infrastructure/booking/util"
 	"time"
+
+	uuid "github.com/google/uuid"
 )
 
 var _ queryservice.IPlanQueryService = &PlanQuery{}
@@ -34,6 +36,10 @@ func PlanQueryTest() {
 		nil,
 		nil,
 	)
+}
+
+func (p *PlanQuery) GetMyBooking(userID uuid.UUID) ([]*entity.Plan, error) {
+	return nil, nil
 }
 
 func (p *PlanQuery) Search(

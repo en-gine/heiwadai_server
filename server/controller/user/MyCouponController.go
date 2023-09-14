@@ -17,15 +17,13 @@ import (
 )
 
 type MyCouponController struct {
-	authUseCase   usecase.AuthUsecase
 	couponUseCase usecase.UserAttachedCouponUsecase
 }
 
 var _ userv1connect.MyCouponControllerClient = &MyCouponController{}
 
-func NewMyCouponController(authUsecase *usecase.AuthUsecase, couponUsecase *usecase.UserAttachedCouponUsecase) *MyCouponController {
+func NewMyCouponController(couponUsecase *usecase.UserAttachedCouponUsecase) *MyCouponController {
 	return &MyCouponController{
-		authUseCase:   *authUsecase,
 		couponUseCase: *couponUsecase,
 	}
 }

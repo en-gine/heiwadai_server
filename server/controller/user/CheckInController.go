@@ -22,7 +22,7 @@ type CheckInController struct {
 
 var _ userv1connect.CheckinControllerClient = &CheckInController{}
 
-func NewCouponController(checkinUsecase *usecase.UserCheckinUsecase) *CheckInController {
+func NewCheckInController(checkinUsecase *usecase.UserCheckinUsecase) *CheckInController {
 	return &CheckInController{
 		checkInUseCase: *checkinUsecase,
 	}
