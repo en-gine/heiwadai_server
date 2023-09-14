@@ -3,10 +3,12 @@ package queryservice
 import (
 	"server/core/entity"
 	"server/core/infra/queryService/types"
+
+	"github.com/google/uuid"
 )
 
 type ICheckinQueryService interface {
-	GetActiveCheckin(user *entity.User) ([]*entity.Checkin, error)
-	GetLastStoreCheckin(user *entity.User, store *entity.Store) (*entity.Checkin, error) //前回の特定のStoreへのチェックイン
-	GetAllCheckin(user *entity.User, pager *types.PageQuery) ([]*entity.Checkin, error)  //archiveかどうか不問
+	GetActiveCheckin(userID uuid.UUID) ([]*entity.Checkin, error)
+	GetLastStoreCheckin(userID uuid.UUID, storeID uuid.UUID) (*entity.Checkin, error)  //前回の特定のStoreへのチェックイン
+	GetAllCheckin(userID uuid.UUID, pager *types.PageQuery) ([]*entity.Checkin, error) //archiveかどうか不問
 }

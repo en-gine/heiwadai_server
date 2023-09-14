@@ -11,6 +11,7 @@ import (
 )
 
 type UserCheckinUsecase struct {
+	userQuery            queryService.IUserQueryService
 	storeRepository      repository.IStoreRepository
 	checkInRepository    repository.ICheckinRepository
 	couponRepository     repository.ICouponRepository
@@ -23,6 +24,7 @@ type UserCheckinUsecase struct {
 }
 
 func NewUserCheckinUsecase(
+	userQuery queryService.IUserQueryService,
 	storeRepository repository.IStoreRepository,
 	checkInRepository repository.ICheckinRepository,
 	couponRepository repository.ICouponRepository,
@@ -35,6 +37,7 @@ func NewUserCheckinUsecase(
 
 ) *UserCheckinUsecase {
 	return &UserCheckinUsecase{
+		userQuery:            userQuery,
 		storeRepository:      storeRepository,
 		checkInRepository:    checkInRepository,
 		couponRepository:     couponRepository,
@@ -47,16 +50,24 @@ func NewUserCheckinUsecase(
 	}
 }
 
-func (u *UserCheckinUsecase) GetStampCard(user *entity.User) (*entity.StampCard, *errors.DomainError) {
-	userCheckins, err := u.checkinQuery.GetActiveCheckin(user)
+func (u *UserCheckinUsecase) GetStampCard(authID uuid.UUID) (*entity.StampCard, *errors.DomainError) {
+
+	userCheckins, err := u.checkinQuery.GetActiveCheckin(authID)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())
 	}
 	return entity.NewStampCard(userCheckins)
 }
 
-func (u *UserCheckinUsecase) Checkin(AuthUser *entity.User, QrHash uuid.UUID) (*entity.UserAttachedCoupon, *errors.DomainError) {
+func (u *UserCheckinUsecase) Checkin(authID uuid.UUID, QrHash uuid.UUID) (*entity.UserAttachedCoupon, *errors.DomainError) {
 	// チェックインによってクーポンが付与された場合クーポンを返す
+	AuthUser, err := u.userQuery.GetByID(authID)
+	if err != nil {
+		return nil, errors.NewDomainError(errors.QueryError, err.Error())
+	}
+	if AuthUser == nil {
+		return nil, errors.NewDomainError(errors.QueryDataNotFoundError, "該当のユーザーが見つかりません。")
+	}
 
 	allStores, err := u.storeQuery.GetActiveAll()
 	if err != nil {
@@ -64,7 +75,7 @@ func (u *UserCheckinUsecase) Checkin(AuthUser *entity.User, QrHash uuid.UUID) (*
 	}
 	var checkInStore *entity.Store
 	var isUnlimitQr bool
-	lastCheckin, err := u.checkinQuery.GetLastStoreCheckin(AuthUser, checkInStore)
+	lastCheckin, err := u.checkinQuery.GetLastStoreCheckin(authID, checkInStore.ID)
 
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())
@@ -95,7 +106,7 @@ func (u *UserCheckinUsecase) Checkin(AuthUser *entity.User, QrHash uuid.UUID) (*
 
 	u.transaction.Begin()
 	newCheckin := entity.CreateCheckin(*checkInStore, *AuthUser)
-	myCheckins, err := u.checkinQuery.GetActiveCheckin(AuthUser)
+	myCheckins, err := u.checkinQuery.GetActiveCheckin(authID)
 	if err != nil {
 		u.transaction.Rollback()
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())
@@ -107,7 +118,7 @@ func (u *UserCheckinUsecase) Checkin(AuthUser *entity.User, QrHash uuid.UUID) (*
 			u.transaction.Rollback()
 			return nil, errors.NewDomainError(errors.QueryError, err.Error())
 		}
-		userAttachedCoupon := entity.CreateUserAttachedCoupon(AuthUser.ID, standardCoupon)
+		userAttachedCoupon := entity.CreateUserAttachedCoupon(authID, standardCoupon)
 
 		err = u.usercouponRepository.Save(userAttachedCoupon)
 		if err != nil {

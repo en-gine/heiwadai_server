@@ -10,7 +10,7 @@ import 'dart:core' as $core;
 
 import 'package:protobuf/protobuf.dart' as $pb;
 
-import '../shared/Store.pb.dart' as $7;
+import '../shared/Store.pb.dart' as $5;
 import '../../google/protobuf/empty.pb.dart' as $1;
 
 class SoreIDRequest extends $pb.GeneratedMessage {
@@ -64,21 +64,21 @@ class StoreControllerApi {
   $pb.RpcClient _client;
   StoreControllerApi(this._client);
 
-  $async.Future<$7.Store> getByID($pb.ClientContext? ctx, SoreIDRequest request) {
-    var emptyResponse = $7.Store();
-    return _client.invoke<$7.Store>(ctx, 'StoreController', 'GetByID', request, emptyResponse);
+  $async.Future<$5.Store> getByID($pb.ClientContext? ctx, SoreIDRequest request) {
+    var emptyResponse = $5.Store();
+    return _client.invoke<$5.Store>(ctx, 'StoreController', 'GetByID', request, emptyResponse);
   }
-  $async.Future<$7.Stores> getAll($pb.ClientContext? ctx, $1.Empty request) {
-    var emptyResponse = $7.Stores();
-    return _client.invoke<$7.Stores>(ctx, 'StoreController', 'GetAll', request, emptyResponse);
+  $async.Future<$5.Stores> getAll($pb.ClientContext? ctx, $1.Empty request) {
+    var emptyResponse = $5.Stores();
+    return _client.invoke<$5.Stores>(ctx, 'StoreController', 'GetAll', request, emptyResponse);
   }
-  $async.Future<$7.StayableStores> getStayables($pb.ClientContext? ctx, $1.Empty request) {
-    var emptyResponse = $7.StayableStores();
-    return _client.invoke<$7.StayableStores>(ctx, 'StoreController', 'GetStayables', request, emptyResponse);
+  $async.Future<$5.StayableStores> getStayables($pb.ClientContext? ctx, $1.Empty request) {
+    var emptyResponse = $5.StayableStores();
+    return _client.invoke<$5.StayableStores>(ctx, 'StoreController', 'GetStayables', request, emptyResponse);
   }
-  $async.Future<$7.StayableStore> getStayableByID($pb.ClientContext? ctx, SoreIDRequest request) {
-    var emptyResponse = $7.StayableStore();
-    return _client.invoke<$7.StayableStore>(ctx, 'StoreController', 'GetStayableByID', request, emptyResponse);
+  $async.Future<$5.StayableStore> getStayableByID($pb.ClientContext? ctx, SoreIDRequest request) {
+    var emptyResponse = $5.StayableStore();
+    return _client.invoke<$5.StayableStore>(ctx, 'StoreController', 'GetStayableByID', request, emptyResponse);
   }
 }
 

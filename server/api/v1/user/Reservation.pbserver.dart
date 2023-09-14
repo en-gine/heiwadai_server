@@ -11,13 +11,13 @@ import 'package:protobuf/protobuf.dart' as $pb;
 
 import 'dart:core' as $core;
 import '../../google/protobuf/empty.pb.dart' as $1;
-import 'Reservation.pb.dart' as $10;
+import 'Reservation.pb.dart' as $12;
 import 'Reservation.pbjson.dart';
 
 export 'Reservation.pb.dart';
 
 abstract class ReservationControllerServiceBase extends $pb.GeneratedService {
-  $async.Future<$10.ReservationResponse> getReservation($pb.ServerContext ctx, $1.Empty request);
+  $async.Future<$12.ReservationResponse> getReservation($pb.ServerContext ctx, $1.Empty request);
 
   $pb.GeneratedMessage createRequest($core.String method) {
     switch (method) {

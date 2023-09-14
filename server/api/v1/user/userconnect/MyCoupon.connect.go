@@ -10,6 +10,7 @@ import (
 	connect_go "github.com/bufbuild/connect-go"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	http "net/http"
+	shared "server/api/v1/shared"
 	user "server/api/v1/user"
 	strings "strings"
 )
@@ -46,7 +47,7 @@ const (
 
 // MyCouponControllerClient is a client for the server.user.MyCouponController service.
 type MyCouponControllerClient interface {
-	GetDetail(context.Context, *connect_go.Request[user.CouponIDRequest]) (*connect_go.Response[user.Coupon], error)
+	GetDetail(context.Context, *connect_go.Request[user.CouponIDRequest]) (*connect_go.Response[shared.Coupon], error)
 	GetList(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[user.MyCouponsResponse], error)
 	Use(context.Context, *connect_go.Request[user.CouponIDRequest]) (*connect_go.Response[emptypb.Empty], error)
 }
@@ -61,7 +62,7 @@ type MyCouponControllerClient interface {
 func NewMyCouponControllerClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) MyCouponControllerClient {
 	baseURL = strings.TrimRight(baseURL, "/")
 	return &myCouponControllerClient{
-		getDetail: connect_go.NewClient[user.CouponIDRequest, user.Coupon](
+		getDetail: connect_go.NewClient[user.CouponIDRequest, shared.Coupon](
 			httpClient,
 			baseURL+MyCouponControllerGetDetailProcedure,
 			opts...,
@@ -81,13 +82,13 @@ func NewMyCouponControllerClient(httpClient connect_go.HTTPClient, baseURL strin
 
 // myCouponControllerClient implements MyCouponControllerClient.
 type myCouponControllerClient struct {
-	getDetail *connect_go.Client[user.CouponIDRequest, user.Coupon]
+	getDetail *connect_go.Client[user.CouponIDRequest, shared.Coupon]
 	getList   *connect_go.Client[emptypb.Empty, user.MyCouponsResponse]
 	use       *connect_go.Client[user.CouponIDRequest, emptypb.Empty]
 }
 
 // GetDetail calls server.user.MyCouponController.GetDetail.
-func (c *myCouponControllerClient) GetDetail(ctx context.Context, req *connect_go.Request[user.CouponIDRequest]) (*connect_go.Response[user.Coupon], error) {
+func (c *myCouponControllerClient) GetDetail(ctx context.Context, req *connect_go.Request[user.CouponIDRequest]) (*connect_go.Response[shared.Coupon], error) {
 	return c.getDetail.CallUnary(ctx, req)
 }
 
@@ -103,7 +104,7 @@ func (c *myCouponControllerClient) Use(ctx context.Context, req *connect_go.Requ
 
 // MyCouponControllerHandler is an implementation of the server.user.MyCouponController service.
 type MyCouponControllerHandler interface {
-	GetDetail(context.Context, *connect_go.Request[user.CouponIDRequest]) (*connect_go.Response[user.Coupon], error)
+	GetDetail(context.Context, *connect_go.Request[user.CouponIDRequest]) (*connect_go.Response[shared.Coupon], error)
 	GetList(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[user.MyCouponsResponse], error)
 	Use(context.Context, *connect_go.Request[user.CouponIDRequest]) (*connect_go.Response[emptypb.Empty], error)
 }
@@ -146,7 +147,7 @@ func NewMyCouponControllerHandler(svc MyCouponControllerHandler, opts ...connect
 // UnimplementedMyCouponControllerHandler returns CodeUnimplemented from all methods.
 type UnimplementedMyCouponControllerHandler struct{}
 
-func (UnimplementedMyCouponControllerHandler) GetDetail(context.Context, *connect_go.Request[user.CouponIDRequest]) (*connect_go.Response[user.Coupon], error) {
+func (UnimplementedMyCouponControllerHandler) GetDetail(context.Context, *connect_go.Request[user.CouponIDRequest]) (*connect_go.Response[shared.Coupon], error) {
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.MyCouponController.GetDetail is not implemented"))
 }
 

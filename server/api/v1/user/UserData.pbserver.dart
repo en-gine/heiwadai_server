@@ -10,24 +10,24 @@ import 'dart:async' as $async;
 import 'package:protobuf/protobuf.dart' as $pb;
 
 import 'dart:core' as $core;
-import 'UserData.pb.dart' as $12;
+import 'UserData.pb.dart' as $14;
 import 'UserData.pbjson.dart';
 
 export 'UserData.pb.dart';
 
 abstract class UserDataControllerServiceBase extends $pb.GeneratedService {
-  $async.Future<$12.UserDataResponse> update($pb.ServerContext ctx, $12.UserUpdateDataRequest request);
+  $async.Future<$14.UserDataResponse> update($pb.ServerContext ctx, $14.UserUpdateDataRequest request);
 
   $pb.GeneratedMessage createRequest($core.String method) {
     switch (method) {
-      case 'Update': return $12.UserUpdateDataRequest();
+      case 'Update': return $14.UserUpdateDataRequest();
       default: throw $core.ArgumentError('Unknown method: $method');
     }
   }
 
   $async.Future<$pb.GeneratedMessage> handleCall($pb.ServerContext ctx, $core.String method, $pb.GeneratedMessage request) {
     switch (method) {
-      case 'Update': return this.update(ctx, request as $12.UserUpdateDataRequest);
+      case 'Update': return this.update(ctx, request as $14.UserUpdateDataRequest);
       default: throw $core.ArgumentError('Unknown method: $method');
     }
   }

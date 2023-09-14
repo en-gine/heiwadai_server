@@ -27,8 +27,8 @@ func NewCheckinQueryService() *CheckinQueryService {
 	}
 }
 
-func (pq *CheckinQueryService) GetActiveCheckin(user *entity.User) ([]*entity.Checkin, error) {
-	checkins, err := models.Checkins(models.CheckinWhere.UserID.EQ(null.StringFrom(user.ID.String())), qm.Load(models.CheckinRels.User), qm.Load(models.CheckinRels.Store), models.CheckinWhere.Archive.EQ(false), models.CheckinWhere.UserID.EQ(null.StringFrom(user.ID.String()))).All(context.Background(), pq.db)
+func (pq *CheckinQueryService) GetActiveCheckin(userID uuid.UUID) ([]*entity.Checkin, error) {
+	checkins, err := models.Checkins(models.CheckinWhere.UserID.EQ(null.StringFrom(userID.String())), qm.Load(models.CheckinRels.User), qm.Load(models.CheckinRels.Store), models.CheckinWhere.Archive.EQ(false), models.CheckinWhere.UserID.EQ(null.StringFrom(userID.String()))).All(context.Background(), pq.db)
 	if err != nil {
 		return nil, err
 	}
@@ -43,8 +43,8 @@ func (pq *CheckinQueryService) GetActiveCheckin(user *entity.User) ([]*entity.Ch
 	return result, nil
 }
 
-func (pq *CheckinQueryService) GetLastStoreCheckin(user *entity.User, store *entity.Store) (*entity.Checkin, error) {
-	checkin, err := models.Checkins(models.CheckinWhere.UserID.EQ(null.StringFrom(user.ID.String())), models.CheckinWhere.StoreID.EQ(null.StringFrom(store.ID.String())), qm.Load(models.CheckinRels.User), qm.Load(models.CheckinRels.Store), qm.OrderBy(`checkin_at desc`)).One(context.Background(), pq.db)
+func (pq *CheckinQueryService) GetLastStoreCheckin(userID uuid.UUID, storeID uuid.UUID) (*entity.Checkin, error) {
+	checkin, err := models.Checkins(models.CheckinWhere.UserID.EQ(null.StringFrom(userID.String())), models.CheckinWhere.StoreID.EQ(null.StringFrom(storeID.String())), qm.Load(models.CheckinRels.User), qm.Load(models.CheckinRels.Store), qm.OrderBy(`checkin_at desc`)).One(context.Background(), pq.db)
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}
@@ -57,8 +57,8 @@ func (pq *CheckinQueryService) GetLastStoreCheckin(user *entity.User, store *ent
 	return result, nil
 }
 
-func (pq *CheckinQueryService) GetAllCheckin(user *entity.User, pager *types.PageQuery) ([]*entity.Checkin, error) {
-	checkins, err := models.Checkins(models.CheckinWhere.UserID.EQ(null.StringFrom(user.ID.String())), qm.Load(models.CheckinRels.User), qm.Load(models.CheckinRels.Store), qm.Limit(pager.Offset()), qm.Offset(pager.Offset())).All(context.Background(), pq.db)
+func (pq *CheckinQueryService) GetAllCheckin(userID uuid.UUID, pager *types.PageQuery) ([]*entity.Checkin, error) {
+	checkins, err := models.Checkins(models.CheckinWhere.UserID.EQ(null.StringFrom(userID.String())), qm.Load(models.CheckinRels.User), qm.Load(models.CheckinRels.Store), qm.Limit(pager.Offset()), qm.Offset(pager.Offset())).All(context.Background(), pq.db)
 	if err != nil {
 		return nil, err
 	}

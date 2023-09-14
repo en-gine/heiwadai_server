@@ -23,13 +23,13 @@ type MyCouponController struct {
 
 var _ userv1connect.MyCouponControllerClient = &MyCouponController{}
 
-func MyNewCouponController(authUsecase *usecase.AuthUsecase, couponUsecase *usecase.UserAttachedCouponUsecase) *MyCouponController {
+func NewMyCouponController(authUsecase *usecase.AuthUsecase, couponUsecase *usecase.UserAttachedCouponUsecase) *MyCouponController {
 	return &MyCouponController{
 		authUseCase:   *authUsecase,
 		couponUseCase: *couponUsecase,
 	}
 }
-func (ac *MyCouponController) GetDetail(ctx context.Context, req *connect.Request[user.CouponIDRequest]) (*connect.Response[user.Coupon], error) {
+func (ac *MyCouponController) GetDetail(ctx context.Context, req *connect.Request[user.CouponIDRequest]) (*connect.Response[shared.Coupon], error) {
 	userID := ctx.Value("userID").(uuid.UUID)
 
 	if userID == uuid.Nil {
@@ -53,10 +53,10 @@ func (ac *MyCouponController) GetDetail(ctx context.Context, req *connect.Reques
 			Name: store.Name,
 		})
 	}
-	result := &user.Coupon{
+	result := &shared.Coupon{
 		ID:                coupon.ID.String(),
 		Name:              coupon.Coupon.Name,
-		CouponType:        user.CouponType(coupon.Coupon.CouponType.ToInt()),
+		CouponType:        shared.CouponType(coupon.Coupon.CouponType.ToInt()),
 		DiscountAmount:    uint32(coupon.Coupon.DiscountAmount),
 		ExpireAt:          timestamppb.New(coupon.Coupon.ExpireAt),
 		IsCombinationable: coupon.Coupon.IsCombinationable,
@@ -78,12 +78,12 @@ func (ac *MyCouponController) GetList(ctx context.Context, req *connect.Request[
 		return nil, controller.ErrorHandler(domaiErr)
 	}
 
-	var response []*user.Coupon
+	var response []*shared.Coupon
 	for _, coupon := range entities {
-		response = append(response, &user.Coupon{
+		response = append(response, &shared.Coupon{
 			ID:                coupon.ID.String(),
 			Name:              coupon.Coupon.Name,
-			CouponType:        user.CouponType(coupon.Coupon.CouponType.ToInt()),
+			CouponType:        shared.CouponType(coupon.Coupon.CouponType.ToInt()),
 			DiscountAmount:    uint32(coupon.Coupon.DiscountAmount),
 			ExpireAt:          timestamppb.New(coupon.Coupon.ExpireAt),
 			IsCombinationable: coupon.Coupon.IsCombinationable,

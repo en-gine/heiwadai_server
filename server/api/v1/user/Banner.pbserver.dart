@@ -11,13 +11,13 @@ import 'package:protobuf/protobuf.dart' as $pb;
 
 import 'dart:core' as $core;
 import '../../google/protobuf/empty.pb.dart' as $1;
-import 'Banner.pb.dart' as $5;
+import 'Banner.pb.dart' as $7;
 import 'Banner.pbjson.dart';
 
 export 'Banner.pb.dart';
 
 abstract class BannerControllerServiceBase extends $pb.GeneratedService {
-  $async.Future<$5.BannerResponse> getBanner($pb.ServerContext ctx, $1.Empty request);
+  $async.Future<$7.BannerResponse> getBanner($pb.ServerContext ctx, $1.Empty request);
 
   $pb.GeneratedMessage createRequest($core.String method) {
     switch (method) {

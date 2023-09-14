@@ -10,40 +10,40 @@ import 'dart:async' as $async;
 import 'package:protobuf/protobuf.dart' as $pb;
 
 import 'dart:core' as $core;
-import 'Auth.pb.dart' as $4;
+import 'Auth.pb.dart' as $6;
 import '../../google/protobuf/empty.pb.dart' as $1;
 import 'Auth.pbjson.dart';
 
 export 'Auth.pb.dart';
 
 abstract class AuthControllerServiceBase extends $pb.GeneratedService {
-  $async.Future<$1.Empty> register($pb.ServerContext ctx, $4.UserRegisterRequest request);
-  $async.Future<$1.Empty> signUp($pb.ServerContext ctx, $4.UserAuthRequest request);
-  $async.Future<$4.UserAuthResponse> signIn($pb.ServerContext ctx, $4.UserAuthRequest request);
-  $async.Future<$1.Empty> resetPasswordMail($pb.ServerContext ctx, $4.ResetPasswordRequest request);
-  $async.Future<$1.Empty> updatePassword($pb.ServerContext ctx, $4.UpdatePasswordRequest request);
-  $async.Future<$1.Empty> updateEmail($pb.ServerContext ctx, $4.UpdateEmailRequest request);
+  $async.Future<$1.Empty> register($pb.ServerContext ctx, $6.UserRegisterRequest request);
+  $async.Future<$1.Empty> signUp($pb.ServerContext ctx, $6.UserAuthRequest request);
+  $async.Future<$6.UserAuthResponse> signIn($pb.ServerContext ctx, $6.UserAuthRequest request);
+  $async.Future<$1.Empty> resetPasswordMail($pb.ServerContext ctx, $6.ResetPasswordRequest request);
+  $async.Future<$1.Empty> updatePassword($pb.ServerContext ctx, $6.UpdatePasswordRequest request);
+  $async.Future<$1.Empty> updateEmail($pb.ServerContext ctx, $6.UpdateEmailRequest request);
 
   $pb.GeneratedMessage createRequest($core.String method) {
     switch (method) {
-      case 'Register': return $4.UserRegisterRequest();
-      case 'SignUp': return $4.UserAuthRequest();
-      case 'SignIn': return $4.UserAuthRequest();
-      case 'ResetPasswordMail': return $4.ResetPasswordRequest();
-      case 'UpdatePassword': return $4.UpdatePasswordRequest();
-      case 'UpdateEmail': return $4.UpdateEmailRequest();
+      case 'Register': return $6.UserRegisterRequest();
+      case 'SignUp': return $6.UserAuthRequest();
+      case 'SignIn': return $6.UserAuthRequest();
+      case 'ResetPasswordMail': return $6.ResetPasswordRequest();
+      case 'UpdatePassword': return $6.UpdatePasswordRequest();
+      case 'UpdateEmail': return $6.UpdateEmailRequest();
       default: throw $core.ArgumentError('Unknown method: $method');
     }
   }
 
   $async.Future<$pb.GeneratedMessage> handleCall($pb.ServerContext ctx, $core.String method, $pb.GeneratedMessage request) {
     switch (method) {
-      case 'Register': return this.register(ctx, request as $4.UserRegisterRequest);
-      case 'SignUp': return this.signUp(ctx, request as $4.UserAuthRequest);
-      case 'SignIn': return this.signIn(ctx, request as $4.UserAuthRequest);
-      case 'ResetPasswordMail': return this.resetPasswordMail(ctx, request as $4.ResetPasswordRequest);
-      case 'UpdatePassword': return this.updatePassword(ctx, request as $4.UpdatePasswordRequest);
-      case 'UpdateEmail': return this.updateEmail(ctx, request as $4.UpdateEmailRequest);
+      case 'Register': return this.register(ctx, request as $6.UserRegisterRequest);
+      case 'SignUp': return this.signUp(ctx, request as $6.UserAuthRequest);
+      case 'SignIn': return this.signIn(ctx, request as $6.UserAuthRequest);
+      case 'ResetPasswordMail': return this.resetPasswordMail(ctx, request as $6.ResetPasswordRequest);
+      case 'UpdatePassword': return this.updatePassword(ctx, request as $6.UpdatePasswordRequest);
+      case 'UpdateEmail': return this.updateEmail(ctx, request as $6.UpdateEmailRequest);
       default: throw $core.ArgumentError('Unknown method: $method');
     }
   }
