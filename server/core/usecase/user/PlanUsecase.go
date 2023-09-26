@@ -4,11 +4,15 @@ import (
 	"server/core/entity"
 	"server/core/errors"
 	queryservice "server/core/infra/queryService"
+	"server/core/infra/repository"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type PlanUsecase struct {
 	planQuery queryservice.IPlanQueryService
+	planRepo  repository.IPlanRepository
 }
 
 func NewPlanUsecase(planQuery queryservice.IPlanQueryService) *PlanUsecase {
@@ -44,4 +48,16 @@ func (u *PlanUsecase) Search(
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())
 	}
 	return plans, nil
+}
+
+func (u *PlanUsecase) GetMyBook(userID uuid.UUID) ([]*entity.Plan, *errors.DomainError) {
+	plans, err := u.planQuery.GetMyBooking(userID)
+	if err != nil {
+		return nil, errors.NewDomainError(errors.QueryError, err.Error())
+	}
+	return plans, nil
+}
+
+func (u *PlanUsecase) Reserve(userID uuid.UUID) *errors.DomainError {
+	return nil // TODO
 }

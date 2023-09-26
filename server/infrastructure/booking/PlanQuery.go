@@ -21,23 +21,6 @@ func NewPlanQuery() *PlanQuery {
 	return &PlanQuery{}
 }
 
-func PlanQueryTest() {
-	p := NewPlanQuery()
-
-	tomorrow := time.Now().Add(2 * 24 * time.Hour)
-	p.Search(
-		nil,
-		time.Now(),
-		tomorrow,
-		1,
-		1,
-		1,
-		nil,
-		nil,
-		nil,
-	)
-}
-
 func (p *PlanQuery) GetMyBooking(userID uuid.UUID) ([]*entity.Plan, error) {
 	return nil, nil
 }
