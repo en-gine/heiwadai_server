@@ -11,7 +11,6 @@ var TableNames = struct {
 	CouponNotices      string
 	CouponStores       string
 	MailMagazine       string
-	SchemaMigrations   string
 	StayableStoreInfo  string
 	Store              string
 	UserData           string
@@ -25,7 +24,6 @@ var TableNames = struct {
 	CouponNotices:      "coupon_notices",
 	CouponStores:       "coupon_stores",
 	MailMagazine:       "mail_magazine",
-	SchemaMigrations:   "schema_migrations",
 	StayableStoreInfo:  "stayable_store_info",
 	Store:              "store",
 	UserData:           "user_data",

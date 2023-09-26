@@ -22,5 +22,8 @@ func main() {
 	fmt.Println(msg)
 
 	log.Fatal(http.ListenAndServe(":"+os.Getenv("SERVER_PORT"), h2c.NewHandler(mux, &http2.Server{}))) // リフレクションを有効にする
+}
+
+func InitEnv() {
 
 }

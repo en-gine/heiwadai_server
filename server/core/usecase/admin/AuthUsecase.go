@@ -80,8 +80,9 @@ func (u *AuthUsecase) Register(
 func (u *AuthUsecase) SignUp(
 	Mail string,
 	Password string,
+
 ) error {
-	err := u.authAction.SignUp(Mail, Password)
+	err := u.authAction.SignUp(Mail, Password, action.UserTypeUser)
 	if err != nil {
 		return errors.NewDomainError(errors.RepositoryError, err.Error())
 	}

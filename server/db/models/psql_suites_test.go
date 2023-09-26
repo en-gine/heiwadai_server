@@ -20,8 +20,6 @@ func TestUpsert(t *testing.T) {
 
 	t.Run("MailMagazines", testMailMagazinesUpsert)
 
-	t.Run("SchemaMigrations", testSchemaMigrationsUpsert)
-
 	t.Run("StayableStoreInfos", testStayableStoreInfosUpsert)
 
 	t.Run("Stores", testStoresUpsert)

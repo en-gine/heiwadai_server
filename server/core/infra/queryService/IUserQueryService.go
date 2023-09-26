@@ -11,5 +11,5 @@ type IUserQueryService interface {
 	GetByID(id uuid.UUID) (*entity.User, error)
 	GetByMail(mail string) (*entity.User, error)
 	GetUserByPrefecture([]*entity.Prefecture) ([]*entity.User, error)
-	GetAll(pager *types.PageQuery) ([]*entity.User, error)
+	GetAll(query *types.UserQuery, pager *types.PageQuery) ([]*entity.User, error)
 }

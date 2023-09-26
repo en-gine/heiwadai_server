@@ -3,8 +3,7 @@ CREATE TABLE user_manager (
     email VARCHAR NOT NULL UNIQUE,
     is_admin BOOLEAN NOT NULL DEFAULT false,
     create_at TIMESTAMPTZ NOT NULL default now(),
-    update_at TIMESTAMPTZ NOT NULL default now(),
-    FOREIGN KEY (id) REFERENCES auth.users (id) ON DELETE CASCADE
+    update_at TIMESTAMPTZ NOT NULL default now()
 );
 
 
@@ -163,3 +162,16 @@ $$ language plpgsql security definer;
 create trigger on_auth_user_updated
   after update of email on auth.users
   for each row execute procedure public.handle_user_email_update();
+
+-- userが削除されるときに、userテーブルのデータも削除する
+CREATE OR REPLACE FUNCTION delete_public_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  DELETE FROM public.user_manager WHERE id = OLD.id;
+  RETURN OLD;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER delete_public_user_trigger
+AFTER DELETE ON auth.users
+FOR EACH ROW EXECUTE FUNCTION delete_public_user();

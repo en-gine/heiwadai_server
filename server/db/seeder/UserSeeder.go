@@ -22,6 +22,7 @@ func UserSeeder() {
 	address := "東区箱崎1-11"
 	tel := "0943-77-3185"
 	email := os.Getenv("TEST_USER_MAIL")
+	fmt.Println(email)
 	user, err := authUsecase.Register(
 		"Tomohide",
 		"Hirakawa",
@@ -39,6 +40,7 @@ func UserSeeder() {
 		true,
 	)
 	if err != nil {
+		fmt.Println(err)
 		panic(err)
 	}
 	if user != nil {

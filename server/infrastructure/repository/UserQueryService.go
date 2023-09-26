@@ -71,8 +71,30 @@ func (pq *UserQueryService) GetUserByPrefecture(prefectures []*entity.Prefecture
 
 }
 
-func (pq *UserQueryService) GetAll(pager *types.PageQuery) ([]*entity.User, error) {
-	userManagers, err := models.UserManagers(models.UserManagerWhere.IsAdmin.EQ(false), qm.Limit(pager.Offset()), qm.Offset(pager.Offset())).All(context.Background(), pq.db)
+func (pq *UserQueryService) GetAll(query *types.UserQuery, pager *types.PageQuery) ([]*entity.User, error) {
+	var firstNameQuery qm.QueryMod = nil
+	if query.FirstName != nil {
+		firstNameQuery = models.UserDatumWhere.FirstName.EQ("%" + *query.FirstName + "%")
+	}
+	var lastNameQuery qm.QueryMod = nil
+	if query.FirstName != nil {
+		lastNameQuery = models.UserDatumWhere.LastName.EQ("%" + *query.LastName + "%")
+	}
+	var firstNameKanaQuery qm.QueryMod = nil
+	if query.FirstNameKana != nil {
+		firstNameKanaQuery = models.UserDatumWhere.FirstNameKana.EQ("%" + *query.FirstNameKana + "%")
+	}
+	var lastNameKanaQuery qm.QueryMod = nil
+	if query.LastNameKana != nil {
+		lastNameKanaQuery = models.UserDatumWhere.LastNameKana.EQ("%" + *query.LastNameKana + "%")
+	}
+	var prefectureQuery qm.QueryMod = nil
+	if query.LastNameKana != nil {
+		prefectureQuery = models.UserDatumWhere.Prefecture.EQ(query.Prefecture.ToInt())
+	}
+
+	userdata, err := models.UserData(firstNameQuery, lastNameQuery, firstNameKanaQuery, lastNameKanaQuery, prefectureQuery, qm.Limit(pager.Offset()), qm.Offset(pager.Offset())).All(context.Background(), pq.db)
+
 	if err != nil {
 		return nil, err
 	}
@@ -80,8 +102,8 @@ func (pq *UserQueryService) GetAll(pager *types.PageQuery) ([]*entity.User, erro
 		return nil, nil
 	}
 	var result []*entity.User
-	for _, user := range userManagers {
-		result = append(result, UserModelToEntity(user.R.UserUserDatum, user.Email))
+	for _, user := range userdata {
+		result = append(result, UserModelToEntity(user, user.R.User.Email))
 	}
 	return result, nil
 }

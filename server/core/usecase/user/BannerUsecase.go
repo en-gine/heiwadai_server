@@ -11,13 +11,10 @@ type BannerUsecase struct {
 }
 
 func NewBannerUsecase(bannerQuery queryservice.IBannerQueryService) *BannerUsecase {
-	return &BannerUsecase{
-		bannerQuery: bannerQuery,
-	}
+	return &BannerUsecase{}
 }
 
 func (u *BannerUsecase) GetList() ([]*entity.Banner, *errors.DomainError) {
-
 	banners, err := u.bannerQuery.GetAll()
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())

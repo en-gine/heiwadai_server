@@ -81,5 +81,5 @@ require (
 	github.com/nedpals/supabase-go v0.3.0
 	github.com/streadway/amqp v1.1.0
 	github.com/stretchr/testify v1.8.4
-	golang.org/x/text v0.10.0 // indirect
+	golang.org/x/text v0.13.0 // indirect
 )
