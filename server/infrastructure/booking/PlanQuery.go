@@ -37,6 +37,7 @@ func (p *PlanQuery) Search(
 	roomTypes *[]entity.RoomType,
 ) ([]*entity.Plan, error) {
 	reqBody := NewOTAHotelAvailRQ(
+		[]string{"E69502"},
 		stayFrom,
 		stayTo,
 		adult,
@@ -55,6 +56,7 @@ func (p *PlanQuery) Search(
 }
 
 func NewOTAHotelAvailRQ(
+	hotelCodes []string,
 	stayFrom time.Time,
 	stayTo time.Time,
 	adult int,
@@ -68,6 +70,11 @@ func NewOTAHotelAvailRQ(
 	start := util.DateToYYYYMMDD(stayFrom)
 	end := util.DateToYYYYMMDD(stayTo)
 
+	// ホテルコード
+	var hotelRef []avail.HotelRef
+	for _, hotelCode := range hotelCodes {
+		hotelRef = append(hotelRef, avail.HotelRef{HotelCode: hotelCode})
+	}
 	// True：禁煙、False：喫煙、省略：条件指定なし
 	var nonSmokingQuery *bool
 
@@ -138,26 +145,17 @@ func NewOTAHotelAvailRQ(
 		}
 		roomStayCandidates = append(roomStayCandidates, candidate)
 	}
-	min := 3000
-	max := 10000
-	rateRange := avail.RateRange{
-		MinRate: &min,
-		MaxRate: &max,
-	}
+
 	return &avail.OTAHotelAvailRQ{
-		Version:        "1.0",
-		PrimaryLangID:  "jpn",
-		RateDetailsInd: util.BoolPtr(false),
+		Version:       "1.0",
+		PrimaryLangID: "jpn",
+		HotelStayOnly: util.BoolPtr(true), // ホテル情報のみを返すフラグ。不明
+		PricingMethod: avail.PricingMethodLowestperstay,
 		AvailRequestSegments: avail.AvailRequestSegments{
 			AvailRequestSegment: avail.AvailRequestSegment{
 				HotelSearchCriteria: avail.HotelSearchCriteria{
 					Criterion: avail.Criterion{
-						RateRange: &rateRange,
-						HotelRef: []avail.HotelRef{
-							{
-								HotelCode: "E69502",
-							},
-						},
+						HotelRef: hotelRef,
 						RatePlanCandidates: &avail.RatePlanCandidates{ // 食事タイプ
 							RatePlanCandidate: []avail.RatePlanCandidate{
 								{

@@ -1,4 +1,4 @@
-package common
+package request
 
 import (
 	"encoding/xml"

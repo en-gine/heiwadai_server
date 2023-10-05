@@ -15,18 +15,18 @@ type OTAHotelAvailRQ struct {
 	AvailRatesOnly       *bool                `xml:"AvailRatesOnly,attr"` // 販売している部屋とプランのみを返すフラグ。デフォルトはTrue
 	HotelStayOnly        *bool                `xml:"HotelStayOnly,attr"`  // ホテル情報のみを返すフラグ。デフォルトはfalse
 	RateDetailsInd       *bool                `xml:"RateDetailsInd,attr"` // 料金の詳細情報を返すフラグ。デフォルトはTrue
-	PricingMethod        *PricingMethod       `xml:"PricingMethod,attr"`  // デフォルトは"None"
+	PricingMethod        PricingMethod        `xml:"PricingMethod,attr"`  // デフォルトは"None"
 }
 
 type PricingMethod string
 
 const (
-	PricingMethodAll            PricingMethod = "All"
-	PricingMethodLowest         PricingMethod = "Lowest"         // 最安値
-	PricingMethodHeighest       PricingMethod = "Heighest"       // 最高値
-	PricingMethodLowestperstay  PricingMethod = "Lowestperstay"  // 連泊期間内の料金合計の最安値
-	PricingMethodHighestperstay PricingMethod = "Highestperstay" // 連泊期間内の料金合計の最高値
-	PricingMethodNone           PricingMethod = "None"           // 指定なし
+	PricingMethodAverage        PricingMethod = "Average"
+	PricingMethodLowest         PricingMethod = "Lowest"           // 最安値
+	PricingMethodHeighest       PricingMethod = "Heighest"         // 最高値
+	PricingMethodLowestperstay  PricingMethod = "Lowest per stay"  // 連泊期間内の料金合計の最安値
+	PricingMethodHighestperstay PricingMethod = "Highest per stay" // 連泊期間内の料金合計の最高値
+	PricingMethodNone           PricingMethod = "None"             // 指定なし
 )
 
 type AvailRequestSegments struct {
