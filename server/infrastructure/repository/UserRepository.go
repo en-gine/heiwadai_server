@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+
 	"server/core/entity"
 	"server/core/infra/repository"
 	"server/db/models"
@@ -28,7 +29,11 @@ func NewUserRepository() *UserRepository {
 
 func (ur *UserRepository) Save(updateUser *entity.User, updateUserOption *entity.UserOption) error {
 	tran := NewTransaction()
-	tran.Begin()
+	ctx := context.Background()
+	err := tran.Begin(ctx)
+	if err != nil {
+		return err
+	}
 	user := models.UserDatum{
 		UserID:        updateUser.ID.String(),
 		FirstName:     updateUser.FirstName,
@@ -44,7 +49,7 @@ func (ur *UserRepository) Save(updateUser *entity.User, updateUserOption *entity
 		Tel:           null.StringFromPtr(updateUser.Tel),
 		AcceptMail:    updateUser.AcceptMail,
 	}
-	err := user.Upsert(context.Background(), ur.db, true, []string{"user_id"}, boil.Infer(), boil.Infer())
+	err = user.Upsert(ctx, ur.db, true, []string{"user_id"}, boil.Infer(), boil.Infer())
 	if err != nil {
 		tran.Rollback()
 		return err
@@ -55,51 +60,64 @@ func (ur *UserRepository) Save(updateUser *entity.User, updateUserOption *entity
 			InnerNote:       updateUserOption.InnerNote,
 			IsBlackCustomer: updateUserOption.IsBlackCustomer,
 		}
-		err := userOption.Upsert(context.Background(), ur.db, true, []string{"user_id"}, boil.Infer(), boil.Infer())
+		err := userOption.Upsert(ctx, ur.db, true, []string{"user_id"}, boil.Infer(), boil.Infer())
 		if err != nil {
 			tran.Rollback()
 			return err
 		}
 	}
-	tran.Commit()
+	err = tran.Commit()
+	if err != nil {
+		tran.Rollback()
+		return err
+	}
+
 	return nil
 }
 
 func (ur *UserRepository) Delete(userID uuid.UUID) error {
-
 	tran := NewTransaction()
-	tran.Begin()
-	deleteUserManager, err := models.FindUserManager(context.Background(), ur.db, userID.String())
+	ctx := context.Background()
+	err := tran.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	deleteUserManager, err := models.FindUserManager(ctx, ur.db, userID.String())
 	if err != nil {
 		tran.Rollback()
 		return err
 	}
-	_, err = deleteUserManager.Delete(context.Background(), ur.db)
+	_, err = deleteUserManager.Delete(ctx, ur.db)
 	if err != nil {
 		tran.Rollback()
 		return err
 	}
 
-	deleteUserData, err := models.FindUserDatum(context.Background(), ur.db, userID.String())
+	deleteUserData, err := models.FindUserDatum(ctx, ur.db, userID.String())
 	if err != nil {
 		tran.Rollback()
 		return err
 	}
-	_, err = deleteUserData.Delete(context.Background(), ur.db)
+	_, err = deleteUserData.Delete(ctx, ur.db)
 	if err != nil {
 		tran.Rollback()
 		return err
 	}
-	deleteUserOption, err := models.FindUserOption(context.Background(), ur.db, userID.String())
+	deleteUserOption, err := models.FindUserOption(ctx, ur.db, userID.String())
 	if err != nil {
 		tran.Rollback()
 		return err
 	}
-	_, err = deleteUserOption.Delete(context.Background(), ur.db)
+	_, err = deleteUserOption.Delete(ctx, ur.db)
 	if err != nil {
 		tran.Rollback()
 		return err
 	}
-	tran.Commit()
+	err = tran.Commit()
+	if err != nil {
+		tran.Rollback()
+		return err
+	}
+
 	return nil
 }

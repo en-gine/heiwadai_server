@@ -1,12 +1,13 @@
 package admin
 
 import (
+	"time"
+
 	"server/core/entity"
 	"server/core/errors"
 	queryservice "server/core/infra/queryService"
 	"server/core/infra/queryService/types"
 	"server/core/infra/repository"
-	"time"
 
 	"github.com/google/uuid"
 )
@@ -47,7 +48,6 @@ func (u *UserDataUsecase) Update(
 	Mail string,
 	AcceptMail bool, // メルマガ配信可
 ) (*entity.User, *errors.DomainError) {
-
 	existUser, err := u.userQuery.GetByID(ID)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())

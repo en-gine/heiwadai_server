@@ -1,9 +1,11 @@
 package repository
 
 import (
+	"context"
+
 	"server/core/entity"
 )
 
 type IUserCouponRepository interface {
-	Save(coupon *entity.UserAttachedCoupon) error
+	Save(ctx context.Context, coupon *entity.UserAttachedCoupon) error
 }

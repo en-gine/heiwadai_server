@@ -170,7 +170,7 @@ BEGIN
   DELETE FROM public.user_manager WHERE id = OLD.id;
   RETURN OLD;
 END;
-$$ LANGUAGE plpgsql;
+$$ language plpgsql security definer;
 
 CREATE TRIGGER delete_public_user_trigger
 AFTER DELETE ON auth.users

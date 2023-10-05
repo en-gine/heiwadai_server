@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+
 	"server/core/entity"
 	"server/core/infra/repository"
 	"server/db/models"
@@ -27,7 +28,6 @@ func NewStoreRepository() *StoreRepository {
 }
 
 func (pr *StoreRepository) Save(updateStore *entity.Store, stayableInfo *entity.StayableStoreInfo) error {
-
 	store := models.Store{
 		ID:              updateStore.ID.String(),
 		Name:            updateStore.Name,
@@ -44,8 +44,12 @@ func (pr *StoreRepository) Save(updateStore *entity.Store, stayableInfo *entity.
 	}
 
 	tran := NewTransaction()
-	tran.Begin()
-	err := store.Upsert(context.Background(), pr.db, true, []string{"id"}, boil.Infer(), boil.Infer())
+	ctx := context.Background()
+	err := tran.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	err = store.Upsert(ctx, pr.db, true, []string{"id"}, boil.Infer(), boil.Infer())
 	if err != nil {
 		tran.Rollback()
 		return err
@@ -61,28 +65,43 @@ func (pr *StoreRepository) Save(updateStore *entity.Store, stayableInfo *entity.
 			RestAPIURL:      stayableInfo.RestAPIURL,
 			BookingSystemID: stayableInfo.BookingSystemID,
 		}
-		err = StayableStoreInfo.Upsert(context.Background(), pr.db, true, []string{"store_id"}, boil.Infer(), boil.Infer())
+		err = StayableStoreInfo.Upsert(ctx, pr.db, true, []string{"store_id"}, boil.Infer(), boil.Infer())
 		if err != nil {
 			tran.Rollback()
 			return err
 		}
 	}
-	tran.Commit()
-	return err
-}
-
-func (pr *StoreRepository) Delete(storeID uuid.UUID) error {
-	deleteStore, err := models.FindStore(context.Background(), pr.db, storeID.String())
-	if err != nil {
-		return err
-	}
-	tran := NewTransaction()
-	tran.Begin()
-	_, err = deleteStore.Delete(context.Background(), pr.db)
+	err = tran.Commit()
 	if err != nil {
 		tran.Rollback()
 		return err
 	}
-	tran.Commit()
-	return err
+
+	return nil
+}
+
+func (pr *StoreRepository) Delete(storeID uuid.UUID) error {
+	ctx := context.Background()
+	tran := NewTransaction()
+	err := tran.Begin(ctx)
+	if err != nil {
+		return err
+	}
+
+	deleteStore, err := models.FindStore(ctx, pr.db, storeID.String())
+	if err != nil {
+		return err
+	}
+	_, err = deleteStore.Delete(ctx, pr.db)
+	if err != nil {
+		tran.Rollback()
+		return err
+	}
+	err = tran.Commit()
+	if err != nil {
+		tran.Rollback()
+		return err
+	}
+
+	return nil
 }

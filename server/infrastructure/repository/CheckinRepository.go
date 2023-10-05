@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+
 	"server/core/entity"
 	"server/core/infra/repository"
 	"server/db/models"
@@ -25,8 +26,7 @@ func NewCheckinRepository() *CheckinRepository {
 	}
 }
 
-func (pr *CheckinRepository) Save(updateCheckin *entity.Checkin) error {
-
+func (pr *CheckinRepository) Save(ctx context.Context, updateCheckin *entity.Checkin) error {
 	checkin := models.Checkin{
 		ID:        updateCheckin.ID.String(),
 		StoreID:   null.StringFrom(updateCheckin.Store.ID.String()),
@@ -34,7 +34,7 @@ func (pr *CheckinRepository) Save(updateCheckin *entity.Checkin) error {
 		CheckInAt: updateCheckin.CheckInAt,
 		Archive:   updateCheckin.Archive,
 	}
-	err := checkin.Upsert(context.Background(), pr.db, true, []string{"id"}, boil.Infer(), boil.Infer())
+	err := checkin.Upsert(ctx, pr.db, true, []string{"id"}, boil.Infer(), boil.Infer())
 
 	return err
 }

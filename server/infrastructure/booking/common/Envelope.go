@@ -1,14 +1,21 @@
 package common
 
-import "encoding/xml"
+import (
+	"encoding/xml"
+)
 
-type Envelope[TBody any] struct {
+type Envelope[T any] struct {
 	XMLName xml.Name `xml:"soapenv:Envelope"`
 	SoapEnv string   `xml:"xmlns:soapenv,attr"`
 	Head    string   `xml:"xmlns:head,attr"`
 	Ns      string   `xml:"xmlns:ns,attr"`
 	Header  Header   `xml:"soapenv:Header"`
-	Body    TBody    `xml:"soapenv:Body"`
+	Body    Body[T]  `xml:"soapenv:Body"`
+}
+
+type Body[T any] struct {
+	XMLName xml.Name `xml:"soapenv:Body"`
+	Content T        `xml:",innerxml"`
 }
 
 type Header struct {
@@ -32,8 +39,8 @@ type Authentication struct {
 	Password string `xml:"head:Password"`
 }
 
-func NewEnvelope[TBody any](XMLBody TBody, UserName string, Password string) Envelope[TBody] {
-	return Envelope[TBody]{
+func NewEnvelope[T any](XMLBody T, UserName string, Password string) Envelope[T] {
+	return Envelope[T]{
 		SoapEnv: "http://schemas.xmlsoap.org/soap/envelope/",
 		Head:    "http://www.seanuts.co.jp/ota/header",
 		Ns:      "http://www.opentravel.org/OTA/2003/05",
@@ -49,6 +56,8 @@ func NewEnvelope[TBody any](XMLBody TBody, UserName string, Password string) Env
 				},
 			},
 		},
-		Body: XMLBody,
+		Body: Body[T]{
+			Content: XMLBody,
+		},
 	}
 }

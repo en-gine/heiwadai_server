@@ -1,7 +1,9 @@
 package repository
 
+import "context"
+
 type ITransaction interface {
+	Begin(ctx context.Context) error
 	Commit() error
-	Begin() error
-	Rollback() error
+	Rollback()
 }

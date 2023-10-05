@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"server/infrastructure/logger"
-
 	"os"
+
+	"server/infrastructure/logger"
 
 	firebase "firebase.google.com/go"
 	"golang.org/x/oauth2/google"
@@ -29,7 +29,6 @@ type FirebaseConfig struct {
 }
 
 func InitFirebase() (*firebase.App, error) {
-
 	config := FirebaseConfig{
 		Type:                    os.Getenv("TYPE"),
 		ProjectId:               os.Getenv("PROJECT_ID"),

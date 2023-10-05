@@ -1,6 +1,8 @@
 package user
 
 import (
+	"context"
+
 	"server/core/entity"
 	"server/core/errors"
 	queryservice "server/core/infra/queryService"
@@ -22,7 +24,6 @@ func NewUserAttachedCouponUsecase(usercouponRepository repository.IUserCouponRep
 }
 
 func (u *UserAttachedCouponUsecase) GetByID(AuthUserID uuid.UUID, couponID uuid.UUID) (*entity.UserAttachedCoupon, *errors.DomainError) {
-
 	usercoupon, err := u.usercouponQuery.GetByID(AuthUserID, couponID)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())
@@ -31,7 +32,6 @@ func (u *UserAttachedCouponUsecase) GetByID(AuthUserID uuid.UUID, couponID uuid.
 }
 
 func (u *UserAttachedCouponUsecase) GetMyList(AuthUserID uuid.UUID) ([]*entity.UserAttachedCoupon, *errors.DomainError) {
-
 	usercoupons, err := u.usercouponQuery.GetActiveAll(AuthUserID)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())
@@ -41,7 +41,6 @@ func (u *UserAttachedCouponUsecase) GetMyList(AuthUserID uuid.UUID) ([]*entity.U
 
 func (u *UserAttachedCouponUsecase) UseMyCoupon(AuthUserID uuid.UUID, couponID uuid.UUID) *errors.DomainError {
 	coupon, err := u.usercouponQuery.GetByID(AuthUserID, couponID)
-
 	if err != nil {
 		return errors.NewDomainError(errors.QueryError, err.Error())
 	}
@@ -63,7 +62,7 @@ func (u *UserAttachedCouponUsecase) UseMyCoupon(AuthUserID uuid.UUID, couponID u
 		AuthUserID,
 		coupon.Coupon,
 	)
-	err = u.usercouponRepository.Save(usedCoupon)
+	err = u.usercouponRepository.Save(context.Background(), usedCoupon)
 	if err != nil {
 		return errors.NewDomainError(errors.RepositoryError, err.Error())
 	}

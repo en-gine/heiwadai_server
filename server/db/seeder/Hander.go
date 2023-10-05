@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+
 	userRouter "server/router/user"
 )
 
@@ -23,7 +24,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	// 取得したGETパラメーターを表示
 	for key, value := range values {
 		fmt.Printf("Key: %s, Value: %s\n", key, value[0])
-		w.Write([]byte(key + ":" + value[0]))
+		_, _ = w.Write([]byte(key + ":" + value[0]))
 		if key == "access_token" && value[0] != "" {
 			token = value[0]
 			go SetPassword(token)
@@ -38,5 +39,4 @@ func SetPassword(token string) {
 	if err != nil {
 		panic(err)
 	}
-
 }

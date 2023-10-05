@@ -29,3 +29,7 @@ RUN  go mod tidy & \
   go install -v github.com/stamblerre/gocode@latest & \
   go install -v golang.org/x/tools/cmd/goimports@latest & \
   go install -v golang.org/x/tools/gopls@latest
+
+### For Lint
+RUN go install -v github.com/nishanths/exhaustive & \
+  curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.54.2 & \

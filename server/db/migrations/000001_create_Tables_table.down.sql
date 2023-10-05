@@ -37,4 +37,8 @@ DROP trigger if exists on_auth_user_updated on auth.users;
 
 DROP function if exists public.handle_user_email_update;
 
+DROP trigger if exists delete_public_user_trigger on auth.users;
+
+DROP function if exists public.delete_public_user;
+
 -- DROP TABLE IF EXISTS schema_migrations;

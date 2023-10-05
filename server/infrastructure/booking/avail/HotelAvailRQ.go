@@ -1,16 +1,21 @@
 package avail
 
-import "server/infrastructure/booking/util"
+import (
+	"encoding/xml"
+
+	"server/infrastructure/booking/util"
+)
 
 type OTAHotelAvailRQ struct {
+	XMLName              xml.Name             `xml:"ns:OTA_HotelAvailRQ"`
 	AvailRequestSegments AvailRequestSegments `xml:"ns:AvailRequestSegments"`
 	Version              string               `xml:"Version,attr"`
 	PrimaryLangID        string               `xml:"PrimaryLangID,attr"`  // デフォルトは"jpn"
-	SummaryOnly          bool                 `xml:"SummaryOnly,attr"`    // サマリ情報のみを返すフラグ。デフォルトはfalse
+	SummaryOnly          *bool                `xml:"SummaryOnly,attr"`    // サマリ情報のみを返すフラグ。デフォルトはfalse
 	AvailRatesOnly       *bool                `xml:"AvailRatesOnly,attr"` // 販売している部屋とプランのみを返すフラグ。デフォルトはTrue
 	HotelStayOnly        *bool                `xml:"HotelStayOnly,attr"`  // ホテル情報のみを返すフラグ。デフォルトはfalse
 	RateDetailsInd       *bool                `xml:"RateDetailsInd,attr"` // 料金の詳細情報を返すフラグ。デフォルトはTrue
-	PricingMethod        PricingMethod        `xml:"PricingMethod,attr"`  // デフォルトは"None"
+	PricingMethod        *PricingMethod       `xml:"PricingMethod,attr"`  // デフォルトは"None"
 }
 
 type PricingMethod string
@@ -64,7 +69,7 @@ type RatePlanCandidates struct {
 }
 
 type RatePlanCandidate struct {
-	MealsIncluded MealsIncluded `xml:"ns:MealsIncluded"`
+	MealsIncluded *MealsIncluded `xml:"ns:MealsIncluded"`
 }
 
 type MealsIncluded struct {
@@ -80,7 +85,7 @@ type RoomStayCandidates struct {
 type RoomStayCandidate struct {
 	RoomTypeCode  *string        `xml:"RoomTypeCode,attr"`
 	BedTypeCode   *BedTypeCode   `xml:"BedTypeCode,attr"`
-	NonSmoking    *bool          `xml:"NonSmoking,attr"` //True：禁煙、False：喫煙、省略：条件指定なし
+	NonSmoking    *bool          `xml:"NonSmoking,attr"` // True：禁煙、False：喫煙、省略：条件指定なし
 	Quantity      *int           `xml:"Quantity,attr"`   // 利用部屋数
 	EffectiveDate *util.YYYYMMDD `xml:"EffectiveDate,attr"`
 	ExpireDate    *util.YYYYMMDD `xml:"ExpireDate,attr"`
@@ -120,6 +125,6 @@ type AvailReqType string
 
 const (
 	AvailReqTypeRoom    AvailReqType = "Room"
-	AvailReqTypeNonRoom AvailReqType = "NonRoom" //プランのみ検索
+	AvailReqTypeNonRoom AvailReqType = "NonRoom" // プランのみ検索
 	AvailReqTypeBoth    AvailReqType = "Both"
 )

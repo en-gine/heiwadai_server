@@ -3,6 +3,7 @@ package action
 import (
 	"log"
 	"net/smtp"
+
 	"server/core/entity"
 	"server/core/infra/action"
 
@@ -11,8 +12,7 @@ import (
 
 var _ action.IMailAction = &SendMail{}
 
-type SendMail struct {
-}
+type SendMail struct{}
 
 func (s *SendMail) SendAll([]*entity.Prefecture) error {
 	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
@@ -80,7 +80,6 @@ func (s *SendMail) Send(email string, Body string) error {
 	err := smtp.SendMail("smtp.example.com:587",
 		smtp.PlainAuth("", from, pass, "smtp.example.com"),
 		from, []string{to}, []byte(msg))
-
 	if err != nil {
 		log.Fatalf("smtp error: %s", err)
 		return nil

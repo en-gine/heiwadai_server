@@ -1,11 +1,13 @@
 package user
 
 import (
+	"context"
+	"time"
+
 	"server/core/entity"
 	"server/core/errors"
 	queryService "server/core/infra/queryService"
 	"server/core/infra/repository"
-	"time"
 
 	"github.com/google/uuid"
 )
@@ -34,7 +36,6 @@ func NewUserCheckinUsecase(
 	checkinQuery queryService.ICheckinQueryService,
 	couponQuery queryService.ICouponQueryService,
 	transaction repository.ITransaction,
-
 ) *UserCheckinUsecase {
 	return &UserCheckinUsecase{
 		userQuery:            userQuery,
@@ -51,7 +52,6 @@ func NewUserCheckinUsecase(
 }
 
 func (u *UserCheckinUsecase) GetStampCard(authID uuid.UUID) (*entity.StampCard, *errors.DomainError) {
-
 	userCheckins, err := u.checkinQuery.GetActiveCheckin(authID)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())
@@ -76,18 +76,17 @@ func (u *UserCheckinUsecase) Checkin(authID uuid.UUID, QrHash uuid.UUID) (*entit
 	var checkInStore *entity.Store
 	var isUnlimitQr bool
 	lastCheckin, err := u.checkinQuery.GetLastStoreCheckin(authID, checkInStore.ID)
-
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())
 	}
 
 	for _, store := range allStores {
-		//通常のQRコードでは24時間以内にチェックインした店舗はチェックインできない
+		// 通常のQRコードでは24時間以内にチェックインした店舗はチェックインできない
 		if store.QRCode == QrHash {
 			checkInStore = store
 			isUnlimitQr = false
 		}
-		//無制限のQRコード
+		// 無制限のQRコード
 		if store.UnLimitedQRCode == QrHash {
 			checkInStore = store
 			isUnlimitQr = true
@@ -103,14 +102,18 @@ func (u *UserCheckinUsecase) Checkin(authID uuid.UUID, QrHash uuid.UUID) (*entit
 	if !isUnlimitQr && isSameStore && lastCheckin.CheckInAt.Add(24*time.Hour).After(time.Now()) {
 		return nil, errors.NewDomainError(errors.UnPemitedOperation, "24時間以内にチェックインした店舗はチェックインできません。")
 	}
+	ctx := context.Background()
+	err = u.transaction.Begin(ctx)
+	if err != nil {
+		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
+	}
 
-	u.transaction.Begin()
 	newCheckin := entity.CreateCheckin(*checkInStore, *AuthUser)
 	myCheckins, err := u.checkinQuery.GetActiveCheckin(authID)
 	if err != nil {
-		u.transaction.Rollback()
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())
 	}
+
 	var userAttachedCoupon *entity.UserAttachedCoupon
 	if len(myCheckins) >= 5 {
 		standardCoupon, domainErr := u.couponQuery.GetCouponByType(entity.CouponStandard)
@@ -120,19 +123,22 @@ func (u *UserCheckinUsecase) Checkin(authID uuid.UUID, QrHash uuid.UUID) (*entit
 		}
 		userAttachedCoupon := entity.CreateUserAttachedCoupon(authID, standardCoupon)
 
-		err = u.usercouponRepository.Save(userAttachedCoupon)
+		err = u.usercouponRepository.Save(ctx, userAttachedCoupon)
 		if err != nil {
 			u.transaction.Rollback()
 			return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
 		}
 	}
 
-	err = u.checkInRepository.Save(newCheckin)
+	err = u.checkInRepository.Save(ctx, newCheckin)
 	if err != nil {
 		u.transaction.Rollback()
 		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
 	}
-	u.transaction.Commit()
+	err = u.transaction.Commit()
+	if err != nil {
+		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
+	}
 
 	return userAttachedCoupon, nil
 }

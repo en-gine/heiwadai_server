@@ -1,10 +1,12 @@
 package avail
 
 import (
+	"encoding/xml"
 	"server/infrastructure/booking/util"
 )
 
 type OTAHotelAvailRS struct {
+	XMLName    xml.Name      `xml:"ns:OTA_HotelAvailRS"`
 	Version    *string       `xml:"Version,attr"`
 	Success    *string       `xml:"Success"`
 	HotelStays *[]HotelStays `xml:"HotelStays"`
@@ -174,7 +176,7 @@ type PenaltyDescription struct {
 }
 
 type RatePlanDescription struct {
-	CreateDateTime     *string  `xml:"CreateDateTime,attr`
+	CreateDateTime     *string  `xml:"CreateDateTime,attr"`
 	LastModifyDateTime *string  `xml:"LastModifyDateTime,attr"`
 	Text               *[]Text  `xml:"Text"`
 	Image              *[]Image `xml:"Image"`

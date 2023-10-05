@@ -104,7 +104,6 @@ func RegenPlan(
 	ImageURL string,
 	SmokeType SmokeType,
 	OverView string,
-
 ) *Plan {
 	return &Plan{
 		ID:        uuid.New(),

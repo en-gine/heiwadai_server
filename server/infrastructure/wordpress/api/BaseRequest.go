@@ -4,8 +4,10 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
-	"server/infrastructure/redis"
 	"time"
+
+	"server/infrastructure/logger"
+	"server/infrastructure/redis"
 )
 
 var rdb, _ = redis.NewMemoryRepository()
@@ -55,7 +57,11 @@ func Request[T any](APIURL string, cacheKey string, cacheExpire time.Duration) (
 		if err != nil {
 			return nil, err
 		}
-		rdb.Set(cacheKey, cacheData, cacheExpire)
+		err = rdb.Set(cacheKey, cacheData, cacheExpire)
+		if err != nil {
+			logger.Errorf("Failed to set cache : %s", err)
+			return nil, err
+		}
 		return data, nil
 	}
 }

@@ -1,8 +1,9 @@
 package entity
 
 import (
-	"server/core/errors"
 	"time"
+
+	"server/core/errors"
 
 	"github.com/google/uuid"
 )
@@ -11,11 +12,11 @@ type Coupon struct {
 	ID                uuid.UUID
 	Name              string
 	CouponType        CouponType
-	DiscountAmount    uint      //割引額
-	ExpireAt          time.Time //有効期限
-	IsCombinationable bool      //併用可能
-	Notices           []string  //注意事項
-	TargetStore       []*Store  //対象店舗
+	DiscountAmount    uint      // 割引額
+	ExpireAt          time.Time // 有効期限
+	IsCombinationable bool      // 併用可能
+	Notices           []string  // 注意事項
+	TargetStore       []*Store  // 対象店舗
 	CreateAt          time.Time
 	Status            CouponStatus
 }
@@ -64,6 +65,8 @@ func (b CouponStatus) String() string {
 		return "Saved"
 	case CouponIssued:
 		return "Issued"
+	case CouponUsed:
+		return "Used"
 	default:
 		return "Unknown"
 	}
@@ -168,7 +171,6 @@ func CreateCustomCoupon(
 func SaveCustomCoupon(
 	DraftCoupon *Coupon,
 ) (*Coupon, *errors.DomainError) {
-
 	return newCoupon(
 		DraftCoupon.ID,
 		DraftCoupon.Name,

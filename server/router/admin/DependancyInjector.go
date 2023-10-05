@@ -7,11 +7,13 @@ import (
 	implements "server/infrastructure/repository"
 )
 
-var authAction = action.NewAuthClient()
-var storeRepo = implements.NewStoreRepository()
-var storeQueryService = implements.NewStoreQueryService()
-var adminRepo = implements.NewAdminRepository()
-var adminQueryService = implements.NewAdminQueryService()
+var (
+	authAction        = action.NewAuthClient()
+	storeRepo         = implements.NewStoreRepository()
+	storeQueryService = implements.NewStoreQueryService()
+	adminRepo         = implements.NewAdminRepository()
+	adminQueryService = implements.NewAdminQueryService()
+)
 
 func InitializeStoreUsecase() *usecase.StoreUsecase {
 	return usecase.NewStoreUsecase(storeRepo, storeQueryService)

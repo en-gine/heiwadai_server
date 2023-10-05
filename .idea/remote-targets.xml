@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="RemoteTargetsManager">
+    <option name="projectDefaultTargetUuid" value="7adb9a42-818a-4606-93f6-ceda8c8f19f7" />
+    <targets>
+      <target name="server" type="docker-compose" uuid="7adb9a42-818a-4606-93f6-ceda8c8f19f7">
+        <config>
+          <option name="targetPlatform">
+            <TargetPlatform />
+          </option>
+          <option name="configurationFiles">
+            <list>
+              <option value="\\wsl$\Ubuntu-20.04\root\heiwadai\docker-compose.yml" />
+            </list>
+          </option>
+          <option name="serviceName" value="server" />
+        </config>
+        <ContributedStateBase type="GoLanguageRuntime">
+          <config>
+            <option name="goPath" value="/go" />
+            <option name="goRoot" value="/usr/local/go/bin/go" />
+            <option name="goVersion" value="go1.20.5 linux/amd64" />
+          </config>
+        </ContributedStateBase>
+      </target>
+    </targets>
+  </component>
+</project>

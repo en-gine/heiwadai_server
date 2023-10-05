@@ -1,13 +1,14 @@
 package user
 
 import (
+	"time"
+
 	"server/core/entity"
 	"server/core/errors"
 	"server/core/infra/action"
 	queryservice "server/core/infra/queryService"
 	"server/core/infra/repository"
 	"server/core/infra/types"
-	"time"
 )
 
 type AuthUsecase struct {
@@ -40,7 +41,6 @@ func (u *AuthUsecase) Register(
 	AcceptMail bool, // メルマガ配信可
 	AcceptTerm bool, // 利用規約に同意
 ) (*entity.User, *errors.DomainError) {
-
 	if !AcceptTerm {
 		return nil, errors.NewDomainError(errors.UnPemitedOperation, "利用規約に同意してください")
 	}
@@ -61,7 +61,6 @@ func (u *AuthUsecase) Register(
 
 	// 招待メール送信
 	newID, err := u.authAction.InviteUserByEmail(Mail)
-
 	if err != nil {
 		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
 	}
@@ -135,7 +134,6 @@ func (u *AuthUsecase) UpdatePassword(
 	Password string,
 	Token string,
 ) error {
-
 	err := u.authAction.UpdatePassword(Password, Token)
 	if err != nil {
 		return errors.NewDomainError(errors.RepositoryError, err.Error())

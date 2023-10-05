@@ -5,7 +5,11 @@ buf: #protoファイルからapiコードを自動生成
 	buf generate
 
 run: 
+	@make lint
 	go run .
+
+lint:
+	golangci-lint run
 
 test-all:
 	go test -v ./test/...
@@ -15,8 +19,10 @@ install-devtools:
 	go install -v github.com/rogpeppe/godef@latest & \
 	go install -v github.com/stamblerre/gocode@latest & \
 	go install -v golang.org/x/tools/cmd/goimports@latest & \
-	go install -v golang.org/x/tools/gopls@latest
-	
+	go install -v golang.org/x/tools/gopls@latest & \
+	go install -v github.com/nishanths/exhaustive & \
+	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.54.2
+
 install-buf:
 	go install github.com/bufbuild/buf/cmd/buf@latest & \
   go install github.com/fullstorydev/grpcurl/cmd/grpcurl@latest & \

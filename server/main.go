@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 
+	"server/infrastructure/env"
 	adminRouter "server/router/admin"
 	userRouter "server/router/user"
 
@@ -14,16 +15,14 @@ import (
 )
 
 func main() {
+	env.InitEnv() // 環境変数を読み込む
+
 	mux := http.NewServeMux()
 	userRouter.NewUserServer(mux)
 	adminRouter.NewAdminServer(mux)
 
 	msg := os.ExpandEnv("${ENV} mode run! port: ${SERVER_PORT}")
 	fmt.Println(msg)
-
-	log.Fatal(http.ListenAndServe(":"+os.Getenv("SERVER_PORT"), h2c.NewHandler(mux, &http2.Server{}))) // リフレクションを有効にする
-}
-
-func InitEnv() {
-
+	port := env.GetEnv(env.EnvServerPort)
+	log.Fatal(http.ListenAndServe(":"+port, h2c.NewHandler(mux, &http2.Server{}))) // リフレクションを有効にする
 }

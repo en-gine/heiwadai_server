@@ -1,11 +1,12 @@
 package user
 
 import (
+	"time"
+
 	"server/core/entity"
 	"server/core/errors"
 	queryservice "server/core/infra/queryService"
 	"server/core/infra/repository"
-	"time"
 
 	"github.com/google/uuid"
 )
@@ -32,7 +33,6 @@ func (u *PlanUsecase) Search(
 	mealType entity.MealType,
 	roomTypes []entity.RoomType,
 ) ([]*entity.Plan, *errors.DomainError) {
-
 	plans, err := u.planQuery.Search(
 		stayStore,
 		stayFrom,
@@ -59,5 +59,9 @@ func (u *PlanUsecase) GetMyBook(userID uuid.UUID) ([]*entity.Plan, *errors.Domai
 }
 
 func (u *PlanUsecase) Reserve(userID uuid.UUID) *errors.DomainError {
+	err := u.planRepo.Save(userID, "", "")
+	if err != nil {
+		return errors.NewDomainError(errors.RepositoryError, err.Error())
+	}
 	return nil // TODO
 }

@@ -4,27 +4,29 @@ import (
 	usecase "server/core/usecase/user"
 
 	action "server/infrastructure/action"
-	"server/infrastructure/booking"
 	implements "server/infrastructure/repository"
 	"server/infrastructure/wordpress"
 )
 
-var userRepo = implements.NewUserRepository()
-var userQueryService = implements.NewUserQueryService()
-var authAction = action.NewAuthClient()
-var userQuery = implements.NewUserQueryService()
-var storeRepository = implements.NewStoreRepository()
-var checkInRepository = implements.NewCheckinRepository()
-var couponRepository = implements.NewCouponRepository()
-var usercouponRepository = implements.NewUserCouponRepository()
-var usercouponQuery = implements.NewUserCouponQueryService()
-var storeQuery = implements.NewStoreQueryService()
-var checkinQuery = implements.NewCheckinQueryService()
-var couponQuery = implements.NewCouponQueryService()
-var transaction = implements.NewTransaction()
-var bannerQuery = wordpress.NewBannerQueryService()
-var postQuery = wordpress.NewPostQueryService()
-var planQuery = booking.NewPlanQuery()
+var (
+	userRepo             = implements.NewUserRepository()
+	userQueryService     = implements.NewUserQueryService()
+	authAction           = action.NewAuthClient()
+	userQuery            = implements.NewUserQueryService()
+	storeRepository      = implements.NewStoreRepository()
+	checkInRepository    = implements.NewCheckinRepository()
+	couponRepository     = implements.NewCouponRepository()
+	usercouponRepository = implements.NewUserCouponRepository()
+	usercouponQuery      = implements.NewUserCouponQueryService()
+	storeQuery           = implements.NewStoreQueryService()
+	checkinQuery         = implements.NewCheckinQueryService()
+	couponQuery          = implements.NewCouponQueryService()
+	transaction          = implements.NewTransaction()
+	bannerQuery          = wordpress.NewBannerQueryService()
+	postQuery            = wordpress.NewPostQueryService()
+)
+
+// var planQuery = booking.NewPlanQuery()
 
 func InitializeUserUsecase() *usecase.UserDataUsecase {
 	return usecase.NewUserDataUsecase(userRepo, userQueryService)

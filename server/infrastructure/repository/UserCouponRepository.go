@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+
 	"server/core/entity"
 	"server/core/infra/repository"
 	"server/db/models"
@@ -25,25 +26,28 @@ func NewUserCouponRepository() *UserCouponRepository {
 	}
 }
 
-func (pr *UserCouponRepository) Save(userCoupon *entity.UserAttachedCoupon) error {
-
+func (pr *UserCouponRepository) Save(ctx context.Context, userCoupon *entity.UserAttachedCoupon) error {
 	coupon := models.CouponAttachedUser{
 		UserID:   userCoupon.UserID.String(),
 		CouponID: userCoupon.Coupon.ID.String(),
 		UsedAt:   null.TimeFromPtr(userCoupon.UsedAt),
 	}
-
-	tx, err := pr.db.BeginTx(context.Background(), nil)
+	tx := NewTransaction()
+	err := tx.Begin(ctx)
 	if err != nil {
 		tx.Rollback()
 		return err
 	}
 
-	err = coupon.Upsert(context.Background(), pr.db, true, []string{"coupon_id", "user_id"}, boil.Infer(), boil.Infer())
-
-	tx.Commit()
+	err = coupon.Upsert(ctx, pr.db, true, []string{"coupon_id", "user_id"}, boil.Infer(), boil.Infer())
 	if err != nil {
 		tx.Rollback()
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		tx.Rollback()
+		return err
 	}
 
 	return err

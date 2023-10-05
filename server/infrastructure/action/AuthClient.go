@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"os"
+
 	"server/core/infra/action"
 	"server/core/infra/types"
 	"server/infrastructure/logger"
@@ -35,7 +36,6 @@ func NewAuthClient() *AuthClient {
 }
 
 func (au *AuthClient) SignUp(email string, password string, userType action.UserType) error {
-
 	ctx := context.Background()
 	_, err := au.client.Auth.SignUp(ctx, supa.UserCredentials{
 		Email:    email,
@@ -53,13 +53,11 @@ func (au *AuthClient) SignUp(email string, password string, userType action.User
 }
 
 func (au *AuthClient) SignIn(email string, password string) (*types.Token, error) {
-
 	ctx := context.Background()
 	auth, err := au.client.Auth.SignIn(ctx, supa.UserCredentials{
 		Email:    email,
 		Password: password,
 	})
-
 	if err != nil {
 		logger.Errorf("Error SignIn: %v", err)
 		return nil, errors.New("Error SignIn" + err.Error())
@@ -73,7 +71,6 @@ func (au *AuthClient) SignIn(email string, password string) (*types.Token, error
 }
 
 func (au *AuthClient) Refresh(token string, refreshToken string) (*types.Token, error) {
-
 	ctx := context.Background()
 	data, err := au.client.Auth.RefreshUser(ctx, token, refreshToken)
 	if err != nil {
