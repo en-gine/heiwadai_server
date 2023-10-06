@@ -10,8 +10,9 @@ type (
 var Env map[EnvKey]string
 
 const (
-	ModeDev  Mode = "dev"
-	ModeProd Mode = "prod"
+	ModeDev   Mode = "dev"
+	ModeProd  Mode = "prod"
+	ModeDebug Mode = "debug"
 )
 
 const (
@@ -40,6 +41,7 @@ const (
 	EnvMailFrom EnvKey = "MAIL_FROM"
 	EnvMailPass EnvKey = "MAIL_PASS"
 
+	EnvTlbookingIsTest        EnvKey = "TLBOOKING_IS_TEST"
 	EnvTlbookingAvailApiUrl   EnvKey = "TLBOOKING_AVAIL_API_URL"
 	EnvTlbookingBookingApiUrl EnvKey = "TLBOOKING_BOOKING_API_URL"
 	EnvTlbookingUsername      EnvKey = "TLBOOKING_USERNAME"
@@ -89,6 +91,7 @@ func InitEnv() {
 		EnvMailFrom: os.Getenv(string(EnvMailFrom)),
 		EnvMailPass: os.Getenv(string(EnvMailPass)),
 
+		EnvTlbookingIsTest:        os.Getenv(string(EnvTlbookingIsTest)),
 		EnvTlbookingAvailApiUrl:   os.Getenv(string(EnvTlbookingAvailApiUrl)),
 		EnvTlbookingBookingApiUrl: os.Getenv(string(EnvTlbookingBookingApiUrl)),
 		EnvTlbookingUsername:      os.Getenv(string(EnvTlbookingUsername)),
@@ -110,8 +113,8 @@ func InitEnv() {
 		EnvFirebaseClientX509CertUrl:       os.Getenv(string(EnvFirebaseClientX509CertUrl)),
 		EnvFirebaseUniverseDomain:          os.Getenv(string(EnvFirebaseUniverseDomain)),
 	}
-	if Env[EnvMode] != string(ModeDev) && Env[EnvMode] != string(ModeProd) {
-		panic("Env " + string(EnvMode) + " is invalid. EnvMode must be dev or prod.")
+	if Env[EnvMode] != string(ModeDev) && Env[EnvMode] != string(ModeProd) && Env[EnvMode] != string(ModeDebug) {
+		panic("Env " + string(EnvMode) + " is invalid. EnvMode must be dev or prod or debug.")
 	}
 
 	// envをループして値が入ってなければpanic

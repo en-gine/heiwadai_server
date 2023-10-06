@@ -1,11 +1,7 @@
 package entity
 
-import (
-	"github.com/google/uuid"
-)
-
 type Plan struct {
-	ID        uuid.UUID
+	ID        string
 	Title     string
 	Price     uint
 	ImageURL  string
@@ -13,6 +9,7 @@ type Plan struct {
 	MealType  MealType
 	SmokeType SmokeType
 	OverView  string
+	Store     StayableStore
 }
 
 type MealType struct {
@@ -43,6 +40,7 @@ const (
 	RoomTypeDouble
 	RoomTypeTwin
 	RoomTypeFourth
+	RoomTypeUnknown
 )
 
 func (s RoomType) String() string {
@@ -62,8 +60,8 @@ func (s RoomType) String() string {
 	}
 }
 
-func IncludeRoomType(roomType *[]RoomType, target RoomType) bool {
-	for _, v := range *roomType {
+func IncludeRoomType(roomType []RoomType, target RoomType) bool {
+	for _, v := range roomType {
 		if v == target {
 			return true
 		}
@@ -76,6 +74,7 @@ type SmokeType int
 const (
 	SmokeTypeNonSmoking SmokeType = iota
 	SmokeTypeSmoking
+	SmokeTypeUnknown
 )
 
 func (s SmokeType) String() string {
@@ -89,8 +88,8 @@ func (s SmokeType) String() string {
 	}
 }
 
-func IncludeSmokeType(smokeType *[]SmokeType, target SmokeType) bool {
-	for _, v := range *smokeType {
+func IncludeSmokeType(smokeTypeArr []SmokeType, target SmokeType) bool {
+	for _, v := range smokeTypeArr {
 		if v == target {
 			return true
 		}
@@ -99,18 +98,21 @@ func IncludeSmokeType(smokeType *[]SmokeType, target SmokeType) bool {
 }
 
 func RegenPlan(
+	ID string,
 	RoomType RoomType,
 	MealType MealType,
 	ImageURL string,
 	SmokeType SmokeType,
 	OverView string,
+	StayableStore StayableStore,
 ) *Plan {
 	return &Plan{
-		ID:        uuid.New(),
+		ID:        ID,
 		RoomType:  RoomType,
 		MealType:  MealType,
 		ImageURL:  ImageURL,
 		SmokeType: SmokeType,
 		OverView:  OverView,
+		Store:     StayableStore,
 	}
 }

@@ -1,8 +1,8 @@
 package booking
 
 import (
-	"fmt"
-	"reflect"
+	"errors"
+	"strconv"
 	"time"
 
 	"server/core/entity"
@@ -15,13 +15,17 @@ import (
 
 var _ queryservice.IPlanQueryService = &PlanQuery{}
 
-type PlanQuery struct{}
-
-func NewPlanQuery() *PlanQuery {
-	return &PlanQuery{}
+type PlanQuery struct {
+	storeQuery queryservice.IStoreQueryService
 }
 
-func (p *PlanQuery) GetMyBooking(userID uuid.UUID) ([]*entity.Plan, error) {
+func NewPlanQuery(storeQuery queryservice.IStoreQueryService) *PlanQuery {
+	return &PlanQuery{
+		storeQuery: storeQuery,
+	}
+}
+
+func (p *PlanQuery) GetMyBooking(userID uuid.UUID) (*[]entity.Plan, error) {
 	return nil, nil
 }
 
@@ -35,7 +39,7 @@ func (p *PlanQuery) Search(
 	smokeTypes *[]entity.SmokeType,
 	mealType *entity.MealType,
 	roomTypes *[]entity.RoomType,
-) ([]*entity.Plan, error) {
+) (*[]entity.Plan, error) {
 	reqBody := NewOTAHotelAvailRQ(
 		[]string{"E69502"},
 		stayFrom,
@@ -48,11 +52,79 @@ func (p *PlanQuery) Search(
 		roomTypes,
 	)
 
-	_, err := Request[avail.OTAHotelAvailRQ, avail.OTAHotelAvailRS](reqBody)
+	res, err := Request[avail.OTAHotelAvailRQ, avail.OTAHotelAvailRS](reqBody)
 	if err != nil {
 		return nil, err
 	}
-	return nil, nil
+
+	plans, err := p.AvailRSToPlans(res)
+	return plans, nil
+}
+
+func (p *PlanQuery) AvailRSToPlans(res *avail.OTAHotelAvailRS) (*[]entity.Plan, error) {
+	var plans []entity.Plan
+
+	if res.RoomStays == nil {
+		return nil, errors.New("RoomStays is nil")
+	}
+	for _, roomStay := range res.RoomStays.RoomStay {
+		hotelCode := roomStay.RPH
+		if hotelCode == nil {
+			return nil, errors.New("hotelCode is nil")
+		}
+		stayable, err := p.storeQuery.GetStayableByBookingID(*hotelCode)
+		if err != nil {
+			return nil, err
+		}
+		roomType := roomStay.RoomTypes.RoomType[0]
+		room := BedTypeCodeToRoomType(roomType.BedTypeCode)
+		smokeType := IsNonSmokingToSmokeType(roomType.NonSmoking) // true false nil
+
+		// roomName := roomType.RoomDescription.Name
+		// roomText := roomType.RoomDescription.Text
+		// roomImageUrl := roomType.RoomDescription.URL
+
+		for _, plan := range *roomStay.RatePlans.RatePlan {
+			planID := plan.RatePlanCode
+			planName := plan.RatePlanName
+
+			var planImageURL string = ""
+			if len(*plan.RatePlanDescription.URL) > 0 {
+				planImageURL = *(*plan.RatePlanDescription.URL)[0].Value
+			}
+
+			var planOverView string = ""
+			if len(*plan.RatePlanDescription.Text) > 0 {
+				planOverView = *(*plan.RatePlanDescription.Text)[0].Value
+			}
+
+			var planPrice uint64 = 0
+			planPrice, _ = strconv.ParseUint(*plan.RatePlanType, 10, 64)
+
+			var IncludeBreakfast bool = *plan.MealsIncluded.Breakfast
+			var IncludeDinner bool = *plan.MealsIncluded.Dinner
+
+			plan := entity.Plan{
+				ID:       *planID,
+				Title:    *planName,
+				Price:    uint(planPrice),
+				ImageURL: planImageURL,
+				RoomType: room,
+				MealType: entity.MealType{
+					Morning: IncludeBreakfast,
+					Dinner:  IncludeDinner,
+				},
+				SmokeType: smokeType,
+				OverView:  planOverView,
+				Store:     *stayable,
+			}
+
+			plans = append(plans, plan)
+		}
+
+	}
+
+	return &plans, nil
 }
 
 func NewOTAHotelAvailRQ(
@@ -77,21 +149,16 @@ func NewOTAHotelAvailRQ(
 	}
 	// True：禁煙、False：喫煙、省略：条件指定なし
 	var nonSmokingQuery *bool
-
-	if reflect.DeepEqual(smokeTypes, []entity.SmokeType{entity.SmokeTypeNonSmoking}) {
+	if smokeTypes == nil {
+		nonSmokingQuery = nil
+	} else if entity.IncludeSmokeType(*smokeTypes, entity.SmokeTypeNonSmoking) {
 		nonSmokingQuery = util.BoolPtr(true)
-	}
-
-	if reflect.DeepEqual(smokeTypes, []entity.SmokeType{entity.SmokeTypeSmoking}) {
+	} else if entity.IncludeSmokeType(*smokeTypes, entity.SmokeTypeSmoking) {
 		nonSmokingQuery = util.BoolPtr(false)
-	}
-
-	if reflect.DeepEqual(smokeTypes, []entity.SmokeType{entity.SmokeTypeNonSmoking, entity.SmokeTypeSmoking}) {
+	} else if entity.IncludeSmokeType(*smokeTypes, entity.SmokeTypeNonSmoking) && entity.IncludeSmokeType(*smokeTypes, entity.SmokeTypeSmoking) {
+		// 禁煙喫煙両方の場合は条件指定なし
 		nonSmokingQuery = nil
 	}
-
-	fmt.Print(nonSmokingQuery)
-	nonSmokingQuery = util.BoolPtr(true)
 
 	// 部屋プラン検索
 	var roomStayCandidates []avail.RoomStayCandidate
@@ -149,7 +216,7 @@ func NewOTAHotelAvailRQ(
 	return &avail.OTAHotelAvailRQ{
 		Version:       "1.0",
 		PrimaryLangID: "jpn",
-		HotelStayOnly: util.BoolPtr(true), // ホテル情報のみを返すフラグ。不明
+		HotelStayOnly: util.BoolPtr(true), // ホテル情報のみを返すフラグ。trueにしないと返ってこない
 		PricingMethod: avail.PricingMethodLowestperstay,
 		AvailRequestSegments: avail.AvailRequestSegments{
 			AvailRequestSegment: avail.AvailRequestSegment{
@@ -198,4 +265,31 @@ func RoomTypeToBedType(rt *entity.RoomType) *avail.BedTypeCode {
 		code = avail.BedTypeFour
 	}
 	return &code
+}
+
+func BedTypeCodeToRoomType(bt *avail.BedTypeCode) entity.RoomType {
+	var roomType entity.RoomType
+	switch *bt {
+	case avail.BedTypeSingle:
+		roomType = entity.RoomTypeSingle
+	case avail.BedTypeDouble:
+		roomType = entity.RoomTypeDouble
+	case avail.BedTypeTwin:
+		roomType = entity.RoomTypeTwin
+	case avail.BedTypeFour:
+		roomType = entity.RoomTypeFourth
+	default:
+		roomType = entity.RoomTypeUnknown
+	}
+	return roomType
+}
+
+func IsNonSmokingToSmokeType(isNonSmoke *bool) entity.SmokeType {
+	switch *isNonSmoke {
+	case true:
+		return entity.SmokeTypeNonSmoking
+	case false:
+		return entity.SmokeTypeNonSmoking
+	}
+	return entity.SmokeTypeUnknown
 }

@@ -32,7 +32,7 @@ func (u *PlanUsecase) Search(
 	smokeTypes []entity.SmokeType,
 	mealType entity.MealType,
 	roomTypes []entity.RoomType,
-) ([]*entity.Plan, *errors.DomainError) {
+) (*[]entity.Plan, *errors.DomainError) {
 	plans, err := u.planQuery.Search(
 		stayStore,
 		stayFrom,
@@ -50,7 +50,7 @@ func (u *PlanUsecase) Search(
 	return plans, nil
 }
 
-func (u *PlanUsecase) GetMyBook(userID uuid.UUID) ([]*entity.Plan, *errors.DomainError) {
+func (u *PlanUsecase) GetMyBook(userID uuid.UUID) (*[]entity.Plan, *errors.DomainError) {
 	plans, err := u.planQuery.GetMyBooking(userID)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())

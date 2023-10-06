@@ -11,5 +11,6 @@ type IStoreQueryService interface {
 	GetActiveAll() ([]*entity.Store, error)
 	GetStayables() ([]*entity.StayableStore, error)
 	GetStayableByID(id uuid.UUID) (*entity.StayableStore, error)
-	GetAll() ([]*entity.Store, error) //activeかどうか不問
+	GetAll() ([]*entity.Store, error)                                    // activeかどうか不問
+	GetStayableByBookingID(bookID string) (*entity.StayableStore, error) // bookingIDからstayableなstoreを取得
 }

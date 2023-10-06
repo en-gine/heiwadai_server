@@ -10,8 +10,7 @@ import (
 	"net/http"
 	"os"
 
-	request "server/infrastructure/booking/request"
-	response "server/infrastructure/booking/response"
+	"server/infrastructure/booking/common"
 	"server/infrastructure/logger"
 )
 
@@ -26,7 +25,7 @@ func Request[TRequestType any, TResultType any](reqBody *TRequestType) (*TResult
 		return nil, errors.New("予約サーバーの認証情報が設定されていません。")
 	}
 
-	reqEnv := request.NewEnvelope[TRequestType](*reqBody, user, pass)
+	reqEnv := common.NewEnvelopeRQ[TRequestType](*reqBody, user, pass)
 	out, _ := xml.MarshalIndent(reqEnv, " ", "  ")
 	body := xml.Header + string(out)
 	url := "https://test472.tl-lincoln.net/agtapi/v1/crs/CrsAvailableInquiryService"
@@ -37,7 +36,7 @@ func Request[TRequestType any, TResultType any](reqBody *TRequestType) (*TResult
 	}
 	req.Header.Add("Content-Type", "text/xml; charset=utf-8")
 	req.Header.Add("Accept-Encoding", "gzip")
-	if envMode == "dev" {
+	if envMode == "debug" {
 		fmt.Print(req.Body)
 	}
 	client := &http.Client{}
@@ -50,7 +49,7 @@ func Request[TRequestType any, TResultType any](reqBody *TRequestType) (*TResult
 
 	var reader io.Reader
 
-	result := &response.Envelope[TResultType]{}
+	result := &common.EnvelopeRS[TResultType]{}
 	encoding := res.Header.Get("Content-Encoding")
 
 	if encoding == "gzip" {
@@ -65,7 +64,7 @@ func Request[TRequestType any, TResultType any](reqBody *TRequestType) (*TResult
 
 	content, _ := io.ReadAll(reader)
 
-	if envMode == "dev" {
+	if envMode == "debug" {
 		fmt.Print(string(content))
 	}
 

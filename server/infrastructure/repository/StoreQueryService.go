@@ -3,6 +3,8 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"errors"
+
 	"server/core/entity"
 	queryservice "server/core/infra/queryService"
 	"server/db/models"
@@ -97,7 +99,19 @@ func (pq *StoreQueryService) GetAll() ([]*entity.Store, error) {
 		result = append(result, StoreModelToEntity(store))
 	}
 	return result, nil
+}
 
+func (pq *StoreQueryService) GetStayableByBookingID(bookingID string) (*entity.StayableStore, error) {
+	stayables, err := pq.GetStayables()
+	if err != nil {
+		return nil, err
+	}
+	for _, stayable := range stayables {
+		if stayable.BookingSystemID == bookingID {
+			return stayable, nil
+		}
+	}
+	return nil, errors.New("該当のStayableStoreがBookingIDから見つけることが出来ません。")
 }
 
 func StoreModelToEntity(model *models.Store) *entity.Store {
