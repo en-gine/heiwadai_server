@@ -8,16 +8,16 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"os"
 
 	"server/infrastructure/booking/common"
+	"server/infrastructure/env"
 	"server/infrastructure/logger"
 )
 
 var (
-	user    = os.Getenv("TLBOOKING_USERNAME")
-	pass    = os.Getenv("TLBOOKING_PASSWORD")
-	envMode = os.Getenv("ENV_MODE")
+	user    = env.GetEnv(env.TlbookingUsername)
+	pass    = env.GetEnv(env.TlbookingPassword)
+	envMode = env.GetEnv(env.EnvMode)
 )
 
 func Request[TRequestType any, TResultType any](reqBody *TRequestType) (*TResultType, error) {

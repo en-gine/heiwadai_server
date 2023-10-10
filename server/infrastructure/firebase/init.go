@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"os"
 
+	"server/infrastructure/env"
 	"server/infrastructure/logger"
 
 	firebase "firebase.google.com/go"
@@ -30,17 +30,17 @@ type FirebaseConfig struct {
 
 func InitFirebase() (*firebase.App, error) {
 	config := FirebaseConfig{
-		Type:                    os.Getenv("TYPE"),
-		ProjectId:               os.Getenv("PROJECT_ID"),
-		PrivateKeyId:            os.Getenv("PRIVATE_KEY_ID"),
-		PrivateKey:              os.Getenv("PRIVATE_KEY"),
-		ClientEmail:             os.Getenv("CLIENT_EMAIL"),
-		ClientId:                os.Getenv("CLIENT_ID"),
-		AuthUri:                 os.Getenv("AUTH_URI"),
-		TokenUri:                os.Getenv("TOKEN_URI"),
-		AuthProviderX509CertUrl: os.Getenv("AUTH_PROVIDER_X509_CERT_URL"),
-		ClientX509CertUrl:       os.Getenv("CLIENT_X509_CERT_URL"),
-		UniverseDomain:          os.Getenv("UNIVERSE_DOMAIN"),
+		Type:                    env.GetEnv(env.FirebaseType),
+		ProjectId:               env.GetEnv(env.FirebaseProjectId),
+		PrivateKeyId:            env.GetEnv(env.FirebasePrivateKeyId),
+		PrivateKey:              env.GetEnv(env.FirebasePrivateKey),
+		ClientEmail:             env.GetEnv(env.FirebaseClientEmail),
+		ClientId:                env.GetEnv(env.FirebaseClientId),
+		AuthUri:                 env.GetEnv(env.FirebaseAuthUri),
+		TokenUri:                env.GetEnv(env.FirebaseTokenUri),
+		AuthProviderX509CertUrl: env.GetEnv(env.FirebaseAuthProviderX509CertUrl),
+		ClientX509CertUrl:       env.GetEnv(env.FirebaseClientX509CertUrl),
+		UniverseDomain:          env.GetEnv(env.FirebaseUniverseDomain),
 	}
 
 	jsonData, err := json.Marshal(config)

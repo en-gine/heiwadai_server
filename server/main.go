@@ -23,6 +23,6 @@ func main() {
 
 	msg := os.ExpandEnv("${ENV} mode run! port: ${SERVER_PORT}")
 	fmt.Println(msg)
-	port := os.Getenv("SERVER_PORT")
+	port := env.GetEnv(env.ServerPort)
 	log.Fatal(http.ListenAndServe(":"+port, h2c.NewHandler(mux, &http2.Server{}))) // リフレクションを有効にする
 }

@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
+
+	"server/infrastructure/env"
 	adminRouter "server/router/admin"
 )
 
@@ -17,8 +18,7 @@ func AdminSeeder() {
 	}
 	belongStoreID := stores[0].ID
 
-	email := os.Getenv("TEST_ADMIN_MAIL")
-
+	email := env.GetEnv(env.TestAdminMail)
 	admin, err := authUsecase.Register(
 		"Tomohide",
 		belongStoreID,
@@ -35,5 +35,4 @@ func AdminSeeder() {
 	fmt.Println("Server started on :3000")
 
 	log.Fatal(http.ListenAndServe(":3000", nil))
-
 }

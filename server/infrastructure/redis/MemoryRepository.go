@@ -2,9 +2,10 @@ package redis
 
 import (
 	"context"
-	"os"
-	"server/core/infra/repository"
 	"time"
+
+	"server/core/infra/repository"
+	"server/infrastructure/env"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -17,13 +18,11 @@ type MemoryRepository struct {
 
 func NewMemoryRepository() (*MemoryRepository, error) {
 	rdb := redis.NewClient(&redis.Options{
-		Addr:     os.Getenv("REDIS_HOST") + ":" + os.Getenv("REDIS_PORT"),
-		Password: os.Getenv("REDIS_PASS"),
+		Addr:     env.GetEnv(env.RedisHost) + ":" + env.GetEnv(env.RedisPort),
+		Password: env.GetEnv(env.RedisPass),
 		DB:       0, // use default DB
 	})
-
 	err := rdb.Ping(context.Background()).Err()
-
 	if err != nil {
 		return nil, err
 	}

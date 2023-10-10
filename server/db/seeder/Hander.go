@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 
+	"server/infrastructure/env"
 	userRouter "server/router/user"
 )
 
@@ -34,7 +34,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 func SetPassword(token string) {
 	authUsecase := userRouter.InitializeAuthUsecase()
-	password := os.Getenv("TEST_USER_PASS")
+	password := env.GetEnv(env.TestUserPass)
 	err := authUsecase.UpdatePassword(password, token)
 	if err != nil {
 		panic(err)

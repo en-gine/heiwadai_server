@@ -3,10 +3,10 @@ package action
 import (
 	"context"
 	"errors"
-	"os"
 
 	"server/core/infra/action"
 	"server/core/infra/types"
+	"server/infrastructure/env"
 	"server/infrastructure/logger"
 
 	"github.com/google/uuid"
@@ -20,8 +20,8 @@ type AuthClient struct {
 }
 
 func NewAuthClient() *AuthClient {
-	authURL := os.Getenv("SUPABASE_URL")
-	authKey := os.Getenv("SUPABASE_KEY")
+	authURL := env.GetEnv(env.SupabaseUrl)
+	authKey := env.GetEnv(env.SupabaseKey)
 	if authURL == "" {
 		panic("SUPABASE_URL is not set")
 	}

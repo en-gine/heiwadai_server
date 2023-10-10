@@ -3,8 +3,8 @@ package repository
 import (
 	"database/sql"
 	"fmt"
-	"os"
 
+	"server/infrastructure/env"
 	"server/infrastructure/logger"
 
 	_ "github.com/lib/pq"
@@ -19,11 +19,11 @@ func InitDB() *sql.DB {
 		return Conn
 	}
 
-	user := os.Getenv("PSQL_USER")
-	password := os.Getenv("PSQL_PASS")
-	host := os.Getenv("PSQL_HOST")
-	port := os.Getenv("PSQL_PORT")
-	database := os.Getenv("PSQL_DBNAME")
+	user := env.GetEnv(env.PsqlUser)
+	password := env.GetEnv(env.PsqlPass)
+	host := env.GetEnv(env.PsqlHost)
+	port := env.GetEnv(env.PsqlPort)
+	database := env.GetEnv(env.PsqlDbname)
 
 	Conn, err = sql.Open("postgres",
 		fmt.Sprintf("user=%s password=%s host=%s port=%s dbname=%s sslmode=disable", user, password, host, port, database))

@@ -1,13 +1,20 @@
 package env
 
-import "os"
-
-type (
-	EnvKey string
-	Mode   string
+import (
+	"os"
+	"sync"
 )
 
-var Env map[EnvKey]string
+type (
+	EnvKey    string
+	Mode      string
+	EnvConfig map[EnvKey]string
+)
+
+var (
+	Env  *EnvConfig
+	once sync.Once
+)
 
 const (
 	ModeDev   Mode = "dev"
@@ -18,107 +25,110 @@ const (
 const (
 	EnvMode EnvKey = "ENV_MODE"
 
-	EnvServerPort EnvKey = "SERVER_PORT"
+	ServerPort EnvKey = "SERVER_PORT"
 
-	EnvPsqlDbname EnvKey = "PSQL_DBNAME"
-	EnvPsqlUser   EnvKey = "PSQL_USER"
-	EnvPsqlPass   EnvKey = "PSQL_PASS"
-	EnvPsqlHost   EnvKey = "PSQL_HOST"
-	EnvPsqlPort   EnvKey = "PSQL_PORT"
+	PsqlDbname EnvKey = "PSQL_DBNAME"
+	PsqlUser   EnvKey = "PSQL_USER"
+	PsqlPass   EnvKey = "PSQL_PASS"
+	PsqlHost   EnvKey = "PSQL_HOST"
+	PsqlPort   EnvKey = "PSQL_PORT"
 
-	EnvSupabaseUrl EnvKey = "SUPABASE_URL"
-	EnvSupabaseKey EnvKey = "SUPABASE_KEY"
+	SupabaseUrl EnvKey = "SUPABASE_URL"
+	SupabaseKey EnvKey = "SUPABASE_KEY"
 
-	EnvRabbitmqDefaultUser EnvKey = "RABBITMQ_DEFAULT_USER"
-	EnvRabbitmqDefaultPass EnvKey = "RABBITMQ_DEFAULT_PASS"
+	RabbitmqDefaultUser EnvKey = "RABBITMQ_DEFAULT_USER"
+	RabbitmqDefaultPass EnvKey = "RABBITMQ_DEFAULT_PASS"
 
-	EnvRedisHost EnvKey = "REDIS_HOST"
-	EnvRedisPort EnvKey = "REDIS_PORT"
-	EnvRedisPass EnvKey = "REDIS_PASS"
+	RedisHost EnvKey = "REDIS_HOST"
+	RedisPort EnvKey = "REDIS_PORT"
+	RedisPass EnvKey = "REDIS_PASS"
 
-	EnvMailHost EnvKey = "MAIL_HOST"
-	EnvMailPort EnvKey = "MAIL_PORT"
-	EnvMailFrom EnvKey = "MAIL_FROM"
-	EnvMailPass EnvKey = "MAIL_PASS"
+	MailHost EnvKey = "MAIL_HOST"
+	MailPort EnvKey = "MAIL_PORT"
+	MailFrom EnvKey = "MAIL_FROM"
+	MailPass EnvKey = "MAIL_PASS"
 
-	EnvTlbookingIsTest        EnvKey = "TLBOOKING_IS_TEST"
-	EnvTlbookingAvailApiUrl   EnvKey = "TLBOOKING_AVAIL_API_URL"
-	EnvTlbookingBookingApiUrl EnvKey = "TLBOOKING_BOOKING_API_URL"
-	EnvTlbookingUsername      EnvKey = "TLBOOKING_USERNAME"
-	EnvTlbookingPassword      EnvKey = "TLBOOKING_PASSWORD"
+	TlbookingIsTest        EnvKey = "TLBOOKING_IS_TEST"
+	TlbookingAvailApiUrl   EnvKey = "TLBOOKING_AVAIL_API_URL"
+	TlbookingBookingApiUrl EnvKey = "TLBOOKING_BOOKING_API_URL"
+	TlbookingUsername      EnvKey = "TLBOOKING_USERNAME"
+	TlbookingPassword      EnvKey = "TLBOOKING_PASSWORD"
 
-	EnvTestUserMail  EnvKey = "TEST_USER_MAIL"
-	EnvTestUserPass  EnvKey = "TEST_USER_PASS"
-	EnvTestAdminMail EnvKey = "TEST_ADMIN_MAIL"
+	TestUserMail  EnvKey = "TEST_USER_MAIL"
+	TestUserPass  EnvKey = "TEST_USER_PASS"
+	TestAdminMail EnvKey = "TEST_ADMIN_MAIL"
 
-	EnvFirebaseType                    EnvKey = "FIREBASE_type"
-	EnvFirebaseProjectId               EnvKey = "FIREBASE_project_id"
-	EnvFirebasePrivateKeyId            EnvKey = "FIREBASE_private_key_id"
-	EnvFirebasePrivateKey              EnvKey = "FIREBASE_private_key"
-	EnvFirebaseClientEmail             EnvKey = "FIREBASE_client_email"
-	EnvFirebaseClientId                EnvKey = "FIREBASE_client_id"
-	EnvFirebaseAuthUri                 EnvKey = "FIREBASE_auth_uri"
-	EnvFirebaseTokenUri                EnvKey = "FIREBASE_token_uri"
-	EnvFirebaseAuthProviderX509CertUrl EnvKey = "FIREBASE_auth_provider_x509_cert_url"
-	EnvFirebaseClientX509CertUrl       EnvKey = "FIREBASE_client_x509_cert_url"
-	EnvFirebaseUniverseDomain          EnvKey = "FIREBASE_universe_domain"
+	FirebaseType                    EnvKey = "FIREBASE_type"
+	FirebaseProjectId               EnvKey = "FIREBASE_project_id"
+	FirebasePrivateKeyId            EnvKey = "FIREBASE_private_key_id"
+	FirebasePrivateKey              EnvKey = "FIREBASE_private_key"
+	FirebaseClientEmail             EnvKey = "FIREBASE_client_email"
+	FirebaseClientId                EnvKey = "FIREBASE_client_id"
+	FirebaseAuthUri                 EnvKey = "FIREBASE_auth_uri"
+	FirebaseTokenUri                EnvKey = "FIREBASE_token_uri"
+	FirebaseAuthProviderX509CertUrl EnvKey = "FIREBASE_auth_provider_x509_cert_url"
+	FirebaseClientX509CertUrl       EnvKey = "FIREBASE_client_x509_cert_url"
+	FirebaseUniverseDomain          EnvKey = "FIREBASE_universe_domain"
 )
 
 func InitEnv() {
-	Env = map[EnvKey]string{
-		EnvMode: os.Getenv(string(EnvMode)),
+	once.Do(func() {
+		Env = &EnvConfig{
+			EnvMode: os.Getenv(string(EnvMode)),
 
-		EnvServerPort: os.Getenv(string(EnvServerPort)),
+			ServerPort: os.Getenv(string(ServerPort)),
 
-		EnvPsqlDbname: os.Getenv(string(EnvPsqlDbname)),
-		EnvPsqlUser:   os.Getenv(string(EnvPsqlUser)),
-		EnvPsqlPass:   os.Getenv(string(EnvPsqlPass)),
-		EnvPsqlHost:   os.Getenv(string(EnvPsqlHost)),
-		EnvPsqlPort:   os.Getenv(string(EnvPsqlPort)),
+			PsqlDbname: os.Getenv(string(PsqlDbname)),
+			PsqlUser:   os.Getenv(string(PsqlUser)),
+			PsqlPass:   os.Getenv(string(PsqlPass)),
+			PsqlHost:   os.Getenv(string(PsqlHost)),
+			PsqlPort:   os.Getenv(string(PsqlPort)),
 
-		EnvSupabaseUrl: os.Getenv(string(EnvSupabaseUrl)),
-		EnvSupabaseKey: os.Getenv(string(EnvSupabaseKey)),
+			SupabaseUrl: os.Getenv(string(SupabaseUrl)),
+			SupabaseKey: os.Getenv(string(SupabaseKey)),
 
-		EnvRabbitmqDefaultUser: os.Getenv(string(EnvRabbitmqDefaultUser)),
-		EnvRabbitmqDefaultPass: os.Getenv(string(EnvRabbitmqDefaultPass)),
+			RabbitmqDefaultUser: os.Getenv(string(RabbitmqDefaultUser)),
+			RabbitmqDefaultPass: os.Getenv(string(RabbitmqDefaultPass)),
 
-		EnvRedisHost: os.Getenv(string(EnvRedisHost)),
-		EnvRedisPort: os.Getenv(string(EnvRedisPort)),
-		EnvRedisPass: os.Getenv(string(EnvRedisPass)),
+			RedisHost: os.Getenv(string(RedisHost)),
+			RedisPort: os.Getenv(string(RedisPort)),
+			RedisPass: os.Getenv(string(RedisPass)),
 
-		EnvMailHost: os.Getenv(string(EnvMailHost)),
-		EnvMailPort: os.Getenv(string(EnvMailPort)),
-		EnvMailFrom: os.Getenv(string(EnvMailFrom)),
-		EnvMailPass: os.Getenv(string(EnvMailPass)),
+			MailHost: os.Getenv(string(MailHost)),
+			MailPort: os.Getenv(string(MailPort)),
+			MailFrom: os.Getenv(string(MailFrom)),
+			MailPass: os.Getenv(string(MailPass)),
 
-		EnvTlbookingIsTest:        os.Getenv(string(EnvTlbookingIsTest)),
-		EnvTlbookingAvailApiUrl:   os.Getenv(string(EnvTlbookingAvailApiUrl)),
-		EnvTlbookingBookingApiUrl: os.Getenv(string(EnvTlbookingBookingApiUrl)),
-		EnvTlbookingUsername:      os.Getenv(string(EnvTlbookingUsername)),
-		EnvTlbookingPassword:      os.Getenv(string(EnvTlbookingPassword)),
+			TlbookingIsTest:        os.Getenv(string(TlbookingIsTest)),
+			TlbookingAvailApiUrl:   os.Getenv(string(TlbookingAvailApiUrl)),
+			TlbookingBookingApiUrl: os.Getenv(string(TlbookingBookingApiUrl)),
+			TlbookingUsername:      os.Getenv(string(TlbookingUsername)),
+			TlbookingPassword:      os.Getenv(string(TlbookingPassword)),
 
-		EnvTestUserMail:  os.Getenv(string(EnvTestUserMail)),
-		EnvTestUserPass:  os.Getenv(string(EnvTestUserPass)),
-		EnvTestAdminMail: os.Getenv(string(EnvTestAdminMail)),
+			TestUserMail:  os.Getenv(string(TestUserMail)),
+			TestUserPass:  os.Getenv(string(TestUserPass)),
+			TestAdminMail: os.Getenv(string(TestAdminMail)),
 
-		EnvFirebaseType:                    os.Getenv(string(EnvFirebaseType)),
-		EnvFirebaseProjectId:               os.Getenv(string(EnvFirebaseProjectId)),
-		EnvFirebasePrivateKeyId:            os.Getenv(string(EnvFirebasePrivateKeyId)),
-		EnvFirebasePrivateKey:              os.Getenv(string(EnvFirebasePrivateKey)),
-		EnvFirebaseClientEmail:             os.Getenv(string(EnvFirebaseClientEmail)),
-		EnvFirebaseClientId:                os.Getenv(string(EnvFirebaseClientId)),
-		EnvFirebaseAuthUri:                 os.Getenv(string(EnvFirebaseAuthUri)),
-		EnvFirebaseTokenUri:                os.Getenv(string(EnvFirebaseTokenUri)),
-		EnvFirebaseAuthProviderX509CertUrl: os.Getenv(string(EnvFirebaseAuthProviderX509CertUrl)),
-		EnvFirebaseClientX509CertUrl:       os.Getenv(string(EnvFirebaseClientX509CertUrl)),
-		EnvFirebaseUniverseDomain:          os.Getenv(string(EnvFirebaseUniverseDomain)),
-	}
-	if Env[EnvMode] != string(ModeDev) && Env[EnvMode] != string(ModeProd) && Env[EnvMode] != string(ModeDebug) {
+			FirebaseType:                    os.Getenv(string(FirebaseType)),
+			FirebaseProjectId:               os.Getenv(string(FirebaseProjectId)),
+			FirebasePrivateKeyId:            os.Getenv(string(FirebasePrivateKeyId)),
+			FirebasePrivateKey:              os.Getenv(string(FirebasePrivateKey)),
+			FirebaseClientEmail:             os.Getenv(string(FirebaseClientEmail)),
+			FirebaseClientId:                os.Getenv(string(FirebaseClientId)),
+			FirebaseAuthUri:                 os.Getenv(string(FirebaseAuthUri)),
+			FirebaseTokenUri:                os.Getenv(string(FirebaseTokenUri)),
+			FirebaseAuthProviderX509CertUrl: os.Getenv(string(FirebaseAuthProviderX509CertUrl)),
+			FirebaseClientX509CertUrl:       os.Getenv(string(FirebaseClientX509CertUrl)),
+			FirebaseUniverseDomain:          os.Getenv(string(FirebaseUniverseDomain)),
+		}
+	})
+	env := *Env
+	if env[EnvMode] != string(ModeDev) && env[EnvMode] != string(ModeProd) && env[EnvMode] != string(ModeDebug) {
 		panic("Env " + string(EnvMode) + " is invalid. EnvMode must be dev or prod or debug.")
 	}
 
 	// envをループして値が入ってなければpanic
-	for k, v := range Env {
+	for k, v := range env {
 		if v == "" {
 			panic("Env " + string(k) + " is empty.")
 		}
@@ -126,5 +136,7 @@ func InitEnv() {
 }
 
 func GetEnv(key EnvKey) string {
-	return Env[key]
+	InitEnv()
+	env := *Env
+	return env[key]
 }
