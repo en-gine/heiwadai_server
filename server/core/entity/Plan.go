@@ -55,6 +55,8 @@ func (s RoomType) String() string {
 		return "ツイン"
 	case RoomTypeFourth:
 		return "フォース"
+	case RoomTypeUnknown:
+		fallthrough
 	default:
 		return "Unknown"
 	}
@@ -83,6 +85,8 @@ func (s SmokeType) String() string {
 		return "禁煙"
 	case SmokeTypeSmoking:
 		return "喫煙"
+	case SmokeTypeUnknown:
+		fallthrough
 	default:
 		return "Unknown"
 	}

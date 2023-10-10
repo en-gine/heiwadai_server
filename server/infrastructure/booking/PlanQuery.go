@@ -58,6 +58,9 @@ func (p *PlanQuery) Search(
 	}
 
 	plans, err := p.AvailRSToPlans(res)
+	if err != nil {
+		return nil, err
+	}
 	return plans, nil
 }
 
@@ -98,7 +101,7 @@ func (p *PlanQuery) AvailRSToPlans(res *avail.OTAHotelAvailRS) (*[]entity.Plan, 
 				planOverView = *(*plan.RatePlanDescription.Text)[0].Value
 			}
 
-			var planPrice uint64 = 0
+			var planPrice uint64
 			planPrice, _ = strconv.ParseUint(*plan.RatePlanType, 10, 64)
 
 			var IncludeBreakfast bool = *plan.MealsIncluded.Breakfast
@@ -162,7 +165,7 @@ func NewOTAHotelAvailRQ(
 
 	// 部屋プラン検索
 	var roomStayCandidates []avail.RoomStayCandidate
-	var bedTypeCode *avail.BedTypeCode = nil
+	var bedTypeCode *avail.BedTypeCode
 
 	var mealMorning *bool
 	var mealDinner *bool
@@ -263,6 +266,8 @@ func RoomTypeToBedType(rt *entity.RoomType) *avail.BedTypeCode {
 		code = avail.BedTypeDouble
 	case entity.RoomTypeFourth:
 		code = avail.BedTypeFour
+	case entity.RoomTypeUnknown:
+		return nil
 	}
 	return &code
 }
@@ -278,6 +283,13 @@ func BedTypeCodeToRoomType(bt *avail.BedTypeCode) entity.RoomType {
 		roomType = entity.RoomTypeTwin
 	case avail.BedTypeFour:
 		roomType = entity.RoomTypeFourth
+	case avail.BedTypeTatami:
+		fallthrough
+	case avail.BedTypeSemiDouble:
+		fallthrough
+	case avail.BedTypeTriple:
+		fallthrough
+	case avail.BedTypeOther:
 	default:
 		roomType = entity.RoomTypeUnknown
 	}
