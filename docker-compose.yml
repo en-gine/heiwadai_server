@@ -12,28 +12,6 @@ services:
       - ./server:/server
     ports:
       - 3000:3000
-  db:
-    container_name: supabase-db
-    image: supabase/postgres:15.1.0.90
-    restart: unless-stopped
-    ports:
-      - ${PSQL_PORT}:${PSQL_PORT}
-    environment:
-      PGPORT: ${PSQL_PORT}
-      POSTGRES_PORT: ${PSQL_PORT}
-      PGPASSWORD: ${PSQL_PASS}
-      POSTGRES_USER: ${PSQL_USER}
-      POSTGRES_PASSWORD: ${PSQL_PASS}
-      PGDATABASE: ${PSQL_DBNAME}
-      POSTGRES_DB: ${PSQL_DBNAME}
-    volumes:
-      - ./docker/init/db/realtime.sql:/docker-entrypoint-initdb.d/migrations/99-realtime.sql:Z
-      # Must be superuser to create event trigger
-      - ./docker/init/db/webhooks.sql:/docker-entrypoint-initdb.d/init-scripts/98-webhooks.sql:Z
-      # Must be superuser to alter reserved role
-      - ./docker/init/db/roles.sql:/docker-entrypoint-initdb.d/init-scripts/99-roles.sql:Z
-      # PGDATA directory is persisted between restarts
-      - ./docker/data/db/data:/var/lib/postgresql/data:Z
   redis:
     container_name: heiwadai-redis
     image: redis:7.0.12
@@ -59,3 +37,26 @@ services:
     # データの永続化
     volumes:
       - ./docker/data/rabbitmq/data:/var/lib/rabbitmq
+
+  # db:
+  #   container_name: supabase-db
+  #   image: supabase/postgres:15.1.0.90
+  #   restart: unless-stopped
+  #   ports:
+  #     - ${PSQL_PORT}:${PSQL_PORT}
+  #   environment:
+  #     PGPORT: ${PSQL_PORT}
+  #     POSTGRES_PORT: ${PSQL_PORT}
+  #     PGPASSWORD: ${PSQL_PASS}
+  #     POSTGRES_USER: ${PSQL_USER}
+  #     POSTGRES_PASSWORD: ${PSQL_PASS}
+  #     PGDATABASE: ${PSQL_DBNAME}
+  #     POSTGRES_DB: ${PSQL_DBNAME}
+  #   volumes:
+  #     - ./docker/init/db/realtime.sql:/docker-entrypoint-initdb.d/migrations/99-realtime.sql:Z
+  #     # Must be superuser to create event trigger
+  #     - ./docker/init/db/webhooks.sql:/docker-entrypoint-initdb.d/init-scripts/98-webhooks.sql:Z
+  #     # Must be superuser to alter reserved role
+  #     - ./docker/init/db/roles.sql:/docker-entrypoint-initdb.d/init-scripts/99-roles.sql:Z
+  #     # PGDATA directory is persisted between restarts
+  #     - ./docker/data/db/data:/var/lib/postgresql/data:Z

@@ -1,0 +1,16 @@
+FROM golang:1.20.5-bullseye as builder
+RUN mkdir server
+WORKDIR /server
+
+RUN apt-get update
+COPY ./server .
+
+RUN export PATH="$(go env GOBIN):${PATH}" && export PATH="$(go env GOPATH)/bin:${PATH}"
+
+RUN go build -o main .
+
+# runtime image
+FROM alpine:latest
+COPY --from=builder /server /app
+
+CMD ["/app/main" ,"8080"] 

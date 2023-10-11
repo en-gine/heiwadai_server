@@ -17,3 +17,10 @@ run:
 
 reload-env:
 	docker-compose --env-file .env up -d
+
+build:
+	docker build -t asia-northeast2-docker.pkg.dev/heiwadai/server/heiwadai-server -f ./docker/Dockerfile/server/Dockerfile.prod .
+
+push:
+	@make build
+	docker push asia-northeast2-docker.pkg.dev/heiwadai/server/heiwadai-server
