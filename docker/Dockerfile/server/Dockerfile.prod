@@ -5,13 +5,11 @@ WORKDIR /server
 # RUN apt-get update
 COPY ./server .
 
-RUN export PATH="$(go env GOBIN):${PATH}" && export PATH="$(go env GOPATH)/bin:${PATH}"
-
-RUN go build -o main .
+RUN CGO_ENABLED=0 go build -o main .
 
 # runtime image
 FROM alpine:3.18
-COPY --from=builder /server /app
-
+COPY --from=builder /server/main /app/main
+RUN chmod +x /app/main
 EXPOSE 3000
 CMD ["/app/main"] 
