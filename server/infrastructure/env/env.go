@@ -39,9 +39,8 @@ const (
 	RabbitmqDefaultUser EnvKey = "RABBITMQ_DEFAULT_USER"
 	RabbitmqDefaultPass EnvKey = "RABBITMQ_DEFAULT_PASS"
 
-	RedisHost EnvKey = "REDIS_HOST"
-	RedisPort EnvKey = "REDIS_PORT"
-	RedisPass EnvKey = "REDIS_PASS"
+	RedisHost EnvKey = "REDISHOST"
+	RedisPort EnvKey = "REDISPORT"
 
 	MailHost EnvKey = "MAIL_HOST"
 	MailPort EnvKey = "MAIL_PORT"
@@ -92,7 +91,6 @@ func InitEnv() {
 
 			RedisHost: os.Getenv(string(RedisHost)),
 			RedisPort: os.Getenv(string(RedisPort)),
-			RedisPass: os.Getenv(string(RedisPass)),
 
 			MailHost: os.Getenv(string(MailHost)),
 			MailPort: os.Getenv(string(MailPort)),

@@ -1,6 +1,7 @@
 *.bkp
 *.dtmp
 .env
+.env.prod
 /docker/data
 /docker/volumes/db/data
 node_modules

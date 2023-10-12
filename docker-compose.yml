@@ -17,9 +17,9 @@ services:
     image: redis:7.0.12
     restart: unless-stopped
     ports:
-      - ${REDIS_PORT}:${REDIS_PORT}
+      - ${REDISPORT}:${REDISPORT}
     environment:
-      REDIS_ARGS: --requirepass ${REDIS_PASS} --save 5 30 --appendonly yes
+      REDIS_ARGS: --save 5 30 --appendonly yes
     volumes:
       - ./docker/data/redis/data:/data:Z
   rabbitmq:

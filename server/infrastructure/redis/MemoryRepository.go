@@ -18,9 +18,8 @@ type MemoryRepository struct {
 
 func NewMemoryRepository() (*MemoryRepository, error) {
 	rdb := redis.NewClient(&redis.Options{
-		Addr:     env.GetEnv(env.RedisHost) + ":" + env.GetEnv(env.RedisPort),
-		Password: env.GetEnv(env.RedisPass),
-		DB:       0, // use default DB
+		Addr: env.GetEnv(env.RedisHost) + ":" + env.GetEnv(env.RedisPort),
+		DB:   0, // use default DB
 	})
 	err := rdb.Ping(context.Background()).Err()
 	if err != nil {
