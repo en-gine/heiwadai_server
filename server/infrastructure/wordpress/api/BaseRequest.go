@@ -6,11 +6,11 @@ import (
 	"net/http"
 	"time"
 
+	"server/infrastructure/cache"
 	"server/infrastructure/logger"
-	"server/infrastructure/redis"
 )
 
-var rdb, _ = redis.NewMemoryRepository()
+var memory, _ = cache.NewMemoryRepository()
 
 func FetchJSONData[T any](APIURL string) (*T, error) {
 	res, err := http.Get(APIURL)
@@ -36,28 +36,25 @@ func FetchJSONData[T any](APIURL string) (*T, error) {
 func Request[T any](APIURL string, cacheKey string, cacheExpire time.Duration) (*T, error) {
 	var data *T
 
-	cache, err := rdb.Get(cacheKey)
-	if err != nil {
-		return nil, err
-	}
+	cache := memory.Get(cacheKey)
 	// キャッシュがあればそれを返す
 	if cache != nil {
-		err = json.Unmarshal(*cache, &data)
+		err := json.Unmarshal(*cache, &data)
 		if err != nil {
 			return nil, err
 		}
 		return data, nil
 	} else {
-		data, err = FetchJSONData[T](APIURL)
+		data, err := FetchJSONData[T](APIURL)
 		if err != nil {
 			return nil, err
 		}
-		// rdbにキャッシュする
+		// memoryにキャッシュする
 		cacheData, err := json.Marshal(data)
 		if err != nil {
 			return nil, err
 		}
-		err = rdb.Set(cacheKey, cacheData, cacheExpire)
+		err = memory.Set(cacheKey, cacheData, cacheExpire)
 		if err != nil {
 			logger.Errorf("Failed to set cache : %s", err)
 			return nil, err
