@@ -21,6 +21,11 @@ func main() {
 	userRouter.NewUserServer(mux)
 	adminRouter.NewAdminServer(mux)
 
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprintf(w, "heiwadai app server!")
+	})
+
 	msg := os.ExpandEnv("${ENV} mode run! port: ${SERVER_PORT}")
 	fmt.Println(msg)
 	port := env.GetEnv(env.ServerPort)

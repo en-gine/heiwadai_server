@@ -2,7 +2,6 @@ package logger
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"runtime"
 	"strings"
@@ -11,8 +10,7 @@ import (
 	"gopkg.in/natefinch/lumberjack.v2"
 )
 
-type Logger struct {
-}
+type Logger struct{}
 
 func NewLogger() *Logger {
 	return &Logger{}
@@ -55,25 +53,28 @@ var LogConfig = &lumberjack.Logger{
 }
 
 func Log(level LogLevel, message string) {
-	mode := os.Getenv("ENV_MODE")
-	if mode == "production" && level == LevelDebug {
-		return
-	}
-
 	_, file, line, _ := runtime.Caller(2)
 	file = strings.Replace(file, os.Getenv("GOPATH")+"/src/", "", 1)
 	now := time.Now()
-	log.SetOutput(LogConfig)
+	// log.SetOutput(LogConfig)
+	// log.Printf("%s [%s] %s:%d %s\n", now.Format("2006-01-02 15:04:05"), level.String(), file, line, message)
 
-	log.Printf("%s [%s] %s:%d %s\n", now.Format("2006-01-02 15:04:05"), level.String(), file, line, message)
+	// cloud loggingのために標準出力に変更
+	fmt.Printf("%s [%s] %s:%d %s\n", now.Format("2006-01-02 15:04:05"), level.String(), file, line, message)
+}
+
+func Trace() string {
+	buf := make([]byte, 1024)
+	n := runtime.Stack(buf, false) // trueを指定すると、すべてのゴルーチンのスタックトレースを取得します
+	return string(buf[:n])
 }
 
 func Error(message string) {
-	Log(LevelWarn, message)
+	Log(LevelWarn, message+"\nStacktrace:\n"+Trace())
 }
 
 func Errorf(format string, a ...interface{}) {
-	Log(LevelError, fmt.Sprintf(format, a...))
+	Log(LevelError, fmt.Sprintf(format, a...)+"\nStacktrace:\n"+Trace())
 }
 
 func Info(message string) {

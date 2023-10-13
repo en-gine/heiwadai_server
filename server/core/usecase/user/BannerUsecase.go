@@ -11,7 +11,9 @@ type BannerUsecase struct {
 }
 
 func NewBannerUsecase(bannerQuery queryservice.IBannerQueryService) *BannerUsecase {
-	return &BannerUsecase{}
+	return &BannerUsecase{
+		bannerQuery: bannerQuery,
+	}
 }
 
 func (u *BannerUsecase) GetList() ([]*entity.Banner, *errors.DomainError) {
