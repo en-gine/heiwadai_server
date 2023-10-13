@@ -25,7 +25,7 @@ const (
 const (
 	EnvMode EnvKey = "ENV_MODE"
 
-	ServerPort EnvKey = "SERVER_PORT"
+	ServerPort EnvKey = "PORT"
 
 	PsqlDbname EnvKey = "PSQL_DBNAME"
 	PsqlUser   EnvKey = "PSQL_USER"
