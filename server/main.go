@@ -15,6 +15,8 @@ import (
 )
 
 func main() {
+	fmt.Print("server up...")
+
 	env.InitEnv() // 環境変数を読み込む
 
 	mux := http.NewServeMux()
