@@ -40,7 +40,7 @@ func (mr *MemoryRepository) Set(key string, value []byte, expire time.Duration) 
 		return errors.New("key cannot be empty")
 	}
 
-	if value == nil || len(value) == 0 {
+	if len(value) == 0 {
 		return errors.New("value cannot be nil or empty")
 	}
 
