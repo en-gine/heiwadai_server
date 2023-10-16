@@ -28,7 +28,7 @@ func main() {
 		fmt.Fprintf(w, "heiwadai app server!")
 	})
 
-	msg := os.ExpandEnv("${ENV} mode run! port: ${PORT}")
+	msg := os.ExpandEnv("${ENV_MODE} mode run! port: ${PORT}")
 	fmt.Println(msg)
 	port := env.GetEnv(env.ServerPort)
 	log.Fatal(http.ListenAndServe(":"+port, h2c.NewHandler(mux, &http2.Server{}))) // リフレクションを有効にする
