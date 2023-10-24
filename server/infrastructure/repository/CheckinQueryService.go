@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+
 	"server/core/entity"
 	queryservice "server/core/infra/queryService"
 	"server/core/infra/queryService/types"
@@ -53,12 +54,12 @@ func (pq *CheckinQueryService) GetLastStoreCheckin(userID uuid.UUID, storeID uui
 		return nil, err
 	}
 
-	var result = CheckinModelToEntity(checkin, nil, nil)
+	result := CheckinModelToEntity(checkin, nil, nil)
 	return result, nil
 }
 
 func (pq *CheckinQueryService) GetAllCheckin(userID uuid.UUID, pager *types.PageQuery) ([]*entity.Checkin, error) {
-	checkins, err := models.Checkins(models.CheckinWhere.UserID.EQ(null.StringFrom(userID.String())), qm.Load(models.CheckinRels.User), qm.Load(models.CheckinRels.Store), qm.Limit(pager.Offset()), qm.Offset(pager.Offset())).All(context.Background(), pq.db)
+	checkins, err := models.Checkins(models.CheckinWhere.UserID.EQ(null.StringFrom(userID.String())), qm.Load(models.CheckinRels.User), qm.Load(models.CheckinRels.Store), qm.Limit(pager.Limit()), qm.Offset(pager.Offset())).All(context.Background(), pq.db)
 	if err != nil {
 		return nil, err
 	}

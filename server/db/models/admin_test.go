@@ -519,8 +519,9 @@ func testAdminToManyAuthorMailMagazines(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	queries.Assign(&b.Author, a.AdminID)
-	queries.Assign(&c.Author, a.AdminID)
+	b.AuthorID = a.AdminID
+	c.AuthorID = a.AdminID
+
 	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Fatal(err)
 	}
@@ -535,10 +536,10 @@ func testAdminToManyAuthorMailMagazines(t *testing.T) {
 
 	bFound, cFound := false, false
 	for _, v := range check {
-		if queries.Equal(v.Author, b.Author) {
+		if v.AuthorID == b.AuthorID {
 			bFound = true
 		}
-		if queries.Equal(v.Author, c.Author) {
+		if v.AuthorID == c.AuthorID {
 			cFound = true
 		}
 	}
@@ -563,6 +564,84 @@ func testAdminToManyAuthorMailMagazines(t *testing.T) {
 		t.Fatal(err)
 	}
 	if got := len(a.R.AuthorMailMagazines); got != 2 {
+		t.Error("number of eager loaded records wrong, got:", got)
+	}
+
+	if t.Failed() {
+		t.Logf("%#v", check)
+	}
+}
+
+func testAdminToManyAuthorMessages(t *testing.T) {
+	var err error
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+
+	var a Admin
+	var b, c Message
+
+	seed := randomize.NewSeed()
+	if err = randomize.Struct(seed, &a, adminDBTypes, true, adminColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Admin struct: %s", err)
+	}
+
+	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	if err = randomize.Struct(seed, &b, messageDBTypes, false, messageColumnsWithDefault...); err != nil {
+		t.Fatal(err)
+	}
+	if err = randomize.Struct(seed, &c, messageDBTypes, false, messageColumnsWithDefault...); err != nil {
+		t.Fatal(err)
+	}
+
+	b.AuthorID = a.AdminID
+	c.AuthorID = a.AdminID
+
+	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+	if err = c.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	check, err := a.AuthorMessages().All(ctx, tx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	bFound, cFound := false, false
+	for _, v := range check {
+		if v.AuthorID == b.AuthorID {
+			bFound = true
+		}
+		if v.AuthorID == c.AuthorID {
+			cFound = true
+		}
+	}
+
+	if !bFound {
+		t.Error("expected to find b")
+	}
+	if !cFound {
+		t.Error("expected to find c")
+	}
+
+	slice := AdminSlice{&a}
+	if err = a.L.LoadAuthorMessages(ctx, tx, false, (*[]*Admin)(&slice), nil); err != nil {
+		t.Fatal(err)
+	}
+	if got := len(a.R.AuthorMessages); got != 2 {
+		t.Error("number of eager loaded records wrong, got:", got)
+	}
+
+	a.R.AuthorMessages = nil
+	if err = a.L.LoadAuthorMessages(ctx, tx, true, &a, nil); err != nil {
+		t.Fatal(err)
+	}
+	if got := len(a.R.AuthorMessages); got != 2 {
 		t.Error("number of eager loaded records wrong, got:", got)
 	}
 
@@ -616,17 +695,17 @@ func testAdminToManyAddOpAuthorMailMagazines(t *testing.T) {
 		first := x[0]
 		second := x[1]
 
-		if !queries.Equal(a.AdminID, first.Author) {
-			t.Error("foreign key was wrong value", a.AdminID, first.Author)
+		if a.AdminID != first.AuthorID {
+			t.Error("foreign key was wrong value", a.AdminID, first.AuthorID)
 		}
-		if !queries.Equal(a.AdminID, second.Author) {
-			t.Error("foreign key was wrong value", a.AdminID, second.Author)
+		if a.AdminID != second.AuthorID {
+			t.Error("foreign key was wrong value", a.AdminID, second.AuthorID)
 		}
 
-		if first.R.AuthorAdmin != &a {
+		if first.R.Author != &a {
 			t.Error("relationship was not added properly to the foreign slice")
 		}
-		if second.R.AuthorAdmin != &a {
+		if second.R.Author != &a {
 			t.Error("relationship was not added properly to the foreign slice")
 		}
 
@@ -646,8 +725,7 @@ func testAdminToManyAddOpAuthorMailMagazines(t *testing.T) {
 		}
 	}
 }
-
-func testAdminToManySetOpAuthorMailMagazines(t *testing.T) {
+func testAdminToManyAddOpAuthorMessages(t *testing.T) {
 	var err error
 
 	ctx := context.Background()
@@ -655,20 +733,20 @@ func testAdminToManySetOpAuthorMailMagazines(t *testing.T) {
 	defer func() { _ = tx.Rollback() }()
 
 	var a Admin
-	var b, c, d, e MailMagazine
+	var b, c, d, e Message
 
 	seed := randomize.NewSeed()
 	if err = randomize.Struct(seed, &a, adminDBTypes, false, strmangle.SetComplement(adminPrimaryKeyColumns, adminColumnsWithoutDefault)...); err != nil {
 		t.Fatal(err)
 	}
-	foreigners := []*MailMagazine{&b, &c, &d, &e}
+	foreigners := []*Message{&b, &c, &d, &e}
 	for _, x := range foreigners {
-		if err = randomize.Struct(seed, x, mailMagazineDBTypes, false, strmangle.SetComplement(mailMagazinePrimaryKeyColumns, mailMagazineColumnsWithoutDefault)...); err != nil {
+		if err = randomize.Struct(seed, x, messageDBTypes, false, strmangle.SetComplement(messagePrimaryKeyColumns, messageColumnsWithoutDefault)...); err != nil {
 			t.Fatal(err)
 		}
 	}
 
-	if err = a.Insert(ctx, tx, boil.Infer()); err != nil {
+	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Fatal(err)
 	}
 	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
@@ -678,150 +756,50 @@ func testAdminToManySetOpAuthorMailMagazines(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = a.SetAuthorMailMagazines(ctx, tx, false, &b, &c)
-	if err != nil {
-		t.Fatal(err)
+	foreignersSplitByInsertion := [][]*Message{
+		{&b, &c},
+		{&d, &e},
 	}
 
-	count, err := a.AuthorMailMagazines().Count(ctx, tx)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if count != 2 {
-		t.Error("count was wrong:", count)
-	}
-
-	err = a.SetAuthorMailMagazines(ctx, tx, true, &d, &e)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	count, err = a.AuthorMailMagazines().Count(ctx, tx)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if count != 2 {
-		t.Error("count was wrong:", count)
-	}
-
-	if !queries.IsValuerNil(b.Author) {
-		t.Error("want b's foreign key value to be nil")
-	}
-	if !queries.IsValuerNil(c.Author) {
-		t.Error("want c's foreign key value to be nil")
-	}
-	if !queries.Equal(a.AdminID, d.Author) {
-		t.Error("foreign key was wrong value", a.AdminID, d.Author)
-	}
-	if !queries.Equal(a.AdminID, e.Author) {
-		t.Error("foreign key was wrong value", a.AdminID, e.Author)
-	}
-
-	if b.R.AuthorAdmin != nil {
-		t.Error("relationship was not removed properly from the foreign struct")
-	}
-	if c.R.AuthorAdmin != nil {
-		t.Error("relationship was not removed properly from the foreign struct")
-	}
-	if d.R.AuthorAdmin != &a {
-		t.Error("relationship was not added properly to the foreign struct")
-	}
-	if e.R.AuthorAdmin != &a {
-		t.Error("relationship was not added properly to the foreign struct")
-	}
-
-	if a.R.AuthorMailMagazines[0] != &d {
-		t.Error("relationship struct slice not set to correct value")
-	}
-	if a.R.AuthorMailMagazines[1] != &e {
-		t.Error("relationship struct slice not set to correct value")
-	}
-}
-
-func testAdminToManyRemoveOpAuthorMailMagazines(t *testing.T) {
-	var err error
-
-	ctx := context.Background()
-	tx := MustTx(boil.BeginTx(ctx, nil))
-	defer func() { _ = tx.Rollback() }()
-
-	var a Admin
-	var b, c, d, e MailMagazine
-
-	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, &a, adminDBTypes, false, strmangle.SetComplement(adminPrimaryKeyColumns, adminColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
-	}
-	foreigners := []*MailMagazine{&b, &c, &d, &e}
-	for _, x := range foreigners {
-		if err = randomize.Struct(seed, x, mailMagazineDBTypes, false, strmangle.SetComplement(mailMagazinePrimaryKeyColumns, mailMagazineColumnsWithoutDefault)...); err != nil {
+	for i, x := range foreignersSplitByInsertion {
+		err = a.AddAuthorMessages(ctx, tx, i != 0, x...)
+		if err != nil {
 			t.Fatal(err)
 		}
-	}
 
-	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
+		first := x[0]
+		second := x[1]
 
-	err = a.AddAuthorMailMagazines(ctx, tx, true, foreigners...)
-	if err != nil {
-		t.Fatal(err)
-	}
+		if a.AdminID != first.AuthorID {
+			t.Error("foreign key was wrong value", a.AdminID, first.AuthorID)
+		}
+		if a.AdminID != second.AuthorID {
+			t.Error("foreign key was wrong value", a.AdminID, second.AuthorID)
+		}
 
-	count, err := a.AuthorMailMagazines().Count(ctx, tx)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if count != 4 {
-		t.Error("count was wrong:", count)
-	}
+		if first.R.Author != &a {
+			t.Error("relationship was not added properly to the foreign slice")
+		}
+		if second.R.Author != &a {
+			t.Error("relationship was not added properly to the foreign slice")
+		}
 
-	err = a.RemoveAuthorMailMagazines(ctx, tx, foreigners[:2]...)
-	if err != nil {
-		t.Fatal(err)
-	}
+		if a.R.AuthorMessages[i*2] != first {
+			t.Error("relationship struct slice not set to correct value")
+		}
+		if a.R.AuthorMessages[i*2+1] != second {
+			t.Error("relationship struct slice not set to correct value")
+		}
 
-	count, err = a.AuthorMailMagazines().Count(ctx, tx)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if count != 2 {
-		t.Error("count was wrong:", count)
-	}
-
-	if !queries.IsValuerNil(b.Author) {
-		t.Error("want b's foreign key value to be nil")
-	}
-	if !queries.IsValuerNil(c.Author) {
-		t.Error("want c's foreign key value to be nil")
-	}
-
-	if b.R.AuthorAdmin != nil {
-		t.Error("relationship was not removed properly from the foreign struct")
-	}
-	if c.R.AuthorAdmin != nil {
-		t.Error("relationship was not removed properly from the foreign struct")
-	}
-	if d.R.AuthorAdmin != &a {
-		t.Error("relationship to a should have been preserved")
-	}
-	if e.R.AuthorAdmin != &a {
-		t.Error("relationship to a should have been preserved")
-	}
-
-	if len(a.R.AuthorMailMagazines) != 2 {
-		t.Error("should have preserved two relationships")
-	}
-
-	// Removal doesn't do a stable deletion for performance so we have to flip the order
-	if a.R.AuthorMailMagazines[1] != &d {
-		t.Error("relationship to d should have been preserved")
-	}
-	if a.R.AuthorMailMagazines[0] != &e {
-		t.Error("relationship to e should have been preserved")
+		count, err := a.AuthorMessages().Count(ctx, tx)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if want := int64((i + 1) * 2); count != want {
+			t.Error("want", want, "got", count)
+		}
 	}
 }
-
 func testAdminToOneUserManagerUsingAdmin(t *testing.T) {
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))

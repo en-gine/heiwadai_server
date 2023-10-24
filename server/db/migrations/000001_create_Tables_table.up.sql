@@ -125,14 +125,26 @@ CREATE TABLE mail_magazine (
     id UUID PRIMARY KEY,
     title VARCHAR NOT NULL,
     content VARCHAR NOT NULL,
-    author UUID,
+    author_id UUID NOT NULL,
     sent_at TIMESTAMPTZ,
-    sent_count int default 0,
+    sent_count int default NULL,
     mail_magazine_status int NOT NULL,
     create_at TIMESTAMPTZ NOT NULL default now(),
     update_at TIMESTAMPTZ NOT NULL default now(),
-    FOREIGN KEY (author) REFERENCES admin (admin_id)
+    FOREIGN KEY (author_id) REFERENCES admin (admin_id)
 );
+
+CREATE TABLE message (
+    id UUID PRIMARY KEY,
+    title VARCHAR NOT NULL,
+    content VARCHAR NOT NULL,
+    author_id UUID NOT NULL,
+    display_date TIMESTAMPTZ NOT NULL default now(),
+    create_at TIMESTAMPTZ NOT NULL default now(),
+    update_at TIMESTAMPTZ NOT NULL default now(),
+    FOREIGN KEY (author_id) REFERENCES admin (admin_id)
+);
+
 --- userが作成されるたびに、userテーブルにもidとemailをinsertする
 create or replace function public.handle_new_user() 
 returns trigger as $$

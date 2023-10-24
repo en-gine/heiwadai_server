@@ -23,7 +23,6 @@ func NewMailMagazineUsecase(mailMagazineRepository repository.IMailMagazineRepos
 }
 
 func (u *MailMagazineUsecase) GetList(pager *types.PageQuery) ([]*entity.MailMagazine, *errors.DomainError) {
-
 	mailMagazines, err := u.mailMagazineQuery.GetAll(pager)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())
@@ -31,9 +30,8 @@ func (u *MailMagazineUsecase) GetList(pager *types.PageQuery) ([]*entity.MailMag
 	return mailMagazines, nil
 }
 
-func (u *MailMagazineUsecase) Create(title string, content string, auther entity.Admin) (*entity.MailMagazine, *errors.DomainError) {
-
-	mailMagazine := entity.CreateDraftMailMagazine(title, content, auther)
+func (u *MailMagazineUsecase) Create(title string, content string, autherID uuid.UUID) (*entity.MailMagazine, *errors.DomainError) {
+	mailMagazine := entity.CreateDraftMailMagazine(title, content, autherID)
 
 	err := u.mailMagazineRepository.Save(mailMagazine)
 	if err != nil {
@@ -43,10 +41,8 @@ func (u *MailMagazineUsecase) Create(title string, content string, auther entity
 	return mailMagazine, nil
 }
 
-func (u *MailMagazineUsecase) Update(title *string, content *string, auther entity.Admin, mailMagazineID uuid.UUID) (*entity.MailMagazine, *errors.DomainError) {
-
+func (u *MailMagazineUsecase) Update(title *string, content *string, autherID uuid.UUID, mailMagazineID uuid.UUID) (*entity.MailMagazine, *errors.DomainError) {
 	oldMailMagazine, err := u.mailMagazineQuery.GetByID(mailMagazineID)
-
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())
 	}
@@ -68,7 +64,7 @@ func (u *MailMagazineUsecase) Update(title *string, content *string, auther enti
 		updateContent = oldMailMagazine.Content
 	}
 
-	updateMailMagazine := entity.UpdateMailMagazine(mailMagazineID, updateTitle, updateContent, auther)
+	updateMailMagazine := entity.UpdateMailMagazine(mailMagazineID, updateTitle, updateContent, autherID)
 
 	if updateMailMagazine.MailMagazineStatus == entity.MailMagazineSent {
 		return nil, errors.NewDomainError(errors.QueryDataNotFoundError, "送信済みのため編集できません")
@@ -84,7 +80,6 @@ func (u *MailMagazineUsecase) Update(title *string, content *string, auther enti
 
 func (u *MailMagazineUsecase) Delete(mailMagazineID uuid.UUID) (*entity.MailMagazine, *errors.DomainError) {
 	deleteMailMagazine, err := u.mailMagazineQuery.GetByID(mailMagazineID)
-
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())
 	}

@@ -56,10 +56,10 @@ install-sqlboiler:
 	go install github.com/volatiletech/sqlboiler/v4@latest
 	go install github.com/volatiletech/sqlboiler/v4/drivers/sqlboiler-psql@latest
 
-sqlboiler:#sqlboilerでmodelを自動生成fvfv
+sqlboiler:#sqlboilerでmodelを自動生成
 	sqlboiler psql --wipe
 
-seeder-store:cfv
+seeder-store:
 	cd /server/db/seeder && go run . -StoreSeeder
 
 seeder-user:

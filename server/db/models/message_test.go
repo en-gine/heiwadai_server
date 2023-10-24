@@ -21,24 +21,24 @@ var (
 	_ = queries.Equal
 )
 
-func testMailMagazines(t *testing.T) {
+func testMessages(t *testing.T) {
 	t.Parallel()
 
-	query := MailMagazines()
+	query := Messages()
 
 	if query.Query == nil {
 		t.Error("expected a query, got nothing")
 	}
 }
 
-func testMailMagazinesDelete(t *testing.T) {
+func testMessagesDelete(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &MailMagazine{}
-	if err = randomize.Struct(seed, o, mailMagazineDBTypes, true, mailMagazineColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize MailMagazine struct: %s", err)
+	o := &Message{}
+	if err = randomize.Struct(seed, o, messageDBTypes, true, messageColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Message struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -54,7 +54,7 @@ func testMailMagazinesDelete(t *testing.T) {
 		t.Error("should only have deleted one row, but affected:", rowsAff)
 	}
 
-	count, err := MailMagazines().Count(ctx, tx)
+	count, err := Messages().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -64,14 +64,14 @@ func testMailMagazinesDelete(t *testing.T) {
 	}
 }
 
-func testMailMagazinesQueryDeleteAll(t *testing.T) {
+func testMessagesQueryDeleteAll(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &MailMagazine{}
-	if err = randomize.Struct(seed, o, mailMagazineDBTypes, true, mailMagazineColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize MailMagazine struct: %s", err)
+	o := &Message{}
+	if err = randomize.Struct(seed, o, messageDBTypes, true, messageColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Message struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -81,13 +81,13 @@ func testMailMagazinesQueryDeleteAll(t *testing.T) {
 		t.Error(err)
 	}
 
-	if rowsAff, err := MailMagazines().DeleteAll(ctx, tx); err != nil {
+	if rowsAff, err := Messages().DeleteAll(ctx, tx); err != nil {
 		t.Error(err)
 	} else if rowsAff != 1 {
 		t.Error("should only have deleted one row, but affected:", rowsAff)
 	}
 
-	count, err := MailMagazines().Count(ctx, tx)
+	count, err := Messages().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -97,14 +97,14 @@ func testMailMagazinesQueryDeleteAll(t *testing.T) {
 	}
 }
 
-func testMailMagazinesSliceDeleteAll(t *testing.T) {
+func testMessagesSliceDeleteAll(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &MailMagazine{}
-	if err = randomize.Struct(seed, o, mailMagazineDBTypes, true, mailMagazineColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize MailMagazine struct: %s", err)
+	o := &Message{}
+	if err = randomize.Struct(seed, o, messageDBTypes, true, messageColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Message struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -114,7 +114,7 @@ func testMailMagazinesSliceDeleteAll(t *testing.T) {
 		t.Error(err)
 	}
 
-	slice := MailMagazineSlice{o}
+	slice := MessageSlice{o}
 
 	if rowsAff, err := slice.DeleteAll(ctx, tx); err != nil {
 		t.Error(err)
@@ -122,7 +122,7 @@ func testMailMagazinesSliceDeleteAll(t *testing.T) {
 		t.Error("should only have deleted one row, but affected:", rowsAff)
 	}
 
-	count, err := MailMagazines().Count(ctx, tx)
+	count, err := Messages().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -132,14 +132,14 @@ func testMailMagazinesSliceDeleteAll(t *testing.T) {
 	}
 }
 
-func testMailMagazinesExists(t *testing.T) {
+func testMessagesExists(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &MailMagazine{}
-	if err = randomize.Struct(seed, o, mailMagazineDBTypes, true, mailMagazineColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize MailMagazine struct: %s", err)
+	o := &Message{}
+	if err = randomize.Struct(seed, o, messageDBTypes, true, messageColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Message struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -149,23 +149,23 @@ func testMailMagazinesExists(t *testing.T) {
 		t.Error(err)
 	}
 
-	e, err := MailMagazineExists(ctx, tx, o.ID)
+	e, err := MessageExists(ctx, tx, o.ID)
 	if err != nil {
-		t.Errorf("Unable to check if MailMagazine exists: %s", err)
+		t.Errorf("Unable to check if Message exists: %s", err)
 	}
 	if !e {
-		t.Errorf("Expected MailMagazineExists to return true, but got false.")
+		t.Errorf("Expected MessageExists to return true, but got false.")
 	}
 }
 
-func testMailMagazinesFind(t *testing.T) {
+func testMessagesFind(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &MailMagazine{}
-	if err = randomize.Struct(seed, o, mailMagazineDBTypes, true, mailMagazineColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize MailMagazine struct: %s", err)
+	o := &Message{}
+	if err = randomize.Struct(seed, o, messageDBTypes, true, messageColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Message struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -175,24 +175,24 @@ func testMailMagazinesFind(t *testing.T) {
 		t.Error(err)
 	}
 
-	mailMagazineFound, err := FindMailMagazine(ctx, tx, o.ID)
+	messageFound, err := FindMessage(ctx, tx, o.ID)
 	if err != nil {
 		t.Error(err)
 	}
 
-	if mailMagazineFound == nil {
+	if messageFound == nil {
 		t.Error("want a record, got nil")
 	}
 }
 
-func testMailMagazinesBind(t *testing.T) {
+func testMessagesBind(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &MailMagazine{}
-	if err = randomize.Struct(seed, o, mailMagazineDBTypes, true, mailMagazineColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize MailMagazine struct: %s", err)
+	o := &Message{}
+	if err = randomize.Struct(seed, o, messageDBTypes, true, messageColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Message struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -202,19 +202,19 @@ func testMailMagazinesBind(t *testing.T) {
 		t.Error(err)
 	}
 
-	if err = MailMagazines().Bind(ctx, tx, o); err != nil {
+	if err = Messages().Bind(ctx, tx, o); err != nil {
 		t.Error(err)
 	}
 }
 
-func testMailMagazinesOne(t *testing.T) {
+func testMessagesOne(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &MailMagazine{}
-	if err = randomize.Struct(seed, o, mailMagazineDBTypes, true, mailMagazineColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize MailMagazine struct: %s", err)
+	o := &Message{}
+	if err = randomize.Struct(seed, o, messageDBTypes, true, messageColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Message struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -224,38 +224,38 @@ func testMailMagazinesOne(t *testing.T) {
 		t.Error(err)
 	}
 
-	if x, err := MailMagazines().One(ctx, tx); err != nil {
+	if x, err := Messages().One(ctx, tx); err != nil {
 		t.Error(err)
 	} else if x == nil {
 		t.Error("expected to get a non nil record")
 	}
 }
 
-func testMailMagazinesAll(t *testing.T) {
+func testMessagesAll(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	mailMagazineOne := &MailMagazine{}
-	mailMagazineTwo := &MailMagazine{}
-	if err = randomize.Struct(seed, mailMagazineOne, mailMagazineDBTypes, false, mailMagazineColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize MailMagazine struct: %s", err)
+	messageOne := &Message{}
+	messageTwo := &Message{}
+	if err = randomize.Struct(seed, messageOne, messageDBTypes, false, messageColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Message struct: %s", err)
 	}
-	if err = randomize.Struct(seed, mailMagazineTwo, mailMagazineDBTypes, false, mailMagazineColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize MailMagazine struct: %s", err)
+	if err = randomize.Struct(seed, messageTwo, messageDBTypes, false, messageColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Message struct: %s", err)
 	}
 
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
-	if err = mailMagazineOne.Insert(ctx, tx, boil.Infer()); err != nil {
+	if err = messageOne.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Error(err)
 	}
-	if err = mailMagazineTwo.Insert(ctx, tx, boil.Infer()); err != nil {
+	if err = messageTwo.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Error(err)
 	}
 
-	slice, err := MailMagazines().All(ctx, tx)
+	slice, err := Messages().All(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -265,31 +265,31 @@ func testMailMagazinesAll(t *testing.T) {
 	}
 }
 
-func testMailMagazinesCount(t *testing.T) {
+func testMessagesCount(t *testing.T) {
 	t.Parallel()
 
 	var err error
 	seed := randomize.NewSeed()
-	mailMagazineOne := &MailMagazine{}
-	mailMagazineTwo := &MailMagazine{}
-	if err = randomize.Struct(seed, mailMagazineOne, mailMagazineDBTypes, false, mailMagazineColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize MailMagazine struct: %s", err)
+	messageOne := &Message{}
+	messageTwo := &Message{}
+	if err = randomize.Struct(seed, messageOne, messageDBTypes, false, messageColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Message struct: %s", err)
 	}
-	if err = randomize.Struct(seed, mailMagazineTwo, mailMagazineDBTypes, false, mailMagazineColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize MailMagazine struct: %s", err)
+	if err = randomize.Struct(seed, messageTwo, messageDBTypes, false, messageColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Message struct: %s", err)
 	}
 
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
-	if err = mailMagazineOne.Insert(ctx, tx, boil.Infer()); err != nil {
+	if err = messageOne.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Error(err)
 	}
-	if err = mailMagazineTwo.Insert(ctx, tx, boil.Infer()); err != nil {
+	if err = messageTwo.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Error(err)
 	}
 
-	count, err := MailMagazines().Count(ctx, tx)
+	count, err := Messages().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -299,155 +299,155 @@ func testMailMagazinesCount(t *testing.T) {
 	}
 }
 
-func mailMagazineBeforeInsertHook(ctx context.Context, e boil.ContextExecutor, o *MailMagazine) error {
-	*o = MailMagazine{}
+func messageBeforeInsertHook(ctx context.Context, e boil.ContextExecutor, o *Message) error {
+	*o = Message{}
 	return nil
 }
 
-func mailMagazineAfterInsertHook(ctx context.Context, e boil.ContextExecutor, o *MailMagazine) error {
-	*o = MailMagazine{}
+func messageAfterInsertHook(ctx context.Context, e boil.ContextExecutor, o *Message) error {
+	*o = Message{}
 	return nil
 }
 
-func mailMagazineAfterSelectHook(ctx context.Context, e boil.ContextExecutor, o *MailMagazine) error {
-	*o = MailMagazine{}
+func messageAfterSelectHook(ctx context.Context, e boil.ContextExecutor, o *Message) error {
+	*o = Message{}
 	return nil
 }
 
-func mailMagazineBeforeUpdateHook(ctx context.Context, e boil.ContextExecutor, o *MailMagazine) error {
-	*o = MailMagazine{}
+func messageBeforeUpdateHook(ctx context.Context, e boil.ContextExecutor, o *Message) error {
+	*o = Message{}
 	return nil
 }
 
-func mailMagazineAfterUpdateHook(ctx context.Context, e boil.ContextExecutor, o *MailMagazine) error {
-	*o = MailMagazine{}
+func messageAfterUpdateHook(ctx context.Context, e boil.ContextExecutor, o *Message) error {
+	*o = Message{}
 	return nil
 }
 
-func mailMagazineBeforeDeleteHook(ctx context.Context, e boil.ContextExecutor, o *MailMagazine) error {
-	*o = MailMagazine{}
+func messageBeforeDeleteHook(ctx context.Context, e boil.ContextExecutor, o *Message) error {
+	*o = Message{}
 	return nil
 }
 
-func mailMagazineAfterDeleteHook(ctx context.Context, e boil.ContextExecutor, o *MailMagazine) error {
-	*o = MailMagazine{}
+func messageAfterDeleteHook(ctx context.Context, e boil.ContextExecutor, o *Message) error {
+	*o = Message{}
 	return nil
 }
 
-func mailMagazineBeforeUpsertHook(ctx context.Context, e boil.ContextExecutor, o *MailMagazine) error {
-	*o = MailMagazine{}
+func messageBeforeUpsertHook(ctx context.Context, e boil.ContextExecutor, o *Message) error {
+	*o = Message{}
 	return nil
 }
 
-func mailMagazineAfterUpsertHook(ctx context.Context, e boil.ContextExecutor, o *MailMagazine) error {
-	*o = MailMagazine{}
+func messageAfterUpsertHook(ctx context.Context, e boil.ContextExecutor, o *Message) error {
+	*o = Message{}
 	return nil
 }
 
-func testMailMagazinesHooks(t *testing.T) {
+func testMessagesHooks(t *testing.T) {
 	t.Parallel()
 
 	var err error
 
 	ctx := context.Background()
-	empty := &MailMagazine{}
-	o := &MailMagazine{}
+	empty := &Message{}
+	o := &Message{}
 
 	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, o, mailMagazineDBTypes, false); err != nil {
-		t.Errorf("Unable to randomize MailMagazine object: %s", err)
+	if err = randomize.Struct(seed, o, messageDBTypes, false); err != nil {
+		t.Errorf("Unable to randomize Message object: %s", err)
 	}
 
-	AddMailMagazineHook(boil.BeforeInsertHook, mailMagazineBeforeInsertHook)
+	AddMessageHook(boil.BeforeInsertHook, messageBeforeInsertHook)
 	if err = o.doBeforeInsertHooks(ctx, nil); err != nil {
 		t.Errorf("Unable to execute doBeforeInsertHooks: %s", err)
 	}
 	if !reflect.DeepEqual(o, empty) {
 		t.Errorf("Expected BeforeInsertHook function to empty object, but got: %#v", o)
 	}
-	mailMagazineBeforeInsertHooks = []MailMagazineHook{}
+	messageBeforeInsertHooks = []MessageHook{}
 
-	AddMailMagazineHook(boil.AfterInsertHook, mailMagazineAfterInsertHook)
+	AddMessageHook(boil.AfterInsertHook, messageAfterInsertHook)
 	if err = o.doAfterInsertHooks(ctx, nil); err != nil {
 		t.Errorf("Unable to execute doAfterInsertHooks: %s", err)
 	}
 	if !reflect.DeepEqual(o, empty) {
 		t.Errorf("Expected AfterInsertHook function to empty object, but got: %#v", o)
 	}
-	mailMagazineAfterInsertHooks = []MailMagazineHook{}
+	messageAfterInsertHooks = []MessageHook{}
 
-	AddMailMagazineHook(boil.AfterSelectHook, mailMagazineAfterSelectHook)
+	AddMessageHook(boil.AfterSelectHook, messageAfterSelectHook)
 	if err = o.doAfterSelectHooks(ctx, nil); err != nil {
 		t.Errorf("Unable to execute doAfterSelectHooks: %s", err)
 	}
 	if !reflect.DeepEqual(o, empty) {
 		t.Errorf("Expected AfterSelectHook function to empty object, but got: %#v", o)
 	}
-	mailMagazineAfterSelectHooks = []MailMagazineHook{}
+	messageAfterSelectHooks = []MessageHook{}
 
-	AddMailMagazineHook(boil.BeforeUpdateHook, mailMagazineBeforeUpdateHook)
+	AddMessageHook(boil.BeforeUpdateHook, messageBeforeUpdateHook)
 	if err = o.doBeforeUpdateHooks(ctx, nil); err != nil {
 		t.Errorf("Unable to execute doBeforeUpdateHooks: %s", err)
 	}
 	if !reflect.DeepEqual(o, empty) {
 		t.Errorf("Expected BeforeUpdateHook function to empty object, but got: %#v", o)
 	}
-	mailMagazineBeforeUpdateHooks = []MailMagazineHook{}
+	messageBeforeUpdateHooks = []MessageHook{}
 
-	AddMailMagazineHook(boil.AfterUpdateHook, mailMagazineAfterUpdateHook)
+	AddMessageHook(boil.AfterUpdateHook, messageAfterUpdateHook)
 	if err = o.doAfterUpdateHooks(ctx, nil); err != nil {
 		t.Errorf("Unable to execute doAfterUpdateHooks: %s", err)
 	}
 	if !reflect.DeepEqual(o, empty) {
 		t.Errorf("Expected AfterUpdateHook function to empty object, but got: %#v", o)
 	}
-	mailMagazineAfterUpdateHooks = []MailMagazineHook{}
+	messageAfterUpdateHooks = []MessageHook{}
 
-	AddMailMagazineHook(boil.BeforeDeleteHook, mailMagazineBeforeDeleteHook)
+	AddMessageHook(boil.BeforeDeleteHook, messageBeforeDeleteHook)
 	if err = o.doBeforeDeleteHooks(ctx, nil); err != nil {
 		t.Errorf("Unable to execute doBeforeDeleteHooks: %s", err)
 	}
 	if !reflect.DeepEqual(o, empty) {
 		t.Errorf("Expected BeforeDeleteHook function to empty object, but got: %#v", o)
 	}
-	mailMagazineBeforeDeleteHooks = []MailMagazineHook{}
+	messageBeforeDeleteHooks = []MessageHook{}
 
-	AddMailMagazineHook(boil.AfterDeleteHook, mailMagazineAfterDeleteHook)
+	AddMessageHook(boil.AfterDeleteHook, messageAfterDeleteHook)
 	if err = o.doAfterDeleteHooks(ctx, nil); err != nil {
 		t.Errorf("Unable to execute doAfterDeleteHooks: %s", err)
 	}
 	if !reflect.DeepEqual(o, empty) {
 		t.Errorf("Expected AfterDeleteHook function to empty object, but got: %#v", o)
 	}
-	mailMagazineAfterDeleteHooks = []MailMagazineHook{}
+	messageAfterDeleteHooks = []MessageHook{}
 
-	AddMailMagazineHook(boil.BeforeUpsertHook, mailMagazineBeforeUpsertHook)
+	AddMessageHook(boil.BeforeUpsertHook, messageBeforeUpsertHook)
 	if err = o.doBeforeUpsertHooks(ctx, nil); err != nil {
 		t.Errorf("Unable to execute doBeforeUpsertHooks: %s", err)
 	}
 	if !reflect.DeepEqual(o, empty) {
 		t.Errorf("Expected BeforeUpsertHook function to empty object, but got: %#v", o)
 	}
-	mailMagazineBeforeUpsertHooks = []MailMagazineHook{}
+	messageBeforeUpsertHooks = []MessageHook{}
 
-	AddMailMagazineHook(boil.AfterUpsertHook, mailMagazineAfterUpsertHook)
+	AddMessageHook(boil.AfterUpsertHook, messageAfterUpsertHook)
 	if err = o.doAfterUpsertHooks(ctx, nil); err != nil {
 		t.Errorf("Unable to execute doAfterUpsertHooks: %s", err)
 	}
 	if !reflect.DeepEqual(o, empty) {
 		t.Errorf("Expected AfterUpsertHook function to empty object, but got: %#v", o)
 	}
-	mailMagazineAfterUpsertHooks = []MailMagazineHook{}
+	messageAfterUpsertHooks = []MessageHook{}
 }
 
-func testMailMagazinesInsert(t *testing.T) {
+func testMessagesInsert(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &MailMagazine{}
-	if err = randomize.Struct(seed, o, mailMagazineDBTypes, true, mailMagazineColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize MailMagazine struct: %s", err)
+	o := &Message{}
+	if err = randomize.Struct(seed, o, messageDBTypes, true, messageColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Message struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -457,7 +457,7 @@ func testMailMagazinesInsert(t *testing.T) {
 		t.Error(err)
 	}
 
-	count, err := MailMagazines().Count(ctx, tx)
+	count, err := Messages().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -467,24 +467,24 @@ func testMailMagazinesInsert(t *testing.T) {
 	}
 }
 
-func testMailMagazinesInsertWhitelist(t *testing.T) {
+func testMessagesInsertWhitelist(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &MailMagazine{}
-	if err = randomize.Struct(seed, o, mailMagazineDBTypes, true); err != nil {
-		t.Errorf("Unable to randomize MailMagazine struct: %s", err)
+	o := &Message{}
+	if err = randomize.Struct(seed, o, messageDBTypes, true); err != nil {
+		t.Errorf("Unable to randomize Message struct: %s", err)
 	}
 
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
-	if err = o.Insert(ctx, tx, boil.Whitelist(mailMagazineColumnsWithoutDefault...)); err != nil {
+	if err = o.Insert(ctx, tx, boil.Whitelist(messageColumnsWithoutDefault...)); err != nil {
 		t.Error(err)
 	}
 
-	count, err := MailMagazines().Count(ctx, tx)
+	count, err := Messages().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -494,17 +494,17 @@ func testMailMagazinesInsertWhitelist(t *testing.T) {
 	}
 }
 
-func testMailMagazineToOneAdminUsingAuthor(t *testing.T) {
+func testMessageToOneAdminUsingAuthor(t *testing.T) {
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
 
-	var local MailMagazine
+	var local Message
 	var foreign Admin
 
 	seed := randomize.NewSeed()
-	if err := randomize.Struct(seed, &local, mailMagazineDBTypes, false, mailMagazineColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize MailMagazine struct: %s", err)
+	if err := randomize.Struct(seed, &local, messageDBTypes, false, messageColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Message struct: %s", err)
 	}
 	if err := randomize.Struct(seed, &foreign, adminDBTypes, false, adminColumnsWithDefault...); err != nil {
 		t.Errorf("Unable to randomize Admin struct: %s", err)
@@ -534,8 +534,8 @@ func testMailMagazineToOneAdminUsingAuthor(t *testing.T) {
 		return nil
 	})
 
-	slice := MailMagazineSlice{&local}
-	if err = local.L.LoadAuthor(ctx, tx, false, (*[]*MailMagazine)(&slice), nil); err != nil {
+	slice := MessageSlice{&local}
+	if err = local.L.LoadAuthor(ctx, tx, false, (*[]*Message)(&slice), nil); err != nil {
 		t.Fatal(err)
 	}
 	if local.R.Author == nil {
@@ -555,18 +555,18 @@ func testMailMagazineToOneAdminUsingAuthor(t *testing.T) {
 	}
 }
 
-func testMailMagazineToOneSetOpAdminUsingAuthor(t *testing.T) {
+func testMessageToOneSetOpAdminUsingAuthor(t *testing.T) {
 	var err error
 
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
 
-	var a MailMagazine
+	var a Message
 	var b, c Admin
 
 	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, &a, mailMagazineDBTypes, false, strmangle.SetComplement(mailMagazinePrimaryKeyColumns, mailMagazineColumnsWithoutDefault)...); err != nil {
+	if err = randomize.Struct(seed, &a, messageDBTypes, false, strmangle.SetComplement(messagePrimaryKeyColumns, messageColumnsWithoutDefault)...); err != nil {
 		t.Fatal(err)
 	}
 	if err = randomize.Struct(seed, &b, adminDBTypes, false, strmangle.SetComplement(adminPrimaryKeyColumns, adminColumnsWithoutDefault)...); err != nil {
@@ -593,7 +593,7 @@ func testMailMagazineToOneSetOpAdminUsingAuthor(t *testing.T) {
 			t.Error("relationship struct not set to correct value")
 		}
 
-		if x.R.AuthorMailMagazines[0] != &a {
+		if x.R.AuthorMessages[0] != &a {
 			t.Error("failed to append to foreign relationship struct")
 		}
 		if a.AuthorID != x.AdminID {
@@ -613,14 +613,14 @@ func testMailMagazineToOneSetOpAdminUsingAuthor(t *testing.T) {
 	}
 }
 
-func testMailMagazinesReload(t *testing.T) {
+func testMessagesReload(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &MailMagazine{}
-	if err = randomize.Struct(seed, o, mailMagazineDBTypes, true, mailMagazineColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize MailMagazine struct: %s", err)
+	o := &Message{}
+	if err = randomize.Struct(seed, o, messageDBTypes, true, messageColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Message struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -635,14 +635,14 @@ func testMailMagazinesReload(t *testing.T) {
 	}
 }
 
-func testMailMagazinesReloadAll(t *testing.T) {
+func testMessagesReloadAll(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &MailMagazine{}
-	if err = randomize.Struct(seed, o, mailMagazineDBTypes, true, mailMagazineColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize MailMagazine struct: %s", err)
+	o := &Message{}
+	if err = randomize.Struct(seed, o, messageDBTypes, true, messageColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Message struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -652,21 +652,21 @@ func testMailMagazinesReloadAll(t *testing.T) {
 		t.Error(err)
 	}
 
-	slice := MailMagazineSlice{o}
+	slice := MessageSlice{o}
 
 	if err = slice.ReloadAll(ctx, tx); err != nil {
 		t.Error(err)
 	}
 }
 
-func testMailMagazinesSelect(t *testing.T) {
+func testMessagesSelect(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &MailMagazine{}
-	if err = randomize.Struct(seed, o, mailMagazineDBTypes, true, mailMagazineColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize MailMagazine struct: %s", err)
+	o := &Message{}
+	if err = randomize.Struct(seed, o, messageDBTypes, true, messageColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Message struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -676,7 +676,7 @@ func testMailMagazinesSelect(t *testing.T) {
 		t.Error(err)
 	}
 
-	slice, err := MailMagazines().All(ctx, tx)
+	slice, err := Messages().All(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -687,25 +687,25 @@ func testMailMagazinesSelect(t *testing.T) {
 }
 
 var (
-	mailMagazineDBTypes = map[string]string{`ID`: `uuid`, `Title`: `character varying`, `Content`: `character varying`, `AuthorID`: `uuid`, `SentAt`: `timestamp with time zone`, `SentCount`: `integer`, `MailMagazineStatus`: `integer`, `CreateAt`: `timestamp with time zone`, `UpdateAt`: `timestamp with time zone`}
-	_                   = bytes.MinRead
+	messageDBTypes = map[string]string{`ID`: `uuid`, `Title`: `character varying`, `Content`: `character varying`, `AuthorID`: `uuid`, `DisplayDate`: `timestamp with time zone`, `CreateAt`: `timestamp with time zone`, `UpdateAt`: `timestamp with time zone`}
+	_              = bytes.MinRead
 )
 
-func testMailMagazinesUpdate(t *testing.T) {
+func testMessagesUpdate(t *testing.T) {
 	t.Parallel()
 
-	if 0 == len(mailMagazinePrimaryKeyColumns) {
+	if 0 == len(messagePrimaryKeyColumns) {
 		t.Skip("Skipping table with no primary key columns")
 	}
-	if len(mailMagazineAllColumns) == len(mailMagazinePrimaryKeyColumns) {
+	if len(messageAllColumns) == len(messagePrimaryKeyColumns) {
 		t.Skip("Skipping table with only primary key columns")
 	}
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &MailMagazine{}
-	if err = randomize.Struct(seed, o, mailMagazineDBTypes, true, mailMagazineColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize MailMagazine struct: %s", err)
+	o := &Message{}
+	if err = randomize.Struct(seed, o, messageDBTypes, true, messageColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Message struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -715,7 +715,7 @@ func testMailMagazinesUpdate(t *testing.T) {
 		t.Error(err)
 	}
 
-	count, err := MailMagazines().Count(ctx, tx)
+	count, err := Messages().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -724,8 +724,8 @@ func testMailMagazinesUpdate(t *testing.T) {
 		t.Error("want one record, got:", count)
 	}
 
-	if err = randomize.Struct(seed, o, mailMagazineDBTypes, true, mailMagazinePrimaryKeyColumns...); err != nil {
-		t.Errorf("Unable to randomize MailMagazine struct: %s", err)
+	if err = randomize.Struct(seed, o, messageDBTypes, true, messagePrimaryKeyColumns...); err != nil {
+		t.Errorf("Unable to randomize Message struct: %s", err)
 	}
 
 	if rowsAff, err := o.Update(ctx, tx, boil.Infer()); err != nil {
@@ -735,18 +735,18 @@ func testMailMagazinesUpdate(t *testing.T) {
 	}
 }
 
-func testMailMagazinesSliceUpdateAll(t *testing.T) {
+func testMessagesSliceUpdateAll(t *testing.T) {
 	t.Parallel()
 
-	if len(mailMagazineAllColumns) == len(mailMagazinePrimaryKeyColumns) {
+	if len(messageAllColumns) == len(messagePrimaryKeyColumns) {
 		t.Skip("Skipping table with only primary key columns")
 	}
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &MailMagazine{}
-	if err = randomize.Struct(seed, o, mailMagazineDBTypes, true, mailMagazineColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize MailMagazine struct: %s", err)
+	o := &Message{}
+	if err = randomize.Struct(seed, o, messageDBTypes, true, messageColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Message struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -756,7 +756,7 @@ func testMailMagazinesSliceUpdateAll(t *testing.T) {
 		t.Error(err)
 	}
 
-	count, err := MailMagazines().Count(ctx, tx)
+	count, err := Messages().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -765,18 +765,18 @@ func testMailMagazinesSliceUpdateAll(t *testing.T) {
 		t.Error("want one record, got:", count)
 	}
 
-	if err = randomize.Struct(seed, o, mailMagazineDBTypes, true, mailMagazinePrimaryKeyColumns...); err != nil {
-		t.Errorf("Unable to randomize MailMagazine struct: %s", err)
+	if err = randomize.Struct(seed, o, messageDBTypes, true, messagePrimaryKeyColumns...); err != nil {
+		t.Errorf("Unable to randomize Message struct: %s", err)
 	}
 
 	// Remove Primary keys and unique columns from what we plan to update
 	var fields []string
-	if strmangle.StringSliceMatch(mailMagazineAllColumns, mailMagazinePrimaryKeyColumns) {
-		fields = mailMagazineAllColumns
+	if strmangle.StringSliceMatch(messageAllColumns, messagePrimaryKeyColumns) {
+		fields = messageAllColumns
 	} else {
 		fields = strmangle.SetComplement(
-			mailMagazineAllColumns,
-			mailMagazinePrimaryKeyColumns,
+			messageAllColumns,
+			messagePrimaryKeyColumns,
 		)
 	}
 
@@ -794,7 +794,7 @@ func testMailMagazinesSliceUpdateAll(t *testing.T) {
 		}
 	}
 
-	slice := MailMagazineSlice{o}
+	slice := MessageSlice{o}
 	if rowsAff, err := slice.UpdateAll(ctx, tx, updateMap); err != nil {
 		t.Error(err)
 	} else if rowsAff != 1 {
@@ -802,29 +802,29 @@ func testMailMagazinesSliceUpdateAll(t *testing.T) {
 	}
 }
 
-func testMailMagazinesUpsert(t *testing.T) {
+func testMessagesUpsert(t *testing.T) {
 	t.Parallel()
 
-	if len(mailMagazineAllColumns) == len(mailMagazinePrimaryKeyColumns) {
+	if len(messageAllColumns) == len(messagePrimaryKeyColumns) {
 		t.Skip("Skipping table with only primary key columns")
 	}
 
 	seed := randomize.NewSeed()
 	var err error
 	// Attempt the INSERT side of an UPSERT
-	o := MailMagazine{}
-	if err = randomize.Struct(seed, &o, mailMagazineDBTypes, true); err != nil {
-		t.Errorf("Unable to randomize MailMagazine struct: %s", err)
+	o := Message{}
+	if err = randomize.Struct(seed, &o, messageDBTypes, true); err != nil {
+		t.Errorf("Unable to randomize Message struct: %s", err)
 	}
 
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
 	if err = o.Upsert(ctx, tx, false, nil, boil.Infer(), boil.Infer()); err != nil {
-		t.Errorf("Unable to upsert MailMagazine: %s", err)
+		t.Errorf("Unable to upsert Message: %s", err)
 	}
 
-	count, err := MailMagazines().Count(ctx, tx)
+	count, err := Messages().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -833,15 +833,15 @@ func testMailMagazinesUpsert(t *testing.T) {
 	}
 
 	// Attempt the UPDATE side of an UPSERT
-	if err = randomize.Struct(seed, &o, mailMagazineDBTypes, false, mailMagazinePrimaryKeyColumns...); err != nil {
-		t.Errorf("Unable to randomize MailMagazine struct: %s", err)
+	if err = randomize.Struct(seed, &o, messageDBTypes, false, messagePrimaryKeyColumns...); err != nil {
+		t.Errorf("Unable to randomize Message struct: %s", err)
 	}
 
 	if err = o.Upsert(ctx, tx, true, nil, boil.Infer(), boil.Infer()); err != nil {
-		t.Errorf("Unable to upsert MailMagazine: %s", err)
+		t.Errorf("Unable to upsert Message: %s", err)
 	}
 
-	count, err = MailMagazines().Count(ctx, tx)
+	count, err = Messages().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}

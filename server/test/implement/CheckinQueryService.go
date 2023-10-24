@@ -12,15 +12,14 @@ import (
 )
 
 // Mocked user and store entity for testing
-var user = &entity.User{ID: uuid.New()}
-var store = &entity.Store{ID: uuid.New()}
+var (
+	user  = &entity.User{ID: uuid.New()}
+	store = &entity.Store{ID: uuid.New()}
+)
 
 var limit = 10
-var pager = &types.PageQuery{
-	Limit:       &limit,
-	CurrentPage: nil,
-	PerPage:     nil,
-}
+
+var pager = types.NewPageQuery(nil, &limit)
 
 func TestCheckinQueryService(t *testing.T) {
 	_, mock, err := sqlmock.New()
@@ -52,5 +51,4 @@ func TestCheckinQueryService(t *testing.T) {
 			t.Error("Error occurred while trying to get all checkins")
 		}
 	})
-
 }

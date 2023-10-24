@@ -24,15 +24,15 @@ import (
 
 // MailMagazine is an object representing the database table.
 type MailMagazine struct {
-	ID                 string      `boil:"id" json:"id" toml:"id" yaml:"id"`
-	Title              string      `boil:"title" json:"title" toml:"title" yaml:"title"`
-	Content            string      `boil:"content" json:"content" toml:"content" yaml:"content"`
-	Author             null.String `boil:"author" json:"author,omitempty" toml:"author" yaml:"author,omitempty"`
-	SentAt             null.Time   `boil:"sent_at" json:"sent_at,omitempty" toml:"sent_at" yaml:"sent_at,omitempty"`
-	SentCount          null.Int    `boil:"sent_count" json:"sent_count,omitempty" toml:"sent_count" yaml:"sent_count,omitempty"`
-	MailMagazineStatus int         `boil:"mail_magazine_status" json:"mail_magazine_status" toml:"mail_magazine_status" yaml:"mail_magazine_status"`
-	CreateAt           time.Time   `boil:"create_at" json:"create_at" toml:"create_at" yaml:"create_at"`
-	UpdateAt           time.Time   `boil:"update_at" json:"update_at" toml:"update_at" yaml:"update_at"`
+	ID                 string    `boil:"id" json:"id" toml:"id" yaml:"id"`
+	Title              string    `boil:"title" json:"title" toml:"title" yaml:"title"`
+	Content            string    `boil:"content" json:"content" toml:"content" yaml:"content"`
+	AuthorID           string    `boil:"author_id" json:"author_id" toml:"author_id" yaml:"author_id"`
+	SentAt             null.Time `boil:"sent_at" json:"sent_at,omitempty" toml:"sent_at" yaml:"sent_at,omitempty"`
+	SentCount          null.Int  `boil:"sent_count" json:"sent_count,omitempty" toml:"sent_count" yaml:"sent_count,omitempty"`
+	MailMagazineStatus int       `boil:"mail_magazine_status" json:"mail_magazine_status" toml:"mail_magazine_status" yaml:"mail_magazine_status"`
+	CreateAt           time.Time `boil:"create_at" json:"create_at" toml:"create_at" yaml:"create_at"`
+	UpdateAt           time.Time `boil:"update_at" json:"update_at" toml:"update_at" yaml:"update_at"`
 
 	R *mailMagazineR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L mailMagazineL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -42,7 +42,7 @@ var MailMagazineColumns = struct {
 	ID                 string
 	Title              string
 	Content            string
-	Author             string
+	AuthorID           string
 	SentAt             string
 	SentCount          string
 	MailMagazineStatus string
@@ -52,7 +52,7 @@ var MailMagazineColumns = struct {
 	ID:                 "id",
 	Title:              "title",
 	Content:            "content",
-	Author:             "author",
+	AuthorID:           "author_id",
 	SentAt:             "sent_at",
 	SentCount:          "sent_count",
 	MailMagazineStatus: "mail_magazine_status",
@@ -64,7 +64,7 @@ var MailMagazineTableColumns = struct {
 	ID                 string
 	Title              string
 	Content            string
-	Author             string
+	AuthorID           string
 	SentAt             string
 	SentCount          string
 	MailMagazineStatus string
@@ -74,7 +74,7 @@ var MailMagazineTableColumns = struct {
 	ID:                 "mail_magazine.id",
 	Title:              "mail_magazine.title",
 	Content:            "mail_magazine.content",
-	Author:             "mail_magazine.author",
+	AuthorID:           "mail_magazine.author_id",
 	SentAt:             "mail_magazine.sent_at",
 	SentCount:          "mail_magazine.sent_count",
 	MailMagazineStatus: "mail_magazine.mail_magazine_status",
@@ -126,7 +126,7 @@ var MailMagazineWhere = struct {
 	ID                 whereHelperstring
 	Title              whereHelperstring
 	Content            whereHelperstring
-	Author             whereHelpernull_String
+	AuthorID           whereHelperstring
 	SentAt             whereHelpernull_Time
 	SentCount          whereHelpernull_Int
 	MailMagazineStatus whereHelperint
@@ -136,7 +136,7 @@ var MailMagazineWhere = struct {
 	ID:                 whereHelperstring{field: "\"mail_magazine\".\"id\""},
 	Title:              whereHelperstring{field: "\"mail_magazine\".\"title\""},
 	Content:            whereHelperstring{field: "\"mail_magazine\".\"content\""},
-	Author:             whereHelpernull_String{field: "\"mail_magazine\".\"author\""},
+	AuthorID:           whereHelperstring{field: "\"mail_magazine\".\"author_id\""},
 	SentAt:             whereHelpernull_Time{field: "\"mail_magazine\".\"sent_at\""},
 	SentCount:          whereHelpernull_Int{field: "\"mail_magazine\".\"sent_count\""},
 	MailMagazineStatus: whereHelperint{field: "\"mail_magazine\".\"mail_magazine_status\""},
@@ -146,14 +146,14 @@ var MailMagazineWhere = struct {
 
 // MailMagazineRels is where relationship names are stored.
 var MailMagazineRels = struct {
-	AuthorAdmin string
+	Author string
 }{
-	AuthorAdmin: "AuthorAdmin",
+	Author: "Author",
 }
 
 // mailMagazineR is where relationships are stored.
 type mailMagazineR struct {
-	AuthorAdmin *Admin `boil:"AuthorAdmin" json:"AuthorAdmin" toml:"AuthorAdmin" yaml:"AuthorAdmin"`
+	Author *Admin `boil:"Author" json:"Author" toml:"Author" yaml:"Author"`
 }
 
 // NewStruct creates a new relationship struct
@@ -161,20 +161,20 @@ func (*mailMagazineR) NewStruct() *mailMagazineR {
 	return &mailMagazineR{}
 }
 
-func (r *mailMagazineR) GetAuthorAdmin() *Admin {
+func (r *mailMagazineR) GetAuthor() *Admin {
 	if r == nil {
 		return nil
 	}
-	return r.AuthorAdmin
+	return r.Author
 }
 
 // mailMagazineL is where Load methods for each relationship are stored.
 type mailMagazineL struct{}
 
 var (
-	mailMagazineAllColumns            = []string{"id", "title", "content", "author", "sent_at", "sent_count", "mail_magazine_status", "create_at", "update_at"}
-	mailMagazineColumnsWithoutDefault = []string{"id", "title", "content", "mail_magazine_status"}
-	mailMagazineColumnsWithDefault    = []string{"author", "sent_at", "sent_count", "create_at", "update_at"}
+	mailMagazineAllColumns            = []string{"id", "title", "content", "author_id", "sent_at", "sent_count", "mail_magazine_status", "create_at", "update_at"}
+	mailMagazineColumnsWithoutDefault = []string{"id", "title", "content", "author_id", "mail_magazine_status"}
+	mailMagazineColumnsWithDefault    = []string{"sent_at", "sent_count", "create_at", "update_at"}
 	mailMagazinePrimaryKeyColumns     = []string{"id"}
 	mailMagazineGeneratedColumns      = []string{}
 )
@@ -457,10 +457,10 @@ func (q mailMagazineQuery) Exists(ctx context.Context, exec boil.ContextExecutor
 	return count > 0, nil
 }
 
-// AuthorAdmin pointed to by the foreign key.
-func (o *MailMagazine) AuthorAdmin(mods ...qm.QueryMod) adminQuery {
+// Author pointed to by the foreign key.
+func (o *MailMagazine) Author(mods ...qm.QueryMod) adminQuery {
 	queryMods := []qm.QueryMod{
-		qm.Where("\"admin_id\" = ?", o.Author),
+		qm.Where("\"admin_id\" = ?", o.AuthorID),
 	}
 
 	queryMods = append(queryMods, mods...)
@@ -468,9 +468,9 @@ func (o *MailMagazine) AuthorAdmin(mods ...qm.QueryMod) adminQuery {
 	return Admins(queryMods...)
 }
 
-// LoadAuthorAdmin allows an eager lookup of values, cached into the
+// LoadAuthor allows an eager lookup of values, cached into the
 // loaded structs of the objects. This is for an N-1 relationship.
-func (mailMagazineL) LoadAuthorAdmin(ctx context.Context, e boil.ContextExecutor, singular bool, maybeMailMagazine interface{}, mods queries.Applicator) error {
+func (mailMagazineL) LoadAuthor(ctx context.Context, e boil.ContextExecutor, singular bool, maybeMailMagazine interface{}, mods queries.Applicator) error {
 	var slice []*MailMagazine
 	var object *MailMagazine
 
@@ -501,9 +501,7 @@ func (mailMagazineL) LoadAuthorAdmin(ctx context.Context, e boil.ContextExecutor
 		if object.R == nil {
 			object.R = &mailMagazineR{}
 		}
-		if !queries.IsNil(object.Author) {
-			args = append(args, object.Author)
-		}
+		args = append(args, object.AuthorID)
 
 	} else {
 	Outer:
@@ -513,14 +511,12 @@ func (mailMagazineL) LoadAuthorAdmin(ctx context.Context, e boil.ContextExecutor
 			}
 
 			for _, a := range args {
-				if queries.Equal(a, obj.Author) {
+				if a == obj.AuthorID {
 					continue Outer
 				}
 			}
 
-			if !queries.IsNil(obj.Author) {
-				args = append(args, obj.Author)
-			}
+			args = append(args, obj.AuthorID)
 
 		}
 	}
@@ -568,7 +564,7 @@ func (mailMagazineL) LoadAuthorAdmin(ctx context.Context, e boil.ContextExecutor
 
 	if singular {
 		foreign := resultSlice[0]
-		object.R.AuthorAdmin = foreign
+		object.R.Author = foreign
 		if foreign.R == nil {
 			foreign.R = &adminR{}
 		}
@@ -578,8 +574,8 @@ func (mailMagazineL) LoadAuthorAdmin(ctx context.Context, e boil.ContextExecutor
 
 	for _, local := range slice {
 		for _, foreign := range resultSlice {
-			if queries.Equal(local.Author, foreign.AdminID) {
-				local.R.AuthorAdmin = foreign
+			if local.AuthorID == foreign.AdminID {
+				local.R.Author = foreign
 				if foreign.R == nil {
 					foreign.R = &adminR{}
 				}
@@ -592,10 +588,10 @@ func (mailMagazineL) LoadAuthorAdmin(ctx context.Context, e boil.ContextExecutor
 	return nil
 }
 
-// SetAuthorAdmin of the mailMagazine to the related item.
-// Sets o.R.AuthorAdmin to related.
+// SetAuthor of the mailMagazine to the related item.
+// Sets o.R.Author to related.
 // Adds o to related.R.AuthorMailMagazines.
-func (o *MailMagazine) SetAuthorAdmin(ctx context.Context, exec boil.ContextExecutor, insert bool, related *Admin) error {
+func (o *MailMagazine) SetAuthor(ctx context.Context, exec boil.ContextExecutor, insert bool, related *Admin) error {
 	var err error
 	if insert {
 		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
@@ -605,7 +601,7 @@ func (o *MailMagazine) SetAuthorAdmin(ctx context.Context, exec boil.ContextExec
 
 	updateQuery := fmt.Sprintf(
 		"UPDATE \"mail_magazine\" SET %s WHERE %s",
-		strmangle.SetParamNames("\"", "\"", 1, []string{"author"}),
+		strmangle.SetParamNames("\"", "\"", 1, []string{"author_id"}),
 		strmangle.WhereClause("\"", "\"", 2, mailMagazinePrimaryKeyColumns),
 	)
 	values := []interface{}{related.AdminID, o.ID}
@@ -619,13 +615,13 @@ func (o *MailMagazine) SetAuthorAdmin(ctx context.Context, exec boil.ContextExec
 		return errors.Wrap(err, "failed to update local table")
 	}
 
-	queries.Assign(&o.Author, related.AdminID)
+	o.AuthorID = related.AdminID
 	if o.R == nil {
 		o.R = &mailMagazineR{
-			AuthorAdmin: related,
+			Author: related,
 		}
 	} else {
-		o.R.AuthorAdmin = related
+		o.R.Author = related
 	}
 
 	if related.R == nil {
@@ -636,39 +632,6 @@ func (o *MailMagazine) SetAuthorAdmin(ctx context.Context, exec boil.ContextExec
 		related.R.AuthorMailMagazines = append(related.R.AuthorMailMagazines, o)
 	}
 
-	return nil
-}
-
-// RemoveAuthorAdmin relationship.
-// Sets o.R.AuthorAdmin to nil.
-// Removes o from all passed in related items' relationships struct.
-func (o *MailMagazine) RemoveAuthorAdmin(ctx context.Context, exec boil.ContextExecutor, related *Admin) error {
-	var err error
-
-	queries.SetScanner(&o.Author, nil)
-	if _, err = o.Update(ctx, exec, boil.Whitelist("author")); err != nil {
-		return errors.Wrap(err, "failed to update local table")
-	}
-
-	if o.R != nil {
-		o.R.AuthorAdmin = nil
-	}
-	if related == nil || related.R == nil {
-		return nil
-	}
-
-	for i, ri := range related.R.AuthorMailMagazines {
-		if queries.Equal(o.Author, ri.Author) {
-			continue
-		}
-
-		ln := len(related.R.AuthorMailMagazines)
-		if ln > 1 && i < ln-1 {
-			related.R.AuthorMailMagazines[i] = related.R.AuthorMailMagazines[ln-1]
-		}
-		related.R.AuthorMailMagazines = related.R.AuthorMailMagazines[:ln-1]
-		break
-	}
 	return nil
 }
 

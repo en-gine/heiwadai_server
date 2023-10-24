@@ -9,6 +9,7 @@ import (
 	queryservice "server/core/infra/queryService"
 	"server/infrastructure/booking/avail"
 	"server/infrastructure/booking/util"
+	"server/infrastructure/logger"
 
 	uuid "github.com/google/uuid"
 )
@@ -68,11 +69,13 @@ func (p *PlanQuery) AvailRSToPlans(res *avail.OTAHotelAvailRS) (*[]entity.Plan, 
 	var plans []entity.Plan
 
 	if res.RoomStays == nil {
+		logger.Errorf("AvailRSToPlans Return Error: %v", res)
 		return nil, errors.New("RoomStays is nil")
 	}
 	for _, roomStay := range res.RoomStays.RoomStay {
 		hotelCode := roomStay.RPH
 		if hotelCode == nil {
+			logger.Errorf("AvailRSToPlans Return Error: %v", res)
 			return nil, errors.New("hotelCode is nil")
 		}
 		stayable, err := p.storeQuery.GetStayableByBookingID(*hotelCode)

@@ -10,11 +10,10 @@ type MailMagazine struct {
 	ID                 uuid.UUID
 	Title              string
 	Content            string
-	Author             Admin
+	AuthorID           uuid.UUID
 	MailMagazineStatus MailMagazineStatus
-	TargetCount        *int
 	SentCount          *int
-	SentAt             time.Time
+	SentAt             *time.Time
 	CreateAt           time.Time
 	UpdateAt           time.Time
 }
@@ -43,12 +42,13 @@ func (s MailMagazineStatus) String() string {
 func CreateDraftMailMagazine(
 	Title string,
 	Content string,
-	Author Admin,
+	AuthorID uuid.UUID,
 ) *MailMagazine {
 	return &MailMagazine{
 		ID:                 uuid.New(),
 		Title:              Title,
 		Content:            Content,
+		AuthorID:           AuthorID,
 		MailMagazineStatus: MailMagazineDraft,
 		CreateAt:           time.Now(),
 	}
@@ -58,12 +58,13 @@ func UpdateMailMagazine(
 	ID uuid.UUID,
 	Title string,
 	Content string,
-	Author Admin,
+	AuthorID uuid.UUID,
 ) *MailMagazine {
 	return &MailMagazine{
 		ID:                 ID,
 		Title:              Title,
 		Content:            Content,
+		AuthorID:           AuthorID,
 		MailMagazineStatus: MailMagazineSaved,
 		UpdateAt:           time.Now(),
 	}
@@ -73,14 +74,16 @@ func SentMailMagazine(
 	ID uuid.UUID,
 	Title string,
 	Content string,
-	Author Admin,
+	AuthorID uuid.UUID,
 ) *MailMagazine {
+	sentAt := time.Now()
 	return &MailMagazine{
 		ID:                 ID,
 		Title:              Title,
 		Content:            Content,
+		AuthorID:           AuthorID,
 		MailMagazineStatus: MailMagazineSent,
-		SentAt:             time.Now(),
+		SentAt:             &sentAt,
 	}
 }
 
@@ -88,9 +91,9 @@ func RegenMailMagazine(
 	ID uuid.UUID,
 	Title string,
 	Content string,
-	Author Admin,
+	AuthorID uuid.UUID,
 	MailMagazineStatus MailMagazineStatus,
-	SentAt time.Time,
+	SentAt *time.Time,
 	CreateAt time.Time,
 	UpdateAt time.Time,
 ) *MailMagazine {
@@ -98,7 +101,7 @@ func RegenMailMagazine(
 		ID:                 uuid.New(),
 		Title:              Title,
 		Content:            Content,
-		Author:             Author,
+		AuthorID:           AuthorID,
 		MailMagazineStatus: MailMagazineStatus,
 		SentAt:             SentAt,
 		CreateAt:           CreateAt,

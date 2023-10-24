@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+
 	"server/core/entity"
 	queryservice "server/core/infra/queryService"
 	"server/core/infra/queryService/types"
@@ -36,6 +37,7 @@ func (pq *UserQueryService) GetByID(id uuid.UUID) (*entity.User, error) {
 	}
 	return UserModelToEntity(user, user.R.User.Email), nil
 }
+
 func (pq *UserQueryService) GetByMail(mail string) (*entity.User, error) {
 	usermanager, err := models.UserManagers(models.UserManagerWhere.Email.EQ(mail)).One(context.Background(), pq.db)
 	if err == sql.ErrNoRows {
@@ -68,7 +70,6 @@ func (pq *UserQueryService) GetUserByPrefecture(prefectures []*entity.Prefecture
 		entities = append(entities, entity)
 	}
 	return entities, nil
-
 }
 
 func (pq *UserQueryService) GetAll(query *types.UserQuery, pager *types.PageQuery) ([]*entity.User, error) {
@@ -93,8 +94,7 @@ func (pq *UserQueryService) GetAll(query *types.UserQuery, pager *types.PageQuer
 		prefectureQuery = models.UserDatumWhere.Prefecture.EQ(query.Prefecture.ToInt())
 	}
 
-	userdata, err := models.UserData(firstNameQuery, lastNameQuery, firstNameKanaQuery, lastNameKanaQuery, prefectureQuery, qm.Limit(pager.Offset()), qm.Offset(pager.Offset())).All(context.Background(), pq.db)
-
+	userdata, err := models.UserData(firstNameQuery, lastNameQuery, firstNameKanaQuery, lastNameKanaQuery, prefectureQuery, qm.Limit(pager.Limit()), qm.Offset(pager.Offset())).All(context.Background(), pq.db)
 	if err != nil {
 		return nil, err
 	}
