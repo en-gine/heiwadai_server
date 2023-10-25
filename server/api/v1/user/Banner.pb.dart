@@ -10,7 +10,7 @@ import 'dart:core' as $core;
 
 import 'package:protobuf/protobuf.dart' as $pb;
 
-import '../../google/protobuf/empty.pb.dart' as $1;
+import '../../google/protobuf/empty.pb.dart' as $2;
 
 class Banner extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Banner', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'server.user'), createEmptyInstance: create)
@@ -118,7 +118,7 @@ class BannerControllerApi {
   $pb.RpcClient _client;
   BannerControllerApi(this._client);
 
-  $async.Future<BannerResponse> getBanner($pb.ClientContext? ctx, $1.Empty request) {
+  $async.Future<BannerResponse> getBanner($pb.ClientContext? ctx, $2.Empty request) {
     var emptyResponse = BannerResponse();
     return _client.invoke<BannerResponse>(ctx, 'BannerController', 'GetBanner', request, emptyResponse);
   }

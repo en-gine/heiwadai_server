@@ -10,35 +10,35 @@ import 'dart:async' as $async;
 import 'package:protobuf/protobuf.dart' as $pb;
 
 import 'dart:core' as $core;
-import 'Store.pb.dart' as $13;
-import '../shared/Store.pb.dart' as $5;
-import '../../google/protobuf/empty.pb.dart' as $1;
+import 'Store.pb.dart' as $14;
+import '../shared/Store.pb.dart' as $1;
+import '../../google/protobuf/empty.pb.dart' as $2;
 import 'Store.pbjson.dart';
 
 export 'Store.pb.dart';
 
 abstract class StoreControllerServiceBase extends $pb.GeneratedService {
-  $async.Future<$5.Store> getByID($pb.ServerContext ctx, $13.SoreIDRequest request);
-  $async.Future<$5.Stores> getAll($pb.ServerContext ctx, $1.Empty request);
-  $async.Future<$5.StayableStores> getStayables($pb.ServerContext ctx, $1.Empty request);
-  $async.Future<$5.StayableStore> getStayableByID($pb.ServerContext ctx, $13.SoreIDRequest request);
+  $async.Future<$1.Store> getByID($pb.ServerContext ctx, $14.SoreIDRequest request);
+  $async.Future<$1.Stores> getAll($pb.ServerContext ctx, $2.Empty request);
+  $async.Future<$1.StayableStores> getStayables($pb.ServerContext ctx, $2.Empty request);
+  $async.Future<$1.StayableStore> getStayableByID($pb.ServerContext ctx, $14.SoreIDRequest request);
 
   $pb.GeneratedMessage createRequest($core.String method) {
     switch (method) {
-      case 'GetByID': return $13.SoreIDRequest();
-      case 'GetAll': return $1.Empty();
-      case 'GetStayables': return $1.Empty();
-      case 'GetStayableByID': return $13.SoreIDRequest();
+      case 'GetByID': return $14.SoreIDRequest();
+      case 'GetAll': return $2.Empty();
+      case 'GetStayables': return $2.Empty();
+      case 'GetStayableByID': return $14.SoreIDRequest();
       default: throw $core.ArgumentError('Unknown method: $method');
     }
   }
 
   $async.Future<$pb.GeneratedMessage> handleCall($pb.ServerContext ctx, $core.String method, $pb.GeneratedMessage request) {
     switch (method) {
-      case 'GetByID': return this.getByID(ctx, request as $13.SoreIDRequest);
-      case 'GetAll': return this.getAll(ctx, request as $1.Empty);
-      case 'GetStayables': return this.getStayables(ctx, request as $1.Empty);
-      case 'GetStayableByID': return this.getStayableByID(ctx, request as $13.SoreIDRequest);
+      case 'GetByID': return this.getByID(ctx, request as $14.SoreIDRequest);
+      case 'GetAll': return this.getAll(ctx, request as $2.Empty);
+      case 'GetStayables': return this.getStayables(ctx, request as $2.Empty);
+      case 'GetStayableByID': return this.getStayableByID(ctx, request as $14.SoreIDRequest);
       default: throw $core.ArgumentError('Unknown method: $method');
     }
   }

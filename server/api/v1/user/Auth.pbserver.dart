@@ -11,18 +11,18 @@ import 'package:protobuf/protobuf.dart' as $pb;
 
 import 'dart:core' as $core;
 import 'Auth.pb.dart' as $6;
-import '../../google/protobuf/empty.pb.dart' as $1;
+import '../../google/protobuf/empty.pb.dart' as $2;
 import 'Auth.pbjson.dart';
 
 export 'Auth.pb.dart';
 
 abstract class AuthControllerServiceBase extends $pb.GeneratedService {
-  $async.Future<$1.Empty> register($pb.ServerContext ctx, $6.UserRegisterRequest request);
-  $async.Future<$1.Empty> signUp($pb.ServerContext ctx, $6.UserAuthRequest request);
+  $async.Future<$2.Empty> register($pb.ServerContext ctx, $6.UserRegisterRequest request);
+  $async.Future<$2.Empty> signUp($pb.ServerContext ctx, $6.UserAuthRequest request);
   $async.Future<$6.UserAuthResponse> signIn($pb.ServerContext ctx, $6.UserAuthRequest request);
-  $async.Future<$1.Empty> resetPasswordMail($pb.ServerContext ctx, $6.ResetPasswordRequest request);
-  $async.Future<$1.Empty> updatePassword($pb.ServerContext ctx, $6.UpdatePasswordRequest request);
-  $async.Future<$1.Empty> updateEmail($pb.ServerContext ctx, $6.UpdateEmailRequest request);
+  $async.Future<$2.Empty> resetPasswordMail($pb.ServerContext ctx, $6.ResetPasswordRequest request);
+  $async.Future<$2.Empty> updatePassword($pb.ServerContext ctx, $6.UpdatePasswordRequest request);
+  $async.Future<$2.Empty> updateEmail($pb.ServerContext ctx, $6.UpdateEmailRequest request);
 
   $pb.GeneratedMessage createRequest($core.String method) {
     switch (method) {

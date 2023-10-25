@@ -10,13 +10,13 @@ import 'dart:core' as $core;
 
 import 'package:protobuf/protobuf.dart' as $pb;
 
-import '../../google/protobuf/timestamp.pb.dart' as $4;
+import '../../google/protobuf/timestamp.pb.dart' as $5;
 import '../shared/Coupon.pb.dart' as $8;
-import '../../google/protobuf/empty.pb.dart' as $1;
+import '../../google/protobuf/empty.pb.dart' as $2;
 
 class CheckinRequest extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'CheckinRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'server.user'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'qrHash')
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'qrHash', protoName: 'qrHash')
     ..hasRequiredFields = false
   ;
 
@@ -67,7 +67,7 @@ class CheckinStamp extends $pb.GeneratedMessage {
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'StoreID', protoName: 'StoreID')
     ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'StoreName', protoName: 'StoreName')
     ..aOS(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'StoreStampImage', protoName: 'StoreStampImage')
-    ..aOM<$4.Timestamp>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'CheckInAt', protoName: 'CheckInAt', subBuilder: $4.Timestamp.create)
+    ..aOM<$5.Timestamp>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'CheckInAt', protoName: 'CheckInAt', subBuilder: $5.Timestamp.create)
     ..hasRequiredFields = false
   ;
 
@@ -77,7 +77,7 @@ class CheckinStamp extends $pb.GeneratedMessage {
     $core.String? storeID,
     $core.String? storeName,
     $core.String? storeStampImage,
-    $4.Timestamp? checkInAt,
+    $5.Timestamp? checkInAt,
   }) {
     final _result = create();
     if (iD != null) {
@@ -155,15 +155,15 @@ class CheckinStamp extends $pb.GeneratedMessage {
   void clearStoreStampImage() => clearField(4);
 
   @$pb.TagNumber(5)
-  $4.Timestamp get checkInAt => $_getN(4);
+  $5.Timestamp get checkInAt => $_getN(4);
   @$pb.TagNumber(5)
-  set checkInAt($4.Timestamp v) { setField(5, v); }
+  set checkInAt($5.Timestamp v) { setField(5, v); }
   @$pb.TagNumber(5)
   $core.bool hasCheckInAt() => $_has(4);
   @$pb.TagNumber(5)
   void clearCheckInAt() => clearField(5);
   @$pb.TagNumber(5)
-  $4.Timestamp ensureCheckInAt() => $_ensure(4);
+  $5.Timestamp ensureCheckInAt() => $_ensure(4);
 }
 
 class StampCardResponse extends $pb.GeneratedMessage {
@@ -260,7 +260,7 @@ class CheckinControllerApi {
   $pb.RpcClient _client;
   CheckinControllerApi(this._client);
 
-  $async.Future<StampCardResponse> getStampCard($pb.ClientContext? ctx, $1.Empty request) {
+  $async.Future<StampCardResponse> getStampCard($pb.ClientContext? ctx, $2.Empty request) {
     var emptyResponse = StampCardResponse();
     return _client.invoke<StampCardResponse>(ctx, 'CheckinController', 'GetStampCard', request, emptyResponse);
   }

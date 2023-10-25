@@ -10,7 +10,7 @@ import 'dart:core' as $core;
 
 import 'package:protobuf/protobuf.dart' as $pb;
 
-import '../../google/protobuf/empty.pb.dart' as $1;
+import '../../google/protobuf/empty.pb.dart' as $2;
 
 class Reservation extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Reservation', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'server.user'), createEmptyInstance: create)
@@ -74,7 +74,7 @@ class ReservationControllerApi {
   $pb.RpcClient _client;
   ReservationControllerApi(this._client);
 
-  $async.Future<ReservationResponse> getReservation($pb.ClientContext? ctx, $1.Empty request) {
+  $async.Future<ReservationResponse> getReservation($pb.ClientContext? ctx, $2.Empty request) {
     var emptyResponse = ReservationResponse();
     return _client.invoke<ReservationResponse>(ctx, 'ReservationController', 'GetReservation', request, emptyResponse);
   }

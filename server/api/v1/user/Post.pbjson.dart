@@ -8,7 +8,8 @@
 import 'dart:core' as $core;
 import 'dart:convert' as $convert;
 import 'dart:typed_data' as $typed_data;
-import '../../google/protobuf/empty.pbjson.dart' as $1;
+import '../../google/protobuf/timestamp.pbjson.dart' as $5;
+import '../../google/protobuf/empty.pbjson.dart' as $2;
 
 @$core.Deprecated('Use postRequestDescriptor instead')
 const PostRequest$json = const {
@@ -38,12 +39,12 @@ const PostResponse$json = const {
     const {'1': 'Title', '3': 2, '4': 1, '5': 9, '10': 'Title'},
     const {'1': 'Content', '3': 3, '4': 1, '5': 9, '10': 'Content'},
     const {'1': 'Author', '3': 4, '4': 1, '5': 9, '10': 'Author'},
-    const {'1': 'PostDate', '3': 5, '4': 1, '5': 9, '10': 'PostDate'},
+    const {'1': 'PostDate', '3': 5, '4': 1, '5': 11, '6': '.google.protobuf.Timestamp', '10': 'PostDate'},
   ],
 };
 
 /// Descriptor for `PostResponse`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List postResponseDescriptor = $convert.base64Decode('CgxQb3N0UmVzcG9uc2USDgoCSUQYASABKA1SAklEEhQKBVRpdGxlGAIgASgJUgVUaXRsZRIYCgdDb250ZW50GAMgASgJUgdDb250ZW50EhYKBkF1dGhvchgEIAEoCVIGQXV0aG9yEhoKCFBvc3REYXRlGAUgASgJUghQb3N0RGF0ZQ==');
+final $typed_data.Uint8List postResponseDescriptor = $convert.base64Decode('CgxQb3N0UmVzcG9uc2USDgoCSUQYASABKA1SAklEEhQKBVRpdGxlGAIgASgJUgVUaXRsZRIYCgdDb250ZW50GAMgASgJUgdDb250ZW50EhYKBkF1dGhvchgEIAEoCVIGQXV0aG9yEjYKCFBvc3REYXRlGAUgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcFIIUG9zdERhdGU=');
 const $core.Map<$core.String, $core.dynamic> PostControllerServiceBase$json = const {
   '1': 'PostController',
   '2': const [
@@ -56,7 +57,8 @@ const $core.Map<$core.String, $core.dynamic> PostControllerServiceBase$json = co
 const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>> PostControllerServiceBase$messageJson = const {
   '.server.user.PostRequest': PostRequest$json,
   '.server.user.PostResponse': PostResponse$json,
-  '.google.protobuf.Empty': $1.Empty$json,
+  '.google.protobuf.Timestamp': $5.Timestamp$json,
+  '.google.protobuf.Empty': $2.Empty$json,
   '.server.user.PostsResponse': PostsResponse$json,
 };
 

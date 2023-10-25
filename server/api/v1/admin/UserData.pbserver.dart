@@ -10,28 +10,28 @@ import 'dart:async' as $async;
 import 'package:protobuf/protobuf.dart' as $pb;
 
 import 'dart:core' as $core;
-import 'UserData.pb.dart' as $3;
-import '../../google/protobuf/empty.pb.dart' as $1;
+import 'UserData.pb.dart' as $4;
+import '../../google/protobuf/empty.pb.dart' as $2;
 import 'UserData.pbjson.dart';
 
 export 'UserData.pb.dart';
 
 abstract class UserDataControllerServiceBase extends $pb.GeneratedService {
-  $async.Future<$1.Empty> update($pb.ServerContext ctx, $3.UserUpdateDataRequest request);
-  $async.Future<$1.Empty> delete($pb.ServerContext ctx, $3.UserDeleteRequest request);
+  $async.Future<$2.Empty> update($pb.ServerContext ctx, $4.UserUpdateDataRequest request);
+  $async.Future<$2.Empty> delete($pb.ServerContext ctx, $4.UserDeleteRequest request);
 
   $pb.GeneratedMessage createRequest($core.String method) {
     switch (method) {
-      case 'Update': return $3.UserUpdateDataRequest();
-      case 'Delete': return $3.UserDeleteRequest();
+      case 'Update': return $4.UserUpdateDataRequest();
+      case 'Delete': return $4.UserDeleteRequest();
       default: throw $core.ArgumentError('Unknown method: $method');
     }
   }
 
   $async.Future<$pb.GeneratedMessage> handleCall($pb.ServerContext ctx, $core.String method, $pb.GeneratedMessage request) {
     switch (method) {
-      case 'Update': return this.update(ctx, request as $3.UserUpdateDataRequest);
-      case 'Delete': return this.delete(ctx, request as $3.UserDeleteRequest);
+      case 'Update': return this.update(ctx, request as $4.UserUpdateDataRequest);
+      case 'Delete': return this.delete(ctx, request as $4.UserDeleteRequest);
       default: throw $core.ArgumentError('Unknown method: $method');
     }
   }

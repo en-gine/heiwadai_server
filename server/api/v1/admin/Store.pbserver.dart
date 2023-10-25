@@ -10,28 +10,35 @@ import 'dart:async' as $async;
 import 'package:protobuf/protobuf.dart' as $pb;
 
 import 'dart:core' as $core;
-import 'Store.pb.dart' as $2;
-import '../../google/protobuf/empty.pb.dart' as $1;
+import 'Store.pb.dart' as $3;
+import '../shared/Store.pb.dart' as $1;
+import '../../google/protobuf/empty.pb.dart' as $2;
 import 'Store.pbjson.dart';
 
 export 'Store.pb.dart';
 
 abstract class StoreControllerServiceBase extends $pb.GeneratedService {
-  $async.Future<$1.Empty> register($pb.ServerContext ctx, $2.StoreRegisterRequest request);
-  $async.Future<$1.Empty> update($pb.ServerContext ctx, $2.StoreUpdateRequest request);
+  $async.Future<$1.Store> getByID($pb.ServerContext ctx, $3.SoreIDRequest request);
+  $async.Future<$1.Stores> getAll($pb.ServerContext ctx, $2.Empty request);
+  $async.Future<$2.Empty> register($pb.ServerContext ctx, $3.StoreRegisterRequest request);
+  $async.Future<$2.Empty> update($pb.ServerContext ctx, $3.StoreUpdateRequest request);
 
   $pb.GeneratedMessage createRequest($core.String method) {
     switch (method) {
-      case 'Register': return $2.StoreRegisterRequest();
-      case 'Update': return $2.StoreUpdateRequest();
+      case 'GetByID': return $3.SoreIDRequest();
+      case 'GetAll': return $2.Empty();
+      case 'Register': return $3.StoreRegisterRequest();
+      case 'Update': return $3.StoreUpdateRequest();
       default: throw $core.ArgumentError('Unknown method: $method');
     }
   }
 
   $async.Future<$pb.GeneratedMessage> handleCall($pb.ServerContext ctx, $core.String method, $pb.GeneratedMessage request) {
     switch (method) {
-      case 'Register': return this.register(ctx, request as $2.StoreRegisterRequest);
-      case 'Update': return this.update(ctx, request as $2.StoreUpdateRequest);
+      case 'GetByID': return this.getByID(ctx, request as $3.SoreIDRequest);
+      case 'GetAll': return this.getAll(ctx, request as $2.Empty);
+      case 'Register': return this.register(ctx, request as $3.StoreRegisterRequest);
+      case 'Update': return this.update(ctx, request as $3.StoreUpdateRequest);
       default: throw $core.ArgumentError('Unknown method: $method');
     }
   }

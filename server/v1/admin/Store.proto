@@ -44,7 +44,9 @@ message StayableInfo {
   string RestAPIURL = 5;
   string BookingSystemID = 6;
 }
-
+message SoreIDRequest {
+  string ID = 1;
+}
 service StoreController {
   rpc GetByID(SoreIDRequest) returns (server.shared.Store) {}
   rpc GetAll(google.protobuf.Empty) returns (server.shared.Stores) {}

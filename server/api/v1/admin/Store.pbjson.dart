@@ -8,7 +8,8 @@
 import 'dart:core' as $core;
 import 'dart:convert' as $convert;
 import 'dart:typed_data' as $typed_data;
-import '../../google/protobuf/empty.pbjson.dart' as $1;
+import '../shared/Store.pbjson.dart' as $1;
+import '../../google/protobuf/empty.pbjson.dart' as $2;
 
 @$core.Deprecated('Use storeRegisterRequestDescriptor instead')
 const StoreRegisterRequest$json = const {
@@ -68,9 +69,21 @@ const StayableInfo$json = const {
 
 /// Descriptor for `StayableInfo`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List stayableInfoDescriptor = $convert.base64Decode('CgxTdGF5YWJsZUluZm8SGAoHUGFya2luZxgBIAEoCVIHUGFya2luZxIaCghMYXRpdHVkZRgCIAEoAVIITGF0aXR1ZGUSHAoJTG9uZ2l0dWRlGAMgASgBUglMb25naXR1ZGUSHgoKQWNjZXNzSW5mbxgEIAEoCVIKQWNjZXNzSW5mbxIeCgpSZXN0QVBJVVJMGAUgASgJUgpSZXN0QVBJVVJMEigKD0Jvb2tpbmdTeXN0ZW1JRBgGIAEoCVIPQm9va2luZ1N5c3RlbUlE');
+@$core.Deprecated('Use soreIDRequestDescriptor instead')
+const SoreIDRequest$json = const {
+  '1': 'SoreIDRequest',
+  '2': const [
+    const {'1': 'ID', '3': 1, '4': 1, '5': 9, '10': 'ID'},
+  ],
+};
+
+/// Descriptor for `SoreIDRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List soreIDRequestDescriptor = $convert.base64Decode('Cg1Tb3JlSURSZXF1ZXN0Eg4KAklEGAEgASgJUgJJRA==');
 const $core.Map<$core.String, $core.dynamic> StoreControllerServiceBase$json = const {
   '1': 'StoreController',
   '2': const [
+    const {'1': 'GetByID', '2': '.server.admin.SoreIDRequest', '3': '.server.shared.Store', '4': const {}},
+    const {'1': 'GetAll', '2': '.google.protobuf.Empty', '3': '.server.shared.Stores', '4': const {}},
     const {'1': 'Register', '2': '.server.admin.StoreRegisterRequest', '3': '.google.protobuf.Empty', '4': const {}},
     const {'1': 'Update', '2': '.server.admin.StoreUpdateRequest', '3': '.google.protobuf.Empty', '4': const {}},
   ],
@@ -78,11 +91,14 @@ const $core.Map<$core.String, $core.dynamic> StoreControllerServiceBase$json = c
 
 @$core.Deprecated('Use storeControllerServiceDescriptor instead')
 const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>> StoreControllerServiceBase$messageJson = const {
+  '.server.admin.SoreIDRequest': SoreIDRequest$json,
+  '.server.shared.Store': $1.Store$json,
+  '.google.protobuf.Empty': $2.Empty$json,
+  '.server.shared.Stores': $1.Stores$json,
   '.server.admin.StoreRegisterRequest': StoreRegisterRequest$json,
   '.server.admin.StayableInfo': StayableInfo$json,
-  '.google.protobuf.Empty': $1.Empty$json,
   '.server.admin.StoreUpdateRequest': StoreUpdateRequest$json,
 };
 
 /// Descriptor for `StoreController`. Decode as a `google.protobuf.ServiceDescriptorProto`.
-final $typed_data.Uint8List storeControllerServiceDescriptor = $convert.base64Decode('Cg9TdG9yZUNvbnRyb2xsZXISSAoIUmVnaXN0ZXISIi5zZXJ2ZXIuYWRtaW4uU3RvcmVSZWdpc3RlclJlcXVlc3QaFi5nb29nbGUucHJvdG9idWYuRW1wdHkiABJECgZVcGRhdGUSIC5zZXJ2ZXIuYWRtaW4uU3RvcmVVcGRhdGVSZXF1ZXN0GhYuZ29vZ2xlLnByb3RvYnVmLkVtcHR5IgA=');
+final $typed_data.Uint8List storeControllerServiceDescriptor = $convert.base64Decode('Cg9TdG9yZUNvbnRyb2xsZXISPgoHR2V0QnlJRBIbLnNlcnZlci5hZG1pbi5Tb3JlSURSZXF1ZXN0GhQuc2VydmVyLnNoYXJlZC5TdG9yZSIAEjkKBkdldEFsbBIWLmdvb2dsZS5wcm90b2J1Zi5FbXB0eRoVLnNlcnZlci5zaGFyZWQuU3RvcmVzIgASSAoIUmVnaXN0ZXISIi5zZXJ2ZXIuYWRtaW4uU3RvcmVSZWdpc3RlclJlcXVlc3QaFi5nb29nbGUucHJvdG9idWYuRW1wdHkiABJECgZVcGRhdGUSIC5zZXJ2ZXIuYWRtaW4uU3RvcmVVcGRhdGVSZXF1ZXN0GhYuZ29vZ2xlLnByb3RvYnVmLkVtcHR5IgA=');

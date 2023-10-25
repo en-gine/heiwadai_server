@@ -10,7 +10,8 @@ import 'dart:core' as $core;
 
 import 'package:protobuf/protobuf.dart' as $pb;
 
-import '../../google/protobuf/empty.pb.dart' as $1;
+import '../shared/Store.pb.dart' as $1;
+import '../../google/protobuf/empty.pb.dart' as $2;
 
 class StoreRegisterRequest extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'StoreRegisterRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'server.admin'), createEmptyInstance: create)
@@ -549,17 +550,72 @@ class StayableInfo extends $pb.GeneratedMessage {
   void clearBookingSystemID() => clearField(6);
 }
 
+class SoreIDRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'SoreIDRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'server.admin'), createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'ID', protoName: 'ID')
+    ..hasRequiredFields = false
+  ;
+
+  SoreIDRequest._() : super();
+  factory SoreIDRequest({
+    $core.String? iD,
+  }) {
+    final _result = create();
+    if (iD != null) {
+      _result.iD = iD;
+    }
+    return _result;
+  }
+  factory SoreIDRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory SoreIDRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  SoreIDRequest clone() => SoreIDRequest()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  SoreIDRequest copyWith(void Function(SoreIDRequest) updates) => super.copyWith((message) => updates(message as SoreIDRequest)) as SoreIDRequest; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static SoreIDRequest create() => SoreIDRequest._();
+  SoreIDRequest createEmptyInstance() => create();
+  static $pb.PbList<SoreIDRequest> createRepeated() => $pb.PbList<SoreIDRequest>();
+  @$core.pragma('dart2js:noInline')
+  static SoreIDRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<SoreIDRequest>(create);
+  static SoreIDRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get iD => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set iD($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasID() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearID() => clearField(1);
+}
+
 class StoreControllerApi {
   $pb.RpcClient _client;
   StoreControllerApi(this._client);
 
-  $async.Future<$1.Empty> register($pb.ClientContext? ctx, StoreRegisterRequest request) {
-    var emptyResponse = $1.Empty();
-    return _client.invoke<$1.Empty>(ctx, 'StoreController', 'Register', request, emptyResponse);
+  $async.Future<$1.Store> getByID($pb.ClientContext? ctx, SoreIDRequest request) {
+    var emptyResponse = $1.Store();
+    return _client.invoke<$1.Store>(ctx, 'StoreController', 'GetByID', request, emptyResponse);
   }
-  $async.Future<$1.Empty> update($pb.ClientContext? ctx, StoreUpdateRequest request) {
-    var emptyResponse = $1.Empty();
-    return _client.invoke<$1.Empty>(ctx, 'StoreController', 'Update', request, emptyResponse);
+  $async.Future<$1.Stores> getAll($pb.ClientContext? ctx, $2.Empty request) {
+    var emptyResponse = $1.Stores();
+    return _client.invoke<$1.Stores>(ctx, 'StoreController', 'GetAll', request, emptyResponse);
+  }
+  $async.Future<$2.Empty> register($pb.ClientContext? ctx, StoreRegisterRequest request) {
+    var emptyResponse = $2.Empty();
+    return _client.invoke<$2.Empty>(ctx, 'StoreController', 'Register', request, emptyResponse);
+  }
+  $async.Future<$2.Empty> update($pb.ClientContext? ctx, StoreUpdateRequest request) {
+    var emptyResponse = $2.Empty();
+    return _client.invoke<$2.Empty>(ctx, 'StoreController', 'Update', request, emptyResponse);
   }
 }
 

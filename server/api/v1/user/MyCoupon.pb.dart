@@ -11,7 +11,7 @@ import 'dart:core' as $core;
 import 'package:protobuf/protobuf.dart' as $pb;
 
 import '../shared/Coupon.pb.dart' as $8;
-import '../../google/protobuf/empty.pb.dart' as $1;
+import '../../google/protobuf/empty.pb.dart' as $2;
 
 class CouponIDRequest extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'CouponIDRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'server.user'), createEmptyInstance: create)
@@ -109,13 +109,13 @@ class MyCouponControllerApi {
     var emptyResponse = $8.Coupon();
     return _client.invoke<$8.Coupon>(ctx, 'MyCouponController', 'GetDetail', request, emptyResponse);
   }
-  $async.Future<MyCouponsResponse> getList($pb.ClientContext? ctx, $1.Empty request) {
+  $async.Future<MyCouponsResponse> getList($pb.ClientContext? ctx, $2.Empty request) {
     var emptyResponse = MyCouponsResponse();
     return _client.invoke<MyCouponsResponse>(ctx, 'MyCouponController', 'GetList', request, emptyResponse);
   }
-  $async.Future<$1.Empty> use($pb.ClientContext? ctx, CouponIDRequest request) {
-    var emptyResponse = $1.Empty();
-    return _client.invoke<$1.Empty>(ctx, 'MyCouponController', 'Use', request, emptyResponse);
+  $async.Future<$2.Empty> use($pb.ClientContext? ctx, CouponIDRequest request) {
+    var emptyResponse = $2.Empty();
+    return _client.invoke<$2.Empty>(ctx, 'MyCouponController', 'Use', request, emptyResponse);
   }
 }
 

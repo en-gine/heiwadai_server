@@ -8,21 +8,21 @@
 import 'dart:core' as $core;
 import 'dart:convert' as $convert;
 import 'dart:typed_data' as $typed_data;
-import '../../google/protobuf/empty.pbjson.dart' as $1;
-import '../../google/protobuf/timestamp.pbjson.dart' as $4;
+import '../../google/protobuf/empty.pbjson.dart' as $2;
+import '../../google/protobuf/timestamp.pbjson.dart' as $5;
 import '../shared/Coupon.pbjson.dart' as $8;
-import '../shared/Store.pbjson.dart' as $5;
+import '../shared/Store.pbjson.dart' as $1;
 
 @$core.Deprecated('Use checkinRequestDescriptor instead')
 const CheckinRequest$json = const {
   '1': 'CheckinRequest',
   '2': const [
-    const {'1': 'qr_hash', '3': 1, '4': 1, '5': 9, '10': 'qrHash'},
+    const {'1': 'qrHash', '3': 1, '4': 1, '5': 9, '10': 'qrHash'},
   ],
 };
 
 /// Descriptor for `CheckinRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List checkinRequestDescriptor = $convert.base64Decode('Cg5DaGVja2luUmVxdWVzdBIXCgdxcl9oYXNoGAEgASgJUgZxckhhc2g=');
+final $typed_data.Uint8List checkinRequestDescriptor = $convert.base64Decode('Cg5DaGVja2luUmVxdWVzdBIWCgZxckhhc2gYASABKAlSBnFySGFzaA==');
 @$core.Deprecated('Use checkinStampDescriptor instead')
 const CheckinStamp$json = const {
   '1': 'CheckinStamp',
@@ -67,14 +67,14 @@ const $core.Map<$core.String, $core.dynamic> CheckinControllerServiceBase$json =
 
 @$core.Deprecated('Use checkinControllerServiceDescriptor instead')
 const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>> CheckinControllerServiceBase$messageJson = const {
-  '.google.protobuf.Empty': $1.Empty$json,
+  '.google.protobuf.Empty': $2.Empty$json,
   '.server.user.StampCardResponse': StampCardResponse$json,
   '.server.user.CheckinStamp': CheckinStamp$json,
-  '.google.protobuf.Timestamp': $4.Timestamp$json,
+  '.google.protobuf.Timestamp': $5.Timestamp$json,
   '.server.user.CheckinRequest': CheckinRequest$json,
   '.server.user.CheckinResponse': CheckinResponse$json,
   '.server.shared.Coupon': $8.Coupon$json,
-  '.server.shared.Store': $5.Store$json,
+  '.server.shared.Store': $1.Store$json,
 };
 
 /// Descriptor for `CheckinController`. Decode as a `google.protobuf.ServiceDescriptorProto`.

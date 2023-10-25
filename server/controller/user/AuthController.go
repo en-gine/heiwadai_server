@@ -24,6 +24,7 @@ func NewAuthController(authUsecase *usecase.AuthUsecase) *AuthController {
 		authUseCase: *authUsecase,
 	}
 }
+
 func (ac *AuthController) Register(ctx context.Context, req *connect.Request[user.UserRegisterRequest]) (*connect.Response[emptypb.Empty], error) {
 	msg := req.Msg
 	birth, err := httpdate.Str2Time(msg.BirthDate, nil)
@@ -59,6 +60,7 @@ func (ac *AuthController) SignUp(ctx context.Context, req *connect.Request[user.
 	}
 	return connect.NewResponse(&emptypb.Empty{}), nil
 }
+
 func (ac *AuthController) SignIn(ctx context.Context, req *connect.Request[user.UserAuthRequest]) (*connect.Response[user.UserAuthResponse], error) {
 	msg := req.Msg
 	token, domainErr := ac.authUseCase.SignIn(msg.Email, msg.Password)
@@ -71,6 +73,7 @@ func (ac *AuthController) SignIn(ctx context.Context, req *connect.Request[user.
 		RefreshToken: *token.RefreshToken,
 	}), nil
 }
+
 func (ac *AuthController) ResetPasswordMail(ctx context.Context, req *connect.Request[user.ResetPasswordRequest]) (*connect.Response[emptypb.Empty], error) {
 	msg := req.Msg
 	err := ac.authUseCase.ResetPasswordMail(msg.Email)
@@ -89,6 +92,7 @@ func (ac *AuthController) UpdatePassword(ctx context.Context, req *connect.Reque
 
 	return connect.NewResponse(&emptypb.Empty{}), nil
 }
+
 func (ac *AuthController) UpdateEmail(ctx context.Context, req *connect.Request[user.UpdateEmailRequest]) (*connect.Response[emptypb.Empty], error) {
 	msg := req.Msg
 	err := ac.authUseCase.UpdateEmail(msg.Email, msg.Token)

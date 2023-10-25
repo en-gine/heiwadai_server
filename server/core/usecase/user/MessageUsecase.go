@@ -23,17 +23,18 @@ func NewMessageUsecase(MessageRepository repository.IMessageRepository, MessageQ
 	}
 }
 
-func (u *MessageUsecase) GetAfter(ID uuid.UUID) ([]*entity.Message, *errors.DomainError) {
-	msg, err := u.MessageQuery.GetByID(ID)
-	if err != nil {
-		return nil, errors.NewDomainError(errors.QueryError, err.Error())
+func (u *MessageUsecase) GetAfter(ID *uuid.UUID) ([]*entity.Message, *errors.DomainError) {
+	var lastDate *time.Time = nil
+	if ID != nil {
+		msg, err := u.MessageQuery.GetByID(*ID)
+		if err != nil {
+			return nil, errors.NewDomainError(errors.QueryError, err.Error())
+		}
+		if msg != nil {
+			lastDate = &msg.CreateAt
+		}
 	}
-	var lastDate *time.Time
-	if msg != nil {
-		lastDate = &msg.CreateAt
-	} else {
-		lastDate = nil
-	}
+
 	msgs, err := u.MessageQuery.GetMessagesAfter(lastDate)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())

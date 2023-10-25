@@ -9,9 +9,9 @@ import 'dart:core' as $core;
 import 'dart:convert' as $convert;
 import 'dart:typed_data' as $typed_data;
 import '../shared/Coupon.pbjson.dart' as $8;
-import '../../google/protobuf/timestamp.pbjson.dart' as $4;
-import '../shared/Store.pbjson.dart' as $5;
-import '../../google/protobuf/empty.pbjson.dart' as $1;
+import '../../google/protobuf/timestamp.pbjson.dart' as $5;
+import '../shared/Store.pbjson.dart' as $1;
+import '../../google/protobuf/empty.pbjson.dart' as $2;
 
 @$core.Deprecated('Use couponIDRequestDescriptor instead')
 const CouponIDRequest$json = const {
@@ -46,9 +46,9 @@ const $core.Map<$core.String, $core.dynamic> MyCouponControllerServiceBase$json 
 const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>> MyCouponControllerServiceBase$messageJson = const {
   '.server.user.CouponIDRequest': CouponIDRequest$json,
   '.server.shared.Coupon': $8.Coupon$json,
-  '.google.protobuf.Timestamp': $4.Timestamp$json,
-  '.server.shared.Store': $5.Store$json,
-  '.google.protobuf.Empty': $1.Empty$json,
+  '.google.protobuf.Timestamp': $5.Timestamp$json,
+  '.server.shared.Store': $1.Store$json,
+  '.google.protobuf.Empty': $2.Empty$json,
   '.server.user.MyCouponsResponse': MyCouponsResponse$json,
 };
 

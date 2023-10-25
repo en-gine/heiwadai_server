@@ -8,7 +8,7 @@
 import 'dart:core' as $core;
 import 'dart:convert' as $convert;
 import 'dart:typed_data' as $typed_data;
-import '../../google/protobuf/empty.pbjson.dart' as $1;
+import '../../google/protobuf/empty.pbjson.dart' as $2;
 
 @$core.Deprecated('Use reservationDescriptor instead')
 const Reservation$json = const {
@@ -33,7 +33,7 @@ const $core.Map<$core.String, $core.dynamic> ReservationControllerServiceBase$js
 
 @$core.Deprecated('Use reservationControllerServiceDescriptor instead')
 const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>> ReservationControllerServiceBase$messageJson = const {
-  '.google.protobuf.Empty': $1.Empty$json,
+  '.google.protobuf.Empty': $2.Empty$json,
   '.server.user.ReservationResponse': ReservationResponse$json,
 };
 

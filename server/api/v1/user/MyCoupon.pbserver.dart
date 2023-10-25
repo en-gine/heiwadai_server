@@ -10,32 +10,32 @@ import 'dart:async' as $async;
 import 'package:protobuf/protobuf.dart' as $pb;
 
 import 'dart:core' as $core;
-import 'MyCoupon.pb.dart' as $10;
+import 'MyCoupon.pb.dart' as $11;
 import '../shared/Coupon.pb.dart' as $8;
-import '../../google/protobuf/empty.pb.dart' as $1;
+import '../../google/protobuf/empty.pb.dart' as $2;
 import 'MyCoupon.pbjson.dart';
 
 export 'MyCoupon.pb.dart';
 
 abstract class MyCouponControllerServiceBase extends $pb.GeneratedService {
-  $async.Future<$8.Coupon> getDetail($pb.ServerContext ctx, $10.CouponIDRequest request);
-  $async.Future<$10.MyCouponsResponse> getList($pb.ServerContext ctx, $1.Empty request);
-  $async.Future<$1.Empty> use($pb.ServerContext ctx, $10.CouponIDRequest request);
+  $async.Future<$8.Coupon> getDetail($pb.ServerContext ctx, $11.CouponIDRequest request);
+  $async.Future<$11.MyCouponsResponse> getList($pb.ServerContext ctx, $2.Empty request);
+  $async.Future<$2.Empty> use($pb.ServerContext ctx, $11.CouponIDRequest request);
 
   $pb.GeneratedMessage createRequest($core.String method) {
     switch (method) {
-      case 'GetDetail': return $10.CouponIDRequest();
-      case 'GetList': return $1.Empty();
-      case 'Use': return $10.CouponIDRequest();
+      case 'GetDetail': return $11.CouponIDRequest();
+      case 'GetList': return $2.Empty();
+      case 'Use': return $11.CouponIDRequest();
       default: throw $core.ArgumentError('Unknown method: $method');
     }
   }
 
   $async.Future<$pb.GeneratedMessage> handleCall($pb.ServerContext ctx, $core.String method, $pb.GeneratedMessage request) {
     switch (method) {
-      case 'GetDetail': return this.getDetail(ctx, request as $10.CouponIDRequest);
-      case 'GetList': return this.getList(ctx, request as $1.Empty);
-      case 'Use': return this.use(ctx, request as $10.CouponIDRequest);
+      case 'GetDetail': return this.getDetail(ctx, request as $11.CouponIDRequest);
+      case 'GetList': return this.getList(ctx, request as $2.Empty);
+      case 'Use': return this.use(ctx, request as $11.CouponIDRequest);
       default: throw $core.ArgumentError('Unknown method: $method');
     }
   }

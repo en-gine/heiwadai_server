@@ -11,6 +11,7 @@ import (
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	http "net/http"
 	admin "server/api/v1/admin"
+	shared "server/api/v1/shared"
 	strings "strings"
 )
 
@@ -34,6 +35,10 @@ const (
 // reflection-formatted method names, remove the leading slash and convert the remaining slash to a
 // period.
 const (
+	// StoreControllerGetByIDProcedure is the fully-qualified name of the StoreController's GetByID RPC.
+	StoreControllerGetByIDProcedure = "/server.admin.StoreController/GetByID"
+	// StoreControllerGetAllProcedure is the fully-qualified name of the StoreController's GetAll RPC.
+	StoreControllerGetAllProcedure = "/server.admin.StoreController/GetAll"
 	// StoreControllerRegisterProcedure is the fully-qualified name of the StoreController's Register
 	// RPC.
 	StoreControllerRegisterProcedure = "/server.admin.StoreController/Register"
@@ -43,6 +48,8 @@ const (
 
 // StoreControllerClient is a client for the server.admin.StoreController service.
 type StoreControllerClient interface {
+	GetByID(context.Context, *connect_go.Request[admin.SoreIDRequest]) (*connect_go.Response[shared.Store], error)
+	GetAll(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[shared.Stores], error)
 	Register(context.Context, *connect_go.Request[admin.StoreRegisterRequest]) (*connect_go.Response[emptypb.Empty], error)
 	Update(context.Context, *connect_go.Request[admin.StoreUpdateRequest]) (*connect_go.Response[emptypb.Empty], error)
 }
@@ -57,6 +64,16 @@ type StoreControllerClient interface {
 func NewStoreControllerClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) StoreControllerClient {
 	baseURL = strings.TrimRight(baseURL, "/")
 	return &storeControllerClient{
+		getByID: connect_go.NewClient[admin.SoreIDRequest, shared.Store](
+			httpClient,
+			baseURL+StoreControllerGetByIDProcedure,
+			opts...,
+		),
+		getAll: connect_go.NewClient[emptypb.Empty, shared.Stores](
+			httpClient,
+			baseURL+StoreControllerGetAllProcedure,
+			opts...,
+		),
 		register: connect_go.NewClient[admin.StoreRegisterRequest, emptypb.Empty](
 			httpClient,
 			baseURL+StoreControllerRegisterProcedure,
@@ -72,8 +89,20 @@ func NewStoreControllerClient(httpClient connect_go.HTTPClient, baseURL string, 
 
 // storeControllerClient implements StoreControllerClient.
 type storeControllerClient struct {
+	getByID  *connect_go.Client[admin.SoreIDRequest, shared.Store]
+	getAll   *connect_go.Client[emptypb.Empty, shared.Stores]
 	register *connect_go.Client[admin.StoreRegisterRequest, emptypb.Empty]
 	update   *connect_go.Client[admin.StoreUpdateRequest, emptypb.Empty]
+}
+
+// GetByID calls server.admin.StoreController.GetByID.
+func (c *storeControllerClient) GetByID(ctx context.Context, req *connect_go.Request[admin.SoreIDRequest]) (*connect_go.Response[shared.Store], error) {
+	return c.getByID.CallUnary(ctx, req)
+}
+
+// GetAll calls server.admin.StoreController.GetAll.
+func (c *storeControllerClient) GetAll(ctx context.Context, req *connect_go.Request[emptypb.Empty]) (*connect_go.Response[shared.Stores], error) {
+	return c.getAll.CallUnary(ctx, req)
 }
 
 // Register calls server.admin.StoreController.Register.
@@ -88,6 +117,8 @@ func (c *storeControllerClient) Update(ctx context.Context, req *connect_go.Requ
 
 // StoreControllerHandler is an implementation of the server.admin.StoreController service.
 type StoreControllerHandler interface {
+	GetByID(context.Context, *connect_go.Request[admin.SoreIDRequest]) (*connect_go.Response[shared.Store], error)
+	GetAll(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[shared.Stores], error)
 	Register(context.Context, *connect_go.Request[admin.StoreRegisterRequest]) (*connect_go.Response[emptypb.Empty], error)
 	Update(context.Context, *connect_go.Request[admin.StoreUpdateRequest]) (*connect_go.Response[emptypb.Empty], error)
 }
@@ -98,6 +129,16 @@ type StoreControllerHandler interface {
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
 func NewStoreControllerHandler(svc StoreControllerHandler, opts ...connect_go.HandlerOption) (string, http.Handler) {
+	storeControllerGetByIDHandler := connect_go.NewUnaryHandler(
+		StoreControllerGetByIDProcedure,
+		svc.GetByID,
+		opts...,
+	)
+	storeControllerGetAllHandler := connect_go.NewUnaryHandler(
+		StoreControllerGetAllProcedure,
+		svc.GetAll,
+		opts...,
+	)
 	storeControllerRegisterHandler := connect_go.NewUnaryHandler(
 		StoreControllerRegisterProcedure,
 		svc.Register,
@@ -110,6 +151,10 @@ func NewStoreControllerHandler(svc StoreControllerHandler, opts ...connect_go.Ha
 	)
 	return "/server.admin.StoreController/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
+		case StoreControllerGetByIDProcedure:
+			storeControllerGetByIDHandler.ServeHTTP(w, r)
+		case StoreControllerGetAllProcedure:
+			storeControllerGetAllHandler.ServeHTTP(w, r)
 		case StoreControllerRegisterProcedure:
 			storeControllerRegisterHandler.ServeHTTP(w, r)
 		case StoreControllerUpdateProcedure:
@@ -122,6 +167,14 @@ func NewStoreControllerHandler(svc StoreControllerHandler, opts ...connect_go.Ha
 
 // UnimplementedStoreControllerHandler returns CodeUnimplemented from all methods.
 type UnimplementedStoreControllerHandler struct{}
+
+func (UnimplementedStoreControllerHandler) GetByID(context.Context, *connect_go.Request[admin.SoreIDRequest]) (*connect_go.Response[shared.Store], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.StoreController.GetByID is not implemented"))
+}
+
+func (UnimplementedStoreControllerHandler) GetAll(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[shared.Stores], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.StoreController.GetAll is not implemented"))
+}
 
 func (UnimplementedStoreControllerHandler) Register(context.Context, *connect_go.Request[admin.StoreRegisterRequest]) (*connect_go.Response[emptypb.Empty], error) {
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.StoreController.Register is not implemented"))

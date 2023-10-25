@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+
 	"server/api/v1/user"
 	userv1connect "server/api/v1/user/userconnect"
 	"server/controller"
@@ -9,6 +10,7 @@ import (
 
 	"github.com/bufbuild/connect-go"
 	"google.golang.org/protobuf/types/known/emptypb"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type PostController struct {
@@ -22,6 +24,7 @@ func NewPostController(postUsecase *usecase.PostUsecase) *PostController {
 		postUseCase: *postUsecase,
 	}
 }
+
 func (ac *PostController) GetPostByID(ctx context.Context, req *connect.Request[user.PostRequest]) (*connect.Response[user.PostResponse], error) {
 	msg := req.Msg
 	postID := msg.ID
@@ -31,13 +34,14 @@ func (ac *PostController) GetPostByID(ctx context.Context, req *connect.Request[
 	if domaiErr != nil {
 		return nil, controller.ErrorHandler(domaiErr)
 	}
+	postDate := timestamppb.New(post.PostDate)
 
 	return connect.NewResponse(&user.PostResponse{
 		ID:       uint32(post.ID),
 		Title:    post.Title,
 		Content:  post.Content,
 		Author:   post.Author,
-		PostDate: post.PostDate.String(),
+		PostDate: postDate,
 	}), nil
 }
 
@@ -49,12 +53,13 @@ func (ac *PostController) GetPosts(ctx context.Context, req *connect.Request[emp
 
 	var resPosts []*user.PostResponse
 	for _, post := range posts {
+		postDate := timestamppb.New(post.PostDate)
 		resPosts = append(resPosts, &user.PostResponse{
 			ID:       uint32(post.ID),
 			Title:    post.Title,
 			Content:  post.Content,
 			Author:   post.Author,
-			PostDate: post.PostDate.String(),
+			PostDate: postDate,
 		})
 	}
 

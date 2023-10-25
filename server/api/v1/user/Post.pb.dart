@@ -10,7 +10,8 @@ import 'dart:core' as $core;
 
 import 'package:protobuf/protobuf.dart' as $pb;
 
-import '../../google/protobuf/empty.pb.dart' as $1;
+import '../../google/protobuf/timestamp.pb.dart' as $5;
+import '../../google/protobuf/empty.pb.dart' as $2;
 
 class PostRequest extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'PostRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'server.user'), createEmptyInstance: create)
@@ -106,7 +107,7 @@ class PostResponse extends $pb.GeneratedMessage {
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'Title', protoName: 'Title')
     ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'Content', protoName: 'Content')
     ..aOS(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'Author', protoName: 'Author')
-    ..aOS(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'PostDate', protoName: 'PostDate')
+    ..aOM<$5.Timestamp>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'PostDate', protoName: 'PostDate', subBuilder: $5.Timestamp.create)
     ..hasRequiredFields = false
   ;
 
@@ -116,7 +117,7 @@ class PostResponse extends $pb.GeneratedMessage {
     $core.String? title,
     $core.String? content,
     $core.String? author,
-    $core.String? postDate,
+    $5.Timestamp? postDate,
   }) {
     final _result = create();
     if (iD != null) {
@@ -194,13 +195,15 @@ class PostResponse extends $pb.GeneratedMessage {
   void clearAuthor() => clearField(4);
 
   @$pb.TagNumber(5)
-  $core.String get postDate => $_getSZ(4);
+  $5.Timestamp get postDate => $_getN(4);
   @$pb.TagNumber(5)
-  set postDate($core.String v) { $_setString(4, v); }
+  set postDate($5.Timestamp v) { setField(5, v); }
   @$pb.TagNumber(5)
   $core.bool hasPostDate() => $_has(4);
   @$pb.TagNumber(5)
   void clearPostDate() => clearField(5);
+  @$pb.TagNumber(5)
+  $5.Timestamp ensurePostDate() => $_ensure(4);
 }
 
 class PostControllerApi {
@@ -211,7 +214,7 @@ class PostControllerApi {
     var emptyResponse = PostResponse();
     return _client.invoke<PostResponse>(ctx, 'PostController', 'GetPostByID', request, emptyResponse);
   }
-  $async.Future<PostsResponse> getPosts($pb.ClientContext? ctx, $1.Empty request) {
+  $async.Future<PostsResponse> getPosts($pb.ClientContext? ctx, $2.Empty request) {
     var emptyResponse = PostsResponse();
     return _client.invoke<PostsResponse>(ctx, 'PostController', 'GetPosts', request, emptyResponse);
   }
