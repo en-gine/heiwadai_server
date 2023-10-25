@@ -26,6 +26,7 @@ func TestParent(t *testing.T) {
 	t.Run("UserData", testUserData)
 	t.Run("UserManagers", testUserManagers)
 	t.Run("UserOptions", testUserOptions)
+	t.Run("UserReports", testUserReports)
 }
 
 func TestDelete(t *testing.T) {
@@ -43,6 +44,7 @@ func TestDelete(t *testing.T) {
 	t.Run("UserData", testUserDataDelete)
 	t.Run("UserManagers", testUserManagersDelete)
 	t.Run("UserOptions", testUserOptionsDelete)
+	t.Run("UserReports", testUserReportsDelete)
 }
 
 func TestQueryDeleteAll(t *testing.T) {
@@ -60,6 +62,7 @@ func TestQueryDeleteAll(t *testing.T) {
 	t.Run("UserData", testUserDataQueryDeleteAll)
 	t.Run("UserManagers", testUserManagersQueryDeleteAll)
 	t.Run("UserOptions", testUserOptionsQueryDeleteAll)
+	t.Run("UserReports", testUserReportsQueryDeleteAll)
 }
 
 func TestSliceDeleteAll(t *testing.T) {
@@ -77,6 +80,7 @@ func TestSliceDeleteAll(t *testing.T) {
 	t.Run("UserData", testUserDataSliceDeleteAll)
 	t.Run("UserManagers", testUserManagersSliceDeleteAll)
 	t.Run("UserOptions", testUserOptionsSliceDeleteAll)
+	t.Run("UserReports", testUserReportsSliceDeleteAll)
 }
 
 func TestExists(t *testing.T) {
@@ -94,6 +98,7 @@ func TestExists(t *testing.T) {
 	t.Run("UserData", testUserDataExists)
 	t.Run("UserManagers", testUserManagersExists)
 	t.Run("UserOptions", testUserOptionsExists)
+	t.Run("UserReports", testUserReportsExists)
 }
 
 func TestFind(t *testing.T) {
@@ -111,6 +116,7 @@ func TestFind(t *testing.T) {
 	t.Run("UserData", testUserDataFind)
 	t.Run("UserManagers", testUserManagersFind)
 	t.Run("UserOptions", testUserOptionsFind)
+	t.Run("UserReports", testUserReportsFind)
 }
 
 func TestBind(t *testing.T) {
@@ -128,6 +134,7 @@ func TestBind(t *testing.T) {
 	t.Run("UserData", testUserDataBind)
 	t.Run("UserManagers", testUserManagersBind)
 	t.Run("UserOptions", testUserOptionsBind)
+	t.Run("UserReports", testUserReportsBind)
 }
 
 func TestOne(t *testing.T) {
@@ -145,6 +152,7 @@ func TestOne(t *testing.T) {
 	t.Run("UserData", testUserDataOne)
 	t.Run("UserManagers", testUserManagersOne)
 	t.Run("UserOptions", testUserOptionsOne)
+	t.Run("UserReports", testUserReportsOne)
 }
 
 func TestAll(t *testing.T) {
@@ -162,6 +170,7 @@ func TestAll(t *testing.T) {
 	t.Run("UserData", testUserDataAll)
 	t.Run("UserManagers", testUserManagersAll)
 	t.Run("UserOptions", testUserOptionsAll)
+	t.Run("UserReports", testUserReportsAll)
 }
 
 func TestCount(t *testing.T) {
@@ -179,6 +188,7 @@ func TestCount(t *testing.T) {
 	t.Run("UserData", testUserDataCount)
 	t.Run("UserManagers", testUserManagersCount)
 	t.Run("UserOptions", testUserOptionsCount)
+	t.Run("UserReports", testUserReportsCount)
 }
 
 func TestHooks(t *testing.T) {
@@ -196,6 +206,7 @@ func TestHooks(t *testing.T) {
 	t.Run("UserData", testUserDataHooks)
 	t.Run("UserManagers", testUserManagersHooks)
 	t.Run("UserOptions", testUserOptionsHooks)
+	t.Run("UserReports", testUserReportsHooks)
 }
 
 func TestInsert(t *testing.T) {
@@ -227,6 +238,8 @@ func TestInsert(t *testing.T) {
 	t.Run("UserManagers", testUserManagersInsertWhitelist)
 	t.Run("UserOptions", testUserOptionsInsert)
 	t.Run("UserOptions", testUserOptionsInsertWhitelist)
+	t.Run("UserReports", testUserReportsInsert)
+	t.Run("UserReports", testUserReportsInsertWhitelist)
 }
 
 // TestToOne tests cannot be run in parallel
@@ -246,6 +259,7 @@ func TestToOne(t *testing.T) {
 	t.Run("StayableStoreInfoToStoreUsingStore", testStayableStoreInfoToOneStoreUsingStore)
 	t.Run("UserDatumToUserManagerUsingUser", testUserDatumToOneUserManagerUsingUser)
 	t.Run("UserOptionToUserDatumUsingUser", testUserOptionToOneUserDatumUsingUser)
+	t.Run("UserReportToUserDatumUsingUser", testUserReportToOneUserDatumUsingUser)
 }
 
 // TestOneToOne tests cannot be run in parallel
@@ -270,6 +284,7 @@ func TestToMany(t *testing.T) {
 	t.Run("StoreToCouponStores", testStoreToManyCouponStores)
 	t.Run("UserDatumToUserCheckins", testUserDatumToManyUserCheckins)
 	t.Run("UserDatumToUserCouponAttachedUsers", testUserDatumToManyUserCouponAttachedUsers)
+	t.Run("UserDatumToUserUserReports", testUserDatumToManyUserUserReports)
 }
 
 // TestToOneSet tests cannot be run in parallel
@@ -289,6 +304,7 @@ func TestToOneSet(t *testing.T) {
 	t.Run("StayableStoreInfoToStoreUsingStayableStoreInfo", testStayableStoreInfoToOneSetOpStoreUsingStore)
 	t.Run("UserDatumToUserManagerUsingUserUserDatum", testUserDatumToOneSetOpUserManagerUsingUser)
 	t.Run("UserOptionToUserDatumUsingUserUserOption", testUserOptionToOneSetOpUserDatumUsingUser)
+	t.Run("UserReportToUserDatumUsingUserUserReports", testUserReportToOneSetOpUserDatumUsingUser)
 }
 
 // TestToOneRemove tests cannot be run in parallel
@@ -324,6 +340,7 @@ func TestToManyAdd(t *testing.T) {
 	t.Run("StoreToCouponStores", testStoreToManyAddOpCouponStores)
 	t.Run("UserDatumToUserCheckins", testUserDatumToManyAddOpUserCheckins)
 	t.Run("UserDatumToUserCouponAttachedUsers", testUserDatumToManyAddOpUserCouponAttachedUsers)
+	t.Run("UserDatumToUserUserReports", testUserDatumToManyAddOpUserUserReports)
 }
 
 // TestToManySet tests cannot be run in parallel
@@ -355,6 +372,7 @@ func TestReload(t *testing.T) {
 	t.Run("UserData", testUserDataReload)
 	t.Run("UserManagers", testUserManagersReload)
 	t.Run("UserOptions", testUserOptionsReload)
+	t.Run("UserReports", testUserReportsReload)
 }
 
 func TestReloadAll(t *testing.T) {
@@ -372,6 +390,7 @@ func TestReloadAll(t *testing.T) {
 	t.Run("UserData", testUserDataReloadAll)
 	t.Run("UserManagers", testUserManagersReloadAll)
 	t.Run("UserOptions", testUserOptionsReloadAll)
+	t.Run("UserReports", testUserReportsReloadAll)
 }
 
 func TestSelect(t *testing.T) {
@@ -389,6 +408,7 @@ func TestSelect(t *testing.T) {
 	t.Run("UserData", testUserDataSelect)
 	t.Run("UserManagers", testUserManagersSelect)
 	t.Run("UserOptions", testUserOptionsSelect)
+	t.Run("UserReports", testUserReportsSelect)
 }
 
 func TestUpdate(t *testing.T) {
@@ -406,6 +426,7 @@ func TestUpdate(t *testing.T) {
 	t.Run("UserData", testUserDataUpdate)
 	t.Run("UserManagers", testUserManagersUpdate)
 	t.Run("UserOptions", testUserOptionsUpdate)
+	t.Run("UserReports", testUserReportsUpdate)
 }
 
 func TestSliceUpdateAll(t *testing.T) {
@@ -423,4 +444,5 @@ func TestSliceUpdateAll(t *testing.T) {
 	t.Run("UserData", testUserDataSliceUpdateAll)
 	t.Run("UserManagers", testUserManagersSliceUpdateAll)
 	t.Run("UserOptions", testUserOptionsSliceUpdateAll)
+	t.Run("UserReports", testUserReportsSliceUpdateAll)
 }

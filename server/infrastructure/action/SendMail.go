@@ -4,17 +4,17 @@ import (
 	"log"
 	"net/smtp"
 
-	"server/core/entity"
 	"server/core/infra/action"
+	"server/infrastructure/env"
 
 	"github.com/streadway/amqp"
 )
 
-var _ action.IMailAction = &SendMail{}
+var _ action.ISendMailAction = &SendMail{}
 
 type SendMail struct{}
 
-func (s *SendMail) SendAll([]*entity.Prefecture) error {
+func (s *SendMail) SendAll(mails *[]string) error {
 	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
 	if err != nil {
 		log.Fatalf("%s: %s", "Failed to connect to RabbitMQ", err)
@@ -67,24 +67,23 @@ func (s *SendMail) SendAll([]*entity.Prefecture) error {
 	return err
 }
 
-func (s *SendMail) Send(email string, Body string) error {
-	from := "your-email@example.com"
-	pass := "your-password"
-	to := email
+func (s *SendMail) Send(To string, CC string, From string, Title string, Body string) error {
+	msg := "From: " + From + "\n" +
+		"To: " + To + "\n" +
+		"Subject: " + Title + "\n\n" +
+		Body
 
-	msg := "From: " + from + "\n" +
-		"To: " + to + "\n" +
-		"Subject: Hello there\n\n" +
-		"Hello from our Go application."
+	host := env.GetEnv(env.MailHost)
+	port := env.GetEnv(env.MailPort)
+	pass := env.GetEnv(env.MailPass)
 
-	err := smtp.SendMail("smtp.example.com:587",
-		smtp.PlainAuth("", from, pass, "smtp.example.com"),
-		from, []string{to}, []byte(msg))
+	err := smtp.SendMail(host+":"+port,
+		smtp.PlainAuth("", From, pass, host),
+		From, []string{To}, []byte(msg))
 	if err != nil {
 		log.Fatalf("smtp error: %s", err)
 		return nil
 	}
 
-	log.Print("sent, visit http://foobar.com/\n")
 	return nil
 }

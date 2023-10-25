@@ -18,6 +18,7 @@ var TableNames = struct {
 	UserData           string
 	UserManager        string
 	UserOption         string
+	UserReport         string
 }{
 	Admin:              "admin",
 	Checkin:            "checkin",
@@ -33,4 +34,5 @@ var TableNames = struct {
 	UserData:           "user_data",
 	UserManager:        "user_manager",
 	UserOption:         "user_option",
+	UserReport:         "user_report",
 }

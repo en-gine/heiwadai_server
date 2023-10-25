@@ -33,4 +33,6 @@ func TestUpsert(t *testing.T) {
 	t.Run("UserManagers", testUserManagersUpsert)
 
 	t.Run("UserOptions", testUserOptionsUpsert)
+
+	t.Run("UserReports", testUserReportsUpsert)
 }

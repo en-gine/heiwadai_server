@@ -19,6 +19,8 @@ DROP TABLE IF EXISTS mail_magazine;
 
 DROP TABLE IF EXISTS message;
 
+DROP TABLE IF EXISTS user_report;
+
 DROP TABLE IF EXISTS admin_login_log;
 
 DROP TABLE IF EXISTS admin;

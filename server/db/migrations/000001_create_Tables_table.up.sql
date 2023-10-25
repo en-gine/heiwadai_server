@@ -145,6 +145,16 @@ CREATE TABLE message (
     FOREIGN KEY (author_id) REFERENCES admin (admin_id)
 );
 
+CREATE TABLE user_report (
+    id UUID PRIMARY KEY,
+    title VARCHAR NOT NULL,
+    content VARCHAR NOT NULL,
+    user_id UUID NOT NULL,
+    user_name VARCHAR NOT NULL,
+    create_at TIMESTAMPTZ NOT NULL default now(),
+    update_at TIMESTAMPTZ NOT NULL default now(),
+    FOREIGN KEY (user_id) REFERENCES user_data (user_id)
+);
 --- userが作成されるたびに、userテーブルにもidとemailをinsertする
 create or replace function public.handle_new_user() 
 returns trigger as $$
