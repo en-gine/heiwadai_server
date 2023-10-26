@@ -8,8 +8,8 @@
 import 'dart:core' as $core;
 import 'dart:convert' as $convert;
 import 'dart:typed_data' as $typed_data;
-import '../../google/protobuf/timestamp.pbjson.dart' as $5;
-import '../../google/protobuf/empty.pbjson.dart' as $2;
+import '../../google/protobuf/timestamp.pbjson.dart' as $6;
+import '../../google/protobuf/empty.pbjson.dart' as $1;
 
 @$core.Deprecated('Use postRequestDescriptor instead')
 const PostRequest$json = const {
@@ -57,8 +57,8 @@ const $core.Map<$core.String, $core.dynamic> PostControllerServiceBase$json = co
 const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>> PostControllerServiceBase$messageJson = const {
   '.server.user.PostRequest': PostRequest$json,
   '.server.user.PostResponse': PostResponse$json,
-  '.google.protobuf.Timestamp': $5.Timestamp$json,
-  '.google.protobuf.Empty': $2.Empty$json,
+  '.google.protobuf.Timestamp': $6.Timestamp$json,
+  '.google.protobuf.Empty': $1.Empty$json,
   '.server.user.PostsResponse': PostsResponse$json,
 };
 

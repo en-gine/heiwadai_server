@@ -8,7 +8,7 @@
 import 'dart:core' as $core;
 import 'dart:convert' as $convert;
 import 'dart:typed_data' as $typed_data;
-import '../../google/protobuf/empty.pbjson.dart' as $2;
+import '../../google/protobuf/empty.pbjson.dart' as $1;
 
 @$core.Deprecated('Use userRegisterRequestDescriptor instead')
 const UserRegisterRequest$json = const {
@@ -103,7 +103,7 @@ const $core.Map<$core.String, $core.dynamic> AuthControllerServiceBase$json = co
 @$core.Deprecated('Use authControllerServiceDescriptor instead')
 const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>> AuthControllerServiceBase$messageJson = const {
   '.server.user.UserRegisterRequest': UserRegisterRequest$json,
-  '.google.protobuf.Empty': $2.Empty$json,
+  '.google.protobuf.Empty': $1.Empty$json,
   '.server.user.UserAuthRequest': UserAuthRequest$json,
   '.server.user.UserAuthResponse': UserAuthResponse$json,
   '.server.user.ResetPasswordRequest': ResetPasswordRequest$json,

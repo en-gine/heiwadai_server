@@ -10,8 +10,8 @@ import 'dart:core' as $core;
 
 import 'package:protobuf/protobuf.dart' as $pb;
 
-import '../shared/Coupon.pb.dart' as $8;
-import '../../google/protobuf/empty.pb.dart' as $2;
+import '../shared/Coupon.pb.dart' as $9;
+import '../../google/protobuf/empty.pb.dart' as $1;
 
 class CouponIDRequest extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'CouponIDRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'server.user'), createEmptyInstance: create)
@@ -62,13 +62,13 @@ class CouponIDRequest extends $pb.GeneratedMessage {
 
 class MyCouponsResponse extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'MyCouponsResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'server.user'), createEmptyInstance: create)
-    ..pc<$8.Coupon>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'Coupons', $pb.PbFieldType.PM, protoName: 'Coupons', subBuilder: $8.Coupon.create)
+    ..pc<$9.Coupon>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'Coupons', $pb.PbFieldType.PM, protoName: 'Coupons', subBuilder: $9.Coupon.create)
     ..hasRequiredFields = false
   ;
 
   MyCouponsResponse._() : super();
   factory MyCouponsResponse({
-    $core.Iterable<$8.Coupon>? coupons,
+    $core.Iterable<$9.Coupon>? coupons,
   }) {
     final _result = create();
     if (coupons != null) {
@@ -98,24 +98,24 @@ class MyCouponsResponse extends $pb.GeneratedMessage {
   static MyCouponsResponse? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.List<$8.Coupon> get coupons => $_getList(0);
+  $core.List<$9.Coupon> get coupons => $_getList(0);
 }
 
 class MyCouponControllerApi {
   $pb.RpcClient _client;
   MyCouponControllerApi(this._client);
 
-  $async.Future<$8.Coupon> getDetail($pb.ClientContext? ctx, CouponIDRequest request) {
-    var emptyResponse = $8.Coupon();
-    return _client.invoke<$8.Coupon>(ctx, 'MyCouponController', 'GetDetail', request, emptyResponse);
+  $async.Future<$9.Coupon> getDetail($pb.ClientContext? ctx, CouponIDRequest request) {
+    var emptyResponse = $9.Coupon();
+    return _client.invoke<$9.Coupon>(ctx, 'MyCouponController', 'GetDetail', request, emptyResponse);
   }
-  $async.Future<MyCouponsResponse> getList($pb.ClientContext? ctx, $2.Empty request) {
+  $async.Future<MyCouponsResponse> getList($pb.ClientContext? ctx, $1.Empty request) {
     var emptyResponse = MyCouponsResponse();
     return _client.invoke<MyCouponsResponse>(ctx, 'MyCouponController', 'GetList', request, emptyResponse);
   }
-  $async.Future<$2.Empty> use($pb.ClientContext? ctx, CouponIDRequest request) {
-    var emptyResponse = $2.Empty();
-    return _client.invoke<$2.Empty>(ctx, 'MyCouponController', 'Use', request, emptyResponse);
+  $async.Future<$1.Empty> use($pb.ClientContext? ctx, CouponIDRequest request) {
+    var emptyResponse = $1.Empty();
+    return _client.invoke<$1.Empty>(ctx, 'MyCouponController', 'Use', request, emptyResponse);
   }
 }
 

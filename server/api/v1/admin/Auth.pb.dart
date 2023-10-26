@@ -11,6 +11,8 @@ import 'dart:core' as $core;
 import 'package:fixnum/fixnum.dart' as $fixnum;
 import 'package:protobuf/protobuf.dart' as $pb;
 
+import '../../google/protobuf/empty.pb.dart' as $1;
+
 class AdminAuthRequest extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'AdminAuthRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'server.admin'), createEmptyInstance: create)
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'email')
@@ -147,13 +149,277 @@ class AdminAuthResponse extends $pb.GeneratedMessage {
   void clearRefreshToken() => clearField(3);
 }
 
+class AdminRegisterRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'AdminRegisterRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'server.admin'), createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'Name', protoName: 'Name')
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'Mail', protoName: 'Mail')
+    ..aOS(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'BelongStoreID', protoName: 'BelongStoreID')
+    ..hasRequiredFields = false
+  ;
+
+  AdminRegisterRequest._() : super();
+  factory AdminRegisterRequest({
+    $core.String? name,
+    $core.String? mail,
+    $core.String? belongStoreID,
+  }) {
+    final _result = create();
+    if (name != null) {
+      _result.name = name;
+    }
+    if (mail != null) {
+      _result.mail = mail;
+    }
+    if (belongStoreID != null) {
+      _result.belongStoreID = belongStoreID;
+    }
+    return _result;
+  }
+  factory AdminRegisterRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory AdminRegisterRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  AdminRegisterRequest clone() => AdminRegisterRequest()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  AdminRegisterRequest copyWith(void Function(AdminRegisterRequest) updates) => super.copyWith((message) => updates(message as AdminRegisterRequest)) as AdminRegisterRequest; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static AdminRegisterRequest create() => AdminRegisterRequest._();
+  AdminRegisterRequest createEmptyInstance() => create();
+  static $pb.PbList<AdminRegisterRequest> createRepeated() => $pb.PbList<AdminRegisterRequest>();
+  @$core.pragma('dart2js:noInline')
+  static AdminRegisterRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<AdminRegisterRequest>(create);
+  static AdminRegisterRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get name => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set name($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasName() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearName() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get mail => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set mail($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasMail() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearMail() => clearField(2);
+
+  @$pb.TagNumber(4)
+  $core.String get belongStoreID => $_getSZ(2);
+  @$pb.TagNumber(4)
+  set belongStoreID($core.String v) { $_setString(2, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasBelongStoreID() => $_has(2);
+  @$pb.TagNumber(4)
+  void clearBelongStoreID() => clearField(4);
+}
+
+class ResetPasswordRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ResetPasswordRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'server.admin'), createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'email')
+    ..hasRequiredFields = false
+  ;
+
+  ResetPasswordRequest._() : super();
+  factory ResetPasswordRequest({
+    $core.String? email,
+  }) {
+    final _result = create();
+    if (email != null) {
+      _result.email = email;
+    }
+    return _result;
+  }
+  factory ResetPasswordRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory ResetPasswordRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  ResetPasswordRequest clone() => ResetPasswordRequest()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  ResetPasswordRequest copyWith(void Function(ResetPasswordRequest) updates) => super.copyWith((message) => updates(message as ResetPasswordRequest)) as ResetPasswordRequest; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static ResetPasswordRequest create() => ResetPasswordRequest._();
+  ResetPasswordRequest createEmptyInstance() => create();
+  static $pb.PbList<ResetPasswordRequest> createRepeated() => $pb.PbList<ResetPasswordRequest>();
+  @$core.pragma('dart2js:noInline')
+  static ResetPasswordRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ResetPasswordRequest>(create);
+  static ResetPasswordRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get email => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set email($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasEmail() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearEmail() => clearField(1);
+}
+
+class UpdatePasswordRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'UpdatePasswordRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'server.admin'), createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'password')
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'token')
+    ..hasRequiredFields = false
+  ;
+
+  UpdatePasswordRequest._() : super();
+  factory UpdatePasswordRequest({
+    $core.String? password,
+    $core.String? token,
+  }) {
+    final _result = create();
+    if (password != null) {
+      _result.password = password;
+    }
+    if (token != null) {
+      _result.token = token;
+    }
+    return _result;
+  }
+  factory UpdatePasswordRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory UpdatePasswordRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  UpdatePasswordRequest clone() => UpdatePasswordRequest()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  UpdatePasswordRequest copyWith(void Function(UpdatePasswordRequest) updates) => super.copyWith((message) => updates(message as UpdatePasswordRequest)) as UpdatePasswordRequest; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static UpdatePasswordRequest create() => UpdatePasswordRequest._();
+  UpdatePasswordRequest createEmptyInstance() => create();
+  static $pb.PbList<UpdatePasswordRequest> createRepeated() => $pb.PbList<UpdatePasswordRequest>();
+  @$core.pragma('dart2js:noInline')
+  static UpdatePasswordRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<UpdatePasswordRequest>(create);
+  static UpdatePasswordRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get password => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set password($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasPassword() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearPassword() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get token => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set token($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasToken() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearToken() => clearField(2);
+}
+
+class UpdateEmailRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'UpdateEmailRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'server.admin'), createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'email')
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'token')
+    ..hasRequiredFields = false
+  ;
+
+  UpdateEmailRequest._() : super();
+  factory UpdateEmailRequest({
+    $core.String? email,
+    $core.String? token,
+  }) {
+    final _result = create();
+    if (email != null) {
+      _result.email = email;
+    }
+    if (token != null) {
+      _result.token = token;
+    }
+    return _result;
+  }
+  factory UpdateEmailRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory UpdateEmailRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  UpdateEmailRequest clone() => UpdateEmailRequest()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  UpdateEmailRequest copyWith(void Function(UpdateEmailRequest) updates) => super.copyWith((message) => updates(message as UpdateEmailRequest)) as UpdateEmailRequest; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static UpdateEmailRequest create() => UpdateEmailRequest._();
+  UpdateEmailRequest createEmptyInstance() => create();
+  static $pb.PbList<UpdateEmailRequest> createRepeated() => $pb.PbList<UpdateEmailRequest>();
+  @$core.pragma('dart2js:noInline')
+  static UpdateEmailRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<UpdateEmailRequest>(create);
+  static UpdateEmailRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get email => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set email($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasEmail() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearEmail() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get token => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set token($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasToken() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearToken() => clearField(2);
+}
+
 class AuthControllerApi {
   $pb.RpcClient _client;
   AuthControllerApi(this._client);
 
-  $async.Future<AdminAuthResponse> call($pb.ClientContext? ctx, AdminAuthRequest request) {
+  $async.Future<$1.Empty> register($pb.ClientContext? ctx, AdminRegisterRequest request) {
+    var emptyResponse = $1.Empty();
+    return _client.invoke<$1.Empty>(ctx, 'AuthController', 'Register', request, emptyResponse);
+  }
+  $async.Future<$1.Empty> signUp($pb.ClientContext? ctx, AdminAuthRequest request) {
+    var emptyResponse = $1.Empty();
+    return _client.invoke<$1.Empty>(ctx, 'AuthController', 'SignUp', request, emptyResponse);
+  }
+  $async.Future<AdminAuthResponse> signIn($pb.ClientContext? ctx, AdminAuthRequest request) {
     var emptyResponse = AdminAuthResponse();
-    return _client.invoke<AdminAuthResponse>(ctx, 'AuthController', 'Call', request, emptyResponse);
+    return _client.invoke<AdminAuthResponse>(ctx, 'AuthController', 'SignIn', request, emptyResponse);
+  }
+  $async.Future<$1.Empty> resetPasswordMail($pb.ClientContext? ctx, ResetPasswordRequest request) {
+    var emptyResponse = $1.Empty();
+    return _client.invoke<$1.Empty>(ctx, 'AuthController', 'ResetPasswordMail', request, emptyResponse);
+  }
+  $async.Future<$1.Empty> updatePassword($pb.ClientContext? ctx, UpdatePasswordRequest request) {
+    var emptyResponse = $1.Empty();
+    return _client.invoke<$1.Empty>(ctx, 'AuthController', 'UpdatePassword', request, emptyResponse);
+  }
+  $async.Future<$1.Empty> updateEmail($pb.ClientContext? ctx, UpdateEmailRequest request) {
+    var emptyResponse = $1.Empty();
+    return _client.invoke<$1.Empty>(ctx, 'AuthController', 'UpdateEmail', request, emptyResponse);
   }
 }
 

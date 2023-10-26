@@ -1,7 +1,6 @@
 package booking
 
 import (
-	"errors"
 	"strconv"
 	"time"
 
@@ -9,7 +8,7 @@ import (
 	queryservice "server/core/infra/queryService"
 	"server/infrastructure/booking/avail"
 	"server/infrastructure/booking/util"
-	"server/infrastructure/logger"
+	"server/infrastructure/env"
 
 	uuid "github.com/google/uuid"
 )
@@ -19,6 +18,8 @@ var _ queryservice.IPlanQueryService = &PlanQuery{}
 type PlanQuery struct {
 	storeQuery queryservice.IStoreQueryService
 }
+
+var BookURL = env.GetEnv(env.TlbookingAvailApiUrl)
 
 func NewPlanQuery(storeQuery queryservice.IStoreQueryService) *PlanQuery {
 	return &PlanQuery{
@@ -31,7 +32,7 @@ func (p *PlanQuery) GetMyBooking(userID uuid.UUID) (*[]entity.Plan, error) {
 }
 
 func (p *PlanQuery) Search(
-	stayStore []entity.Store,
+	stores []entity.StayableStore,
 	stayFrom time.Time,
 	stayTo time.Time,
 	adult int,
@@ -41,8 +42,17 @@ func (p *PlanQuery) Search(
 	mealType *entity.MealType,
 	roomTypes *[]entity.RoomType,
 ) (*[]entity.Plan, error) {
+	bookingIDs := []string{}
+	for _, store := range stores {
+		bookingIDs = append(bookingIDs, store.BookingSystemID)
+	}
+
+	if env.GetEnv(env.TlbookingIsTest) == "true" {
+		bookingIDs = []string{"E69502"}
+	}
+
 	reqBody := NewOTAHotelAvailRQ(
-		[]string{"E69502"},
+		bookingIDs,
 		stayFrom,
 		stayTo,
 		adult,
@@ -53,7 +63,7 @@ func (p *PlanQuery) Search(
 		roomTypes,
 	)
 
-	res, err := Request[avail.OTAHotelAvailRQ, avail.OTAHotelAvailRS](reqBody)
+	res, err := Request[avail.OTAHotelAvailRQ, avail.OTAHotelAvailRS](BookURL, reqBody)
 	if err != nil {
 		return nil, err
 	}
@@ -67,18 +77,16 @@ func (p *PlanQuery) Search(
 
 func (p *PlanQuery) AvailRSToPlans(res *avail.OTAHotelAvailRS) (*[]entity.Plan, error) {
 	var plans []entity.Plan
-
-	if res.RoomStays == nil {
-		logger.Errorf("AvailRSToPlans Return Error: %v", res)
-		return nil, errors.New("RoomStays is nil")
-	}
-	for _, roomStay := range res.RoomStays.RoomStay {
+	body := res.Body.OTA_HotelAvailRS
+	for _, roomStay := range body.RoomStays.RoomStay {
 		hotelCode := roomStay.RPH
-		if hotelCode == nil {
-			logger.Errorf("AvailRSToPlans Return Error: %v", res)
-			return nil, errors.New("hotelCode is nil")
+		var stayable *entity.StayableStore
+		var err error
+		if env.GetEnv(env.TlbookingIsTest) != "true" {
+			stayable, err = p.storeQuery.GetStayableByBookingID(hotelCode)
+		} else {
+			stayable = &entity.StayableStore{}
 		}
-		stayable, err := p.storeQuery.GetStayableByBookingID(*hotelCode)
 		if err != nil {
 			return nil, err
 		}
@@ -89,30 +97,30 @@ func (p *PlanQuery) AvailRSToPlans(res *avail.OTAHotelAvailRS) (*[]entity.Plan, 
 		// roomName := roomType.RoomDescription.Name
 		// roomText := roomType.RoomDescription.Text
 		// roomImageUrl := roomType.RoomDescription.URL
+		amount := roomStay.RoomRates.RoomRate[0].Total.AmountAfterTax
+		var planPrice uint64
+		planPrice, _ = strconv.ParseUint(amount, 10, 64)
 
-		for _, plan := range *roomStay.RatePlans.RatePlan {
+		for _, plan := range roomStay.RatePlans.RatePlan {
 			planID := plan.RatePlanCode
 			planName := plan.RatePlanName
 
 			var planImageURL string = ""
-			if len(*plan.RatePlanDescription.URL) > 0 {
-				planImageURL = *(*plan.RatePlanDescription.URL)[0].Value
+			if len(plan.RatePlanDescription.URL.Value) > 0 {
+				planImageURL = plan.RatePlanDescription.URL.Value
 			}
 
 			var planOverView string = ""
-			if len(*plan.RatePlanDescription.Text) > 0 {
-				planOverView = *(*plan.RatePlanDescription.Text)[0].Value
+			if len(*&plan.RatePlanDescription.Text.Value) > 0 {
+				planOverView = plan.RatePlanDescription.Text.Value
 			}
-
-			var planPrice uint64
-			planPrice, _ = strconv.ParseUint(*plan.RatePlanType, 10, 64)
 
 			var IncludeBreakfast bool = *plan.MealsIncluded.Breakfast
 			var IncludeDinner bool = *plan.MealsIncluded.Dinner
 
 			plan := entity.Plan{
-				ID:       *planID,
-				Title:    *planName,
+				ID:       planID,
+				Title:    planName,
 				Price:    uint(planPrice),
 				ImageURL: planImageURL,
 				RoomType: room,
@@ -275,9 +283,9 @@ func RoomTypeToBedType(rt *entity.RoomType) *avail.BedTypeCode {
 	return &code
 }
 
-func BedTypeCodeToRoomType(bt *avail.BedTypeCode) entity.RoomType {
+func BedTypeCodeToRoomType(bt avail.BedTypeCode) entity.RoomType {
 	var roomType entity.RoomType
-	switch *bt {
+	switch bt {
 	case avail.BedTypeSingle:
 		roomType = entity.RoomTypeSingle
 	case avail.BedTypeDouble:
@@ -299,8 +307,8 @@ func BedTypeCodeToRoomType(bt *avail.BedTypeCode) entity.RoomType {
 	return roomType
 }
 
-func IsNonSmokingToSmokeType(isNonSmoke *bool) entity.SmokeType {
-	switch *isNonSmoke {
+func IsNonSmokingToSmokeType(isNonSmoke bool) entity.SmokeType {
+	switch isNonSmoke {
 	case true:
 		return entity.SmokeTypeNonSmoking
 	case false:

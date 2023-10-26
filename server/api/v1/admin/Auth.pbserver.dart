@@ -10,24 +10,40 @@ import 'dart:async' as $async;
 import 'package:protobuf/protobuf.dart' as $pb;
 
 import 'dart:core' as $core;
-import 'Auth.pb.dart' as $0;
+import 'Auth.pb.dart' as $2;
+import '../../google/protobuf/empty.pb.dart' as $1;
 import 'Auth.pbjson.dart';
 
 export 'Auth.pb.dart';
 
 abstract class AuthControllerServiceBase extends $pb.GeneratedService {
-  $async.Future<$0.AdminAuthResponse> call($pb.ServerContext ctx, $0.AdminAuthRequest request);
+  $async.Future<$1.Empty> register($pb.ServerContext ctx, $2.AdminRegisterRequest request);
+  $async.Future<$1.Empty> signUp($pb.ServerContext ctx, $2.AdminAuthRequest request);
+  $async.Future<$2.AdminAuthResponse> signIn($pb.ServerContext ctx, $2.AdminAuthRequest request);
+  $async.Future<$1.Empty> resetPasswordMail($pb.ServerContext ctx, $2.ResetPasswordRequest request);
+  $async.Future<$1.Empty> updatePassword($pb.ServerContext ctx, $2.UpdatePasswordRequest request);
+  $async.Future<$1.Empty> updateEmail($pb.ServerContext ctx, $2.UpdateEmailRequest request);
 
   $pb.GeneratedMessage createRequest($core.String method) {
     switch (method) {
-      case 'Call': return $0.AdminAuthRequest();
+      case 'Register': return $2.AdminRegisterRequest();
+      case 'SignUp': return $2.AdminAuthRequest();
+      case 'SignIn': return $2.AdminAuthRequest();
+      case 'ResetPasswordMail': return $2.ResetPasswordRequest();
+      case 'UpdatePassword': return $2.UpdatePasswordRequest();
+      case 'UpdateEmail': return $2.UpdateEmailRequest();
       default: throw $core.ArgumentError('Unknown method: $method');
     }
   }
 
   $async.Future<$pb.GeneratedMessage> handleCall($pb.ServerContext ctx, $core.String method, $pb.GeneratedMessage request) {
     switch (method) {
-      case 'Call': return this.call(ctx, request as $0.AdminAuthRequest);
+      case 'Register': return this.register(ctx, request as $2.AdminRegisterRequest);
+      case 'SignUp': return this.signUp(ctx, request as $2.AdminAuthRequest);
+      case 'SignIn': return this.signIn(ctx, request as $2.AdminAuthRequest);
+      case 'ResetPasswordMail': return this.resetPasswordMail(ctx, request as $2.ResetPasswordRequest);
+      case 'UpdatePassword': return this.updatePassword(ctx, request as $2.UpdatePasswordRequest);
+      case 'UpdateEmail': return this.updateEmail(ctx, request as $2.UpdateEmailRequest);
       default: throw $core.ArgumentError('Unknown method: $method');
     }
   }

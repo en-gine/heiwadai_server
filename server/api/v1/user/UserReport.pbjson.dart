@@ -8,7 +8,7 @@
 import 'dart:core' as $core;
 import 'dart:convert' as $convert;
 import 'dart:typed_data' as $typed_data;
-import '../../google/protobuf/empty.pbjson.dart' as $2;
+import '../../google/protobuf/empty.pbjson.dart' as $1;
 
 @$core.Deprecated('Use userReportRequestDescriptor instead')
 const UserReportRequest$json = const {
@@ -31,7 +31,7 @@ const $core.Map<$core.String, $core.dynamic> UserReportControllerServiceBase$jso
 @$core.Deprecated('Use userReportControllerServiceDescriptor instead')
 const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>> UserReportControllerServiceBase$messageJson = const {
   '.server.user.UserReportRequest': UserReportRequest$json,
-  '.google.protobuf.Empty': $2.Empty$json,
+  '.google.protobuf.Empty': $1.Empty$json,
 };
 
 /// Descriptor for `UserReportController`. Decode as a `google.protobuf.ServiceDescriptorProto`.

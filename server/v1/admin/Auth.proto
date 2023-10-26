@@ -1,6 +1,7 @@
 syntax = "proto3";
 
 package server.admin;
+import "google/protobuf/empty.proto";
 
 message AdminAuthRequest {
   string email = 1;
@@ -12,7 +13,31 @@ message AdminAuthResponse {
 	int64 expiresIn = 2;
 	string refreshToken= 3;
 }
+message AdminRegisterRequest {
+  string Name = 1;
+  string Mail = 2;
+  string BelongStoreID = 4;
+}
+
+message ResetPasswordRequest{
+  string email = 1;
+}
+
+message UpdatePasswordRequest{
+  string password = 1;
+  string token = 2;
+}
+
+message UpdateEmailRequest{
+  string email = 1;
+  string token = 2;
+}
 
 service AuthController {
-  rpc Call(AdminAuthRequest) returns (AdminAuthResponse) {}
+  rpc Register(AdminRegisterRequest) returns (google.protobuf.Empty) {}
+  rpc SignUp(AdminAuthRequest) returns (google.protobuf.Empty) {}
+  rpc SignIn(AdminAuthRequest) returns (AdminAuthResponse) {}
+  rpc ResetPasswordMail(ResetPasswordRequest) returns (google.protobuf.Empty) {}
+  rpc UpdatePassword(UpdatePasswordRequest) returns (google.protobuf.Empty) {}
+  rpc UpdateEmail(UpdateEmailRequest) returns (google.protobuf.Empty) {}
 }

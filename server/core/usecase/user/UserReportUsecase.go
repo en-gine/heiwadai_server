@@ -13,7 +13,6 @@ import (
 type UserReportUsecase struct {
 	userQuery            queryservice.IUserQueryService
 	userReportRepository repository.IUserReportRepository
-	userReportQuery      queryservice.IUserReportQueryService
 	sendMailAction       action.ISendMailAction
 }
 

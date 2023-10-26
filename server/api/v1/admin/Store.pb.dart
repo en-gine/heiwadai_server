@@ -10,8 +10,8 @@ import 'dart:core' as $core;
 
 import 'package:protobuf/protobuf.dart' as $pb;
 
-import '../shared/Store.pb.dart' as $1;
-import '../../google/protobuf/empty.pb.dart' as $2;
+import '../shared/Store.pb.dart' as $3;
+import '../../google/protobuf/empty.pb.dart' as $1;
 
 class StoreRegisterRequest extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'StoreRegisterRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'server.admin'), createEmptyInstance: create)
@@ -601,21 +601,21 @@ class StoreControllerApi {
   $pb.RpcClient _client;
   StoreControllerApi(this._client);
 
-  $async.Future<$1.Store> getByID($pb.ClientContext? ctx, SoreIDRequest request) {
-    var emptyResponse = $1.Store();
-    return _client.invoke<$1.Store>(ctx, 'StoreController', 'GetByID', request, emptyResponse);
+  $async.Future<$3.Store> getByID($pb.ClientContext? ctx, SoreIDRequest request) {
+    var emptyResponse = $3.Store();
+    return _client.invoke<$3.Store>(ctx, 'StoreController', 'GetByID', request, emptyResponse);
   }
-  $async.Future<$1.Stores> getAll($pb.ClientContext? ctx, $2.Empty request) {
-    var emptyResponse = $1.Stores();
-    return _client.invoke<$1.Stores>(ctx, 'StoreController', 'GetAll', request, emptyResponse);
+  $async.Future<$3.Stores> getAll($pb.ClientContext? ctx, $1.Empty request) {
+    var emptyResponse = $3.Stores();
+    return _client.invoke<$3.Stores>(ctx, 'StoreController', 'GetAll', request, emptyResponse);
   }
-  $async.Future<$2.Empty> register($pb.ClientContext? ctx, StoreRegisterRequest request) {
-    var emptyResponse = $2.Empty();
-    return _client.invoke<$2.Empty>(ctx, 'StoreController', 'Register', request, emptyResponse);
+  $async.Future<$1.Empty> register($pb.ClientContext? ctx, StoreRegisterRequest request) {
+    var emptyResponse = $1.Empty();
+    return _client.invoke<$1.Empty>(ctx, 'StoreController', 'Register', request, emptyResponse);
   }
-  $async.Future<$2.Empty> update($pb.ClientContext? ctx, StoreUpdateRequest request) {
-    var emptyResponse = $2.Empty();
-    return _client.invoke<$2.Empty>(ctx, 'StoreController', 'Update', request, emptyResponse);
+  $async.Future<$1.Empty> update($pb.ClientContext? ctx, StoreUpdateRequest request) {
+    var emptyResponse = $1.Empty();
+    return _client.invoke<$1.Empty>(ctx, 'StoreController', 'Update', request, emptyResponse);
   }
 }
 

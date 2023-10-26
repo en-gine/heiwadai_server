@@ -10,7 +10,7 @@ import 'dart:core' as $core;
 
 import 'package:protobuf/protobuf.dart' as $pb;
 
-import '../../google/protobuf/empty.pb.dart' as $2;
+import '../../google/protobuf/empty.pb.dart' as $1;
 
 class UserReportRequest extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'UserReportRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'server.user'), createEmptyInstance: create)
@@ -77,9 +77,9 @@ class UserReportControllerApi {
   $pb.RpcClient _client;
   UserReportControllerApi(this._client);
 
-  $async.Future<$2.Empty> send($pb.ClientContext? ctx, UserReportRequest request) {
-    var emptyResponse = $2.Empty();
-    return _client.invoke<$2.Empty>(ctx, 'UserReportController', 'Send', request, emptyResponse);
+  $async.Future<$1.Empty> send($pb.ClientContext? ctx, UserReportRequest request) {
+    var emptyResponse = $1.Empty();
+    return _client.invoke<$1.Empty>(ctx, 'UserReportController', 'Send', request, emptyResponse);
   }
 }
 

@@ -10,28 +10,28 @@ import 'dart:async' as $async;
 import 'package:protobuf/protobuf.dart' as $pb;
 
 import 'dart:core' as $core;
-import '../../google/protobuf/empty.pb.dart' as $2;
-import 'Checkin.pb.dart' as $9;
+import '../../google/protobuf/empty.pb.dart' as $1;
+import 'Checkin.pb.dart' as $10;
 import 'Checkin.pbjson.dart';
 
 export 'Checkin.pb.dart';
 
 abstract class CheckinControllerServiceBase extends $pb.GeneratedService {
-  $async.Future<$9.StampCardResponse> getStampCard($pb.ServerContext ctx, $2.Empty request);
-  $async.Future<$9.CheckinResponse> checkin($pb.ServerContext ctx, $9.CheckinRequest request);
+  $async.Future<$10.StampCardResponse> getStampCard($pb.ServerContext ctx, $1.Empty request);
+  $async.Future<$10.CheckinResponse> checkin($pb.ServerContext ctx, $10.CheckinRequest request);
 
   $pb.GeneratedMessage createRequest($core.String method) {
     switch (method) {
-      case 'GetStampCard': return $2.Empty();
-      case 'Checkin': return $9.CheckinRequest();
+      case 'GetStampCard': return $1.Empty();
+      case 'Checkin': return $10.CheckinRequest();
       default: throw $core.ArgumentError('Unknown method: $method');
     }
   }
 
   $async.Future<$pb.GeneratedMessage> handleCall($pb.ServerContext ctx, $core.String method, $pb.GeneratedMessage request) {
     switch (method) {
-      case 'GetStampCard': return this.getStampCard(ctx, request as $2.Empty);
-      case 'Checkin': return this.checkin(ctx, request as $9.CheckinRequest);
+      case 'GetStampCard': return this.getStampCard(ctx, request as $1.Empty);
+      case 'Checkin': return this.checkin(ctx, request as $10.CheckinRequest);
       default: throw $core.ArgumentError('Unknown method: $method');
     }
   }

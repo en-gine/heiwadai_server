@@ -8,8 +8,8 @@
 import 'dart:core' as $core;
 import 'dart:convert' as $convert;
 import 'dart:typed_data' as $typed_data;
-import '../shared/Store.pbjson.dart' as $1;
-import '../../google/protobuf/empty.pbjson.dart' as $2;
+import '../shared/Store.pbjson.dart' as $3;
+import '../../google/protobuf/empty.pbjson.dart' as $1;
 
 @$core.Deprecated('Use soreIDRequestDescriptor instead')
 const SoreIDRequest$json = const {
@@ -34,12 +34,12 @@ const $core.Map<$core.String, $core.dynamic> StoreControllerServiceBase$json = c
 @$core.Deprecated('Use storeControllerServiceDescriptor instead')
 const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>> StoreControllerServiceBase$messageJson = const {
   '.server.user.SoreIDRequest': SoreIDRequest$json,
-  '.server.shared.Store': $1.Store$json,
-  '.google.protobuf.Empty': $2.Empty$json,
-  '.server.shared.Stores': $1.Stores$json,
-  '.server.shared.StayableStores': $1.StayableStores$json,
-  '.server.shared.StayableStore': $1.StayableStore$json,
-  '.server.shared.StayableStoreInfo': $1.StayableStoreInfo$json,
+  '.server.shared.Store': $3.Store$json,
+  '.google.protobuf.Empty': $1.Empty$json,
+  '.server.shared.Stores': $3.Stores$json,
+  '.server.shared.StayableStores': $3.StayableStores$json,
+  '.server.shared.StayableStore': $3.StayableStore$json,
+  '.server.shared.StayableStoreInfo': $3.StayableStoreInfo$json,
 };
 
 /// Descriptor for `StoreController`. Decode as a `google.protobuf.ServiceDescriptorProto`.

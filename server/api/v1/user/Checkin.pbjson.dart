@@ -8,10 +8,10 @@
 import 'dart:core' as $core;
 import 'dart:convert' as $convert;
 import 'dart:typed_data' as $typed_data;
-import '../../google/protobuf/empty.pbjson.dart' as $2;
-import '../../google/protobuf/timestamp.pbjson.dart' as $5;
-import '../shared/Coupon.pbjson.dart' as $8;
-import '../shared/Store.pbjson.dart' as $1;
+import '../../google/protobuf/empty.pbjson.dart' as $1;
+import '../../google/protobuf/timestamp.pbjson.dart' as $6;
+import '../shared/Coupon.pbjson.dart' as $9;
+import '../shared/Store.pbjson.dart' as $3;
 
 @$core.Deprecated('Use checkinRequestDescriptor instead')
 const CheckinRequest$json = const {
@@ -67,14 +67,14 @@ const $core.Map<$core.String, $core.dynamic> CheckinControllerServiceBase$json =
 
 @$core.Deprecated('Use checkinControllerServiceDescriptor instead')
 const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>> CheckinControllerServiceBase$messageJson = const {
-  '.google.protobuf.Empty': $2.Empty$json,
+  '.google.protobuf.Empty': $1.Empty$json,
   '.server.user.StampCardResponse': StampCardResponse$json,
   '.server.user.CheckinStamp': CheckinStamp$json,
-  '.google.protobuf.Timestamp': $5.Timestamp$json,
+  '.google.protobuf.Timestamp': $6.Timestamp$json,
   '.server.user.CheckinRequest': CheckinRequest$json,
   '.server.user.CheckinResponse': CheckinResponse$json,
-  '.server.shared.Coupon': $8.Coupon$json,
-  '.server.shared.Store': $1.Store$json,
+  '.server.shared.Coupon': $9.Coupon$json,
+  '.server.shared.Store': $3.Store$json,
 };
 
 /// Descriptor for `CheckinController`. Decode as a `google.protobuf.ServiceDescriptorProto`.

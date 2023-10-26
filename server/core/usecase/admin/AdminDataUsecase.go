@@ -29,7 +29,6 @@ func (u *AdminDataUsecase) Update(
 	IsActive bool,
 	Mail string,
 	storeID uuid.UUID,
-	AcceptMail bool, // メルマガ配信可
 ) (*entity.Admin, *errors.DomainError) {
 
 	existAdmin, err := u.adminQuery.GetByID(ID)

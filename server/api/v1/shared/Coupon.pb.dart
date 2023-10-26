@@ -9,8 +9,8 @@ import 'dart:core' as $core;
 
 import 'package:protobuf/protobuf.dart' as $pb;
 
-import '../../google/protobuf/timestamp.pb.dart' as $5;
-import 'Store.pb.dart' as $1;
+import '../../google/protobuf/timestamp.pb.dart' as $6;
+import 'Store.pb.dart' as $3;
 
 import 'Coupon.pbenum.dart';
 
@@ -22,10 +22,10 @@ class Coupon extends $pb.GeneratedMessage {
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'Name', protoName: 'Name')
     ..e<CouponType>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'CouponType', $pb.PbFieldType.OE, protoName: 'CouponType', defaultOrMaker: CouponType.COUPON_STANDARD, valueOf: CouponType.valueOf, enumValues: CouponType.values)
     ..a<$core.int>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'DiscountAmount', $pb.PbFieldType.OU3, protoName: 'DiscountAmount')
-    ..aOM<$5.Timestamp>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'ExpireAt', protoName: 'ExpireAt', subBuilder: $5.Timestamp.create)
+    ..aOM<$6.Timestamp>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'ExpireAt', protoName: 'ExpireAt', subBuilder: $6.Timestamp.create)
     ..aOB(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'IsCombinationable', protoName: 'IsCombinationable')
     ..pPS(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'Notices', protoName: 'Notices')
-    ..pc<$1.Store>(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'TargetStore', $pb.PbFieldType.PM, protoName: 'TargetStore', subBuilder: $1.Store.create)
+    ..pc<$3.Store>(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'TargetStore', $pb.PbFieldType.PM, protoName: 'TargetStore', subBuilder: $3.Store.create)
     ..hasRequiredFields = false
   ;
 
@@ -35,10 +35,10 @@ class Coupon extends $pb.GeneratedMessage {
     $core.String? name,
     CouponType? couponType,
     $core.int? discountAmount,
-    $5.Timestamp? expireAt,
+    $6.Timestamp? expireAt,
     $core.bool? isCombinationable,
     $core.Iterable<$core.String>? notices,
-    $core.Iterable<$1.Store>? targetStore,
+    $core.Iterable<$3.Store>? targetStore,
   }) {
     final _result = create();
     if (iD != null) {
@@ -125,15 +125,15 @@ class Coupon extends $pb.GeneratedMessage {
   void clearDiscountAmount() => clearField(4);
 
   @$pb.TagNumber(5)
-  $5.Timestamp get expireAt => $_getN(4);
+  $6.Timestamp get expireAt => $_getN(4);
   @$pb.TagNumber(5)
-  set expireAt($5.Timestamp v) { setField(5, v); }
+  set expireAt($6.Timestamp v) { setField(5, v); }
   @$pb.TagNumber(5)
   $core.bool hasExpireAt() => $_has(4);
   @$pb.TagNumber(5)
   void clearExpireAt() => clearField(5);
   @$pb.TagNumber(5)
-  $5.Timestamp ensureExpireAt() => $_ensure(4);
+  $6.Timestamp ensureExpireAt() => $_ensure(4);
 
   @$pb.TagNumber(6)
   $core.bool get isCombinationable => $_getBF(5);
@@ -148,6 +148,6 @@ class Coupon extends $pb.GeneratedMessage {
   $core.List<$core.String> get notices => $_getList(6);
 
   @$pb.TagNumber(8)
-  $core.List<$1.Store> get targetStore => $_getList(7);
+  $core.List<$3.Store> get targetStore => $_getList(7);
 }
 

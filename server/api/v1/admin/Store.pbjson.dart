@@ -8,8 +8,8 @@
 import 'dart:core' as $core;
 import 'dart:convert' as $convert;
 import 'dart:typed_data' as $typed_data;
-import '../shared/Store.pbjson.dart' as $1;
-import '../../google/protobuf/empty.pbjson.dart' as $2;
+import '../shared/Store.pbjson.dart' as $3;
+import '../../google/protobuf/empty.pbjson.dart' as $1;
 
 @$core.Deprecated('Use storeRegisterRequestDescriptor instead')
 const StoreRegisterRequest$json = const {
@@ -92,9 +92,9 @@ const $core.Map<$core.String, $core.dynamic> StoreControllerServiceBase$json = c
 @$core.Deprecated('Use storeControllerServiceDescriptor instead')
 const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>> StoreControllerServiceBase$messageJson = const {
   '.server.admin.SoreIDRequest': SoreIDRequest$json,
-  '.server.shared.Store': $1.Store$json,
-  '.google.protobuf.Empty': $2.Empty$json,
-  '.server.shared.Stores': $1.Stores$json,
+  '.server.shared.Store': $3.Store$json,
+  '.google.protobuf.Empty': $1.Empty$json,
+  '.server.shared.Stores': $3.Stores$json,
   '.server.admin.StoreRegisterRequest': StoreRegisterRequest$json,
   '.server.admin.StayableInfo': StayableInfo$json,
   '.server.admin.StoreUpdateRequest': StoreUpdateRequest$json,

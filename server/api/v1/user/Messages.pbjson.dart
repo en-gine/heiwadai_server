@@ -8,7 +8,7 @@
 import 'dart:core' as $core;
 import 'dart:convert' as $convert;
 import 'dart:typed_data' as $typed_data;
-import '../../google/protobuf/timestamp.pbjson.dart' as $5;
+import '../../google/protobuf/timestamp.pbjson.dart' as $6;
 
 @$core.Deprecated('Use messageRequestDescriptor instead')
 const MessageRequest$json = const {
@@ -56,7 +56,7 @@ const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>> MessageCon
   '.server.user.MessageRequest': MessageRequest$json,
   '.server.user.MessagesResponse': MessagesResponse$json,
   '.server.user.MessageResponse': MessageResponse$json,
-  '.google.protobuf.Timestamp': $5.Timestamp$json,
+  '.google.protobuf.Timestamp': $6.Timestamp$json,
 };
 
 /// Descriptor for `MessageController`. Decode as a `google.protobuf.ServiceDescriptorProto`.

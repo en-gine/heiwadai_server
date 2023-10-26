@@ -10,25 +10,25 @@ import 'dart:async' as $async;
 import 'package:protobuf/protobuf.dart' as $pb;
 
 import 'dart:core' as $core;
-import 'UserReport.pb.dart' as $16;
-import '../../google/protobuf/empty.pb.dart' as $2;
+import 'UserReport.pb.dart' as $17;
+import '../../google/protobuf/empty.pb.dart' as $1;
 import 'UserReport.pbjson.dart';
 
 export 'UserReport.pb.dart';
 
 abstract class UserReportControllerServiceBase extends $pb.GeneratedService {
-  $async.Future<$2.Empty> send($pb.ServerContext ctx, $16.UserReportRequest request);
+  $async.Future<$1.Empty> send($pb.ServerContext ctx, $17.UserReportRequest request);
 
   $pb.GeneratedMessage createRequest($core.String method) {
     switch (method) {
-      case 'Send': return $16.UserReportRequest();
+      case 'Send': return $17.UserReportRequest();
       default: throw $core.ArgumentError('Unknown method: $method');
     }
   }
 
   $async.Future<$pb.GeneratedMessage> handleCall($pb.ServerContext ctx, $core.String method, $pb.GeneratedMessage request) {
     switch (method) {
-      case 'Send': return this.send(ctx, request as $16.UserReportRequest);
+      case 'Send': return this.send(ctx, request as $17.UserReportRequest);
       default: throw $core.ArgumentError('Unknown method: $method');
     }
   }

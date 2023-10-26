@@ -8,7 +8,7 @@
 import 'dart:core' as $core;
 import 'dart:convert' as $convert;
 import 'dart:typed_data' as $typed_data;
-import '../../google/protobuf/empty.pbjson.dart' as $2;
+import '../../google/protobuf/empty.pbjson.dart' as $1;
 
 @$core.Deprecated('Use userUpdateDataRequestDescriptor instead')
 const UserUpdateDataRequest$json = const {
@@ -81,7 +81,7 @@ const $core.Map<$core.String, $core.dynamic> UserDataControllerServiceBase$json 
 @$core.Deprecated('Use userDataControllerServiceDescriptor instead')
 const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>> UserDataControllerServiceBase$messageJson = const {
   '.server.admin.UserUpdateDataRequest': UserUpdateDataRequest$json,
-  '.google.protobuf.Empty': $2.Empty$json,
+  '.google.protobuf.Empty': $1.Empty$json,
   '.server.admin.UserDeleteRequest': UserDeleteRequest$json,
 };
 

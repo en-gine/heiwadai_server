@@ -5,15 +5,15 @@ import (
 )
 
 type EnvelopeRQ[T any] struct {
-	XMLName xml.Name `xml:"soapenv:Envelope"`
-	SoapEnv string   `xml:"xmlns:soapenv,attr"`
-	Head    string   `xml:"xmlns:head,attr"`
-	Ns      string   `xml:"xmlns:ns,attr"`
-	Header  Header   `xml:"soapenv:Header"`
-	Body    Body[T]  `xml:"soapenv:Body"`
+	XMLName xml.Name  `xml:"soapenv:Envelope"`
+	SoapEnv string    `xml:"xmlns:soapenv,attr"`
+	Head    string    `xml:"xmlns:head,attr"`
+	Ns      string    `xml:"xmlns:ns,attr"`
+	Header  Header    `xml:"soapenv:Header"`
+	Body    BodyRQ[T] `xml:"soapenv:Body"`
 }
 
-type Body[T any] struct {
+type BodyRQ[T any] struct {
 	XMLName xml.Name `xml:"soapenv:Body"`
 	Content T        `xml:",innerxml"`
 }
@@ -56,7 +56,7 @@ func NewEnvelopeRQ[T any](XMLBody T, UserName string, Password string) EnvelopeR
 				},
 			},
 		},
-		Body: Body[T]{
+		Body: BodyRQ[T]{
 			Content: XMLBody,
 		},
 	}

@@ -23,7 +23,7 @@ func NewPlanUsecase(planQuery queryservice.IPlanQueryService) *PlanUsecase {
 }
 
 func (u *PlanUsecase) Search(
-	stayStore []entity.Store,
+	stayStore []entity.StayableStore,
 	stayFrom time.Time,
 	stayTo time.Time,
 	adult int,

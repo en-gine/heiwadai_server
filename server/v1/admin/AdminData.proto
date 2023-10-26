@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package server.user;
+
+option go_package = "server/api/v1";
+
+message AdminUpdateDataRequest {
+  string ID = 1;
+  string Name = 2;
+  string IsActive = 3;
+  string Mail = 4;
+  string StoreID = 5;
+}
+
+message AdminDataResponse {
+  string ID = 1;
+  string Name = 2;
+  string IsActive = 3;
+  string Mail = 4;
+  string StoreID = 5;
+}
+
+service AdminDataController {
+  rpc Update(AdminUpdateDataRequest) returns (AdminDataResponse) {}
+}

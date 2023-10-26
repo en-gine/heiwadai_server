@@ -20,15 +20,19 @@ var (
 	envMode = env.GetEnv(env.EnvMode)
 )
 
-func Request[TRequestType any, TResultType any](reqBody *TRequestType) (*TResultType, error) {
+func Request[TRequestType any, TResultType any](url string, reqBody *TRequestType) (*TResultType, error) {
 	if user == "" || pass == "" {
 		return nil, errors.New("予約サーバーの認証情報が設定されていません。")
 	}
 
 	reqEnv := common.NewEnvelopeRQ[TRequestType](*reqBody, user, pass)
-	out, _ := xml.MarshalIndent(reqEnv, " ", "  ")
+	out, err := xml.MarshalIndent(reqEnv, " ", "  ")
+	if err != nil {
+		logger.Error(err.Error())
+		return nil, errors.New("リクエストの解析に失敗しました。")
+	}
 	body := xml.Header + string(out)
-	url := "https://test472.tl-lincoln.net/agtapi/v1/crs/CrsAvailableInquiryService"
+
 	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer([]byte(body)))
 	if err != nil {
 		logger.Error(err.Error())
@@ -49,7 +53,7 @@ func Request[TRequestType any, TResultType any](reqBody *TRequestType) (*TResult
 
 	var reader io.Reader
 
-	result := &common.EnvelopeRS[TResultType]{}
+	var result TResultType
 	encoding := res.Header.Get("Content-Encoding")
 
 	if encoding == "gzip" {
@@ -62,10 +66,14 @@ func Request[TRequestType any, TResultType any](reqBody *TRequestType) (*TResult
 		reader = res.Body
 	}
 
-	content, _ := io.ReadAll(reader)
+	content, err := io.ReadAll(reader)
+	if err != nil {
+		logger.Error(err.Error())
+		return nil, errors.New("ストリームをデコード出来ませんでした。")
+	}
 
-	if envMode == "debug" {
-		fmt.Print(string(content))
+	if envMode == "dev" {
+		// fmt.Print(string(content))
 	}
 
 	if res.StatusCode != http.StatusOK {
@@ -74,13 +82,14 @@ func Request[TRequestType any, TResultType any](reqBody *TRequestType) (*TResult
 		return nil, errors.New("予約サーバーがエラーレスポンスを返しました。")
 	}
 
-	err = xml.Unmarshal(content, result)
+	err = xml.Unmarshal(content, &result)
 
 	if err != nil {
 		logger.Errorf("XML Unmarshal error: %s", err)
 		logger.Error(string(content))
 		return nil, errors.New("予約サーバーからのレスポンスの解析に失敗しました。")
 	}
+	// fmt.Printf("result: %+v", result)
 
-	return &result.Body.Content, nil
+	return &result, nil
 }
