@@ -12,8 +12,8 @@ import (
 )
 
 func main() {
-	// Search()
-	Book()
+	Search()
+	// Book()
 }
 
 func Book() {
@@ -87,10 +87,12 @@ func Search() {
 
 	tomorrow := time.Now().Add(2 * 24 * time.Hour)
 	single := entity.RoomTypeSingle
-	rooms := []entity.RoomType{single}
+	double := entity.RoomTypeDouble
+	rooms := []entity.RoomType{single, double}
 	meal := entity.MealType{Morning: true, Dinner: true}
-	// smork := entity.SmokeTypeSmoking
-	// smokes := []entity.SmokeType{smork}
+	smork := entity.SmokeTypeSmoking
+	nonSmoke := entity.SmokeTypeNonSmoking
+	smokes := []entity.SmokeType{smork, nonSmoke}
 	plans, err := p.Search(
 		nil,
 		time.Now(),
@@ -98,7 +100,7 @@ func Search() {
 		1,
 		1,
 		1,
-		nil,
+		&smokes,
 		&meal,
 		&rooms,
 	)

@@ -141,8 +141,8 @@ type RatePlans struct {
 }
 
 type RatePlan struct {
-	EffectiveDate       string              `xml:"EffectiveDate,attr"`
-	ExpireDate          string              `xml:"ExpireDate,attr"`
+	EffectiveDate       util.YYYYMMDD       `xml:"EffectiveDate,attr"`
+	ExpireDate          util.YYYYMMDD       `xml:"ExpireDate,attr"`
 	RatePlanCode        string              `xml:"RatePlanCode,attr"`
 	RatePlanName        string              `xml:"RatePlanName,attr"`
 	RatePlanDescription RatePlanDescription `xml:"RatePlanDescription"`
@@ -217,6 +217,13 @@ type RoomRate struct {
 	Total              Total       `xml:"Total"`
 	GuestCounts        GuestCounts `xml:"GuestCounts"`
 }
+type AvailabilityStatus string
+
+const (
+	AvailableForSale   AvailabilityStatus = "AvailableForSale" // 販売中
+	AvailableOnRequest AvailabilityStatus = "OnRequest"        // 残りわずか
+	AvailableClosedOut AvailabilityStatus = "ClosedOut"        // 売り切れ
+)
 
 type Rates struct {
 	Rate Rate `xml:"Rate"`
@@ -224,7 +231,7 @@ type Rates struct {
 
 type Rate struct {
 	AgeQualifyingCode string `xml:"AgeQualifyingCode,attr"`
-	RoomPricingType   string `xml:"RoomPricingType,attr"`
+	RoomPricingType   string `xml:"RoomPricingType,attr"` // "Per night"：通常プラン
 	Base              Base   `xml:"Base"`
 }
 
