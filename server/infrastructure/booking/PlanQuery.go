@@ -1,6 +1,7 @@
 package booking
 
 import (
+	"errors"
 	"strconv"
 	"time"
 
@@ -9,17 +10,21 @@ import (
 	"server/infrastructure/booking/avail"
 	"server/infrastructure/booking/util"
 	"server/infrastructure/env"
+	"server/infrastructure/logger"
 
 	uuid "github.com/google/uuid"
 )
 
 var _ queryservice.IPlanQueryService = &PlanQuery{}
+var (
+	TLBookingUser      = env.GetEnv(env.TlbookingUsername)
+	TLBookingPass      = env.GetEnv(env.TlbookingPassword)
+	TLBookingSearchURL = env.GetEnv(env.TlbookingAvailApiUrl)
+)
 
 type PlanQuery struct {
 	storeQuery queryservice.IStoreQueryService
 }
-
-var BookURL = env.GetEnv(env.TlbookingAvailApiUrl)
 
 func NewPlanQuery(storeQuery queryservice.IStoreQueryService) *PlanQuery {
 	return &PlanQuery{
@@ -63,19 +68,29 @@ func (p *PlanQuery) Search(
 		roomTypes,
 	)
 
-	res, err := Request[avail.OTAHotelAvailRQ, avail.OTAHotelAvailRS](BookURL, reqBody)
+	request := avail.NewEnvelopeRQ(TLBookingUser, TLBookingPass, reqBody)
+
+	res, err := Request[avail.EnvelopeRQ, avail.EnvelopeRS](TLBookingSearchURL, request)
 	if err != nil {
 		return nil, err
 	}
 
+	if res.Body.OTA_HotelAvailRS.Errors != nil {
+		errs := res.Body.OTA_HotelAvailRS.Errors
+		msg := errs.Error[0].ShortText
+		logger.Error(msg)
+		return nil, errors.New(msg)
+	}
+
 	plans, err := p.AvailRSToPlans(res)
 	if err != nil {
+		logger.Error(err.Error())
 		return nil, err
 	}
 	return plans, nil
 }
 
-func (p *PlanQuery) AvailRSToPlans(res *avail.OTAHotelAvailRS) (*[]entity.Plan, error) {
+func (p *PlanQuery) AvailRSToPlans(res *avail.EnvelopeRS) (*[]entity.Plan, error) {
 	var plans []entity.Plan
 	body := res.Body.OTA_HotelAvailRS
 	for _, roomStay := range body.RoomStays.RoomStay {
@@ -111,7 +126,7 @@ func (p *PlanQuery) AvailRSToPlans(res *avail.OTAHotelAvailRS) (*[]entity.Plan, 
 			}
 
 			var planOverView string = ""
-			if len(*&plan.RatePlanDescription.Text.Value) > 0 {
+			if len(plan.RatePlanDescription.Text.Value) > 0 {
 				planOverView = plan.RatePlanDescription.Text.Value
 			}
 
@@ -151,7 +166,7 @@ func NewOTAHotelAvailRQ(
 	smokeTypes *[]entity.SmokeType,
 	mealType *entity.MealType,
 	roomTypes *[]entity.RoomType,
-) *avail.OTAHotelAvailRQ {
+) *avail.OTA_HotelAvailRQ {
 	// 日付
 	start := util.DateToYYYYMMDD(stayFrom)
 	end := util.DateToYYYYMMDD(stayTo)
@@ -227,7 +242,7 @@ func NewOTAHotelAvailRQ(
 		roomStayCandidates = append(roomStayCandidates, candidate)
 	}
 
-	return &avail.OTAHotelAvailRQ{
+	return &avail.OTA_HotelAvailRQ{
 		Version:       "1.0",
 		PrimaryLangID: "jpn",
 		HotelStayOnly: util.BoolPtr(true), // ホテル情報のみを返すフラグ。trueにしないと返ってこない

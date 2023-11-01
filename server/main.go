@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io"
 	"log"
 	"net/http"
 	"os"
@@ -29,25 +28,7 @@ func main() {
 
 	msg := os.ExpandEnv("${ENV_MODE} mode run! port: ${PORT}")
 	fmt.Println(msg)
-	CheckIP()
+	EchoMyIP()
 	port := env.GetEnv(env.ServerPort)
 	log.Fatal(http.ListenAndServe(":"+port, h2c.NewHandler(mux, &http2.Server{}))) // リフレクションを有効にする
-}
-
-func CheckIP() {
-	url := "http://checkip.dyndns.com/"
-	res, err := http.Get(url)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	defer res.Body.Close()
-	body, err := io.ReadAll(res.Body)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	s := string(body)
-	fmt.Println(s)
 }

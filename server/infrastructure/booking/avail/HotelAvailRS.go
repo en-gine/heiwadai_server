@@ -6,7 +6,7 @@ import (
 	"server/infrastructure/booking/util"
 )
 
-type OTAHotelAvailRS struct {
+type EnvelopeRS struct {
 	XMLName xml.Name `xml:"Envelope"`
 	Body    Body     `xml:"Body"`
 }

@@ -6,8 +6,41 @@ import (
 	"server/infrastructure/booking/util"
 )
 
-type OTAHotelAvailRQ struct {
-	XMLName              xml.Name             `xml:"ns:OTA_HotelAvailRQ"`
+type EnvelopeRQ struct {
+	XMLName xml.Name `xml:"soapenv:Envelope"`
+	SoapEnv string   `xml:"xmlns:soapenv,attr"`
+	Head    string   `xml:"xmlns:head,attr"`
+	Ns      string   `xml:"xmlns:ns,attr"`
+	Header  Header   `xml:"soapenv:Header"`
+	Body    BodyRQ   `xml:"soapenv:Body"`
+}
+
+type Header struct {
+	Interface Interface `xml:"head:Interface"`
+}
+
+type Interface struct {
+	PayloadInfo PayloadInfo `xml:"head:PayloadInfo"`
+}
+
+type PayloadInfo struct {
+	CommDescriptor CommDescriptor `xml:"head:CommDescriptor"`
+}
+
+type CommDescriptor struct {
+	Authentication Authentication `xml:"head:Authentication"`
+}
+
+type Authentication struct {
+	Username string `xml:"head:Username"`
+	Password string `xml:"head:Password"`
+}
+
+type BodyRQ struct {
+	OTA_HotelAvailRQ OTA_HotelAvailRQ `xml:"ns:OTA_HotelAvailRQ"`
+}
+
+type OTA_HotelAvailRQ struct {
 	AvailRequestSegments AvailRequestSegments `xml:"ns:AvailRequestSegments"`
 	Version              string               `xml:"Version,attr"`
 	PrimaryLangID        string               `xml:"PrimaryLangID,attr"`  // デフォルトは"jpn"
@@ -128,3 +161,26 @@ const (
 	AvailReqTypeNonRoom AvailReqType = "NonRoom" // プランのみ検索
 	AvailReqTypeBoth    AvailReqType = "Both"
 )
+
+func NewEnvelopeRQ(UserName string, Password string, AvailRequest *OTA_HotelAvailRQ) *EnvelopeRQ {
+	return &EnvelopeRQ{
+		SoapEnv: "http://schemas.xmlsoap.org/soap/envelope/",
+		Head:    "http://www.seanuts.co.jp/ota/header",
+		Ns:      "http://www.opentravel.org/OTA/2003/05",
+		Header: Header{
+			Interface: Interface{
+				PayloadInfo: PayloadInfo{
+					CommDescriptor: CommDescriptor{
+						Authentication: Authentication{
+							Username: UserName,
+							Password: Password,
+						},
+					},
+				},
+			},
+		},
+		Body: BodyRQ{
+			OTA_HotelAvailRQ: *AvailRequest,
+		},
+	}
+}

@@ -19,16 +19,23 @@ type MealType struct {
 
 func (m MealType) String() string {
 	var mealType string
+	var morning string
+	var dinner string
 
-	morning := "朝食なし"
-	dinner := "夕食なし"
 	if m.Morning {
 		morning = "朝食あり"
+	} else {
+		morning = "朝食なし"
 	}
 	if m.Dinner {
 		dinner = "夕食あり"
+	} else {
+		dinner = "夕食なし"
 	}
 	mealType = morning + dinner
+	if !m.Morning && !m.Dinner {
+		mealType = "食事なし"
+	}
 	return mealType
 }
 
@@ -55,6 +62,25 @@ func (s RoomType) String() string {
 		return "ツイン"
 	case RoomTypeFourth:
 		return "フォース"
+	case RoomTypeUnknown:
+		fallthrough
+	default:
+		return "Unknown"
+	}
+}
+
+func (s RoomType) Code() string {
+	switch s {
+	case RoomTypeSingle:
+		return "Single"
+	case RoomTypeSemiDouble:
+		return "SemiDouble"
+	case RoomTypeDouble:
+		return "Double"
+	case RoomTypeTwin:
+		return "Twin"
+	case RoomTypeFourth:
+		return "Fourth"
 	case RoomTypeUnknown:
 		fallthrough
 	default:
@@ -103,18 +129,22 @@ func IncludeSmokeType(smokeTypeArr []SmokeType, target SmokeType) bool {
 
 func RegenPlan(
 	ID string,
+	Title string,
+	Price uint,
+	ImageURL string,
 	RoomType RoomType,
 	MealType MealType,
-	ImageURL string,
 	SmokeType SmokeType,
 	OverView string,
 	StayableStore StayableStore,
 ) *Plan {
 	return &Plan{
 		ID:        ID,
+		Title:     Title,
+		Price:     Price,
+		ImageURL:  ImageURL,
 		RoomType:  RoomType,
 		MealType:  MealType,
-		ImageURL:  ImageURL,
 		SmokeType: SmokeType,
 		OverView:  OverView,
 		Store:     StayableStore,
