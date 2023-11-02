@@ -3,7 +3,7 @@ package entity
 import "time"
 
 type PlanCalendar struct {
-	Plan
+	Plan       Plan
 	DateStatus []DateStatus
 }
 

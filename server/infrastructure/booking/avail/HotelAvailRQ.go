@@ -88,8 +88,9 @@ type HotelRef struct {
 }
 
 type StayDateRange struct {
-	Start *util.YYYYMMDD `xml:"Start,attr"` // 宿泊開始日
-	End   *util.YYYYMMDD `xml:"End,attr"`   // 宿泊終了日
+	Start    *util.YYYYMMDD `xml:"Start,attr"`    // 宿泊開始日
+	End      *util.YYYYMMDD `xml:"End,attr"`      // 宿泊終了日
+	Duration *string        `xml:"Duration,attr"` // 泊数P{$i}N
 }
 
 type RateRange struct {
@@ -103,6 +104,7 @@ type RatePlanCandidates struct {
 
 type RatePlanCandidate struct {
 	MealsIncluded *MealsIncluded `xml:"ns:MealsIncluded"`
+	RatePlanCode  *string        `xml:"RatePlanCode,attr"`
 }
 
 type MealsIncluded struct {

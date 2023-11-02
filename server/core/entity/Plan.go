@@ -50,6 +50,14 @@ const (
 	RoomTypeUnknown
 )
 
+var RoomTypeAll = []RoomType{
+	RoomTypeSingle,
+	RoomTypeSemiDouble,
+	RoomTypeDouble,
+	RoomTypeTwin,
+	RoomTypeFourth,
+}
+
 func (s RoomType) String() string {
 	switch s {
 	case RoomTypeSingle:

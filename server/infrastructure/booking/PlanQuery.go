@@ -37,23 +37,114 @@ func (p *PlanQuery) GetMyBooking(userID uuid.UUID) (*[]entity.Plan, error) {
 	return nil, nil
 }
 
+func (p *PlanQuery) GetMyPlanByID(userID uuid.UUID, planID string) (*entity.Plan, error) {
+	return nil, nil
+}
+
 func (p *PlanQuery) GetCalendar(
 	planID string,
 	storeID uuid.UUID,
-	dateFrom time.Time,
-	dateTo time.Time,
-) (*[]entity.PlanCalendar, error) {
+	night int,
+	adult int,
+	child int,
+	roomCount int,
+	smokeTypes *[]entity.SmokeType,
+	mealType *entity.MealType,
+	roomType *entity.RoomType,
+	fromDate time.Time,
+	toDate time.Time,
+) (*entity.PlanCalendar, error) {
 	store, err := p.storeQuery.GetStayableByID(storeID)
 	if err != nil {
 		return nil, err
 	}
-	bookingID := store.BookingSystemID
+	hotelCode := store.BookingSystemID
 
 	if env.GetEnv(env.TlbookingIsTest) == "true" {
-		bookingID = "E69502"
+		hotelCode = "E69502"
+		planID = "14030824"
 	}
-	fmt.Print(bookingID)
-	return nil, nil
+
+	type result struct {
+		planCalendar *[]entity.PlanCalendar
+		err          error
+	}
+
+	mealsIncluded := MealTypeToQuery(mealType)
+
+	roomStayCandidate := NewRoomStayCandidate(
+		roomType,
+		adult,
+		&child,
+		roomCount,
+		smokeTypes,
+		&fromDate,
+		&toDate,
+	)
+
+	nightFormat := fmt.Sprintf("P%dN", night)
+	reqBody := &avail.OTA_HotelAvailRQ{
+		Version:        "1.0",
+		PrimaryLangID:  "jpn",
+		AvailRatesOnly: util.BoolPtr(true),
+		AvailRequestSegments: avail.AvailRequestSegments{
+			AvailRequestSegment: avail.AvailRequestSegment{
+				HotelSearchCriteria: avail.HotelSearchCriteria{
+					Criterion: avail.Criterion{
+						HotelRef: []avail.HotelRef{
+							{HotelCode: hotelCode},
+						},
+						RatePlanCandidates: &avail.RatePlanCandidates{ // 食事タイプ
+							RatePlanCandidate: []avail.RatePlanCandidate{
+								{
+									MealsIncluded: mealsIncluded,
+								},
+							},
+						},
+						StayDateRange: &avail.StayDateRange{
+							Duration: &nightFormat,
+						},
+						RoomStayCandidates: &avail.RoomStayCandidates{
+							RoomStayCandidate: []avail.RoomStayCandidate{
+								*roomStayCandidate,
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	request := avail.NewEnvelopeRQ(TLBookingUser, TLBookingPass, reqBody)
+
+	res, err := Request[avail.EnvelopeRQ, avail.EnvelopeRS](TLBookingSearchURL, request)
+	if err != nil {
+		return nil, err
+	}
+
+	if res.Body.OTA_HotelAvailRS.Errors != nil {
+		errs := res.Body.OTA_HotelAvailRS.Errors
+		msg := errs.Error[0].ShortText
+		logger.Error(msg)
+		return nil, errors.New(msg)
+	}
+
+	plans, err := p.AvailRSToPlans(res)
+	if err != nil {
+		logger.Error(err.Error())
+		return nil, err
+	}
+	plan := (*plans)[0]
+	statases, err := p.AvailRSToCalendarStatus(res)
+	if err != nil {
+		logger.Error(err.Error())
+		return nil, err
+	}
+
+	return &entity.PlanCalendar{
+		Plan:       plan,
+		DateStatus: *statases,
+	}, nil
 }
 
 func (p *PlanQuery) Search(
@@ -73,12 +164,7 @@ func (p *PlanQuery) Search(
 	}
 
 	if roomTypes == nil || len(*roomTypes) == 0 {
-		roomTypes = &[]entity.RoomType{
-			entity.RoomTypeSingle,
-			entity.RoomTypeDouble,
-			entity.RoomTypeTwin,
-			entity.RoomTypeFourth,
-		}
+		roomTypes = &entity.RoomTypeAll
 	}
 
 	if env.GetEnv(env.TlbookingIsTest) == "true" {
@@ -211,6 +297,28 @@ func (p *PlanQuery) AvailRSToPlans(res *avail.EnvelopeRS) (*[]entity.Plan, error
 	return &plans, nil
 }
 
+func (p *PlanQuery) AvailRSToCalendarStatus(res *avail.EnvelopeRS) (*[]entity.DateStatus, error) {
+	var dateStatuses []entity.DateStatus
+	body := res.Body.OTA_HotelAvailRS
+	for _, roomStay := range body.RoomStays.RoomStay {
+		for _, roomRate := range roomStay.RoomRates.RoomRate {
+			amount := roomRate.Total.AmountAfterTax
+			var planPrice uint64
+			planPrice, _ = strconv.ParseUint(amount, 10, 64)
+			date, err := util.YYYYMMDDToDate(roomRate.EffectiveDate)
+			if err != nil {
+				return nil, err
+			}
+			dateStatus := entity.DateStatus{
+				Date:  date,
+				Price: uint(planPrice),
+			}
+			dateStatuses = append(dateStatuses, dateStatus)
+		}
+	}
+	return &dateStatuses, nil
+}
+
 func NewOTAHotelAvailRQ(
 	hotelCodes []string,
 	stayFrom time.Time,
@@ -231,6 +339,61 @@ func NewOTAHotelAvailRQ(
 	for _, hotelCode := range hotelCodes {
 		hotelRef = append(hotelRef, avail.HotelRef{HotelCode: hotelCode})
 	}
+
+	mealsIncluded := MealTypeToQuery(mealType)
+
+	roomStayCandidate := NewRoomStayCandidate(
+		roomType,
+		adult,
+		&child,
+		roomCount,
+		smokeTypes,
+		nil, // EffectiveDate
+		nil, // ExpireDate
+	)
+
+	return &avail.OTA_HotelAvailRQ{
+		Version:       "1.0",
+		PrimaryLangID: "jpn",
+		HotelStayOnly: util.BoolPtr(true), // ホテル情報のみを返すフラグ。trueにしないと返ってこない
+		PricingMethod: avail.PricingMethodLowestperstay,
+		AvailRequestSegments: avail.AvailRequestSegments{
+			AvailRequestSegment: avail.AvailRequestSegment{
+				HotelSearchCriteria: avail.HotelSearchCriteria{
+					Criterion: avail.Criterion{
+						HotelRef: hotelRef,
+						RatePlanCandidates: &avail.RatePlanCandidates{ // 食事タイプ
+							RatePlanCandidate: []avail.RatePlanCandidate{
+								{
+									MealsIncluded: mealsIncluded,
+								},
+							},
+						},
+						StayDateRange: &avail.StayDateRange{
+							Start: &start,
+							End:   &end,
+						},
+						RoomStayCandidates: &avail.RoomStayCandidates{
+							RoomStayCandidate: []avail.RoomStayCandidate{
+								*roomStayCandidate,
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func NewRoomStayCandidate(
+	roomType *entity.RoomType,
+	adult int,
+	child *int,
+	roomCount int,
+	smokeTypes *[]entity.SmokeType,
+	effectiveDate *time.Time,
+	expireDate *time.Time,
+) *avail.RoomStayCandidate {
 	// True：禁煙、False：喫煙、省略：条件指定なし
 	var nonSmokingQuery *bool
 	if smokeTypes == nil {
@@ -244,22 +407,8 @@ func NewOTAHotelAvailRQ(
 		nonSmokingQuery = nil
 	}
 
-	// 部屋プラン検索
-	var roomStayCandidates []avail.RoomStayCandidate
-	var bedTypeCode *avail.BedTypeCode
-
-	var mealMorning *bool
-	var mealDinner *bool
-	if mealType != nil {
-		mealMorning = &mealType.Morning
-		mealDinner = &mealType.Dinner
-	} else {
-		mealMorning = nil
-		mealDinner = nil
-	}
-
-	bedTypeCode = RoomTypeToBedType(roomType)
-	candidate := avail.RoomStayCandidate{
+	bedTypeCode := RoomTypeToBedType(roomType)
+	candidate := &avail.RoomStayCandidate{
 		Quantity:    &roomCount,
 		BedTypeCode: bedTypeCode,
 		NonSmoking:  nonSmokingQuery,
@@ -272,79 +421,24 @@ func NewOTAHotelAvailRQ(
 			},
 		},
 	}
-	roomStayCandidates = append(roomStayCandidates, candidate)
-
-	return &avail.OTA_HotelAvailRQ{
-		Version:       "1.0",
-		PrimaryLangID: "jpn",
-		HotelStayOnly: util.BoolPtr(true), // ホテル情報のみを返すフラグ。trueにしないと返ってこない
-		PricingMethod: avail.PricingMethodLowestperstay,
-		AvailRequestSegments: avail.AvailRequestSegments{
-			AvailRequestSegment: avail.AvailRequestSegment{
-				HotelSearchCriteria: avail.HotelSearchCriteria{
-					Criterion: avail.Criterion{
-						HotelRef: hotelRef,
-						RatePlanCandidates: &avail.RatePlanCandidates{ // 食事タイプ
-							RatePlanCandidate: []avail.RatePlanCandidate{
-								{
-									MealsIncluded: &avail.MealsIncluded{
-										Breakfast: mealMorning,
-										Dinner:    mealDinner,
-									},
-								},
-							},
-						},
-						StayDateRange: &avail.StayDateRange{
-							Start: &start,
-							End:   &end,
-						},
-						RoomStayCandidates: &avail.RoomStayCandidates{
-							RoomStayCandidate: roomStayCandidates,
-						},
-					},
-				},
-			},
-		},
+	if child != nil && *child > 0 {
+		candidate.GuestCounts.GuestCount = append(candidate.GuestCounts.GuestCount, avail.GuestCount{
+			AgeQualifyingCode: avail.AgeQualifyingChild,
+			Count:             *child,
+		})
 	}
+	if effectiveDate != nil {
+		effective := util.DateToYYYYMMDD(*effectiveDate)
+		candidate.EffectiveDate = &effective
+	}
+	if expireDate != nil {
+		expire := util.DateToYYYYMMDD(*expireDate)
+		candidate.ExpireDate = &expire
+	}
+	return candidate
 }
 
-func NewPlanCalendarRQ(
-	hotelCodes []string,
-	stayFrom time.Time,
-	stayTo time.Time,
-	roomCount int,
-	adult int,
-	child int,
-	smokeTypes *[]entity.SmokeType,
-	mealType *entity.MealType,
-	roomTypes *[]entity.RoomType,
-) *avail.OTA_HotelAvailRQ {
-	// 日付
-	start := util.DateToYYYYMMDD(stayFrom)
-	end := util.DateToYYYYMMDD(stayTo)
-
-	// ホテルコード
-	var hotelRef []avail.HotelRef
-	for _, hotelCode := range hotelCodes {
-		hotelRef = append(hotelRef, avail.HotelRef{HotelCode: hotelCode})
-	}
-	// True：禁煙、False：喫煙、省略：条件指定なし
-	var nonSmokingQuery *bool
-	if smokeTypes == nil {
-		nonSmokingQuery = nil
-	} else if entity.IncludeSmokeType(*smokeTypes, entity.SmokeTypeNonSmoking) {
-		nonSmokingQuery = util.BoolPtr(true)
-	} else if entity.IncludeSmokeType(*smokeTypes, entity.SmokeTypeSmoking) {
-		nonSmokingQuery = util.BoolPtr(false)
-	} else if entity.IncludeSmokeType(*smokeTypes, entity.SmokeTypeNonSmoking) && entity.IncludeSmokeType(*smokeTypes, entity.SmokeTypeSmoking) {
-		// 禁煙喫煙両方の場合は条件指定なし
-		nonSmokingQuery = nil
-	}
-
-	// 部屋プラン検索
-	var roomStayCandidates []avail.RoomStayCandidate
-	// var bedTypeCode *avail.BedTypeCode
-
+func MealTypeToQuery(mealType *entity.MealType) *avail.MealsIncluded {
 	var mealMorning *bool
 	var mealDinner *bool
 	if mealType != nil {
@@ -354,57 +448,9 @@ func NewPlanCalendarRQ(
 		mealMorning = nil
 		mealDinner = nil
 	}
-
-	candidate := avail.RoomStayCandidate{
-		Quantity:    &roomCount,
-		NonSmoking:  nonSmokingQuery,
-		BedTypeCode: nil,
-		GuestCounts: &avail.GuestCounts{
-			GuestCount: []avail.GuestCount{
-				{
-					AgeQualifyingCode: avail.AgeQualifyingAdult,
-					Count:             adult,
-				},
-				{
-					AgeQualifyingCode: avail.AgeQualifyingChild,
-					Count:             child,
-				},
-			},
-		},
-	}
-	fmt.Print(candidate)
-
-	return &avail.OTA_HotelAvailRQ{
-		Version:       "1.0",
-		PrimaryLangID: "jpn",
-		HotelStayOnly: util.BoolPtr(true), // ホテル情報のみを返すフラグ。trueにしないと返ってこない
-		PricingMethod: avail.PricingMethodLowestperstay,
-		AvailRequestSegments: avail.AvailRequestSegments{
-			AvailRequestSegment: avail.AvailRequestSegment{
-				HotelSearchCriteria: avail.HotelSearchCriteria{
-					Criterion: avail.Criterion{
-						HotelRef: hotelRef,
-						RatePlanCandidates: &avail.RatePlanCandidates{ // 食事タイプ
-							RatePlanCandidate: []avail.RatePlanCandidate{
-								{
-									MealsIncluded: &avail.MealsIncluded{
-										Breakfast: mealMorning,
-										Dinner:    mealDinner,
-									},
-								},
-							},
-						},
-						StayDateRange: &avail.StayDateRange{
-							Start: &start,
-							End:   &end,
-						},
-						RoomStayCandidates: &avail.RoomStayCandidates{
-							RoomStayCandidate: roomStayCandidates,
-						},
-					},
-				},
-			},
-		},
+	return &avail.MealsIncluded{
+		Breakfast: mealMorning,
+		Dinner:    mealDinner,
 	}
 }
 

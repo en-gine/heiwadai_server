@@ -26,3 +26,7 @@ func StringToYYYYMMDD(dateStr string) (*YYYYMMDD, error) {
 	formated := DateToYYYYMMDD(date)
 	return &formated, nil
 }
+
+func YYYYMMDDToDate(str YYYYMMDD) (time.Time, error) {
+	return time.Parse("2006-01-02", str.ToString())
+}

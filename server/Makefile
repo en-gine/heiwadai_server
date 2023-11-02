@@ -72,4 +72,4 @@ seeder-server:
 	cd /server/db/seeder && go run . -OnlyServer
 
 book:
-	go run /server/booking/.
+	go run /server/bookingTest/.

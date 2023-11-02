@@ -209,13 +209,15 @@ type RoomRates struct {
 }
 
 type RoomRate struct {
-	AvailabilityStatus string      `xml:"AvailabilityStatus,attr"`
-	NumberOfUnits      string      `xml:"NumberOfUnits,attr"`
-	RatePlanCode       string      `xml:"RatePlanCode,attr"`
-	RoomTypeCode       string      `xml:"RoomTypeCode,attr"`
-	Rates              Rates       `xml:"Rates"`
-	Total              Total       `xml:"Total"`
-	GuestCounts        GuestCounts `xml:"GuestCounts"`
+	AvailabilityStatus string        `xml:"AvailabilityStatus,attr"`
+	NumberOfUnits      string        `xml:"NumberOfUnits,attr"`
+	RatePlanCode       string        `xml:"RatePlanCode,attr"`
+	RoomTypeCode       string        `xml:"RoomTypeCode,attr"`
+	EffectiveDate      util.YYYYMMDD `xml:"EffectiveDate,attr"`
+	ExpireDate         util.YYYYMMDD `xml:"ExpireDate,attr"`
+	Rates              Rates         `xml:"Rates"`
+	Total              Total         `xml:"Total"`
+	GuestCounts        GuestCounts   `xml:"GuestCounts"`
 }
 type AvailabilityStatus string
 
@@ -226,7 +228,7 @@ const (
 )
 
 type Rates struct {
-	Rate Rate `xml:"Rate"`
+	Rate []Rate `xml:"Rate"`
 }
 
 type Rate struct {
