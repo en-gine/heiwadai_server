@@ -155,6 +155,62 @@ CREATE TABLE user_report (
     update_at TIMESTAMPTZ NOT NULL default now(),
     FOREIGN KEY (user_id) REFERENCES user_data (user_id)
 );
+
+CREATE TABLE book_guest_data (
+    id UUID PRIMARY KEY,
+    first_name VARCHAR(255) NOT NULL,
+    last_name VARCHAR(255) NOT NULL,
+    first_name_kana VARCHAR(255) NOT NULL,
+    last_name_kana VARCHAR(255) NOT NULL,
+    company_name VARCHAR(255),
+    birth_date DATE NOT NULL,
+    zip_code VARCHAR(7),
+    prefecture INTEGER NOT NULL,
+    city VARCHAR(255),
+    address TEXT,
+    tel VARCHAR(15),
+    mail VARCHAR(255) NOT NULL,
+    create_at TIMESTAMPTZ NOT NULL default now(),
+    update_at TIMESTAMPTZ NOT NULL default now()
+);
+
+CREATE TABLE book_plan (
+    id UUID PRIMARY KEY,
+    plan_id VARCHAR(255) NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    price INTEGER NOT NULL CHECK (price >= 0),
+    image_url VARCHAR(255) NOT NULL,
+    room_type INTEGER NOT NULL,
+    meal_type_morning BOOLEAN NOT NULL,
+    meal_type_dinner BOOLEAN NOT NULL,
+    smoke_type INTEGER NOT NULL,
+    overview TEXT NOT NULL,
+    store_id UUID NOT NULL,
+    create_at TIMESTAMPTZ NOT NULL default now(),
+    update_at TIMESTAMPTZ NOT NULL default now(),
+    FOREIGN KEY (store_id) REFERENCES store(id)
+);
+
+CREATE TABLE user_book (
+    id UUID PRIMARY KEY,
+    tl_booking_number VARCHAR(255) NOT NULL,
+    stay_from TIMESTAMP NOT NULL,
+    stay_to TIMESTAMP NOT NULL,
+    adult INTEGER NOT NULL CHECK (adult >= 0),
+    child INTEGER NOT NULL CHECK (child >= 0),
+    room_count INTEGER NOT NULL CHECK (room_count > 0),
+    check_in_time VARCHAR NOT NULL,
+    total_cost INTEGER NOT NULL CHECK (total_cost >= 0),
+    guest_data_id UUID NOT NULL,
+    book_plan_id UUID NOT NULL,
+    book_user_id UUID NOT NULL,
+    note TEXT,
+    create_at TIMESTAMPTZ NOT NULL default now(),
+    update_at TIMESTAMPTZ NOT NULL default now(),
+    FOREIGN KEY (book_user_id) REFERENCES user_data(user_id),
+    FOREIGN KEY (guest_data_id) REFERENCES book_guest_data(id) ON DELETE CASCADE,
+    FOREIGN KEY (book_plan_id) REFERENCES book_plan(id) ON DELETE CASCADE
+);
 --- userが作成されるたびに、userテーブルにもidとemailをinsertする
 create or replace function public.handle_new_user() 
 returns trigger as $$
@@ -197,3 +253,25 @@ $$ language plpgsql security definer;
 CREATE TRIGGER delete_public_user_trigger
 AFTER DELETE ON auth.users
 FOR EACH ROW EXECUTE FUNCTION delete_public_user();
+
+-- 予約用シーケンスを作成
+CREATE SEQUENCE booking_number_sequence;
+
+CREATE OR REPLACE FUNCTION generate_booking_number()
+RETURNS TEXT AS $$
+DECLARE
+  current_date_str VARCHAR(8);
+  sequence_number BIGINT;
+BEGIN
+  -- 現在の日付を'YYYYMMDD'形式の文字列として取得
+  current_date_str := TO_CHAR(NOW(), 'YYYYMMDD');
+  
+  -- シーケンスを使用して連番を取得 (シーケンスは別途作成)
+  sequence_number := NEXTVAL('booking_number_sequence');
+  
+  -- 日付の文字列と9桁の0埋めされた連番を結合
+  RETURN current_date_str || LPAD(sequence_number::TEXT, 9, '0');
+END;
+$$ LANGUAGE plpgsql;
+
+

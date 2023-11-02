@@ -771,6 +771,84 @@ func testUserDatumToManyUserCouponAttachedUsers(t *testing.T) {
 	}
 }
 
+func testUserDatumToManyBookUserUserBooks(t *testing.T) {
+	var err error
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+
+	var a UserDatum
+	var b, c UserBook
+
+	seed := randomize.NewSeed()
+	if err = randomize.Struct(seed, &a, userDatumDBTypes, true, userDatumColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize UserDatum struct: %s", err)
+	}
+
+	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	if err = randomize.Struct(seed, &b, userBookDBTypes, false, userBookColumnsWithDefault...); err != nil {
+		t.Fatal(err)
+	}
+	if err = randomize.Struct(seed, &c, userBookDBTypes, false, userBookColumnsWithDefault...); err != nil {
+		t.Fatal(err)
+	}
+
+	b.BookUserID = a.UserID
+	c.BookUserID = a.UserID
+
+	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+	if err = c.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	check, err := a.BookUserUserBooks().All(ctx, tx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	bFound, cFound := false, false
+	for _, v := range check {
+		if v.BookUserID == b.BookUserID {
+			bFound = true
+		}
+		if v.BookUserID == c.BookUserID {
+			cFound = true
+		}
+	}
+
+	if !bFound {
+		t.Error("expected to find b")
+	}
+	if !cFound {
+		t.Error("expected to find c")
+	}
+
+	slice := UserDatumSlice{&a}
+	if err = a.L.LoadBookUserUserBooks(ctx, tx, false, (*[]*UserDatum)(&slice), nil); err != nil {
+		t.Fatal(err)
+	}
+	if got := len(a.R.BookUserUserBooks); got != 2 {
+		t.Error("number of eager loaded records wrong, got:", got)
+	}
+
+	a.R.BookUserUserBooks = nil
+	if err = a.L.LoadBookUserUserBooks(ctx, tx, true, &a, nil); err != nil {
+		t.Fatal(err)
+	}
+	if got := len(a.R.BookUserUserBooks); got != 2 {
+		t.Error("number of eager loaded records wrong, got:", got)
+	}
+
+	if t.Failed() {
+		t.Logf("%#v", check)
+	}
+}
+
 func testUserDatumToManyUserUserReports(t *testing.T) {
 	var err error
 	ctx := context.Background()
@@ -1167,6 +1245,81 @@ func testUserDatumToManyAddOpUserCouponAttachedUsers(t *testing.T) {
 		}
 
 		count, err := a.UserCouponAttachedUsers().Count(ctx, tx)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if want := int64((i + 1) * 2); count != want {
+			t.Error("want", want, "got", count)
+		}
+	}
+}
+func testUserDatumToManyAddOpBookUserUserBooks(t *testing.T) {
+	var err error
+
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+
+	var a UserDatum
+	var b, c, d, e UserBook
+
+	seed := randomize.NewSeed()
+	if err = randomize.Struct(seed, &a, userDatumDBTypes, false, strmangle.SetComplement(userDatumPrimaryKeyColumns, userDatumColumnsWithoutDefault)...); err != nil {
+		t.Fatal(err)
+	}
+	foreigners := []*UserBook{&b, &c, &d, &e}
+	for _, x := range foreigners {
+		if err = randomize.Struct(seed, x, userBookDBTypes, false, strmangle.SetComplement(userBookPrimaryKeyColumns, userBookColumnsWithoutDefault)...); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+	if err = c.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	foreignersSplitByInsertion := [][]*UserBook{
+		{&b, &c},
+		{&d, &e},
+	}
+
+	for i, x := range foreignersSplitByInsertion {
+		err = a.AddBookUserUserBooks(ctx, tx, i != 0, x...)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		first := x[0]
+		second := x[1]
+
+		if a.UserID != first.BookUserID {
+			t.Error("foreign key was wrong value", a.UserID, first.BookUserID)
+		}
+		if a.UserID != second.BookUserID {
+			t.Error("foreign key was wrong value", a.UserID, second.BookUserID)
+		}
+
+		if first.R.BookUser != &a {
+			t.Error("relationship was not added properly to the foreign slice")
+		}
+		if second.R.BookUser != &a {
+			t.Error("relationship was not added properly to the foreign slice")
+		}
+
+		if a.R.BookUserUserBooks[i*2] != first {
+			t.Error("relationship struct slice not set to correct value")
+		}
+		if a.R.BookUserUserBooks[i*2+1] != second {
+			t.Error("relationship struct slice not set to correct value")
+		}
+
+		count, err := a.BookUserUserBooks().Count(ctx, tx)
 		if err != nil {
 			t.Fatal(err)
 		}

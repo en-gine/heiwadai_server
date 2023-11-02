@@ -59,7 +59,7 @@ func Book() {
 		meal,
 		smork,
 		"広々とした部屋です。",
-		*stores[0],
+		*&stores[0].ID,
 	)
 
 	bookData := entity.CreateBooking(
@@ -74,7 +74,7 @@ func Book() {
 		plan,
 		uuid.New(),
 		"駐車場利用します")
-	err = p.Book(bookData)
+	err = p.Book(bookData, "20231102000000001")
 	if err != nil {
 		fmt.Print(err)
 		return

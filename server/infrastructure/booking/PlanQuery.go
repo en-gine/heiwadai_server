@@ -37,10 +37,6 @@ func (p *PlanQuery) GetMyBooking(userID uuid.UUID) (*[]entity.Plan, error) {
 	return nil, nil
 }
 
-func (p *PlanQuery) GetMyPlanByID(userID uuid.UUID, planID string) (*entity.Plan, error) {
-	return nil, nil
-}
-
 func (p *PlanQuery) GetCalendar(
 	planID string,
 	storeID uuid.UUID,
@@ -286,7 +282,7 @@ func (p *PlanQuery) AvailRSToPlans(res *avail.EnvelopeRS) (*[]entity.Plan, error
 				},
 				SmokeType: smokeType,
 				OverView:  planOverView,
-				Store:     *stayable,
+				StoreID:   stayable.ID,
 			}
 
 			plans = append(plans, plan)

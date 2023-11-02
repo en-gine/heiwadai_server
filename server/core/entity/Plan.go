@@ -1,5 +1,7 @@
 package entity
 
+import "github.com/google/uuid"
+
 type Plan struct {
 	ID        string
 	Title     string
@@ -9,7 +11,7 @@ type Plan struct {
 	MealType  MealType
 	SmokeType SmokeType
 	OverView  string
-	Store     StayableStore
+	StoreID   uuid.UUID
 }
 
 type MealType struct {
@@ -144,7 +146,7 @@ func RegenPlan(
 	MealType MealType,
 	SmokeType SmokeType,
 	OverView string,
-	StayableStore StayableStore,
+	StoreID uuid.UUID,
 ) *Plan {
 	return &Plan{
 		ID:        ID,
@@ -155,6 +157,6 @@ func RegenPlan(
 		MealType:  MealType,
 		SmokeType: SmokeType,
 		OverView:  OverView,
-		Store:     StayableStore,
+		StoreID:   StoreID,
 	}
 }

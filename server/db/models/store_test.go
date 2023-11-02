@@ -694,6 +694,84 @@ func testStoreToManyBelongToAdmins(t *testing.T) {
 	}
 }
 
+func testStoreToManyBookPlans(t *testing.T) {
+	var err error
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+
+	var a Store
+	var b, c BookPlan
+
+	seed := randomize.NewSeed()
+	if err = randomize.Struct(seed, &a, storeDBTypes, true, storeColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Store struct: %s", err)
+	}
+
+	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	if err = randomize.Struct(seed, &b, bookPlanDBTypes, false, bookPlanColumnsWithDefault...); err != nil {
+		t.Fatal(err)
+	}
+	if err = randomize.Struct(seed, &c, bookPlanDBTypes, false, bookPlanColumnsWithDefault...); err != nil {
+		t.Fatal(err)
+	}
+
+	b.StoreID = a.ID
+	c.StoreID = a.ID
+
+	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+	if err = c.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	check, err := a.BookPlans().All(ctx, tx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	bFound, cFound := false, false
+	for _, v := range check {
+		if v.StoreID == b.StoreID {
+			bFound = true
+		}
+		if v.StoreID == c.StoreID {
+			cFound = true
+		}
+	}
+
+	if !bFound {
+		t.Error("expected to find b")
+	}
+	if !cFound {
+		t.Error("expected to find c")
+	}
+
+	slice := StoreSlice{&a}
+	if err = a.L.LoadBookPlans(ctx, tx, false, (*[]*Store)(&slice), nil); err != nil {
+		t.Fatal(err)
+	}
+	if got := len(a.R.BookPlans); got != 2 {
+		t.Error("number of eager loaded records wrong, got:", got)
+	}
+
+	a.R.BookPlans = nil
+	if err = a.L.LoadBookPlans(ctx, tx, true, &a, nil); err != nil {
+		t.Fatal(err)
+	}
+	if got := len(a.R.BookPlans); got != 2 {
+		t.Error("number of eager loaded records wrong, got:", got)
+	}
+
+	if t.Failed() {
+		t.Logf("%#v", check)
+	}
+}
+
 func testStoreToManyCheckins(t *testing.T) {
 	var err error
 	ctx := context.Background()
@@ -916,6 +994,81 @@ func testStoreToManyAddOpBelongToAdmins(t *testing.T) {
 		}
 
 		count, err := a.BelongToAdmins().Count(ctx, tx)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if want := int64((i + 1) * 2); count != want {
+			t.Error("want", want, "got", count)
+		}
+	}
+}
+func testStoreToManyAddOpBookPlans(t *testing.T) {
+	var err error
+
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+
+	var a Store
+	var b, c, d, e BookPlan
+
+	seed := randomize.NewSeed()
+	if err = randomize.Struct(seed, &a, storeDBTypes, false, strmangle.SetComplement(storePrimaryKeyColumns, storeColumnsWithoutDefault)...); err != nil {
+		t.Fatal(err)
+	}
+	foreigners := []*BookPlan{&b, &c, &d, &e}
+	for _, x := range foreigners {
+		if err = randomize.Struct(seed, x, bookPlanDBTypes, false, strmangle.SetComplement(bookPlanPrimaryKeyColumns, bookPlanColumnsWithoutDefault)...); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+	if err = c.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	foreignersSplitByInsertion := [][]*BookPlan{
+		{&b, &c},
+		{&d, &e},
+	}
+
+	for i, x := range foreignersSplitByInsertion {
+		err = a.AddBookPlans(ctx, tx, i != 0, x...)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		first := x[0]
+		second := x[1]
+
+		if a.ID != first.StoreID {
+			t.Error("foreign key was wrong value", a.ID, first.StoreID)
+		}
+		if a.ID != second.StoreID {
+			t.Error("foreign key was wrong value", a.ID, second.StoreID)
+		}
+
+		if first.R.Store != &a {
+			t.Error("relationship was not added properly to the foreign slice")
+		}
+		if second.R.Store != &a {
+			t.Error("relationship was not added properly to the foreign slice")
+		}
+
+		if a.R.BookPlans[i*2] != first {
+			t.Error("relationship struct slice not set to correct value")
+		}
+		if a.R.BookPlans[i*2+1] != second {
+			t.Error("relationship struct slice not set to correct value")
+		}
+
+		count, err := a.BookPlans().Count(ctx, tx)
 		if err != nil {
 			t.Fatal(err)
 		}

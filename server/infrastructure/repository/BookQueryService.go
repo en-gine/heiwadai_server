@@ -1,0 +1,111 @@
+package repository
+
+import (
+	"context"
+	"database/sql"
+
+	"server/core/entity"
+	queryservice "server/core/infra/queryService"
+	"server/db/models"
+
+	"github.com/google/uuid"
+)
+
+var _ queryservice.IBookQueryService = &BookQueryService{}
+
+type BookQueryService struct {
+	db *sql.DB
+}
+
+func NewBookQueryService() *BookQueryService {
+	db := InitDB()
+
+	return &BookQueryService{
+		db: db,
+	}
+}
+
+func (pq *BookQueryService) GetMyBooking(userID uuid.UUID) ([]*entity.Booking, error) {
+	books, err := models.UserBooks(models.UserBookWhere.BookUserID.EQ(userID.String())).All(context.Background(), pq.db)
+	var entities []*entity.Booking
+	for _, book := range books {
+		guest := book.R.GuestDatum
+		plan := book.R.BookPlan
+		entity := BookModelToEntity(book, guest, plan)
+		if err != nil {
+			return nil, err
+		}
+		entities = append(entities, entity)
+	}
+	if err != nil {
+		return nil, err
+	}
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	return entities, nil
+}
+
+func (pq *BookQueryService) GetBookRequestNumber() (*string, error) {
+	var reqID string
+	// Use a raw query
+
+	query := pq.db.QueryRow("SELECT generate_booking_number()")
+	err := query.Err()
+	if err != nil {
+		return nil, err
+	}
+
+	err = query.Scan(&reqID)
+	if err != nil {
+		return nil, err
+	}
+
+	query.Scan(&reqID)
+	return &reqID, nil
+}
+
+func BookModelToEntity(book *models.UserBook, guest *models.BookGuestDatum, plan *models.BookPlan) *entity.Booking {
+	guestEntity := &entity.GuestData{
+		FirstName:     guest.FirstName,
+		LastName:      guest.LastName,
+		FirstNameKana: guest.FirstNameKana,
+		LastNameKana:  guest.LastNameKana,
+		CompanyName:   guest.CompanyName.Ptr(),
+		BirthDate:     guest.BirthDate,
+		ZipCode:       guest.ZipCode.Ptr(),
+		Prefecture:    entity.Prefecture(guest.Prefecture),
+		City:          guest.City.Ptr(),
+		Address:       guest.Address.Ptr(),
+		Tel:           guest.Tel.Ptr(),
+		Mail:          guest.Mail,
+	}
+
+	planEntity := &entity.Plan{
+		ID:        plan.ID,
+		Title:     plan.ID,
+		Price:     uint(plan.Price),
+		ImageURL:  plan.ImageURL,
+		RoomType:  entity.RoomType(plan.RoomType),
+		MealType:  entity.MealType{Morning: plan.MealTypeMorning, Dinner: plan.MealTypeDinner},
+		SmokeType: entity.SmokeType(plan.SmokeType),
+		OverView:  plan.Overview,
+		StoreID:   uuid.MustParse(plan.StoreID),
+	}
+
+	return &entity.Booking{
+		ID:           uuid.MustParse(book.ID),
+		BookSystemID: book.TLBookingNumber,
+		StayFrom:     book.StayFrom,
+		StayTo:       book.StayTo,
+		Adult:        uint(book.Adult),
+		Child:        uint(book.Child),
+		RoomCount:    uint(book.RoomCount),
+		CheckInTime:  entity.CheckInTime(book.CheckInTime),
+		TotalCost:    uint(book.TotalCost),
+		GuestData:    guestEntity,
+		BookPlan:     planEntity,
+		BookUserID:   uuid.MustParse(book.BookUserID),
+		Note:         book.Note.String,
+	}
+}

@@ -5,6 +5,8 @@ package models
 
 var TableNames = struct {
 	Admin              string
+	BookGuestData      string
+	BookPlan           string
 	Checkin            string
 	Coupon             string
 	CouponAttachedUser string
@@ -15,12 +17,15 @@ var TableNames = struct {
 	SchemaMigrations   string
 	StayableStoreInfo  string
 	Store              string
+	UserBook           string
 	UserData           string
 	UserManager        string
 	UserOption         string
 	UserReport         string
 }{
 	Admin:              "admin",
+	BookGuestData:      "book_guest_data",
+	BookPlan:           "book_plan",
 	Checkin:            "checkin",
 	Coupon:             "coupon",
 	CouponAttachedUser: "coupon_attached_user",
@@ -31,6 +36,7 @@ var TableNames = struct {
 	SchemaMigrations:   "schema_migrations",
 	StayableStoreInfo:  "stayable_store_info",
 	Store:              "store",
+	UserBook:           "user_book",
 	UserData:           "user_data",
 	UserManager:        "user_manager",
 	UserOption:         "user_option",

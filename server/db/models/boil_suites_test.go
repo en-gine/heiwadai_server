@@ -13,6 +13,8 @@ import "testing"
 // Separating the tests thusly grants avoidance of Postgres deadlocks.
 func TestParent(t *testing.T) {
 	t.Run("Admins", testAdmins)
+	t.Run("BookGuestData", testBookGuestData)
+	t.Run("BookPlans", testBookPlans)
 	t.Run("Checkins", testCheckins)
 	t.Run("Coupons", testCoupons)
 	t.Run("CouponAttachedUsers", testCouponAttachedUsers)
@@ -23,6 +25,7 @@ func TestParent(t *testing.T) {
 	t.Run("SchemaMigrations", testSchemaMigrations)
 	t.Run("StayableStoreInfos", testStayableStoreInfos)
 	t.Run("Stores", testStores)
+	t.Run("UserBooks", testUserBooks)
 	t.Run("UserData", testUserData)
 	t.Run("UserManagers", testUserManagers)
 	t.Run("UserOptions", testUserOptions)
@@ -31,6 +34,8 @@ func TestParent(t *testing.T) {
 
 func TestDelete(t *testing.T) {
 	t.Run("Admins", testAdminsDelete)
+	t.Run("BookGuestData", testBookGuestDataDelete)
+	t.Run("BookPlans", testBookPlansDelete)
 	t.Run("Checkins", testCheckinsDelete)
 	t.Run("Coupons", testCouponsDelete)
 	t.Run("CouponAttachedUsers", testCouponAttachedUsersDelete)
@@ -41,6 +46,7 @@ func TestDelete(t *testing.T) {
 	t.Run("SchemaMigrations", testSchemaMigrationsDelete)
 	t.Run("StayableStoreInfos", testStayableStoreInfosDelete)
 	t.Run("Stores", testStoresDelete)
+	t.Run("UserBooks", testUserBooksDelete)
 	t.Run("UserData", testUserDataDelete)
 	t.Run("UserManagers", testUserManagersDelete)
 	t.Run("UserOptions", testUserOptionsDelete)
@@ -49,6 +55,8 @@ func TestDelete(t *testing.T) {
 
 func TestQueryDeleteAll(t *testing.T) {
 	t.Run("Admins", testAdminsQueryDeleteAll)
+	t.Run("BookGuestData", testBookGuestDataQueryDeleteAll)
+	t.Run("BookPlans", testBookPlansQueryDeleteAll)
 	t.Run("Checkins", testCheckinsQueryDeleteAll)
 	t.Run("Coupons", testCouponsQueryDeleteAll)
 	t.Run("CouponAttachedUsers", testCouponAttachedUsersQueryDeleteAll)
@@ -59,6 +67,7 @@ func TestQueryDeleteAll(t *testing.T) {
 	t.Run("SchemaMigrations", testSchemaMigrationsQueryDeleteAll)
 	t.Run("StayableStoreInfos", testStayableStoreInfosQueryDeleteAll)
 	t.Run("Stores", testStoresQueryDeleteAll)
+	t.Run("UserBooks", testUserBooksQueryDeleteAll)
 	t.Run("UserData", testUserDataQueryDeleteAll)
 	t.Run("UserManagers", testUserManagersQueryDeleteAll)
 	t.Run("UserOptions", testUserOptionsQueryDeleteAll)
@@ -67,6 +76,8 @@ func TestQueryDeleteAll(t *testing.T) {
 
 func TestSliceDeleteAll(t *testing.T) {
 	t.Run("Admins", testAdminsSliceDeleteAll)
+	t.Run("BookGuestData", testBookGuestDataSliceDeleteAll)
+	t.Run("BookPlans", testBookPlansSliceDeleteAll)
 	t.Run("Checkins", testCheckinsSliceDeleteAll)
 	t.Run("Coupons", testCouponsSliceDeleteAll)
 	t.Run("CouponAttachedUsers", testCouponAttachedUsersSliceDeleteAll)
@@ -77,6 +88,7 @@ func TestSliceDeleteAll(t *testing.T) {
 	t.Run("SchemaMigrations", testSchemaMigrationsSliceDeleteAll)
 	t.Run("StayableStoreInfos", testStayableStoreInfosSliceDeleteAll)
 	t.Run("Stores", testStoresSliceDeleteAll)
+	t.Run("UserBooks", testUserBooksSliceDeleteAll)
 	t.Run("UserData", testUserDataSliceDeleteAll)
 	t.Run("UserManagers", testUserManagersSliceDeleteAll)
 	t.Run("UserOptions", testUserOptionsSliceDeleteAll)
@@ -85,6 +97,8 @@ func TestSliceDeleteAll(t *testing.T) {
 
 func TestExists(t *testing.T) {
 	t.Run("Admins", testAdminsExists)
+	t.Run("BookGuestData", testBookGuestDataExists)
+	t.Run("BookPlans", testBookPlansExists)
 	t.Run("Checkins", testCheckinsExists)
 	t.Run("Coupons", testCouponsExists)
 	t.Run("CouponAttachedUsers", testCouponAttachedUsersExists)
@@ -95,6 +109,7 @@ func TestExists(t *testing.T) {
 	t.Run("SchemaMigrations", testSchemaMigrationsExists)
 	t.Run("StayableStoreInfos", testStayableStoreInfosExists)
 	t.Run("Stores", testStoresExists)
+	t.Run("UserBooks", testUserBooksExists)
 	t.Run("UserData", testUserDataExists)
 	t.Run("UserManagers", testUserManagersExists)
 	t.Run("UserOptions", testUserOptionsExists)
@@ -103,6 +118,8 @@ func TestExists(t *testing.T) {
 
 func TestFind(t *testing.T) {
 	t.Run("Admins", testAdminsFind)
+	t.Run("BookGuestData", testBookGuestDataFind)
+	t.Run("BookPlans", testBookPlansFind)
 	t.Run("Checkins", testCheckinsFind)
 	t.Run("Coupons", testCouponsFind)
 	t.Run("CouponAttachedUsers", testCouponAttachedUsersFind)
@@ -113,6 +130,7 @@ func TestFind(t *testing.T) {
 	t.Run("SchemaMigrations", testSchemaMigrationsFind)
 	t.Run("StayableStoreInfos", testStayableStoreInfosFind)
 	t.Run("Stores", testStoresFind)
+	t.Run("UserBooks", testUserBooksFind)
 	t.Run("UserData", testUserDataFind)
 	t.Run("UserManagers", testUserManagersFind)
 	t.Run("UserOptions", testUserOptionsFind)
@@ -121,6 +139,8 @@ func TestFind(t *testing.T) {
 
 func TestBind(t *testing.T) {
 	t.Run("Admins", testAdminsBind)
+	t.Run("BookGuestData", testBookGuestDataBind)
+	t.Run("BookPlans", testBookPlansBind)
 	t.Run("Checkins", testCheckinsBind)
 	t.Run("Coupons", testCouponsBind)
 	t.Run("CouponAttachedUsers", testCouponAttachedUsersBind)
@@ -131,6 +151,7 @@ func TestBind(t *testing.T) {
 	t.Run("SchemaMigrations", testSchemaMigrationsBind)
 	t.Run("StayableStoreInfos", testStayableStoreInfosBind)
 	t.Run("Stores", testStoresBind)
+	t.Run("UserBooks", testUserBooksBind)
 	t.Run("UserData", testUserDataBind)
 	t.Run("UserManagers", testUserManagersBind)
 	t.Run("UserOptions", testUserOptionsBind)
@@ -139,6 +160,8 @@ func TestBind(t *testing.T) {
 
 func TestOne(t *testing.T) {
 	t.Run("Admins", testAdminsOne)
+	t.Run("BookGuestData", testBookGuestDataOne)
+	t.Run("BookPlans", testBookPlansOne)
 	t.Run("Checkins", testCheckinsOne)
 	t.Run("Coupons", testCouponsOne)
 	t.Run("CouponAttachedUsers", testCouponAttachedUsersOne)
@@ -149,6 +172,7 @@ func TestOne(t *testing.T) {
 	t.Run("SchemaMigrations", testSchemaMigrationsOne)
 	t.Run("StayableStoreInfos", testStayableStoreInfosOne)
 	t.Run("Stores", testStoresOne)
+	t.Run("UserBooks", testUserBooksOne)
 	t.Run("UserData", testUserDataOne)
 	t.Run("UserManagers", testUserManagersOne)
 	t.Run("UserOptions", testUserOptionsOne)
@@ -157,6 +181,8 @@ func TestOne(t *testing.T) {
 
 func TestAll(t *testing.T) {
 	t.Run("Admins", testAdminsAll)
+	t.Run("BookGuestData", testBookGuestDataAll)
+	t.Run("BookPlans", testBookPlansAll)
 	t.Run("Checkins", testCheckinsAll)
 	t.Run("Coupons", testCouponsAll)
 	t.Run("CouponAttachedUsers", testCouponAttachedUsersAll)
@@ -167,6 +193,7 @@ func TestAll(t *testing.T) {
 	t.Run("SchemaMigrations", testSchemaMigrationsAll)
 	t.Run("StayableStoreInfos", testStayableStoreInfosAll)
 	t.Run("Stores", testStoresAll)
+	t.Run("UserBooks", testUserBooksAll)
 	t.Run("UserData", testUserDataAll)
 	t.Run("UserManagers", testUserManagersAll)
 	t.Run("UserOptions", testUserOptionsAll)
@@ -175,6 +202,8 @@ func TestAll(t *testing.T) {
 
 func TestCount(t *testing.T) {
 	t.Run("Admins", testAdminsCount)
+	t.Run("BookGuestData", testBookGuestDataCount)
+	t.Run("BookPlans", testBookPlansCount)
 	t.Run("Checkins", testCheckinsCount)
 	t.Run("Coupons", testCouponsCount)
 	t.Run("CouponAttachedUsers", testCouponAttachedUsersCount)
@@ -185,6 +214,7 @@ func TestCount(t *testing.T) {
 	t.Run("SchemaMigrations", testSchemaMigrationsCount)
 	t.Run("StayableStoreInfos", testStayableStoreInfosCount)
 	t.Run("Stores", testStoresCount)
+	t.Run("UserBooks", testUserBooksCount)
 	t.Run("UserData", testUserDataCount)
 	t.Run("UserManagers", testUserManagersCount)
 	t.Run("UserOptions", testUserOptionsCount)
@@ -193,6 +223,8 @@ func TestCount(t *testing.T) {
 
 func TestHooks(t *testing.T) {
 	t.Run("Admins", testAdminsHooks)
+	t.Run("BookGuestData", testBookGuestDataHooks)
+	t.Run("BookPlans", testBookPlansHooks)
 	t.Run("Checkins", testCheckinsHooks)
 	t.Run("Coupons", testCouponsHooks)
 	t.Run("CouponAttachedUsers", testCouponAttachedUsersHooks)
@@ -203,6 +235,7 @@ func TestHooks(t *testing.T) {
 	t.Run("SchemaMigrations", testSchemaMigrationsHooks)
 	t.Run("StayableStoreInfos", testStayableStoreInfosHooks)
 	t.Run("Stores", testStoresHooks)
+	t.Run("UserBooks", testUserBooksHooks)
 	t.Run("UserData", testUserDataHooks)
 	t.Run("UserManagers", testUserManagersHooks)
 	t.Run("UserOptions", testUserOptionsHooks)
@@ -212,6 +245,10 @@ func TestHooks(t *testing.T) {
 func TestInsert(t *testing.T) {
 	t.Run("Admins", testAdminsInsert)
 	t.Run("Admins", testAdminsInsertWhitelist)
+	t.Run("BookGuestData", testBookGuestDataInsert)
+	t.Run("BookGuestData", testBookGuestDataInsertWhitelist)
+	t.Run("BookPlans", testBookPlansInsert)
+	t.Run("BookPlans", testBookPlansInsertWhitelist)
 	t.Run("Checkins", testCheckinsInsert)
 	t.Run("Checkins", testCheckinsInsertWhitelist)
 	t.Run("Coupons", testCouponsInsert)
@@ -232,6 +269,8 @@ func TestInsert(t *testing.T) {
 	t.Run("StayableStoreInfos", testStayableStoreInfosInsertWhitelist)
 	t.Run("Stores", testStoresInsert)
 	t.Run("Stores", testStoresInsertWhitelist)
+	t.Run("UserBooks", testUserBooksInsert)
+	t.Run("UserBooks", testUserBooksInsertWhitelist)
 	t.Run("UserData", testUserDataInsert)
 	t.Run("UserData", testUserDataInsertWhitelist)
 	t.Run("UserManagers", testUserManagersInsert)
@@ -247,6 +286,7 @@ func TestInsert(t *testing.T) {
 func TestToOne(t *testing.T) {
 	t.Run("AdminToUserManagerUsingAdmin", testAdminToOneUserManagerUsingAdmin)
 	t.Run("AdminToStoreUsingBelongToStore", testAdminToOneStoreUsingBelongToStore)
+	t.Run("BookPlanToStoreUsingStore", testBookPlanToOneStoreUsingStore)
 	t.Run("CheckinToStoreUsingStore", testCheckinToOneStoreUsingStore)
 	t.Run("CheckinToUserDatumUsingUser", testCheckinToOneUserDatumUsingUser)
 	t.Run("CouponAttachedUserToCouponUsingCoupon", testCouponAttachedUserToOneCouponUsingCoupon)
@@ -257,6 +297,9 @@ func TestToOne(t *testing.T) {
 	t.Run("MailMagazineToAdminUsingAuthor", testMailMagazineToOneAdminUsingAuthor)
 	t.Run("MessageToAdminUsingAuthor", testMessageToOneAdminUsingAuthor)
 	t.Run("StayableStoreInfoToStoreUsingStore", testStayableStoreInfoToOneStoreUsingStore)
+	t.Run("UserBookToBookPlanUsingBookPlan", testUserBookToOneBookPlanUsingBookPlan)
+	t.Run("UserBookToUserDatumUsingBookUser", testUserBookToOneUserDatumUsingBookUser)
+	t.Run("UserBookToBookGuestDatumUsingGuestDatum", testUserBookToOneBookGuestDatumUsingGuestDatum)
 	t.Run("UserDatumToUserManagerUsingUser", testUserDatumToOneUserManagerUsingUser)
 	t.Run("UserOptionToUserDatumUsingUser", testUserOptionToOneUserDatumUsingUser)
 	t.Run("UserReportToUserDatumUsingUser", testUserReportToOneUserDatumUsingUser)
@@ -278,12 +321,16 @@ func TestOneToOne(t *testing.T) {
 func TestToMany(t *testing.T) {
 	t.Run("AdminToAuthorMailMagazines", testAdminToManyAuthorMailMagazines)
 	t.Run("AdminToAuthorMessages", testAdminToManyAuthorMessages)
+	t.Run("BookGuestDatumToGuestDatumUserBooks", testBookGuestDatumToManyGuestDatumUserBooks)
+	t.Run("BookPlanToUserBooks", testBookPlanToManyUserBooks)
 	t.Run("CouponToCouponAttachedUsers", testCouponToManyCouponAttachedUsers)
 	t.Run("StoreToBelongToAdmins", testStoreToManyBelongToAdmins)
+	t.Run("StoreToBookPlans", testStoreToManyBookPlans)
 	t.Run("StoreToCheckins", testStoreToManyCheckins)
 	t.Run("StoreToCouponStores", testStoreToManyCouponStores)
 	t.Run("UserDatumToUserCheckins", testUserDatumToManyUserCheckins)
 	t.Run("UserDatumToUserCouponAttachedUsers", testUserDatumToManyUserCouponAttachedUsers)
+	t.Run("UserDatumToBookUserUserBooks", testUserDatumToManyBookUserUserBooks)
 	t.Run("UserDatumToUserUserReports", testUserDatumToManyUserUserReports)
 }
 
@@ -292,6 +339,7 @@ func TestToMany(t *testing.T) {
 func TestToOneSet(t *testing.T) {
 	t.Run("AdminToUserManagerUsingAdminAdmin", testAdminToOneSetOpUserManagerUsingAdmin)
 	t.Run("AdminToStoreUsingBelongToAdmins", testAdminToOneSetOpStoreUsingBelongToStore)
+	t.Run("BookPlanToStoreUsingBookPlans", testBookPlanToOneSetOpStoreUsingStore)
 	t.Run("CheckinToStoreUsingCheckins", testCheckinToOneSetOpStoreUsingStore)
 	t.Run("CheckinToUserDatumUsingUserCheckins", testCheckinToOneSetOpUserDatumUsingUser)
 	t.Run("CouponAttachedUserToCouponUsingCouponAttachedUsers", testCouponAttachedUserToOneSetOpCouponUsingCoupon)
@@ -302,6 +350,9 @@ func TestToOneSet(t *testing.T) {
 	t.Run("MailMagazineToAdminUsingAuthorMailMagazines", testMailMagazineToOneSetOpAdminUsingAuthor)
 	t.Run("MessageToAdminUsingAuthorMessages", testMessageToOneSetOpAdminUsingAuthor)
 	t.Run("StayableStoreInfoToStoreUsingStayableStoreInfo", testStayableStoreInfoToOneSetOpStoreUsingStore)
+	t.Run("UserBookToBookPlanUsingUserBooks", testUserBookToOneSetOpBookPlanUsingBookPlan)
+	t.Run("UserBookToUserDatumUsingBookUserUserBooks", testUserBookToOneSetOpUserDatumUsingBookUser)
+	t.Run("UserBookToBookGuestDatumUsingGuestDatumUserBooks", testUserBookToOneSetOpBookGuestDatumUsingGuestDatum)
 	t.Run("UserDatumToUserManagerUsingUserUserDatum", testUserDatumToOneSetOpUserManagerUsingUser)
 	t.Run("UserOptionToUserDatumUsingUserUserOption", testUserOptionToOneSetOpUserDatumUsingUser)
 	t.Run("UserReportToUserDatumUsingUserUserReports", testUserReportToOneSetOpUserDatumUsingUser)
@@ -334,12 +385,16 @@ func TestOneToOneRemove(t *testing.T) {}
 func TestToManyAdd(t *testing.T) {
 	t.Run("AdminToAuthorMailMagazines", testAdminToManyAddOpAuthorMailMagazines)
 	t.Run("AdminToAuthorMessages", testAdminToManyAddOpAuthorMessages)
+	t.Run("BookGuestDatumToGuestDatumUserBooks", testBookGuestDatumToManyAddOpGuestDatumUserBooks)
+	t.Run("BookPlanToUserBooks", testBookPlanToManyAddOpUserBooks)
 	t.Run("CouponToCouponAttachedUsers", testCouponToManyAddOpCouponAttachedUsers)
 	t.Run("StoreToBelongToAdmins", testStoreToManyAddOpBelongToAdmins)
+	t.Run("StoreToBookPlans", testStoreToManyAddOpBookPlans)
 	t.Run("StoreToCheckins", testStoreToManyAddOpCheckins)
 	t.Run("StoreToCouponStores", testStoreToManyAddOpCouponStores)
 	t.Run("UserDatumToUserCheckins", testUserDatumToManyAddOpUserCheckins)
 	t.Run("UserDatumToUserCouponAttachedUsers", testUserDatumToManyAddOpUserCouponAttachedUsers)
+	t.Run("UserDatumToBookUserUserBooks", testUserDatumToManyAddOpBookUserUserBooks)
 	t.Run("UserDatumToUserUserReports", testUserDatumToManyAddOpUserUserReports)
 }
 
@@ -359,6 +414,8 @@ func TestToManyRemove(t *testing.T) {
 
 func TestReload(t *testing.T) {
 	t.Run("Admins", testAdminsReload)
+	t.Run("BookGuestData", testBookGuestDataReload)
+	t.Run("BookPlans", testBookPlansReload)
 	t.Run("Checkins", testCheckinsReload)
 	t.Run("Coupons", testCouponsReload)
 	t.Run("CouponAttachedUsers", testCouponAttachedUsersReload)
@@ -369,6 +426,7 @@ func TestReload(t *testing.T) {
 	t.Run("SchemaMigrations", testSchemaMigrationsReload)
 	t.Run("StayableStoreInfos", testStayableStoreInfosReload)
 	t.Run("Stores", testStoresReload)
+	t.Run("UserBooks", testUserBooksReload)
 	t.Run("UserData", testUserDataReload)
 	t.Run("UserManagers", testUserManagersReload)
 	t.Run("UserOptions", testUserOptionsReload)
@@ -377,6 +435,8 @@ func TestReload(t *testing.T) {
 
 func TestReloadAll(t *testing.T) {
 	t.Run("Admins", testAdminsReloadAll)
+	t.Run("BookGuestData", testBookGuestDataReloadAll)
+	t.Run("BookPlans", testBookPlansReloadAll)
 	t.Run("Checkins", testCheckinsReloadAll)
 	t.Run("Coupons", testCouponsReloadAll)
 	t.Run("CouponAttachedUsers", testCouponAttachedUsersReloadAll)
@@ -387,6 +447,7 @@ func TestReloadAll(t *testing.T) {
 	t.Run("SchemaMigrations", testSchemaMigrationsReloadAll)
 	t.Run("StayableStoreInfos", testStayableStoreInfosReloadAll)
 	t.Run("Stores", testStoresReloadAll)
+	t.Run("UserBooks", testUserBooksReloadAll)
 	t.Run("UserData", testUserDataReloadAll)
 	t.Run("UserManagers", testUserManagersReloadAll)
 	t.Run("UserOptions", testUserOptionsReloadAll)
@@ -395,6 +456,8 @@ func TestReloadAll(t *testing.T) {
 
 func TestSelect(t *testing.T) {
 	t.Run("Admins", testAdminsSelect)
+	t.Run("BookGuestData", testBookGuestDataSelect)
+	t.Run("BookPlans", testBookPlansSelect)
 	t.Run("Checkins", testCheckinsSelect)
 	t.Run("Coupons", testCouponsSelect)
 	t.Run("CouponAttachedUsers", testCouponAttachedUsersSelect)
@@ -405,6 +468,7 @@ func TestSelect(t *testing.T) {
 	t.Run("SchemaMigrations", testSchemaMigrationsSelect)
 	t.Run("StayableStoreInfos", testStayableStoreInfosSelect)
 	t.Run("Stores", testStoresSelect)
+	t.Run("UserBooks", testUserBooksSelect)
 	t.Run("UserData", testUserDataSelect)
 	t.Run("UserManagers", testUserManagersSelect)
 	t.Run("UserOptions", testUserOptionsSelect)
@@ -413,6 +477,8 @@ func TestSelect(t *testing.T) {
 
 func TestUpdate(t *testing.T) {
 	t.Run("Admins", testAdminsUpdate)
+	t.Run("BookGuestData", testBookGuestDataUpdate)
+	t.Run("BookPlans", testBookPlansUpdate)
 	t.Run("Checkins", testCheckinsUpdate)
 	t.Run("Coupons", testCouponsUpdate)
 	t.Run("CouponAttachedUsers", testCouponAttachedUsersUpdate)
@@ -423,6 +489,7 @@ func TestUpdate(t *testing.T) {
 	t.Run("SchemaMigrations", testSchemaMigrationsUpdate)
 	t.Run("StayableStoreInfos", testStayableStoreInfosUpdate)
 	t.Run("Stores", testStoresUpdate)
+	t.Run("UserBooks", testUserBooksUpdate)
 	t.Run("UserData", testUserDataUpdate)
 	t.Run("UserManagers", testUserManagersUpdate)
 	t.Run("UserOptions", testUserOptionsUpdate)
@@ -431,6 +498,8 @@ func TestUpdate(t *testing.T) {
 
 func TestSliceUpdateAll(t *testing.T) {
 	t.Run("Admins", testAdminsSliceUpdateAll)
+	t.Run("BookGuestData", testBookGuestDataSliceUpdateAll)
+	t.Run("BookPlans", testBookPlansSliceUpdateAll)
 	t.Run("Checkins", testCheckinsSliceUpdateAll)
 	t.Run("Coupons", testCouponsSliceUpdateAll)
 	t.Run("CouponAttachedUsers", testCouponAttachedUsersSliceUpdateAll)
@@ -441,6 +510,7 @@ func TestSliceUpdateAll(t *testing.T) {
 	t.Run("SchemaMigrations", testSchemaMigrationsSliceUpdateAll)
 	t.Run("StayableStoreInfos", testStayableStoreInfosSliceUpdateAll)
 	t.Run("Stores", testStoresSliceUpdateAll)
+	t.Run("UserBooks", testUserBooksSliceUpdateAll)
 	t.Run("UserData", testUserDataSliceUpdateAll)
 	t.Run("UserManagers", testUserManagersSliceUpdateAll)
 	t.Run("UserOptions", testUserOptionsSliceUpdateAll)

@@ -8,6 +8,10 @@ import "testing"
 func TestUpsert(t *testing.T) {
 	t.Run("Admins", testAdminsUpsert)
 
+	t.Run("BookGuestData", testBookGuestDataUpsert)
+
+	t.Run("BookPlans", testBookPlansUpsert)
+
 	t.Run("Checkins", testCheckinsUpsert)
 
 	t.Run("Coupons", testCouponsUpsert)
@@ -27,6 +31,8 @@ func TestUpsert(t *testing.T) {
 	t.Run("StayableStoreInfos", testStayableStoreInfosUpsert)
 
 	t.Run("Stores", testStoresUpsert)
+
+	t.Run("UserBooks", testUserBooksUpsert)
 
 	t.Run("UserData", testUserDataUpsert)
 

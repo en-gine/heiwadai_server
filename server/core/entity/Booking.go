@@ -10,18 +10,19 @@ import (
 )
 
 type Booking struct {
-	ID             uuid.UUID
-	StayFrom       time.Time
-	StayTo         time.Time
-	Adult          uint
-	Child          uint
-	RoomCount      uint
-	CheckInTime    CheckInTime
-	TotalCost      uint
-	GuestData      *GuestData
-	BookPlan       *Plan
-	ReservedUserID uuid.UUID
-	Note           string
+	ID           uuid.UUID
+	BookSystemID string // TLBooking番号
+	StayFrom     time.Time
+	StayTo       time.Time
+	Adult        uint
+	Child        uint
+	RoomCount    uint
+	CheckInTime  CheckInTime
+	TotalCost    uint
+	GuestData    *GuestData
+	BookPlan     *Plan
+	BookUserID   uuid.UUID
+	Note         string
 }
 
 type GuestData struct {
@@ -111,6 +112,10 @@ func NewCheckInTime(s string) (*CheckInTime, *errors.DomainError) {
 	return &result, nil
 }
 
+func (c *CheckInTime) String() string {
+	return string(*c)
+}
+
 func IsValidTimeFormat(s string) bool {
 	// パターンは 00~23の時と 00~59の分にマッチします
 	pattern := `^([01]?[0-9]|2[0-3]):[0-5][0-9]$`
@@ -128,21 +133,21 @@ func CreateBooking(
 	TotalCost uint,
 	GuestData *GuestData,
 	BookPlan *Plan,
-	ReservedUserID uuid.UUID,
+	BookUserID uuid.UUID,
 	Note string,
 ) *Booking {
 	return &Booking{
-		ID:             uuid.New(),
-		StayFrom:       stayFrom,
-		StayTo:         stayTo,
-		Adult:          adult,
-		Child:          child,
-		RoomCount:      roomCount,
-		CheckInTime:    CheckInTime,
-		TotalCost:      TotalCost,
-		GuestData:      GuestData,
-		BookPlan:       BookPlan,
-		ReservedUserID: ReservedUserID,
-		Note:           Note,
+		ID:          uuid.New(),
+		StayFrom:    stayFrom,
+		StayTo:      stayTo,
+		Adult:       adult,
+		Child:       child,
+		RoomCount:   roomCount,
+		CheckInTime: CheckInTime,
+		TotalCost:   TotalCost,
+		GuestData:   GuestData,
+		BookPlan:    BookPlan,
+		BookUserID:  BookUserID,
+		Note:        Note,
 	}
 }
