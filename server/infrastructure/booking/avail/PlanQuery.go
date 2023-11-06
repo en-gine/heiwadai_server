@@ -1,4 +1,4 @@
-package booking
+package avail
 
 import (
 	"errors"
@@ -8,7 +8,6 @@ import (
 
 	"server/core/entity"
 	queryservice "server/core/infra/queryService"
-	"server/infrastructure/booking/avail"
 	"server/infrastructure/booking/util"
 	"server/infrastructure/env"
 	"server/infrastructure/logger"
@@ -31,10 +30,6 @@ func NewPlanQuery(storeQuery queryservice.IStoreQueryService) *PlanQuery {
 	return &PlanQuery{
 		storeQuery: storeQuery,
 	}
-}
-
-func (p *PlanQuery) GetMyBooking(userID uuid.UUID) (*[]entity.Plan, error) {
-	return nil, nil
 }
 
 func (p *PlanQuery) GetCalendar(
@@ -61,11 +56,6 @@ func (p *PlanQuery) GetCalendar(
 		planID = "14030824"
 	}
 
-	type result struct {
-		planCalendar *[]entity.PlanCalendar
-		err          error
-	}
-
 	mealsIncluded := MealTypeToQuery(mealType)
 
 	roomStayCandidate := NewRoomStayCandidate(
@@ -79,29 +69,29 @@ func (p *PlanQuery) GetCalendar(
 	)
 
 	nightFormat := fmt.Sprintf("P%dN", night)
-	reqBody := &avail.OTA_HotelAvailRQ{
+	reqBody := &OTA_HotelAvailRQ{
 		Version:        "1.0",
 		PrimaryLangID:  "jpn",
 		AvailRatesOnly: util.BoolPtr(true),
-		AvailRequestSegments: avail.AvailRequestSegments{
-			AvailRequestSegment: avail.AvailRequestSegment{
-				HotelSearchCriteria: avail.HotelSearchCriteria{
-					Criterion: avail.Criterion{
-						HotelRef: []avail.HotelRef{
+		AvailRequestSegments: AvailRequestSegments{
+			AvailRequestSegment: AvailRequestSegment{
+				HotelSearchCriteria: HotelSearchCriteria{
+					Criterion: Criterion{
+						HotelRef: []HotelRef{
 							{HotelCode: hotelCode},
 						},
-						RatePlanCandidates: &avail.RatePlanCandidates{ // 食事タイプ
-							RatePlanCandidate: []avail.RatePlanCandidate{
+						RatePlanCandidates: &RatePlanCandidates{ // 食事タイプ
+							RatePlanCandidate: []RatePlanCandidate{
 								{
 									MealsIncluded: mealsIncluded,
 								},
 							},
 						},
-						StayDateRange: &avail.StayDateRange{
+						StayDateRange: &StayDateRange{
 							Duration: &nightFormat,
 						},
-						RoomStayCandidates: &avail.RoomStayCandidates{
-							RoomStayCandidate: []avail.RoomStayCandidate{
+						RoomStayCandidates: &RoomStayCandidates{
+							RoomStayCandidate: []RoomStayCandidate{
 								*roomStayCandidate,
 							},
 						},
@@ -111,9 +101,9 @@ func (p *PlanQuery) GetCalendar(
 		},
 	}
 
-	request := avail.NewEnvelopeRQ(TLBookingUser, TLBookingPass, reqBody)
+	request := NewEnvelopeRQ(TLBookingUser, TLBookingPass, reqBody)
 
-	res, err := Request[avail.EnvelopeRQ, avail.EnvelopeRS](TLBookingSearchURL, request)
+	res, err := util.Request[EnvelopeRQ, EnvelopeRS](TLBookingSearchURL, request)
 	if err != nil {
 		return nil, err
 	}
@@ -187,8 +177,8 @@ func (p *PlanQuery) Search(
 				mealType,
 				&rt,
 			)
-			request := avail.NewEnvelopeRQ(TLBookingUser, TLBookingPass, reqBody)
-			res, err := Request[avail.EnvelopeRQ, avail.EnvelopeRS](TLBookingSearchURL, request)
+			request := NewEnvelopeRQ(TLBookingUser, TLBookingPass, reqBody)
+			res, err := util.Request[EnvelopeRQ, EnvelopeRS](TLBookingSearchURL, request)
 			if err != nil {
 				resultsCh <- result{nil, err}
 				return
@@ -223,7 +213,7 @@ func (p *PlanQuery) Search(
 	return &allPlans, nil
 }
 
-func (p *PlanQuery) AvailRSToPlans(res *avail.EnvelopeRS) (*[]entity.Plan, error) {
+func (p *PlanQuery) AvailRSToPlans(res *EnvelopeRS) (*[]entity.Plan, error) {
 	var plans []entity.Plan
 	body := res.Body.OTA_HotelAvailRS
 	for _, roomStay := range body.RoomStays.RoomStay {
@@ -293,7 +283,7 @@ func (p *PlanQuery) AvailRSToPlans(res *avail.EnvelopeRS) (*[]entity.Plan, error
 	return &plans, nil
 }
 
-func (p *PlanQuery) AvailRSToCalendarStatus(res *avail.EnvelopeRS) (*[]entity.DateStatus, error) {
+func (p *PlanQuery) AvailRSToCalendarStatus(res *EnvelopeRS) (*[]entity.DateStatus, error) {
 	var dateStatuses []entity.DateStatus
 	body := res.Body.OTA_HotelAvailRS
 	for _, roomStay := range body.RoomStays.RoomStay {
@@ -325,15 +315,15 @@ func NewOTAHotelAvailRQ(
 	smokeTypes *[]entity.SmokeType,
 	mealType *entity.MealType,
 	roomType *entity.RoomType,
-) *avail.OTA_HotelAvailRQ {
+) *OTA_HotelAvailRQ {
 	// 日付
 	start := util.DateToYYYYMMDD(stayFrom)
 	end := util.DateToYYYYMMDD(stayTo)
 
 	// ホテルコード
-	var hotelRef []avail.HotelRef
+	var hotelRef []HotelRef
 	for _, hotelCode := range hotelCodes {
-		hotelRef = append(hotelRef, avail.HotelRef{HotelCode: hotelCode})
+		hotelRef = append(hotelRef, HotelRef{HotelCode: hotelCode})
 	}
 
 	mealsIncluded := MealTypeToQuery(mealType)
@@ -348,29 +338,29 @@ func NewOTAHotelAvailRQ(
 		nil, // ExpireDate
 	)
 
-	return &avail.OTA_HotelAvailRQ{
+	return &OTA_HotelAvailRQ{
 		Version:       "1.0",
 		PrimaryLangID: "jpn",
 		HotelStayOnly: util.BoolPtr(true), // ホテル情報のみを返すフラグ。trueにしないと返ってこない
-		PricingMethod: avail.PricingMethodLowestperstay,
-		AvailRequestSegments: avail.AvailRequestSegments{
-			AvailRequestSegment: avail.AvailRequestSegment{
-				HotelSearchCriteria: avail.HotelSearchCriteria{
-					Criterion: avail.Criterion{
+		PricingMethod: PricingMethodLowestperstay,
+		AvailRequestSegments: AvailRequestSegments{
+			AvailRequestSegment: AvailRequestSegment{
+				HotelSearchCriteria: HotelSearchCriteria{
+					Criterion: Criterion{
 						HotelRef: hotelRef,
-						RatePlanCandidates: &avail.RatePlanCandidates{ // 食事タイプ
-							RatePlanCandidate: []avail.RatePlanCandidate{
+						RatePlanCandidates: &RatePlanCandidates{ // 食事タイプ
+							RatePlanCandidate: []RatePlanCandidate{
 								{
 									MealsIncluded: mealsIncluded,
 								},
 							},
 						},
-						StayDateRange: &avail.StayDateRange{
+						StayDateRange: &StayDateRange{
 							Start: &start,
 							End:   &end,
 						},
-						RoomStayCandidates: &avail.RoomStayCandidates{
-							RoomStayCandidate: []avail.RoomStayCandidate{
+						RoomStayCandidates: &RoomStayCandidates{
+							RoomStayCandidate: []RoomStayCandidate{
 								*roomStayCandidate,
 							},
 						},
@@ -389,7 +379,7 @@ func NewRoomStayCandidate(
 	smokeTypes *[]entity.SmokeType,
 	effectiveDate *time.Time,
 	expireDate *time.Time,
-) *avail.RoomStayCandidate {
+) *RoomStayCandidate {
 	// True：禁煙、False：喫煙、省略：条件指定なし
 	var nonSmokingQuery *bool
 	if smokeTypes == nil {
@@ -404,22 +394,22 @@ func NewRoomStayCandidate(
 	}
 
 	bedTypeCode := RoomTypeToBedType(roomType)
-	candidate := &avail.RoomStayCandidate{
+	candidate := &RoomStayCandidate{
 		Quantity:    &roomCount,
 		BedTypeCode: bedTypeCode,
 		NonSmoking:  nonSmokingQuery,
-		GuestCounts: &avail.GuestCounts{
-			GuestCount: []avail.GuestCount{
+		GuestCounts: &GuestCounts{
+			GuestCount: []GuestCount{
 				{
-					AgeQualifyingCode: avail.AgeQualifyingAdult,
+					AgeQualifyingCode: AgeQualifyingAdult,
 					Count:             adult,
 				},
 			},
 		},
 	}
 	if child != nil && *child > 0 {
-		candidate.GuestCounts.GuestCount = append(candidate.GuestCounts.GuestCount, avail.GuestCount{
-			AgeQualifyingCode: avail.AgeQualifyingChild,
+		candidate.GuestCounts.GuestCount = append(candidate.GuestCounts.GuestCount, GuestCount{
+			AgeQualifyingCode: AgeQualifyingChild,
 			Count:             *child,
 		})
 	}
@@ -434,7 +424,7 @@ func NewRoomStayCandidate(
 	return candidate
 }
 
-func MealTypeToQuery(mealType *entity.MealType) *avail.MealsIncluded {
+func MealTypeToQuery(mealType *entity.MealType) *MealsIncluded {
 	var mealMorning *bool
 	var mealDinner *bool
 	if mealType != nil {
@@ -444,52 +434,52 @@ func MealTypeToQuery(mealType *entity.MealType) *avail.MealsIncluded {
 		mealMorning = nil
 		mealDinner = nil
 	}
-	return &avail.MealsIncluded{
+	return &MealsIncluded{
 		Breakfast: mealMorning,
 		Dinner:    mealDinner,
 	}
 }
 
-func RoomTypeToBedType(rt *entity.RoomType) *avail.BedTypeCode {
-	var code avail.BedTypeCode
+func RoomTypeToBedType(rt *entity.RoomType) *BedTypeCode {
+	var code BedTypeCode
 	if rt == nil {
 		return nil
 	}
 	switch *rt {
 	case entity.RoomTypeSingle:
-		code = avail.BedTypeSingle
+		code = BedTypeSingle
 	case entity.RoomTypeSemiDouble:
-		code = avail.BedTypeDouble
+		code = BedTypeDouble
 	case entity.RoomTypeTwin:
-		code = avail.BedTypeTwin
+		code = BedTypeTwin
 	case entity.RoomTypeDouble:
-		code = avail.BedTypeDouble
+		code = BedTypeDouble
 	case entity.RoomTypeFourth:
-		code = avail.BedTypeFour
+		code = BedTypeFour
 	case entity.RoomTypeUnknown:
 		return nil
 	}
 	return &code
 }
 
-func BedTypeCodeToRoomType(bt avail.BedTypeCode) entity.RoomType {
+func BedTypeCodeToRoomType(bt BedTypeCode) entity.RoomType {
 	var roomType entity.RoomType
 	switch bt {
-	case avail.BedTypeSingle:
+	case BedTypeSingle:
 		roomType = entity.RoomTypeSingle
-	case avail.BedTypeDouble:
+	case BedTypeDouble:
 		roomType = entity.RoomTypeDouble
-	case avail.BedTypeTwin:
+	case BedTypeTwin:
 		roomType = entity.RoomTypeTwin
-	case avail.BedTypeFour:
+	case BedTypeFour:
 		roomType = entity.RoomTypeFourth
-	case avail.BedTypeTatami:
+	case BedTypeTatami:
 		fallthrough
-	case avail.BedTypeSemiDouble:
+	case BedTypeSemiDouble:
 		fallthrough
-	case avail.BedTypeTriple:
+	case BedTypeTriple:
 		fallthrough
-	case avail.BedTypeOther:
+	case BedTypeOther:
 	default:
 		roomType = entity.RoomTypeUnknown
 	}

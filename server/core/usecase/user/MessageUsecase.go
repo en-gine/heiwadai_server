@@ -1,8 +1,6 @@
 package user
 
 import (
-	"time"
-
 	"server/core/entity"
 	"server/core/errors"
 	queryservice "server/core/infra/queryService"
@@ -24,18 +22,7 @@ func NewMessageUsecase(MessageRepository repository.IMessageRepository, MessageQ
 }
 
 func (u *MessageUsecase) GetAfter(ID *uuid.UUID) ([]*entity.Message, *errors.DomainError) {
-	var lastDate *time.Time = nil
-	if ID != nil {
-		msg, err := u.MessageQuery.GetByID(*ID)
-		if err != nil {
-			return nil, errors.NewDomainError(errors.QueryError, err.Error())
-		}
-		if msg != nil {
-			lastDate = &msg.CreateAt
-		}
-	}
-
-	msgs, err := u.MessageQuery.GetMessagesAfter(lastDate)
+	msgs, err := u.MessageQuery.GetMessagesAfter(ID)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())
 	}

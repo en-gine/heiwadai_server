@@ -5,7 +5,8 @@ import (
 	"time"
 
 	"server/core/entity"
-	"server/infrastructure/booking"
+	"server/infrastructure/booking/avail"
+	"server/infrastructure/booking/book"
 	implements "server/infrastructure/repository"
 
 	"github.com/google/uuid"
@@ -18,12 +19,13 @@ func main() {
 
 func Book() {
 	storeQuery := implements.NewStoreQueryService()
+	bookQuery := implements.NewBookQueryService()
 	stores, err := storeQuery.GetStayables()
 	if err != nil {
 		fmt.Print(err)
 		return
 	}
-	p := booking.NewPlanRepository(storeQuery)
+	p := book.NewBookRepository(storeQuery, bookQuery)
 	tomorrow := time.Now().Add(2 * 24 * time.Hour)
 	meal := entity.MealType{Morning: true, Dinner: true}
 	smork := entity.SmokeTypeSmoking
@@ -59,7 +61,7 @@ func Book() {
 		meal,
 		smork,
 		"広々とした部屋です。",
-		*&stores[0].ID,
+		stores[0].ID,
 	)
 
 	bookData := entity.CreateBooking(
@@ -73,17 +75,25 @@ func Book() {
 		guest,
 		plan,
 		uuid.New(),
-		"駐車場利用します")
-	err = p.Book(bookData, "20231102000000001")
+		"駐車場利用します",
+		"20231106000000001",
+	)
 	if err != nil {
 		fmt.Print(err)
 		return
 	}
+
+	reserveID, err := p.Reserve(bookData)
+	if err != nil {
+		fmt.Print(err)
+		return
+	}
+	fmt.Print(reserveID)
 }
 
 func Search() {
 	storeQuery := implements.NewStoreQueryService()
-	p := booking.NewPlanQuery(storeQuery)
+	p := avail.NewPlanQuery(storeQuery)
 
 	tomorrow := time.Now().Add(2 * 24 * time.Hour)
 	single := entity.RoomTypeSingle

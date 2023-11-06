@@ -10,19 +10,19 @@ import (
 )
 
 type Booking struct {
-	ID           uuid.UUID
-	BookSystemID string // TLBooking番号
-	StayFrom     time.Time
-	StayTo       time.Time
-	Adult        uint
-	Child        uint
-	RoomCount    uint
-	CheckInTime  CheckInTime
-	TotalCost    uint
-	GuestData    *GuestData
-	BookPlan     *Plan
-	BookUserID   uuid.UUID
-	Note         string
+	ID              uuid.UUID
+	StayFrom        time.Time
+	StayTo          time.Time
+	Adult           uint
+	Child           uint
+	RoomCount       uint
+	CheckInTime     CheckInTime
+	TotalCost       uint
+	GuestData       *GuestData
+	BookPlan        *Plan
+	BookUserID      uuid.UUID
+	Note            string
+	TlBookingNumber string // TLBooking番号
 }
 
 type GuestData struct {
@@ -135,19 +135,21 @@ func CreateBooking(
 	BookPlan *Plan,
 	BookUserID uuid.UUID,
 	Note string,
+	TlBookingNumber string,
 ) *Booking {
 	return &Booking{
-		ID:          uuid.New(),
-		StayFrom:    stayFrom,
-		StayTo:      stayTo,
-		Adult:       adult,
-		Child:       child,
-		RoomCount:   roomCount,
-		CheckInTime: CheckInTime,
-		TotalCost:   TotalCost,
-		GuestData:   GuestData,
-		BookPlan:    BookPlan,
-		BookUserID:  BookUserID,
-		Note:        Note,
+		ID:              uuid.New(),
+		StayFrom:        stayFrom,
+		StayTo:          stayTo,
+		Adult:           adult,
+		Child:           child,
+		RoomCount:       roomCount,
+		CheckInTime:     CheckInTime,
+		TotalCost:       TotalCost,
+		GuestData:       GuestData,
+		BookPlan:        BookPlan,
+		BookUserID:      BookUserID,
+		Note:            Note,
+		TlBookingNumber: TlBookingNumber,
 	}
 }

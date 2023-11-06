@@ -7,6 +7,7 @@ import (
 )
 
 type IBookQueryService interface {
+	GetByID(bookID uuid.UUID) (*entity.Booking, error)
 	GetMyBooking(userID uuid.UUID) ([]*entity.Booking, error)
-	GetBookRequestNumber() (*string, error)
+	GetBookRequestDataID() (*string, error)
 }

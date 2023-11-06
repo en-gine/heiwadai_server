@@ -25,6 +25,20 @@ func NewBookQueryService() *BookQueryService {
 	}
 }
 
+func (pq *BookQueryService) GetByID(bookID uuid.UUID) (*entity.Booking, error) {
+	book, err := models.FindUserBook(context.Background(), pq.db, bookID.String())
+	if err != nil {
+		return nil, err
+	}
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	guest := book.R.GuestDatum
+	plan := book.R.BookPlan
+	entity := BookModelToEntity(book, guest, plan)
+	return entity, nil
+}
+
 func (pq *BookQueryService) GetMyBooking(userID uuid.UUID) ([]*entity.Booking, error) {
 	books, err := models.UserBooks(models.UserBookWhere.BookUserID.EQ(userID.String())).All(context.Background(), pq.db)
 	var entities []*entity.Booking
@@ -46,7 +60,7 @@ func (pq *BookQueryService) GetMyBooking(userID uuid.UUID) ([]*entity.Booking, e
 	return entities, nil
 }
 
-func (pq *BookQueryService) GetBookRequestNumber() (*string, error) {
+func (pq *BookQueryService) GetBookRequestDataID() (*string, error) {
 	var reqID string
 	// Use a raw query
 
@@ -61,7 +75,6 @@ func (pq *BookQueryService) GetBookRequestNumber() (*string, error) {
 		return nil, err
 	}
 
-	query.Scan(&reqID)
 	return &reqID, nil
 }
 
@@ -94,18 +107,18 @@ func BookModelToEntity(book *models.UserBook, guest *models.BookGuestDatum, plan
 	}
 
 	return &entity.Booking{
-		ID:           uuid.MustParse(book.ID),
-		BookSystemID: book.TLBookingNumber,
-		StayFrom:     book.StayFrom,
-		StayTo:       book.StayTo,
-		Adult:        uint(book.Adult),
-		Child:        uint(book.Child),
-		RoomCount:    uint(book.RoomCount),
-		CheckInTime:  entity.CheckInTime(book.CheckInTime),
-		TotalCost:    uint(book.TotalCost),
-		GuestData:    guestEntity,
-		BookPlan:     planEntity,
-		BookUserID:   uuid.MustParse(book.BookUserID),
-		Note:         book.Note.String,
+		ID:              uuid.MustParse(book.ID),
+		TlBookingNumber: book.TLBookingNumber,
+		StayFrom:        book.StayFrom,
+		StayTo:          book.StayTo,
+		Adult:           uint(book.Adult),
+		Child:           uint(book.Child),
+		RoomCount:       uint(book.RoomCount),
+		CheckInTime:     entity.CheckInTime(book.CheckInTime),
+		TotalCost:       uint(book.TotalCost),
+		GuestData:       guestEntity,
+		BookPlan:        planEntity,
+		BookUserID:      uuid.MustParse(book.BookUserID),
+		Note:            book.Note.String,
 	}
 }

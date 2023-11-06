@@ -5,9 +5,9 @@ import (
 	"time"
 )
 
-type EnvelopeRS struct {
+type EnvelopeRS[TBody any] struct {
 	XMLName xml.Name `xml:"S:Envelope"`
-	Body    BodyRS   `xml:"S:Body"`
+	Body    TBody    `xml:"S:Body"`
 }
 
 type BodyRS struct {

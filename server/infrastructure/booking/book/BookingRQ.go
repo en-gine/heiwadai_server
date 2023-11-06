@@ -6,12 +6,12 @@ import (
 	"server/infrastructure/booking/util"
 )
 
-type EnvelopeRQ struct {
+type EnvelopeRQ[TBody any] struct {
 	XMLName xml.Name `xml:"soapenv:Envelope"`
 	SoapEnv string   `xml:"xmlns:soapenv,attr"`
 	Naif    string   `xml:"xmlns:naif,attr"`
 	Header  string   `xml:"soapenv:Header"`
-	Body    Body     `xml:"soapenv:Body"`
+	Body    TBody    `xml:"soapenv:Body"`
 }
 
 type Body struct {

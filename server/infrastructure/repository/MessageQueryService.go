@@ -39,23 +39,21 @@ func (pq *MessageQueryService) GetByID(id uuid.UUID) (*entity.Message, error) {
 	return MessageModelToEntity(mgz), nil
 }
 
-func (pq *MessageQueryService) GetMessagesAfter(lastCreateAt *time.Time) ([]*entity.Message, error) {
+func (pq *MessageQueryService) GetMessagesAfter(ID *uuid.UUID) ([]*entity.Message, error) {
 	var msgs []*models.Message
 
-	// lastCreateAtがnilの場合は全件取得
-	if lastCreateAt == nil {
-		msgs, err := models.Messages().All(context.Background(), pq.db)
-		if err != nil {
-			return nil, err
-		}
-		var result []*entity.Message
-		for _, mgz := range msgs {
-			result = append(result, MessageModelToEntity(mgz))
-		}
-		return result, nil
+	var lastCreateAt *time.Time
+	msg, err := models.FindMessage(context.Background(), pq.db, ID.String())
+	if err != nil {
+		return nil, err
+	}
+	if msg != nil {
+		lastCreateAt = &msg.CreateAt
+	} else {
+		lastCreateAt = &time.Time{}
 	}
 
-	msgs, err := models.Messages(models.MessageWhere.CreateAt.GT(*lastCreateAt)).All(context.Background(), pq.db)
+	msgs, err = models.Messages(models.MessageWhere.CreateAt.GT(*lastCreateAt)).All(context.Background(), pq.db)
 	if err != nil {
 		return nil, err
 	}

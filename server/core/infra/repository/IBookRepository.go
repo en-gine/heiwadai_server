@@ -8,5 +8,9 @@ import (
 
 type IBookRepository interface {
 	Save(book *entity.Booking) error
-	Delete(bookID uuid.UUID) error
+	Delete(id uuid.UUID) error
+}
+type IBookAPIRepository interface {
+	Reserve(bookData *entity.Booking) (*string, error)
+	Cancel(bookData *entity.Booking) error
 }
