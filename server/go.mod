@@ -74,7 +74,6 @@ require (
 
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.0
-	github.com/Songmu/go-httpdate v1.0.0
 	github.com/bufbuild/connect-grpcreflect-go v1.1.0
 	github.com/google/uuid v1.3.0
 	github.com/nedpals/supabase-go v0.3.0

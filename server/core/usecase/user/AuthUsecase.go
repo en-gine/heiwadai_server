@@ -31,9 +31,9 @@ func (u *AuthUsecase) Register(
 	FirstNameKana string,
 	LastNameKana string,
 	CompanyName *string,
-	BirthDate time.Time,
+	BirthDate *time.Time,
 	ZipCode *string,
-	Prefecture string,
+	PrefectureID int,
 	City *string,
 	Address *string,
 	Tel *string,
@@ -54,10 +54,7 @@ func (u *AuthUsecase) Register(
 		return nil, errors.NewDomainError(errors.UnPemitedOperation, "既に登録されているメールアドレスです")
 	}
 
-	prefecture, domainErr := entity.StringToPrefecture(Prefecture)
-	if domainErr != nil {
-		return nil, domainErr
-	}
+	prefecture := entity.Prefecture(PrefectureID)
 
 	// 招待メール送信
 	newID, err := u.authAction.InviteUserByEmail(Mail)

@@ -3,43 +3,18 @@ syntax = "proto3";
 package server.admin;
 
 import "google/protobuf/empty.proto";
+import "v1/user/UserData.proto";
 
 message UserUpdateDataRequest {
-  string ID = 1;
-  string FirstName = 2;
-  string LastName = 3;
-  string FirstNameKana = 4;
-  string LastNameKana = 5;
-  string CompanyName = 6;
-  string BirthDate = 7;
-  string ZipCode = 8;
-  string Prefecture = 9;
-  string City = 10;
-  string Address = 11;
-  string Tel = 12;
-  string Mail = 13;
-  bool AcceptMail = 14;
-  string InnerNote = 15;
-	bool IsBlackCustomer  = 16;
+  server.user.UserUpdateDataRequest User = 1;
+  string InnerNote = 2;
+	bool IsBlackCustomer  = 3;
 }
 
 message UserDataResponse {
-  string ID = 1;
-  string FirstName = 2;
-  string LastName = 3;
-  string FirstNameKana = 4;
-  string LastNameKana = 5;
-  string CompanyName = 6;
-  string BirthDate = 7;
-  string ZipCode = 8;
-  string Prefecture = 9;
-  string City = 10;
-  string Address = 11;
-  string Tel = 12;
-  string Mail = 13;
-  bool AcceptMail = 14;
-  string InnerNote = 15;
-	bool IsBlackCustomer  = 16;
+  server.user.UserDataResponse User = 1;
+  string InnerNote = 2;
+	bool IsBlackCustomer  = 3;
 }
 
 message UserDeleteRequest{

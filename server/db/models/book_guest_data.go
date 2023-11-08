@@ -30,9 +30,8 @@ type BookGuestDatum struct {
 	FirstNameKana string      `boil:"first_name_kana" json:"first_name_kana" toml:"first_name_kana" yaml:"first_name_kana"`
 	LastNameKana  string      `boil:"last_name_kana" json:"last_name_kana" toml:"last_name_kana" yaml:"last_name_kana"`
 	CompanyName   null.String `boil:"company_name" json:"company_name,omitempty" toml:"company_name" yaml:"company_name,omitempty"`
-	BirthDate     time.Time   `boil:"birth_date" json:"birth_date" toml:"birth_date" yaml:"birth_date"`
 	ZipCode       null.String `boil:"zip_code" json:"zip_code,omitempty" toml:"zip_code" yaml:"zip_code,omitempty"`
-	Prefecture    int         `boil:"prefecture" json:"prefecture" toml:"prefecture" yaml:"prefecture"`
+	Prefecture    null.Int    `boil:"prefecture" json:"prefecture,omitempty" toml:"prefecture" yaml:"prefecture,omitempty"`
 	City          null.String `boil:"city" json:"city,omitempty" toml:"city" yaml:"city,omitempty"`
 	Address       null.String `boil:"address" json:"address,omitempty" toml:"address" yaml:"address,omitempty"`
 	Tel           null.String `boil:"tel" json:"tel,omitempty" toml:"tel" yaml:"tel,omitempty"`
@@ -51,7 +50,6 @@ var BookGuestDatumColumns = struct {
 	FirstNameKana string
 	LastNameKana  string
 	CompanyName   string
-	BirthDate     string
 	ZipCode       string
 	Prefecture    string
 	City          string
@@ -67,7 +65,6 @@ var BookGuestDatumColumns = struct {
 	FirstNameKana: "first_name_kana",
 	LastNameKana:  "last_name_kana",
 	CompanyName:   "company_name",
-	BirthDate:     "birth_date",
 	ZipCode:       "zip_code",
 	Prefecture:    "prefecture",
 	City:          "city",
@@ -85,7 +82,6 @@ var BookGuestDatumTableColumns = struct {
 	FirstNameKana string
 	LastNameKana  string
 	CompanyName   string
-	BirthDate     string
 	ZipCode       string
 	Prefecture    string
 	City          string
@@ -101,7 +97,6 @@ var BookGuestDatumTableColumns = struct {
 	FirstNameKana: "book_guest_data.first_name_kana",
 	LastNameKana:  "book_guest_data.last_name_kana",
 	CompanyName:   "book_guest_data.company_name",
-	BirthDate:     "book_guest_data.birth_date",
 	ZipCode:       "book_guest_data.zip_code",
 	Prefecture:    "book_guest_data.prefecture",
 	City:          "book_guest_data.city",
@@ -152,28 +147,43 @@ func (w whereHelpernull_String) NIN(slice []string) qm.QueryMod {
 func (w whereHelpernull_String) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
 func (w whereHelpernull_String) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
 
-type whereHelperint struct{ field string }
+type whereHelpernull_Int struct{ field string }
 
-func (w whereHelperint) EQ(x int) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
-func (w whereHelperint) NEQ(x int) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
-func (w whereHelperint) LT(x int) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
-func (w whereHelperint) LTE(x int) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
-func (w whereHelperint) GT(x int) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
-func (w whereHelperint) GTE(x int) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
-func (w whereHelperint) IN(slice []int) qm.QueryMod {
+func (w whereHelpernull_Int) EQ(x null.Int) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, false, x)
+}
+func (w whereHelpernull_Int) NEQ(x null.Int) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, true, x)
+}
+func (w whereHelpernull_Int) LT(x null.Int) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelpernull_Int) LTE(x null.Int) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelpernull_Int) GT(x null.Int) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelpernull_Int) GTE(x null.Int) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+func (w whereHelpernull_Int) IN(slice []int) qm.QueryMod {
 	values := make([]interface{}, 0, len(slice))
 	for _, value := range slice {
 		values = append(values, value)
 	}
 	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
 }
-func (w whereHelperint) NIN(slice []int) qm.QueryMod {
+func (w whereHelpernull_Int) NIN(slice []int) qm.QueryMod {
 	values := make([]interface{}, 0, len(slice))
 	for _, value := range slice {
 		values = append(values, value)
 	}
 	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
 }
+
+func (w whereHelpernull_Int) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
+func (w whereHelpernull_Int) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
 
 var BookGuestDatumWhere = struct {
 	ID            whereHelperstring
@@ -182,9 +192,8 @@ var BookGuestDatumWhere = struct {
 	FirstNameKana whereHelperstring
 	LastNameKana  whereHelperstring
 	CompanyName   whereHelpernull_String
-	BirthDate     whereHelpertime_Time
 	ZipCode       whereHelpernull_String
-	Prefecture    whereHelperint
+	Prefecture    whereHelpernull_Int
 	City          whereHelpernull_String
 	Address       whereHelpernull_String
 	Tel           whereHelpernull_String
@@ -198,9 +207,8 @@ var BookGuestDatumWhere = struct {
 	FirstNameKana: whereHelperstring{field: "\"book_guest_data\".\"first_name_kana\""},
 	LastNameKana:  whereHelperstring{field: "\"book_guest_data\".\"last_name_kana\""},
 	CompanyName:   whereHelpernull_String{field: "\"book_guest_data\".\"company_name\""},
-	BirthDate:     whereHelpertime_Time{field: "\"book_guest_data\".\"birth_date\""},
 	ZipCode:       whereHelpernull_String{field: "\"book_guest_data\".\"zip_code\""},
-	Prefecture:    whereHelperint{field: "\"book_guest_data\".\"prefecture\""},
+	Prefecture:    whereHelpernull_Int{field: "\"book_guest_data\".\"prefecture\""},
 	City:          whereHelpernull_String{field: "\"book_guest_data\".\"city\""},
 	Address:       whereHelpernull_String{field: "\"book_guest_data\".\"address\""},
 	Tel:           whereHelpernull_String{field: "\"book_guest_data\".\"tel\""},
@@ -237,9 +245,9 @@ func (r *bookGuestDatumR) GetGuestDatumUserBooks() UserBookSlice {
 type bookGuestDatumL struct{}
 
 var (
-	bookGuestDatumAllColumns            = []string{"id", "first_name", "last_name", "first_name_kana", "last_name_kana", "company_name", "birth_date", "zip_code", "prefecture", "city", "address", "tel", "mail", "create_at", "update_at"}
-	bookGuestDatumColumnsWithoutDefault = []string{"id", "first_name", "last_name", "first_name_kana", "last_name_kana", "birth_date", "prefecture", "mail"}
-	bookGuestDatumColumnsWithDefault    = []string{"company_name", "zip_code", "city", "address", "tel", "create_at", "update_at"}
+	bookGuestDatumAllColumns            = []string{"id", "first_name", "last_name", "first_name_kana", "last_name_kana", "company_name", "zip_code", "prefecture", "city", "address", "tel", "mail", "create_at", "update_at"}
+	bookGuestDatumColumnsWithoutDefault = []string{"id", "first_name", "last_name", "first_name_kana", "last_name_kana", "mail"}
+	bookGuestDatumColumnsWithDefault    = []string{"company_name", "zip_code", "prefecture", "city", "address", "tel", "create_at", "update_at"}
 	bookGuestDatumPrimaryKeyColumns     = []string{"id"}
 	bookGuestDatumGeneratedColumns      = []string{}
 )

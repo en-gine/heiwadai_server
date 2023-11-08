@@ -7,7 +7,7 @@ import "google/protobuf/empty.proto";
 
 message StoreRegisterRequest {
   string Name = 1;
-  string BranchName = 2;
+  optional string BranchName = 2;
   string ZipCode = 3;
   string Address = 4;
   string Tel = 5;
@@ -23,7 +23,7 @@ message StoreRegisterRequest {
 message StoreUpdateRequest {
   string ID = 1;
   string Name = 2;
-  string BranchName = 3; 
+  optional string BranchName = 3; 
   string ZipCode = 4;
   string Address = 5;
   string Tel = 6;
@@ -44,6 +44,7 @@ message StayableInfo {
   string RestAPIURL = 5;
   string BookingSystemID = 6;
 }
+
 message SoreIDRequest {
   string ID = 1;
 }

@@ -4,6 +4,27 @@ package server.user;
 
 option go_package = "server/api/v1";
 
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+import "v1/shared/Prefecture.proto";
+
+message UserRegisterRequest {
+  string FirstName = 1;
+  string LastName = 2;
+  string FirstNameKana = 3;
+  string LastNameKana = 4;
+  optional string CompanyName = 5;
+  google.protobuf.Timestamp BirthDate = 6;
+  optional string ZipCode = 7;
+  server.shared.Prefecture Prefecture = 8;
+  optional string City = 9;
+  optional string Address = 10;
+  optional string Tel = 11;
+  string Mail = 12;
+  bool AcceptMail = 13;
+  bool AcceptTerm = 14;
+}
 
 
 message UserUpdateDataRequest {
@@ -12,13 +33,13 @@ message UserUpdateDataRequest {
   string LastName = 3;
   string FirstNameKana = 4;
   string LastNameKana = 5;
-  string CompanyName = 6;
-  string BirthDate = 7;
-  string ZipCode = 8;
-  string Prefecture = 9;
-  string City = 10;
-  string Address = 11;
-  string Tel = 12;
+  optional string CompanyName = 6;
+  google.protobuf.Timestamp BirthDate = 7;
+  optional string ZipCode = 8;
+  server.shared.Prefecture Prefecture = 9;
+  optional string City = 10;
+  optional string Address = 11;
+  optional string Tel = 12;
   string Mail = 13;
   bool AcceptMail = 14;
 }
@@ -29,13 +50,13 @@ message UserDataResponse {
   string LastName = 3;
   string FirstNameKana = 4;
   string LastNameKana = 5;
-  string CompanyName = 6;
-  string BirthDate = 7;
-  string ZipCode = 8;
-  string Prefecture = 9;
-  string City = 10;
-  string Address = 11;
-  string Tel = 12;
+  optional string CompanyName = 6;
+  google.protobuf.Timestamp BirthDate = 7;
+  optional string ZipCode = 8;
+  server.shared.Prefecture Prefecture = 9;
+  optional string City = 10;
+  optional string Address = 11;
+  optional string Tel = 12;
   string Mail = 13;
   bool AcceptMail = 14;
 }

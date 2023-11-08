@@ -79,15 +79,23 @@ func (pq *BookQueryService) GetBookRequestDataID() (*string, error) {
 }
 
 func BookModelToEntity(book *models.UserBook, guest *models.BookGuestDatum, plan *models.BookPlan) *entity.Booking {
+	prefCode := guest.Prefecture.Ptr()
+	var pref *entity.Prefecture
+	if prefCode == nil {
+		pref = nil
+	} else {
+		temp := entity.Prefecture(*prefCode)
+		pref = &temp
+	}
+
 	guestEntity := &entity.GuestData{
 		FirstName:     guest.FirstName,
 		LastName:      guest.LastName,
 		FirstNameKana: guest.FirstNameKana,
 		LastNameKana:  guest.LastNameKana,
 		CompanyName:   guest.CompanyName.Ptr(),
-		BirthDate:     guest.BirthDate,
 		ZipCode:       guest.ZipCode.Ptr(),
-		Prefecture:    entity.Prefecture(guest.Prefecture),
+		Prefecture:    pref,
 		City:          guest.City.Ptr(),
 		Address:       guest.Address.Ptr(),
 		Tel:           guest.Tel.Ptr(),

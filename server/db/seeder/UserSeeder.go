@@ -21,6 +21,7 @@ func UserSeeder() {
 	address := "東区箱崎1-11"
 	tel := "0943-77-3185"
 	email := env.GetEnv(env.TestUserMail)
+	birth := time.Date(1996, 1, 1, 0, 0, 0, 0, time.Local)
 	fmt.Println(email)
 	user, err := authUsecase.Register(
 		"Tomohide",
@@ -28,9 +29,9 @@ func UserSeeder() {
 		"トモヒデ",
 		"ヒラカワ",
 		&companyName,
-		time.Date(1996, 1, 1, 0, 0, 0, 0, time.Local),
+		&birth,
 		&zip,
-		"福岡県",
+		12,
 		&city,
 		&address,
 		&tel,

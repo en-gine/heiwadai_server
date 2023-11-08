@@ -1,11 +1,12 @@
 package user
 
 import (
+	"time"
+
 	"server/core/entity"
 	"server/core/errors"
 	queryservice "server/core/infra/queryService"
 	"server/core/infra/repository"
-	"time"
 
 	"github.com/google/uuid"
 )
@@ -29,16 +30,15 @@ func (u *UserDataUsecase) Update(
 	FirstNameKana string,
 	LastNameKana string,
 	CompanyName *string,
-	BirthDate time.Time,
+	BirthDate *time.Time,
 	ZipCode *string,
-	Prefecture string,
+	PrefectureID int,
 	City *string,
 	Address *string,
 	Tel *string,
 	Mail string,
 	AcceptMail bool, // メルマガ配信可
 ) (*entity.User, *errors.DomainError) {
-
 	existUser, err := u.userQuery.GetByID(ID)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())
@@ -55,10 +55,7 @@ func (u *UserDataUsecase) Update(
 		return nil, errors.NewDomainError(errors.QueryDataNotFoundError, "このアドレスで登録されているユーザーが存在しません")
 	}
 
-	prefecture, domainErr := entity.StringToPrefecture(Prefecture)
-	if domainErr != nil {
-		return nil, domainErr
-	}
+	prefecture := entity.Prefecture(PrefectureID)
 
 	updateData := entity.RegenUser(
 		ID,

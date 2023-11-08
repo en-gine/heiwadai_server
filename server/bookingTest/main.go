@@ -36,6 +36,7 @@ func Book() {
 	city := "千代田区"
 	address := "丸の内1-1-1"
 	tel := "03-1234-5678"
+	pref := entity.Prefecture(13)
 
 	guest := &entity.GuestData{
 		FirstName:     "太郎",
@@ -43,9 +44,8 @@ func Book() {
 		FirstNameKana: "タロウ",
 		LastNameKana:  "タナカ",
 		CompanyName:   &companyName,
-		BirthDate:     time.Date(1990, time.January, 1, 0, 0, 0, 0, time.UTC),
 		ZipCode:       &zipCode,
-		Prefecture:    entity.Prefecture(13),
+		Prefecture:    &pref,
 		City:          &city,
 		Address:       &address,
 		Tel:           &tel,

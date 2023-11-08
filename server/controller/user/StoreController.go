@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"errors"
+
 	"server/api/v1/shared"
 	"server/api/v1/user"
 	userv1connect "server/api/v1/user/userconnect"
@@ -26,6 +27,7 @@ func NewStoreController(storeUsecase *usecase.StoreUsecase) *StoreController {
 		storeUseCase: *storeUsecase,
 	}
 }
+
 func (ac *StoreController) GetByID(ctx context.Context, req *connect.Request[user.SoreIDRequest]) (*connect.Response[shared.Store], error) {
 	msg := req.Msg
 	storeID, err := uuid.Parse(msg.ID)
@@ -101,7 +103,7 @@ func StoreToResponse(store *entity.Store) *shared.Store {
 	return &shared.Store{
 		ID:              store.ID.String(),
 		Name:            store.Name,
-		BranchName:      *store.BranchName,
+		BranchName:      store.BranchName,
 		ZipCode:         store.ZipCode,
 		Address:         store.Address,
 		Tel:             store.Tel,
@@ -113,6 +115,7 @@ func StoreToResponse(store *entity.Store) *shared.Store {
 		UnLimitedQRCode: store.UnLimitedQRCode.String(),
 	}
 }
+
 func StayableInfoToResponse(info *entity.StayableStoreInfo) *shared.StayableStoreInfo {
 	return &shared.StayableStoreInfo{
 		Parking:         info.Parking,

@@ -116,7 +116,7 @@ func UserModelToEntity(model *models.UserDatum, email string) *entity.User {
 		model.FirstNameKana,
 		model.LastNameKana,
 		model.CompanyName.Ptr(),
-		model.BirthDate,
+		model.BirthDate.Ptr(),
 		&model.ZipCode.String,
 		entity.Prefecture(model.Prefecture),
 		model.City.Ptr(),

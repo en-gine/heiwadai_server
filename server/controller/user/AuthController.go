@@ -3,12 +3,13 @@ package user
 import (
 	"context"
 	"errors"
+
 	"server/api/v1/user"
 	userv1connect "server/api/v1/user/userconnect"
+	"server/controller/util"
 	usecase "server/core/usecase/user"
 	"server/infrastructure/logger"
 
-	"github.com/Songmu/go-httpdate"
 	connect "github.com/bufbuild/connect-go"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
@@ -27,23 +28,19 @@ func NewAuthController(authUsecase *usecase.AuthUsecase) *AuthController {
 
 func (ac *AuthController) Register(ctx context.Context, req *connect.Request[user.UserRegisterRequest]) (*connect.Response[emptypb.Empty], error) {
 	msg := req.Msg
-	birth, err := httpdate.Str2Time(msg.BirthDate, nil)
-	if err != nil {
-		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("誕生日の形式が不正です"))
-	}
 
 	_, domaiErr := ac.authUseCase.Register(
 		msg.FirstName,
 		msg.LastName,
 		msg.FirstNameKana,
 		msg.LastNameKana,
-		&msg.CompanyName,
-		birth,
-		&msg.ZipCode,
-		msg.Prefecture,
-		&msg.City,
-		&msg.Address,
-		&msg.Tel,
+		msg.CompanyName,
+		util.TimeStampPtrToTimePtr(msg.BirthDate),
+		msg.ZipCode,
+		int(msg.Prefecture),
+		msg.City,
+		msg.Address,
+		msg.Tel,
 		msg.Mail,
 		msg.AcceptMail,
 		msg.AcceptTerm,

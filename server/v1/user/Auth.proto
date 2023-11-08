@@ -3,25 +3,10 @@ syntax = "proto3";
 package server.user;
 
 import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+import "v1/user/UserData.proto";
 
 option go_package = "server/api/v1";
-
-message UserRegisterRequest {
-  string FirstName = 1;
-  string LastName = 2;
-  string FirstNameKana = 3;
-  string LastNameKana = 4;
-  string CompanyName = 5;
-  string BirthDate = 6;
-  string ZipCode = 7;
-  string Prefecture = 8;
-  string City = 9;
-  string Address = 10;
-  string Tel = 11;
-  string Mail = 12;
-  bool AcceptMail = 13;
-  bool AcceptTerm = 14;
-}
 
 message UserAuthRequest {
   string email = 1;
@@ -49,7 +34,7 @@ message UpdateEmailRequest{
 }
 
 service AuthController {
-  rpc Register(UserRegisterRequest) returns (google.protobuf.Empty) {}
+  rpc Register(server.user.UserRegisterRequest) returns (google.protobuf.Empty) {}
   rpc SignUp(UserAuthRequest) returns (google.protobuf.Empty) {}
   rpc SignIn(UserAuthRequest) returns (UserAuthResponse) {}
   rpc ResetPasswordMail(ResetPasswordRequest) returns (google.protobuf.Empty) {}

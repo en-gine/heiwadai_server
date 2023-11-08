@@ -13,7 +13,7 @@ type User struct {
 	FirstNameKana string
 	LastNameKana  string
 	CompanyName   *string
-	BirthDate     time.Time
+	BirthDate     *time.Time
 	ZipCode       *string
 	Prefecture    Prefecture
 	City          *string
@@ -30,7 +30,7 @@ func CreateUser(
 	FirstNameKana string,
 	LastNameKana string,
 	CompanyName *string,
-	BirthDate time.Time,
+	BirthDate *time.Time,
 	ZipCode *string,
 	Prefecture Prefecture,
 	City *string,
@@ -64,7 +64,7 @@ func RegenUser(
 	FirstNameKana string,
 	LastNameKana string,
 	CompanyName *string,
-	BirthDate time.Time,
+	BirthDate *time.Time,
 	ZipCode *string,
 	Prefecture Prefecture,
 	City *string,

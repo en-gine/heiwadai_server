@@ -41,7 +41,7 @@ func (ur *UserRepository) Save(updateUser *entity.User, updateUserOption *entity
 		FirstNameKana: updateUser.FirstNameKana,
 		LastNameKana:  updateUser.LastNameKana,
 		CompanyName:   null.StringFromPtr(updateUser.CompanyName),
-		BirthDate:     updateUser.BirthDate,
+		BirthDate:     null.TimeFromPtr(updateUser.BirthDate),
 		ZipCode:       null.StringFromPtr(updateUser.ZipCode),
 		Prefecture:    int(updateUser.Prefecture),
 		City:          null.StringFromPtr(updateUser.City),

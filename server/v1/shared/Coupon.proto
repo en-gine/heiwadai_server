@@ -4,6 +4,7 @@ package server.shared;
 
 import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
+
 import "v1/shared/Store.proto";
 
 enum CouponType {

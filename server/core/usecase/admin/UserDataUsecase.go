@@ -39,7 +39,7 @@ func (u *UserDataUsecase) Update(
 	FirstNameKana string,
 	LastNameKana string,
 	CompanyName *string,
-	BirthDate time.Time,
+	BirthDate *time.Time,
 	ZipCode *string,
 	Prefecture string,
 	City *string,

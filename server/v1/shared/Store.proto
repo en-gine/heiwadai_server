@@ -2,10 +2,11 @@ syntax = "proto3";
 
 package server.shared;
 
+
 message Store {
   string ID = 1; // uuid.UUID
   string Name = 2;
-  string BranchName = 3; 
+  optional string BranchName = 3; 
   string ZipCode = 4;
   string Address = 5;
   string Tel = 6;
@@ -32,7 +33,7 @@ message StayableStoreInfo {
 
 message StayableStore {
   Store Store = 1;
-  StayableStoreInfo Info = 2;
+  optional StayableStoreInfo Info = 2;
 }
 
 message StayableStores {

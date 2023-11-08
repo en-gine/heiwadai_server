@@ -30,7 +30,7 @@ type UserDatum struct {
 	FirstNameKana string      `boil:"first_name_kana" json:"first_name_kana" toml:"first_name_kana" yaml:"first_name_kana"`
 	LastNameKana  string      `boil:"last_name_kana" json:"last_name_kana" toml:"last_name_kana" yaml:"last_name_kana"`
 	CompanyName   null.String `boil:"company_name" json:"company_name,omitempty" toml:"company_name" yaml:"company_name,omitempty"`
-	BirthDate     time.Time   `boil:"birth_date" json:"birth_date" toml:"birth_date" yaml:"birth_date"`
+	BirthDate     null.Time   `boil:"birth_date" json:"birth_date,omitempty" toml:"birth_date" yaml:"birth_date,omitempty"`
 	ZipCode       null.String `boil:"zip_code" json:"zip_code,omitempty" toml:"zip_code" yaml:"zip_code,omitempty"`
 	Prefecture    int         `boil:"prefecture" json:"prefecture" toml:"prefecture" yaml:"prefecture"`
 	City          null.String `boil:"city" json:"city,omitempty" toml:"city" yaml:"city,omitempty"`
@@ -121,7 +121,7 @@ var UserDatumWhere = struct {
 	FirstNameKana whereHelperstring
 	LastNameKana  whereHelperstring
 	CompanyName   whereHelpernull_String
-	BirthDate     whereHelpertime_Time
+	BirthDate     whereHelpernull_Time
 	ZipCode       whereHelpernull_String
 	Prefecture    whereHelperint
 	City          whereHelpernull_String
@@ -137,7 +137,7 @@ var UserDatumWhere = struct {
 	FirstNameKana: whereHelperstring{field: "\"user_data\".\"first_name_kana\""},
 	LastNameKana:  whereHelperstring{field: "\"user_data\".\"last_name_kana\""},
 	CompanyName:   whereHelpernull_String{field: "\"user_data\".\"company_name\""},
-	BirthDate:     whereHelpertime_Time{field: "\"user_data\".\"birth_date\""},
+	BirthDate:     whereHelpernull_Time{field: "\"user_data\".\"birth_date\""},
 	ZipCode:       whereHelpernull_String{field: "\"user_data\".\"zip_code\""},
 	Prefecture:    whereHelperint{field: "\"user_data\".\"prefecture\""},
 	City:          whereHelpernull_String{field: "\"user_data\".\"city\""},
@@ -227,8 +227,8 @@ type userDatumL struct{}
 
 var (
 	userDatumAllColumns            = []string{"user_id", "first_name", "last_name", "first_name_kana", "last_name_kana", "company_name", "birth_date", "zip_code", "prefecture", "city", "address", "tel", "accept_mail", "create_at", "update_at"}
-	userDatumColumnsWithoutDefault = []string{"user_id", "first_name", "last_name", "first_name_kana", "last_name_kana", "birth_date", "prefecture", "accept_mail"}
-	userDatumColumnsWithDefault    = []string{"company_name", "zip_code", "city", "address", "tel", "create_at", "update_at"}
+	userDatumColumnsWithoutDefault = []string{"user_id", "first_name", "last_name", "first_name_kana", "last_name_kana", "prefecture", "accept_mail"}
+	userDatumColumnsWithDefault    = []string{"company_name", "birth_date", "zip_code", "city", "address", "tel", "create_at", "update_at"}
 	userDatumPrimaryKeyColumns     = []string{"user_id"}
 	userDatumGeneratedColumns      = []string{}
 )

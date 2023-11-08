@@ -22,7 +22,7 @@ const _ = connect_go.IsAtLeastVersion0_1_0
 
 const (
 	// AdminDataControllerName is the fully-qualified name of the AdminDataController service.
-	AdminDataControllerName = "server.user.AdminDataController"
+	AdminDataControllerName = "server.admin.AdminDataController"
 )
 
 // These constants are the fully-qualified names of the RPCs defined in this package. They're
@@ -35,18 +35,18 @@ const (
 const (
 	// AdminDataControllerUpdateProcedure is the fully-qualified name of the AdminDataController's
 	// Update RPC.
-	AdminDataControllerUpdateProcedure = "/server.user.AdminDataController/Update"
+	AdminDataControllerUpdateProcedure = "/server.admin.AdminDataController/Update"
 )
 
-// AdminDataControllerClient is a client for the server.user.AdminDataController service.
+// AdminDataControllerClient is a client for the server.admin.AdminDataController service.
 type AdminDataControllerClient interface {
 	Update(context.Context, *connect_go.Request[admin.AdminUpdateDataRequest]) (*connect_go.Response[admin.AdminDataResponse], error)
 }
 
-// NewAdminDataControllerClient constructs a client for the server.user.AdminDataController service.
-// By default, it uses the Connect protocol with the binary Protobuf Codec, asks for gzipped
-// responses, and sends uncompressed requests. To use the gRPC or gRPC-Web protocols, supply the
-// connect.WithGRPC() or connect.WithGRPCWeb() options.
+// NewAdminDataControllerClient constructs a client for the server.admin.AdminDataController
+// service. By default, it uses the Connect protocol with the binary Protobuf Codec, asks for
+// gzipped responses, and sends uncompressed requests. To use the gRPC or gRPC-Web protocols, supply
+// the connect.WithGRPC() or connect.WithGRPCWeb() options.
 //
 // The URL supplied here should be the base URL for the Connect or gRPC server (for example,
 // http://api.acme.com or https://acme.com/grpc).
@@ -66,12 +66,12 @@ type adminDataControllerClient struct {
 	update *connect_go.Client[admin.AdminUpdateDataRequest, admin.AdminDataResponse]
 }
 
-// Update calls server.user.AdminDataController.Update.
+// Update calls server.admin.AdminDataController.Update.
 func (c *adminDataControllerClient) Update(ctx context.Context, req *connect_go.Request[admin.AdminUpdateDataRequest]) (*connect_go.Response[admin.AdminDataResponse], error) {
 	return c.update.CallUnary(ctx, req)
 }
 
-// AdminDataControllerHandler is an implementation of the server.user.AdminDataController service.
+// AdminDataControllerHandler is an implementation of the server.admin.AdminDataController service.
 type AdminDataControllerHandler interface {
 	Update(context.Context, *connect_go.Request[admin.AdminUpdateDataRequest]) (*connect_go.Response[admin.AdminDataResponse], error)
 }
@@ -87,7 +87,7 @@ func NewAdminDataControllerHandler(svc AdminDataControllerHandler, opts ...conne
 		svc.Update,
 		opts...,
 	)
-	return "/server.user.AdminDataController/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	return "/server.admin.AdminDataController/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case AdminDataControllerUpdateProcedure:
 			adminDataControllerUpdateHandler.ServeHTTP(w, r)
@@ -101,5 +101,5 @@ func NewAdminDataControllerHandler(svc AdminDataControllerHandler, opts ...conne
 type UnimplementedAdminDataControllerHandler struct{}
 
 func (UnimplementedAdminDataControllerHandler) Update(context.Context, *connect_go.Request[admin.AdminUpdateDataRequest]) (*connect_go.Response[admin.AdminDataResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.AdminDataController.Update is not implemented"))
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.AdminDataController.Update is not implemented"))
 }

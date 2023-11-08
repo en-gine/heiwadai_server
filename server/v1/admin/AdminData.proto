@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package server.user;
+package server.admin;
 
 option go_package = "server/api/v1";
 

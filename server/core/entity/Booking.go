@@ -31,9 +31,8 @@ type GuestData struct {
 	FirstNameKana string
 	LastNameKana  string
 	CompanyName   *string
-	BirthDate     time.Time
 	ZipCode       *string
-	Prefecture    Prefecture
+	Prefecture    *Prefecture
 	City          *string
 	Address       *string
 	Tel           *string
@@ -48,7 +47,7 @@ func CreateGuestData(
 	CompanyName *string,
 	BirthDate time.Time,
 	ZipCode *string,
-	Prefecture Prefecture,
+	Prefecture *Prefecture,
 	City *string,
 	Address *string,
 	Tel *string,
@@ -60,7 +59,6 @@ func CreateGuestData(
 		FirstNameKana: FirstNameKana,
 		LastNameKana:  LastNameKana,
 		CompanyName:   CompanyName,
-		BirthDate:     BirthDate,
 		ZipCode:       ZipCode,
 		Prefecture:    Prefecture,
 		City:          City,
@@ -79,7 +77,7 @@ func RegenGuestData(
 	CompanyName *string,
 	BirthDate time.Time,
 	ZipCode *string,
-	Prefecture Prefecture,
+	Prefecture *Prefecture,
 	City *string,
 	Address *string,
 	Tel *string,
@@ -92,7 +90,6 @@ func RegenGuestData(
 		FirstNameKana: FirstNameKana,
 		LastNameKana:  LastNameKana,
 		CompanyName:   CompanyName,
-		BirthDate:     BirthDate,
 		ZipCode:       ZipCode,
 		Prefecture:    Prefecture,
 		City:          City,

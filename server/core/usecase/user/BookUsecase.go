@@ -61,6 +61,18 @@ func (u *BookUsecase) Cancel(bookID uuid.UUID) *errors.DomainError {
 	return nil
 }
 
+func (u *BookUsecase) GetByID(bookID uuid.UUID) (*entity.Booking, *errors.DomainError) {
+	book, err := u.bookQuery.GetByID(bookID)
+	if err != nil {
+		return nil, errors.NewDomainError(errors.QueryError, err.Error())
+	}
+
+	if book == nil {
+		return nil, errors.NewDomainError(errors.QueryError, "該当の予約が存在しません。")
+	}
+	return book, nil
+}
+
 func (u *BookUsecase) Reserve(
 	stayFrom time.Time,
 	stayTo time.Time,
