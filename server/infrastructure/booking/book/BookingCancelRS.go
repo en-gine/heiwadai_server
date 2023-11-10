@@ -5,11 +5,11 @@ import (
 )
 
 type CancelBodyRS struct {
-	DeleteBookingWithCPResponse DeleteBookingWithCPResponse `xml:"ns2:deleteBookingWithCPResponse"`
+	DeleteBookingWithCPResponse DeleteBookingWithCPResponse `xml:"deleteBookingWithCPResponse"`
 }
 
 type DeleteBookingWithCPResponse struct {
-	XMLName                   xml.Name                  `xml:"ns2:deleteBookingWithCPResponse"`
+	XMLName                   xml.Name                  `xml:"deleteBookingWithCPResponse"`
 	XMLNs                     string                    `xml:"xmlns:ns2,attr"`
 	DeleteBookingWithCPResult DeleteBookingWithCPResult `xml:"deleteBookingWithCPResult"`
 }

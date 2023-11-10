@@ -24,6 +24,7 @@ var (
 	TLBookingUser = env.GetEnv(env.TlbookingUsername)
 	TLBookingPass = env.GetEnv(env.TlbookingPassword)
 	BookURL       = env.GetEnv(env.TlbookingBookingApiUrl)
+	CancelURL     = env.GetEnv(env.TlbookingCancelApiUrl)
 )
 
 func NewBookRepository(storeQuery queryservice.IStoreQueryService, bookQuery queryservice.IBookQueryService) *BookRepository {
@@ -46,7 +47,7 @@ func (p BookRepository) Cancel(bookData *entity.Booking) error {
 	}
 
 	reqBody := NewCancelRQ(bookData, store, *dataID)
-	res, err := util.Request[EnvelopeRQ[CancelBody], EnvelopeRS[CancelBodyRS]](BookURL, reqBody)
+	res, err := util.Request[EnvelopeRQ[CancelBody], EnvelopeRS[CancelBodyRS]](CancelURL, reqBody)
 	if err != nil {
 		logger.Error(err.Error())
 		return err
@@ -84,7 +85,6 @@ func (p *BookRepository) Reserve(
 		logger.Error(err.Error())
 		return nil, err
 	}
-
 	if res.Body.EntryBookingResponse.EntryBookingResult.CommonResponse.ResultCode == "False" {
 		msg := res.Body.EntryBookingResponse.EntryBookingResult.CommonResponse.ErrorInfos.ErrorMsg
 		code := res.Body.EntryBookingResponse.EntryBookingResult.CommonResponse.ErrorInfos.ErrorCode
@@ -116,6 +116,13 @@ func NewBookingRQ(bookData *entity.Booking, store *entity.StayableStore, dataID 
 		mealCondition = MealConditionOther
 	}
 
+	var BookingSystemID string
+	if env.GetEnv(env.TlbookingIsTest) == "true" {
+		BookingSystemID = "E69502"
+	} else {
+		BookingSystemID = store.BookingSystemID
+	}
+
 	guestNameKana := moji.Convert(guest.LastNameKana, moji.ZK, moji.HK) + " " + moji.Convert(guest.FirstNameKana, moji.ZK, moji.HK)
 	return &EnvelopeRQ[Body]{
 		SoapEnv: "http://schemas.xmlsoap.org/soap/envelope/",
@@ -130,7 +137,7 @@ func NewBookingRQ(bookData *entity.Booking, store *entity.StayableStore, dataID 
 						SystemDate:  time.Now().Format("2006-01-02T15:04:05"),
 					},
 					ExtendLincoln: ExtendLincoln{
-						TllHotelCode: store.BookingSystemID,
+						TllHotelCode: BookingSystemID,
 						UseTllPlan:   1,
 					},
 					SendInformation: SendInformation{
@@ -149,7 +156,7 @@ func NewBookingRQ(bookData *entity.Booking, store *entity.StayableStore, dataID 
 						},
 						SalesOfficeInformation: SalesOfficeInformation{
 							SalesOfficeCompanyName: "平和台ホテルアプリ",
-							SalesOfficeName:        "",
+							SalesOfficeName:        store.Name + *store.BranchName,
 							SalesOfficeCode:        "10000000",
 						},
 						BasicInformation: BasicInformation{
@@ -170,8 +177,10 @@ func NewBookingRQ(bookData *entity.Booking, store *entity.StayableStore, dataID 
 							TotalPaxMaleCount:          bookData.Adult,
 							TotalPaxFemaleCount:        0,
 							TotalChildA70Count:         bookData.Child,
-							PackagePlanCode:            bookData.BookPlan.ID,
 							MealCondition:              mealCondition,
+							PackageType:                "Package",
+							PackagePlanCode:            plan.ID,
+							PackagePlanName:            plan.Title,
 						},
 						BasicRateInformation: BasicRateInformation{
 							RoomRateOrPersonalRate:   RoomRateRoom,
@@ -187,7 +196,7 @@ func NewBookingRQ(bookData *entity.Booking, store *entity.StayableStore, dataID 
 							RoomAndGuestList: []RoomAndGuest{
 								{
 									RoomInformation: RoomInformation{
-										RoomTypeCode:    plan.RoomType.Code(),
+										RoomTypeCode:    int(plan.RoomType),
 										RoomTypeName:    plan.RoomType.String(),
 										PerRoomPaxCount: bookData.Adult + bookData.Child,
 									},

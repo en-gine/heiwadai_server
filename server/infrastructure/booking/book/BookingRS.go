@@ -6,16 +6,16 @@ import (
 )
 
 type EnvelopeRS[TBody any] struct {
-	XMLName xml.Name `xml:"S:Envelope"`
-	Body    TBody    `xml:"S:Body"`
+	XMLName xml.Name `xml:"Envelope"`
+	Body    TBody    `xml:"Body"`
 }
 
 type BodyRS struct {
-	EntryBookingResponse EntryBookingResponse `xml:"ns2:entryBookingResponse"`
+	EntryBookingResponse EntryBookingResponse `xml:"entryBookingResponse"`
 }
 
 type EntryBookingResponse struct {
-	XMLName            xml.Name           `xml:"ns2:entryBookingResponse"`
+	XMLName            xml.Name           `xml:"entryBookingResponse"`
 	EntryBookingResult EntryBookingResult `xml:"entryBookingResult"`
 }
 

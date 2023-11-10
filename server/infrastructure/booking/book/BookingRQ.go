@@ -104,8 +104,11 @@ type BasicInformation struct {
 	TotalPaxMaleCount          uint          `xml:"TotalPaxMaleCount"`   //	お客様総合計男性人数
 	TotalPaxFemaleCount        uint          `xml:"TotalPaxFemaleCount"` //	お客様総合計女性人数（男女区別が無い場合は0）
 	TotalChildA70Count         uint          `xml:"TotalChildA70Count"`  //	お客様総合計子供A（70%）人数
-	PackagePlanCode            string        `xml:"PackagePlanCode"`     // 企画(パッケージ)コード
 	MealCondition              MealCondition `xml:"MealCondition"`       // 食事条件
+	PackageType                string        `xml:"PackageType"`         // Package固定
+	PackagePlanCode            string        `xml:"PackagePlanCode"`     // 企画(パッケージ)コード
+	PackagePlanName            string        `xml:"PackagePlanName"`     // 企画(パッケージ)名
+	PackagePlanContent         string        `xml:"PackagePlanContent"`  // 企画(パッケージ)内容
 }
 type MealCondition string
 
@@ -204,7 +207,7 @@ type RoomAndGuest struct {
 }
 
 type RoomInformation struct {
-	RoomTypeCode             string `xml:"RoomTypeCode"`
+	RoomTypeCode             int    `xml:"RoomTypeCode"`
 	RoomTypeName             string `xml:"RoomTypeName"`
 	RelationRoomCode         *int   `xml:"RelationRoomCode"`
 	RelationRoomName         *int   `xml:"RelationRoomName"`

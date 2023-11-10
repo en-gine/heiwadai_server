@@ -50,6 +50,7 @@ const (
 	TlbookingIsTest        EnvKey = "TLBOOKING_IS_TEST"
 	TlbookingAvailApiUrl   EnvKey = "TLBOOKING_AVAIL_API_URL"
 	TlbookingBookingApiUrl EnvKey = "TLBOOKING_BOOKING_API_URL"
+	TlbookingCancelApiUrl  EnvKey = "TLBOOKING_CANCEL_API_URL"
 	TlbookingUsername      EnvKey = "TLBOOKING_USERNAME"
 	TlbookingPassword      EnvKey = "TLBOOKING_PASSWORD"
 
@@ -100,6 +101,7 @@ func InitEnv() {
 			TlbookingIsTest:        os.Getenv(string(TlbookingIsTest)),
 			TlbookingAvailApiUrl:   os.Getenv(string(TlbookingAvailApiUrl)),
 			TlbookingBookingApiUrl: os.Getenv(string(TlbookingBookingApiUrl)),
+			TlbookingCancelApiUrl:  os.Getenv(string(TlbookingCancelApiUrl)),
 			TlbookingUsername:      os.Getenv(string(TlbookingUsername)),
 			TlbookingPassword:      os.Getenv(string(TlbookingPassword)),
 
