@@ -149,17 +149,19 @@ func (u *MailMagazineUsecase) Send(mailMagazineID uuid.UUID) *errors.DomainError
 		return errors.NewDomainError(errors.QueryDataNotFoundError, "送信済みのため送信できません")
 	}
 
-	// 一旦ログにコピーしてDB保存（途中失敗なども考えて状態を固定）
-	err = u.mailMagazineLogRepository.BulkCopyToLogAsUnsent(mailMagazineID, mgz.TargetPrefecture)
+	// 一旦ログにコピーしてDB保存（途中失敗なども考えて状態を固定）／送信途中失敗時はコピーしない
+	if mgz.MailMagazineStatus != entity.MailMagazineSentUnCompleted {
+		err = u.mailMagazineLogRepository.BulkCopyToLogAsUnsent(mailMagazineID, mgz.TargetPrefecture)
+	}
 
 	if err != nil {
-		u.saveUncompleteMailMagazine(mgz, mgz.UnsentCount, 0)
+		u.saveUncompleteMailMagazine(mgz, mgz.UnsentCount, mgz.SentCount)
 		return errors.NewDomainError(errors.RepositoryError, err.Error())
 	}
 
 	count, err := u.mailMagazineLogQuery.GetUnsentTargetAllCount(mailMagazineID)
 	if err != nil {
-		u.saveUncompleteMailMagazine(mgz, mgz.UnsentCount, 0)
+		u.saveUncompleteMailMagazine(mgz, mgz.UnsentCount, mgz.SentCount)
 		return errors.NewDomainError(errors.QueryError, err.Error())
 	}
 
