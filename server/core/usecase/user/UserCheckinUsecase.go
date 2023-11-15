@@ -52,7 +52,7 @@ func NewUserCheckinUsecase(
 }
 
 func (u *UserCheckinUsecase) GetStampCard(authID uuid.UUID) (*entity.StampCard, *errors.DomainError) {
-	userCheckins, err := u.checkinQuery.GetActiveCheckin(authID)
+	userCheckins, err := u.checkinQuery.GetMyActiveCheckin(authID)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())
 	}
@@ -75,7 +75,7 @@ func (u *UserCheckinUsecase) Checkin(authID uuid.UUID, QrHash uuid.UUID) (*entit
 	}
 	var checkInStore *entity.Store
 	var isUnlimitQr bool
-	lastCheckin, err := u.checkinQuery.GetLastStoreCheckin(authID, checkInStore.ID)
+	lastCheckin, err := u.checkinQuery.GetMyLastStoreCheckin(authID, checkInStore.ID)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())
 	}
@@ -109,7 +109,7 @@ func (u *UserCheckinUsecase) Checkin(authID uuid.UUID, QrHash uuid.UUID) (*entit
 	}
 
 	newCheckin := entity.CreateCheckin(*checkInStore, *AuthUser)
-	myCheckins, err := u.checkinQuery.GetActiveCheckin(authID)
+	myCheckins, err := u.checkinQuery.GetMyActiveCheckin(authID)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())
 	}

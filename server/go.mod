@@ -34,6 +34,7 @@ require (
 	cloud.google.com/go/longrunning v0.5.0 // indirect
 	cloud.google.com/go/storage v1.29.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/ericlagergren/decimal v0.0.0-20211103172832-aca2edc11f73 // indirect
 	github.com/fsnotify/fsnotify v1.5.4 // indirect
 	github.com/gofrs/uuid v4.2.0+incompatible // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
@@ -77,7 +78,6 @@ require (
 	github.com/bufbuild/connect-grpcreflect-go v1.1.0
 	github.com/google/uuid v1.3.0
 	github.com/nedpals/supabase-go v0.3.0
-	github.com/streadway/amqp v1.1.0
 	github.com/stretchr/testify v1.8.4
 	golang.org/x/text v0.13.0 // indirect
 )

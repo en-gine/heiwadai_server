@@ -1,89 +1,83 @@
 package action
 
 import (
-	"log"
+	"encoding/base64"
+	"fmt"
+	"mime"
 	"net/smtp"
+	"strings"
 
 	"server/core/infra/action"
 	"server/infrastructure/env"
-
-	"github.com/streadway/amqp"
+	"server/infrastructure/logger"
 )
 
 var _ action.ISendMailAction = &SendMail{}
 
+var (
+	HOST = env.GetEnv(env.MailHost)
+	PORT = env.GetEnv(env.MailPort)
+	PASS = env.GetEnv(env.MailPass)
+)
+
 type SendMail struct{}
 
-func (s *SendMail) SendAll(mails *[]string) error {
-	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
+func (s *SendMail) SendAll(mails *[]string, From string, Title string, Body string) error {
+	To := "no-reply@heiwadai-hotel.app" // 一斉送信の場合ダミー
+	err := s.SendMail(To, "", From, Title, Body, mails)
 	if err != nil {
-		log.Fatalf("%s: %s", "Failed to connect to RabbitMQ", err)
+		return err
 	}
-	defer conn.Close()
-
-	ch, err := conn.Channel()
-	if err != nil {
-		log.Fatalf("%s: %s", "Failed to open a channel", err)
-	}
-	defer ch.Close()
-
-	q, err := ch.QueueDeclare(
-		"email_queue", // name
-		true,          // durable
-		false,         // delete when unused
-		false,         // exclusive
-		false,         // no-wait
-		nil,           // arguments
-	)
-	if err != nil {
-		log.Fatalf("%s: %s", "Failed to declare a queue", err)
-	}
-
-	msgs, err := ch.Consume(
-		q.Name, // queue
-		"",     // consumer
-		true,   // auto-ack
-		false,  // exclusive
-		false,  // no-local
-		false,  // no-wait
-		nil,    // args
-	)
-	if err != nil {
-		log.Fatalf("%s: %s", "Failed to register a consumer", err)
-	}
-
-	forever := make(chan bool)
-
-	go func() {
-		for d := range msgs {
-			log.Printf("Received a message: %s", d.Body)
-			// sendMail(string(d.Body))
-		}
-	}()
-
-	log.Printf(" [*] Waiting for messages. To exit press CTRL+C")
-	<-forever
-
-	return err
+	return nil
 }
 
 func (s *SendMail) Send(To string, CC string, From string, Title string, Body string) error {
-	msg := "From: " + From + "\n" +
-		"To: " + To + "\n" +
-		"Subject: " + Title + "\n\n" +
-		Body
-
-	host := env.GetEnv(env.MailHost)
-	port := env.GetEnv(env.MailPort)
-	pass := env.GetEnv(env.MailPass)
-
-	err := smtp.SendMail(host+":"+port,
-		smtp.PlainAuth("", From, pass, host),
-		From, []string{To}, []byte(msg))
+	err := s.SendMail(To, CC, From, Title, Body, nil)
 	if err != nil {
-		log.Fatalf("smtp error: %s", err)
-		return nil
+		return err
+	}
+	return nil
+}
+
+func (s *SendMail) SendMail(To string, CC string, From string, Title string, Body string, BulkTo *[]string) error {
+	header := make(map[string]string)
+	header["From"] = From
+	header["To"] = To
+	header["Subject"] = mime.QEncoding.Encode("UTF-8", Title)
+	header["MIME-Version"] = "1.0"
+	header["Content-Type"] = "text/plain; charset=\"utf-8\""
+	header["Content-Transfer-Encoding"] = "base64"
+	if BulkTo != nil {
+		var emails []string
+		for i, email := range *BulkTo {
+			emails[i] = fmt.Sprintf("\"%s\"", email)
+		}
+		joinedString := "[" + strings.Join(emails, ", ") + "]"
+		header["x-smtpapi"] = `{"to":` + joinedString + `}` // 一斉送信の場合
+	}
+	message := ""
+	for k, v := range header {
+		message += fmt.Sprintf("%s: %s\r\n", k, v)
+	}
+
+	for k, v := range header {
+		message += fmt.Sprintf("%s: %s\r\n", k, v)
+	}
+	message += "\r\n" + base64.StdEncoding.EncodeToString([]byte(Body))
+
+	err := smtp.SendMail(HOST+":"+PORT,
+		smtp.PlainAuth("", From, PASS, HOST),
+		From, []string{To}, []byte(message))
+	if err != nil {
+		logger.Fatalf("smtp error: %s", err)
+		return err
 	}
 
 	return nil
+}
+
+func main() {
+	BulkTo := []string{"test@test.jp"}
+	BulkTo = append(BulkTo, "aaaa@bbbb.co.jp")
+	fmt.Printf("%v", BulkTo)
 }

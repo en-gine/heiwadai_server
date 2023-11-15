@@ -14,7 +14,6 @@ import (
 	"time"
 
 	"github.com/friendsofgo/errors"
-	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -24,13 +23,13 @@ import (
 
 // Checkin is an object representing the database table.
 type Checkin struct {
-	ID        string      `boil:"id" json:"id" toml:"id" yaml:"id"`
-	StoreID   null.String `boil:"store_id" json:"store_id,omitempty" toml:"store_id" yaml:"store_id,omitempty"`
-	UserID    null.String `boil:"user_id" json:"user_id,omitempty" toml:"user_id" yaml:"user_id,omitempty"`
-	CheckInAt time.Time   `boil:"check_in_at" json:"check_in_at" toml:"check_in_at" yaml:"check_in_at"`
-	Archive   bool        `boil:"archive" json:"archive" toml:"archive" yaml:"archive"`
-	CreateAt  time.Time   `boil:"create_at" json:"create_at" toml:"create_at" yaml:"create_at"`
-	UpdateAt  time.Time   `boil:"update_at" json:"update_at" toml:"update_at" yaml:"update_at"`
+	ID        string    `boil:"id" json:"id" toml:"id" yaml:"id"`
+	StoreID   string    `boil:"store_id" json:"store_id" toml:"store_id" yaml:"store_id"`
+	UserID    string    `boil:"user_id" json:"user_id" toml:"user_id" yaml:"user_id"`
+	CheckInAt time.Time `boil:"check_in_at" json:"check_in_at" toml:"check_in_at" yaml:"check_in_at"`
+	Archive   bool      `boil:"archive" json:"archive" toml:"archive" yaml:"archive"`
+	CreateAt  time.Time `boil:"create_at" json:"create_at" toml:"create_at" yaml:"create_at"`
+	UpdateAt  time.Time `boil:"update_at" json:"update_at" toml:"update_at" yaml:"update_at"`
 
 	R *checkinR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L checkinL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -76,16 +75,16 @@ var CheckinTableColumns = struct {
 
 var CheckinWhere = struct {
 	ID        whereHelperstring
-	StoreID   whereHelpernull_String
-	UserID    whereHelpernull_String
+	StoreID   whereHelperstring
+	UserID    whereHelperstring
 	CheckInAt whereHelpertime_Time
 	Archive   whereHelperbool
 	CreateAt  whereHelpertime_Time
 	UpdateAt  whereHelpertime_Time
 }{
 	ID:        whereHelperstring{field: "\"checkin\".\"id\""},
-	StoreID:   whereHelpernull_String{field: "\"checkin\".\"store_id\""},
-	UserID:    whereHelpernull_String{field: "\"checkin\".\"user_id\""},
+	StoreID:   whereHelperstring{field: "\"checkin\".\"store_id\""},
+	UserID:    whereHelperstring{field: "\"checkin\".\"user_id\""},
 	CheckInAt: whereHelpertime_Time{field: "\"checkin\".\"check_in_at\""},
 	Archive:   whereHelperbool{field: "\"checkin\".\"archive\""},
 	CreateAt:  whereHelpertime_Time{field: "\"checkin\".\"create_at\""},
@@ -131,8 +130,8 @@ type checkinL struct{}
 
 var (
 	checkinAllColumns            = []string{"id", "store_id", "user_id", "check_in_at", "archive", "create_at", "update_at"}
-	checkinColumnsWithoutDefault = []string{"id", "check_in_at", "archive"}
-	checkinColumnsWithDefault    = []string{"store_id", "user_id", "create_at", "update_at"}
+	checkinColumnsWithoutDefault = []string{"id", "store_id", "user_id", "check_in_at", "archive"}
+	checkinColumnsWithDefault    = []string{"create_at", "update_at"}
 	checkinPrimaryKeyColumns     = []string{"id"}
 	checkinGeneratedColumns      = []string{}
 )
@@ -470,9 +469,7 @@ func (checkinL) LoadStore(ctx context.Context, e boil.ContextExecutor, singular 
 		if object.R == nil {
 			object.R = &checkinR{}
 		}
-		if !queries.IsNil(object.StoreID) {
-			args = append(args, object.StoreID)
-		}
+		args = append(args, object.StoreID)
 
 	} else {
 	Outer:
@@ -482,14 +479,12 @@ func (checkinL) LoadStore(ctx context.Context, e boil.ContextExecutor, singular 
 			}
 
 			for _, a := range args {
-				if queries.Equal(a, obj.StoreID) {
+				if a == obj.StoreID {
 					continue Outer
 				}
 			}
 
-			if !queries.IsNil(obj.StoreID) {
-				args = append(args, obj.StoreID)
-			}
+			args = append(args, obj.StoreID)
 
 		}
 	}
@@ -547,7 +542,7 @@ func (checkinL) LoadStore(ctx context.Context, e boil.ContextExecutor, singular 
 
 	for _, local := range slice {
 		for _, foreign := range resultSlice {
-			if queries.Equal(local.StoreID, foreign.ID) {
+			if local.StoreID == foreign.ID {
 				local.R.Store = foreign
 				if foreign.R == nil {
 					foreign.R = &storeR{}
@@ -594,9 +589,7 @@ func (checkinL) LoadUser(ctx context.Context, e boil.ContextExecutor, singular b
 		if object.R == nil {
 			object.R = &checkinR{}
 		}
-		if !queries.IsNil(object.UserID) {
-			args = append(args, object.UserID)
-		}
+		args = append(args, object.UserID)
 
 	} else {
 	Outer:
@@ -606,14 +599,12 @@ func (checkinL) LoadUser(ctx context.Context, e boil.ContextExecutor, singular b
 			}
 
 			for _, a := range args {
-				if queries.Equal(a, obj.UserID) {
+				if a == obj.UserID {
 					continue Outer
 				}
 			}
 
-			if !queries.IsNil(obj.UserID) {
-				args = append(args, obj.UserID)
-			}
+			args = append(args, obj.UserID)
 
 		}
 	}
@@ -671,7 +662,7 @@ func (checkinL) LoadUser(ctx context.Context, e boil.ContextExecutor, singular b
 
 	for _, local := range slice {
 		for _, foreign := range resultSlice {
-			if queries.Equal(local.UserID, foreign.UserID) {
+			if local.UserID == foreign.UserID {
 				local.R.User = foreign
 				if foreign.R == nil {
 					foreign.R = &userDatumR{}
@@ -712,7 +703,7 @@ func (o *Checkin) SetStore(ctx context.Context, exec boil.ContextExecutor, inser
 		return errors.Wrap(err, "failed to update local table")
 	}
 
-	queries.Assign(&o.StoreID, related.ID)
+	o.StoreID = related.ID
 	if o.R == nil {
 		o.R = &checkinR{
 			Store: related,
@@ -729,39 +720,6 @@ func (o *Checkin) SetStore(ctx context.Context, exec boil.ContextExecutor, inser
 		related.R.Checkins = append(related.R.Checkins, o)
 	}
 
-	return nil
-}
-
-// RemoveStore relationship.
-// Sets o.R.Store to nil.
-// Removes o from all passed in related items' relationships struct.
-func (o *Checkin) RemoveStore(ctx context.Context, exec boil.ContextExecutor, related *Store) error {
-	var err error
-
-	queries.SetScanner(&o.StoreID, nil)
-	if _, err = o.Update(ctx, exec, boil.Whitelist("store_id")); err != nil {
-		return errors.Wrap(err, "failed to update local table")
-	}
-
-	if o.R != nil {
-		o.R.Store = nil
-	}
-	if related == nil || related.R == nil {
-		return nil
-	}
-
-	for i, ri := range related.R.Checkins {
-		if queries.Equal(o.StoreID, ri.StoreID) {
-			continue
-		}
-
-		ln := len(related.R.Checkins)
-		if ln > 1 && i < ln-1 {
-			related.R.Checkins[i] = related.R.Checkins[ln-1]
-		}
-		related.R.Checkins = related.R.Checkins[:ln-1]
-		break
-	}
 	return nil
 }
 
@@ -792,7 +750,7 @@ func (o *Checkin) SetUser(ctx context.Context, exec boil.ContextExecutor, insert
 		return errors.Wrap(err, "failed to update local table")
 	}
 
-	queries.Assign(&o.UserID, related.UserID)
+	o.UserID = related.UserID
 	if o.R == nil {
 		o.R = &checkinR{
 			User: related,
@@ -809,39 +767,6 @@ func (o *Checkin) SetUser(ctx context.Context, exec boil.ContextExecutor, insert
 		related.R.UserCheckins = append(related.R.UserCheckins, o)
 	}
 
-	return nil
-}
-
-// RemoveUser relationship.
-// Sets o.R.User to nil.
-// Removes o from all passed in related items' relationships struct.
-func (o *Checkin) RemoveUser(ctx context.Context, exec boil.ContextExecutor, related *UserDatum) error {
-	var err error
-
-	queries.SetScanner(&o.UserID, nil)
-	if _, err = o.Update(ctx, exec, boil.Whitelist("user_id")); err != nil {
-		return errors.Wrap(err, "failed to update local table")
-	}
-
-	if o.R != nil {
-		o.R.User = nil
-	}
-	if related == nil || related.R == nil {
-		return nil
-	}
-
-	for i, ri := range related.R.UserCheckins {
-		if queries.Equal(o.UserID, ri.UserID) {
-			continue
-		}
-
-		ln := len(related.R.UserCheckins)
-		if ln > 1 && i < ln-1 {
-			related.R.UserCheckins[i] = related.R.UserCheckins[ln-1]
-		}
-		related.R.UserCheckins = related.R.UserCheckins[:ln-1]
-		break
-	}
 	return nil
 }
 

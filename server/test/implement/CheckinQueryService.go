@@ -32,21 +32,21 @@ func TestCheckinQueryService(t *testing.T) {
 	mock.ExpectQuery("^SELECT (.+) FROM checkins").WillReturnRows(sqlmock.NewRows([]string{"id", "user_id", "store_id"}))
 
 	t.Run("GetActiveCheckin", func(t *testing.T) {
-		_, err := checkinQueryService.GetActiveCheckin(user.ID)
+		_, err := checkinQueryService.GetMyActiveCheckin(user.ID)
 		if err != nil {
 			t.Error("Error occurred while trying to get active checkins")
 		}
 	})
 
 	t.Run("GetLastStoreCheckin", func(t *testing.T) {
-		_, err := checkinQueryService.GetLastStoreCheckin(user.ID, store.ID)
+		_, err := checkinQueryService.GetMyLastStoreCheckin(user.ID, store.ID)
 		if err != nil {
 			t.Error("Error occurred while trying to get last store checkin")
 		}
 	})
 
 	t.Run("GetAllCheckin", func(t *testing.T) {
-		_, err := checkinQueryService.GetAllCheckin(user.ID, pager)
+		_, err := checkinQueryService.GetMyAllCheckin(user.ID, pager)
 		if err != nil {
 			t.Error("Error occurred while trying to get all checkins")
 		}

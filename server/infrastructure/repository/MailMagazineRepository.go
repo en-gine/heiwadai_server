@@ -11,6 +11,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
+	"github.com/volatiletech/sqlboiler/v4/types"
 )
 
 var _ repository.IMailMagazineRepository = &MailMagazineRepository{}
@@ -28,6 +29,10 @@ func NewMailMagazineRepository() *MailMagazineRepository {
 }
 
 func (pq *MailMagazineRepository) Save(mailMagazine *entity.MailMagazine) error {
+	var prefs []int64
+	for _, pref := range *mailMagazine.TargetPrefecture {
+		prefs = append(prefs, int64(pref))
+	}
 	mgz := models.MailMagazine{
 		ID:                 mailMagazine.ID.String(),
 		Title:              mailMagazine.Title,
@@ -37,7 +42,9 @@ func (pq *MailMagazineRepository) Save(mailMagazine *entity.MailMagazine) error 
 		CreateAt:           mailMagazine.CreateAt,
 		UpdateAt:           mailMagazine.UpdateAt,
 		SentAt:             null.TimeFromPtr(mailMagazine.SentAt),
-		SentCount:          null.IntFromPtr(mailMagazine.SentCount),
+		UnsentCount:        mailMagazine.UnsentCount,
+		SentCount:          mailMagazine.SentCount,
+		TargetPrefectures:  types.Int64Array(prefs),
 	}
 
 	err := mgz.Upsert(context.Background(), pq.db, true, []string{"id"}, boil.Infer(), boil.Infer())

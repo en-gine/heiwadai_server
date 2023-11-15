@@ -19,20 +19,23 @@ import (
 	"github.com/volatiletech/sqlboiler/v4/queries"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 	"github.com/volatiletech/sqlboiler/v4/queries/qmhelper"
+	"github.com/volatiletech/sqlboiler/v4/types"
 	"github.com/volatiletech/strmangle"
 )
 
 // MailMagazine is an object representing the database table.
 type MailMagazine struct {
-	ID                 string    `boil:"id" json:"id" toml:"id" yaml:"id"`
-	Title              string    `boil:"title" json:"title" toml:"title" yaml:"title"`
-	Content            string    `boil:"content" json:"content" toml:"content" yaml:"content"`
-	AuthorID           string    `boil:"author_id" json:"author_id" toml:"author_id" yaml:"author_id"`
-	SentAt             null.Time `boil:"sent_at" json:"sent_at,omitempty" toml:"sent_at" yaml:"sent_at,omitempty"`
-	SentCount          null.Int  `boil:"sent_count" json:"sent_count,omitempty" toml:"sent_count" yaml:"sent_count,omitempty"`
-	MailMagazineStatus int       `boil:"mail_magazine_status" json:"mail_magazine_status" toml:"mail_magazine_status" yaml:"mail_magazine_status"`
-	CreateAt           time.Time `boil:"create_at" json:"create_at" toml:"create_at" yaml:"create_at"`
-	UpdateAt           time.Time `boil:"update_at" json:"update_at" toml:"update_at" yaml:"update_at"`
+	ID                 string           `boil:"id" json:"id" toml:"id" yaml:"id"`
+	Title              string           `boil:"title" json:"title" toml:"title" yaml:"title"`
+	Content            string           `boil:"content" json:"content" toml:"content" yaml:"content"`
+	AuthorID           string           `boil:"author_id" json:"author_id" toml:"author_id" yaml:"author_id"`
+	SentAt             null.Time        `boil:"sent_at" json:"sent_at,omitempty" toml:"sent_at" yaml:"sent_at,omitempty"`
+	UnsentCount        int              `boil:"unsent_count" json:"unsent_count" toml:"unsent_count" yaml:"unsent_count"`
+	SentCount          int              `boil:"sent_count" json:"sent_count" toml:"sent_count" yaml:"sent_count"`
+	TargetPrefectures  types.Int64Array `boil:"target_prefectures" json:"target_prefectures,omitempty" toml:"target_prefectures" yaml:"target_prefectures,omitempty"`
+	MailMagazineStatus int              `boil:"mail_magazine_status" json:"mail_magazine_status" toml:"mail_magazine_status" yaml:"mail_magazine_status"`
+	CreateAt           time.Time        `boil:"create_at" json:"create_at" toml:"create_at" yaml:"create_at"`
+	UpdateAt           time.Time        `boil:"update_at" json:"update_at" toml:"update_at" yaml:"update_at"`
 
 	R *mailMagazineR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L mailMagazineL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -44,7 +47,9 @@ var MailMagazineColumns = struct {
 	Content            string
 	AuthorID           string
 	SentAt             string
+	UnsentCount        string
 	SentCount          string
+	TargetPrefectures  string
 	MailMagazineStatus string
 	CreateAt           string
 	UpdateAt           string
@@ -54,7 +59,9 @@ var MailMagazineColumns = struct {
 	Content:            "content",
 	AuthorID:           "author_id",
 	SentAt:             "sent_at",
+	UnsentCount:        "unsent_count",
 	SentCount:          "sent_count",
+	TargetPrefectures:  "target_prefectures",
 	MailMagazineStatus: "mail_magazine_status",
 	CreateAt:           "create_at",
 	UpdateAt:           "update_at",
@@ -66,7 +73,9 @@ var MailMagazineTableColumns = struct {
 	Content            string
 	AuthorID           string
 	SentAt             string
+	UnsentCount        string
 	SentCount          string
+	TargetPrefectures  string
 	MailMagazineStatus string
 	CreateAt           string
 	UpdateAt           string
@@ -76,7 +85,9 @@ var MailMagazineTableColumns = struct {
 	Content:            "mail_magazine.content",
 	AuthorID:           "mail_magazine.author_id",
 	SentAt:             "mail_magazine.sent_at",
+	UnsentCount:        "mail_magazine.unsent_count",
 	SentCount:          "mail_magazine.sent_count",
+	TargetPrefectures:  "mail_magazine.target_prefectures",
 	MailMagazineStatus: "mail_magazine.mail_magazine_status",
 	CreateAt:           "mail_magazine.create_at",
 	UpdateAt:           "mail_magazine.update_at",
@@ -84,13 +95,39 @@ var MailMagazineTableColumns = struct {
 
 // Generated where
 
+type whereHelpertypes_Int64Array struct{ field string }
+
+func (w whereHelpertypes_Int64Array) EQ(x types.Int64Array) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, false, x)
+}
+func (w whereHelpertypes_Int64Array) NEQ(x types.Int64Array) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, true, x)
+}
+func (w whereHelpertypes_Int64Array) LT(x types.Int64Array) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelpertypes_Int64Array) LTE(x types.Int64Array) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelpertypes_Int64Array) GT(x types.Int64Array) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelpertypes_Int64Array) GTE(x types.Int64Array) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+
+func (w whereHelpertypes_Int64Array) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
+func (w whereHelpertypes_Int64Array) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
+
 var MailMagazineWhere = struct {
 	ID                 whereHelperstring
 	Title              whereHelperstring
 	Content            whereHelperstring
 	AuthorID           whereHelperstring
 	SentAt             whereHelpernull_Time
-	SentCount          whereHelpernull_Int
+	UnsentCount        whereHelperint
+	SentCount          whereHelperint
+	TargetPrefectures  whereHelpertypes_Int64Array
 	MailMagazineStatus whereHelperint
 	CreateAt           whereHelpertime_Time
 	UpdateAt           whereHelpertime_Time
@@ -100,7 +137,9 @@ var MailMagazineWhere = struct {
 	Content:            whereHelperstring{field: "\"mail_magazine\".\"content\""},
 	AuthorID:           whereHelperstring{field: "\"mail_magazine\".\"author_id\""},
 	SentAt:             whereHelpernull_Time{field: "\"mail_magazine\".\"sent_at\""},
-	SentCount:          whereHelpernull_Int{field: "\"mail_magazine\".\"sent_count\""},
+	UnsentCount:        whereHelperint{field: "\"mail_magazine\".\"unsent_count\""},
+	SentCount:          whereHelperint{field: "\"mail_magazine\".\"sent_count\""},
+	TargetPrefectures:  whereHelpertypes_Int64Array{field: "\"mail_magazine\".\"target_prefectures\""},
 	MailMagazineStatus: whereHelperint{field: "\"mail_magazine\".\"mail_magazine_status\""},
 	CreateAt:           whereHelpertime_Time{field: "\"mail_magazine\".\"create_at\""},
 	UpdateAt:           whereHelpertime_Time{field: "\"mail_magazine\".\"update_at\""},
@@ -108,14 +147,17 @@ var MailMagazineWhere = struct {
 
 // MailMagazineRels is where relationship names are stored.
 var MailMagazineRels = struct {
-	Author string
+	Author           string
+	MailMagazineLogs string
 }{
-	Author: "Author",
+	Author:           "Author",
+	MailMagazineLogs: "MailMagazineLogs",
 }
 
 // mailMagazineR is where relationships are stored.
 type mailMagazineR struct {
-	Author *Admin `boil:"Author" json:"Author" toml:"Author" yaml:"Author"`
+	Author           *Admin               `boil:"Author" json:"Author" toml:"Author" yaml:"Author"`
+	MailMagazineLogs MailMagazineLogSlice `boil:"MailMagazineLogs" json:"MailMagazineLogs" toml:"MailMagazineLogs" yaml:"MailMagazineLogs"`
 }
 
 // NewStruct creates a new relationship struct
@@ -130,13 +172,20 @@ func (r *mailMagazineR) GetAuthor() *Admin {
 	return r.Author
 }
 
+func (r *mailMagazineR) GetMailMagazineLogs() MailMagazineLogSlice {
+	if r == nil {
+		return nil
+	}
+	return r.MailMagazineLogs
+}
+
 // mailMagazineL is where Load methods for each relationship are stored.
 type mailMagazineL struct{}
 
 var (
-	mailMagazineAllColumns            = []string{"id", "title", "content", "author_id", "sent_at", "sent_count", "mail_magazine_status", "create_at", "update_at"}
+	mailMagazineAllColumns            = []string{"id", "title", "content", "author_id", "sent_at", "unsent_count", "sent_count", "target_prefectures", "mail_magazine_status", "create_at", "update_at"}
 	mailMagazineColumnsWithoutDefault = []string{"id", "title", "content", "author_id", "mail_magazine_status"}
-	mailMagazineColumnsWithDefault    = []string{"sent_at", "sent_count", "create_at", "update_at"}
+	mailMagazineColumnsWithDefault    = []string{"sent_at", "unsent_count", "sent_count", "target_prefectures", "create_at", "update_at"}
 	mailMagazinePrimaryKeyColumns     = []string{"id"}
 	mailMagazineGeneratedColumns      = []string{}
 )
@@ -430,6 +479,20 @@ func (o *MailMagazine) Author(mods ...qm.QueryMod) adminQuery {
 	return Admins(queryMods...)
 }
 
+// MailMagazineLogs retrieves all the mail_magazine_log's MailMagazineLogs with an executor.
+func (o *MailMagazine) MailMagazineLogs(mods ...qm.QueryMod) mailMagazineLogQuery {
+	var queryMods []qm.QueryMod
+	if len(mods) != 0 {
+		queryMods = append(queryMods, mods...)
+	}
+
+	queryMods = append(queryMods,
+		qm.Where("\"mail_magazine_log\".\"mail_magazine_id\"=?", o.ID),
+	)
+
+	return MailMagazineLogs(queryMods...)
+}
+
 // LoadAuthor allows an eager lookup of values, cached into the
 // loaded structs of the objects. This is for an N-1 relationship.
 func (mailMagazineL) LoadAuthor(ctx context.Context, e boil.ContextExecutor, singular bool, maybeMailMagazine interface{}, mods queries.Applicator) error {
@@ -550,6 +613,120 @@ func (mailMagazineL) LoadAuthor(ctx context.Context, e boil.ContextExecutor, sin
 	return nil
 }
 
+// LoadMailMagazineLogs allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-M or N-M relationship.
+func (mailMagazineL) LoadMailMagazineLogs(ctx context.Context, e boil.ContextExecutor, singular bool, maybeMailMagazine interface{}, mods queries.Applicator) error {
+	var slice []*MailMagazine
+	var object *MailMagazine
+
+	if singular {
+		var ok bool
+		object, ok = maybeMailMagazine.(*MailMagazine)
+		if !ok {
+			object = new(MailMagazine)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeMailMagazine)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeMailMagazine))
+			}
+		}
+	} else {
+		s, ok := maybeMailMagazine.(*[]*MailMagazine)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeMailMagazine)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeMailMagazine))
+			}
+		}
+	}
+
+	args := make([]interface{}, 0, 1)
+	if singular {
+		if object.R == nil {
+			object.R = &mailMagazineR{}
+		}
+		args = append(args, object.ID)
+	} else {
+	Outer:
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &mailMagazineR{}
+			}
+
+			for _, a := range args {
+				if a == obj.ID {
+					continue Outer
+				}
+			}
+
+			args = append(args, obj.ID)
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	query := NewQuery(
+		qm.From(`mail_magazine_log`),
+		qm.WhereIn(`mail_magazine_log.mail_magazine_id in ?`, args...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load mail_magazine_log")
+	}
+
+	var resultSlice []*MailMagazineLog
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice mail_magazine_log")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results in eager load on mail_magazine_log")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for mail_magazine_log")
+	}
+
+	if len(mailMagazineLogAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+	if singular {
+		object.R.MailMagazineLogs = resultSlice
+		for _, foreign := range resultSlice {
+			if foreign.R == nil {
+				foreign.R = &mailMagazineLogR{}
+			}
+			foreign.R.MailMagazine = object
+		}
+		return nil
+	}
+
+	for _, foreign := range resultSlice {
+		for _, local := range slice {
+			if local.ID == foreign.MailMagazineID {
+				local.R.MailMagazineLogs = append(local.R.MailMagazineLogs, foreign)
+				if foreign.R == nil {
+					foreign.R = &mailMagazineLogR{}
+				}
+				foreign.R.MailMagazine = local
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
 // SetAuthor of the mailMagazine to the related item.
 // Sets o.R.Author to related.
 // Adds o to related.R.AuthorMailMagazines.
@@ -594,6 +771,59 @@ func (o *MailMagazine) SetAuthor(ctx context.Context, exec boil.ContextExecutor,
 		related.R.AuthorMailMagazines = append(related.R.AuthorMailMagazines, o)
 	}
 
+	return nil
+}
+
+// AddMailMagazineLogs adds the given related objects to the existing relationships
+// of the mail_magazine, optionally inserting them as new records.
+// Appends related to o.R.MailMagazineLogs.
+// Sets related.R.MailMagazine appropriately.
+func (o *MailMagazine) AddMailMagazineLogs(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*MailMagazineLog) error {
+	var err error
+	for _, rel := range related {
+		if insert {
+			rel.MailMagazineID = o.ID
+			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
+				return errors.Wrap(err, "failed to insert into foreign table")
+			}
+		} else {
+			updateQuery := fmt.Sprintf(
+				"UPDATE \"mail_magazine_log\" SET %s WHERE %s",
+				strmangle.SetParamNames("\"", "\"", 1, []string{"mail_magazine_id"}),
+				strmangle.WhereClause("\"", "\"", 2, mailMagazineLogPrimaryKeyColumns),
+			)
+			values := []interface{}{o.ID, rel.ID}
+
+			if boil.IsDebug(ctx) {
+				writer := boil.DebugWriterFrom(ctx)
+				fmt.Fprintln(writer, updateQuery)
+				fmt.Fprintln(writer, values)
+			}
+			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+				return errors.Wrap(err, "failed to update foreign table")
+			}
+
+			rel.MailMagazineID = o.ID
+		}
+	}
+
+	if o.R == nil {
+		o.R = &mailMagazineR{
+			MailMagazineLogs: related,
+		}
+	} else {
+		o.R.MailMagazineLogs = append(o.R.MailMagazineLogs, related...)
+	}
+
+	for _, rel := range related {
+		if rel.R == nil {
+			rel.R = &mailMagazineLogR{
+				MailMagazine: o,
+			}
+		} else {
+			rel.R.MailMagazine = o
+		}
+	}
 	return nil
 }
 

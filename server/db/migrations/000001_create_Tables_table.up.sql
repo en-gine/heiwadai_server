@@ -79,8 +79,8 @@ CREATE TABLE admin (
 
 CREATE TABLE checkin (
     id UUID PRIMARY KEY,
-    store_id UUID,
-    user_id UUID,
+    store_id UUID NOT NULL,
+    user_id UUID NOT NULL,
     check_in_at TIMESTAMPTZ NOT NULL,
     archive BOOLEAN NOT NULL,
     create_at TIMESTAMPTZ NOT NULL default now(),
@@ -127,12 +127,27 @@ CREATE TABLE mail_magazine (
     content VARCHAR NOT NULL,
     author_id UUID NOT NULL,
     sent_at TIMESTAMPTZ,
-    sent_count int default NULL,
+    unsent_count int NOT NULL default 0,
+    sent_count int NOT NULL default 0,
+    target_prefectures INTEGER[] NULL default array[]::INTEGER[],
     mail_magazine_status int NOT NULL,
     create_at TIMESTAMPTZ NOT NULL default now(),
     update_at TIMESTAMPTZ NOT NULL default now(),
     FOREIGN KEY (author_id) REFERENCES admin (admin_id)
 );
+
+CREATE TABLE mail_magazine_log (
+    id bigserial PRIMARY KEY,
+    mail_magazine_id UUID NOT NULL,
+    user_id UUID NOT NULL,
+    email VARCHAR NOT NULL,
+    sent_at TIMESTAMPTZ NULL, -- 送信日時　NULLの場合は未送信
+    create_at TIMESTAMPTZ NOT NULL default now(),
+    update_at TIMESTAMPTZ NOT NULL default now(),
+    FOREIGN KEY (mail_magazine_id) REFERENCES mail_magazine (id),
+    FOREIGN KEY (user_id) REFERENCES user_data (user_id)
+);
+
 
 CREATE TABLE message (
     id UUID PRIMARY KEY,

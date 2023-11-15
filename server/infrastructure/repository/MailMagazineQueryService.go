@@ -51,13 +51,20 @@ func (pq *MailMagazineQueryService) GetAll(pager *types.PageQuery) ([]*entity.Ma
 }
 
 func MailMagazineModelToEntity(mgz *models.MailMagazine) *entity.MailMagazine {
+	var prefs []entity.Prefecture
+	for _, pref := range mgz.TargetPrefectures {
+		prefs = append(prefs, entity.Prefecture(pref))
+	}
+
 	return &entity.MailMagazine{
 		ID:                 uuid.MustParse(mgz.ID),
 		Title:              mgz.Title,
 		Content:            mgz.Content,
 		AuthorID:           uuid.MustParse(mgz.AuthorID),
+		TargetPrefecture:   &prefs,
 		MailMagazineStatus: entity.MailMagazineStatus(mgz.MailMagazineStatus),
-		SentCount:          mgz.SentCount.Ptr(),
+		UnsentCount:        mgz.UnsentCount,
+		SentCount:          mgz.SentCount,
 		SentAt:             mgz.SentAt.Ptr(),
 		CreateAt:           mgz.CreateAt,
 		UpdateAt:           mgz.UpdateAt,

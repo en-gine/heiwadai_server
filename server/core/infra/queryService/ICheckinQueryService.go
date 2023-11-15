@@ -8,7 +8,8 @@ import (
 )
 
 type ICheckinQueryService interface {
-	GetActiveCheckin(userID uuid.UUID) ([]*entity.Checkin, error)
-	GetLastStoreCheckin(userID uuid.UUID, storeID uuid.UUID) (*entity.Checkin, error)  //前回の特定のStoreへのチェックイン
-	GetAllCheckin(userID uuid.UUID, pager *types.PageQuery) ([]*entity.Checkin, error) //archiveかどうか不問
+	GetMyActiveCheckin(userID uuid.UUID) ([]*entity.Checkin, error)
+	GetMyLastStoreCheckin(userID uuid.UUID, storeID uuid.UUID) (*entity.Checkin, error)  // 前回の特定のStoreへのチェックイン
+	GetMyAllCheckin(userID uuid.UUID, pager *types.PageQuery) ([]*entity.Checkin, error) // archiveかどうか不問
+	GetAllUserAllCheckin(pager *types.PageQuery) ([]*entity.Checkin, error)              // 前回のユーザーチェックインarchiveかどうか不問
 }

@@ -51,16 +51,17 @@ func (pq *UserQueryService) GetByMail(mail string) (*entity.User, error) {
 	return UserModelToEntity(usermanager.R.UserUserDatum, usermanager.Email), nil
 }
 
-func (pq *UserQueryService) GetUserByPrefecture(prefectures []*entity.Prefecture) ([]*entity.User, error) {
-	var preIds []int
-	for _, prefecture := range prefectures {
-		preIds = append(preIds, prefecture.ToInt())
-	}
+func (pq *UserQueryService) GetMailOKUser(prefectures *[]entity.Prefecture) ([]*entity.User, error) {
+	var users []*models.UserDatum
+	var err error
 
-	users, err := models.UserData(models.UserDatumWhere.Prefecture.IN(preIds)).All(context.Background(), pq.db)
+	qm := GetMailUserWhereMods(prefectures)
+	users, err = models.UserData(qm...).All(context.Background(), pq.db)
+
 	if err != nil {
 		return nil, err
 	}
+
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}
@@ -70,6 +71,38 @@ func (pq *UserQueryService) GetUserByPrefecture(prefectures []*entity.Prefecture
 		entities = append(entities, entity)
 	}
 	return entities, nil
+}
+
+func (pq *UserQueryService) GetMailOKUserCount(prefectures *[]entity.Prefecture) (*int, error) {
+	var err error
+	var count int
+	qm := GetMailUserWhereMods(prefectures)
+	int64Count, err := models.UserData(qm...).Count(context.Background(), pq.db)
+	count = int(int64Count)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if err == sql.ErrNoRows {
+		count = 0
+		return &count, nil
+	}
+	return &count, nil
+}
+
+// CountとAll両方で使えるようにクエリのみ返す
+func GetMailUserWhereMods(prefectures *[]entity.Prefecture) []qm.QueryMod {
+	var preIds []int
+
+	if prefectures == nil {
+		return []qm.QueryMod{models.UserDatumWhere.AcceptMail.EQ(true)}
+	} else {
+		for _, prefecture := range *prefectures {
+			preIds = append(preIds, prefecture.ToInt())
+		}
+		return []qm.QueryMod{models.UserDatumWhere.Prefecture.IN(preIds), models.UserDatumWhere.AcceptMail.EQ(true)}
+	}
 }
 
 func (pq *UserQueryService) GetAll(query *types.UserQuery, pager *types.PageQuery) ([]*entity.User, error) {

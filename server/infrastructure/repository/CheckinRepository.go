@@ -8,7 +8,6 @@ import (
 	"server/core/infra/repository"
 	"server/db/models"
 
-	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 )
 
@@ -29,8 +28,8 @@ func NewCheckinRepository() *CheckinRepository {
 func (pr *CheckinRepository) Save(ctx context.Context, updateCheckin *entity.Checkin) error {
 	checkin := models.Checkin{
 		ID:        updateCheckin.ID.String(),
-		StoreID:   null.StringFrom(updateCheckin.Store.ID.String()),
-		UserID:    null.StringFrom(updateCheckin.User.ID.String()),
+		StoreID:   updateCheckin.Store.ID.String(),
+		UserID:    updateCheckin.User.ID.String(),
 		CheckInAt: updateCheckin.CheckInAt,
 		Archive:   updateCheckin.Archive,
 	}

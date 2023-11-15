@@ -15,6 +15,8 @@ DROP TABLE IF EXISTS banner;
 
 DROP TABLE IF EXISTS post;
 
+DROP TABLE IF EXISTS mail_magazine_log;
+
 DROP TABLE IF EXISTS mail_magazine;
 
 DROP TABLE IF EXISTS message;

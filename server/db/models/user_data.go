@@ -154,6 +154,7 @@ var UserDatumRels = struct {
 	UserUserOption          string
 	UserCheckins            string
 	UserCouponAttachedUsers string
+	UserMailMagazineLogs    string
 	BookUserUserBooks       string
 	UserUserReports         string
 }{
@@ -161,6 +162,7 @@ var UserDatumRels = struct {
 	UserUserOption:          "UserUserOption",
 	UserCheckins:            "UserCheckins",
 	UserCouponAttachedUsers: "UserCouponAttachedUsers",
+	UserMailMagazineLogs:    "UserMailMagazineLogs",
 	BookUserUserBooks:       "BookUserUserBooks",
 	UserUserReports:         "UserUserReports",
 }
@@ -171,6 +173,7 @@ type userDatumR struct {
 	UserUserOption          *UserOption             `boil:"UserUserOption" json:"UserUserOption" toml:"UserUserOption" yaml:"UserUserOption"`
 	UserCheckins            CheckinSlice            `boil:"UserCheckins" json:"UserCheckins" toml:"UserCheckins" yaml:"UserCheckins"`
 	UserCouponAttachedUsers CouponAttachedUserSlice `boil:"UserCouponAttachedUsers" json:"UserCouponAttachedUsers" toml:"UserCouponAttachedUsers" yaml:"UserCouponAttachedUsers"`
+	UserMailMagazineLogs    MailMagazineLogSlice    `boil:"UserMailMagazineLogs" json:"UserMailMagazineLogs" toml:"UserMailMagazineLogs" yaml:"UserMailMagazineLogs"`
 	BookUserUserBooks       UserBookSlice           `boil:"BookUserUserBooks" json:"BookUserUserBooks" toml:"BookUserUserBooks" yaml:"BookUserUserBooks"`
 	UserUserReports         UserReportSlice         `boil:"UserUserReports" json:"UserUserReports" toml:"UserUserReports" yaml:"UserUserReports"`
 }
@@ -206,6 +209,13 @@ func (r *userDatumR) GetUserCouponAttachedUsers() CouponAttachedUserSlice {
 		return nil
 	}
 	return r.UserCouponAttachedUsers
+}
+
+func (r *userDatumR) GetUserMailMagazineLogs() MailMagazineLogSlice {
+	if r == nil {
+		return nil
+	}
+	return r.UserMailMagazineLogs
 }
 
 func (r *userDatumR) GetBookUserUserBooks() UserBookSlice {
@@ -561,6 +571,20 @@ func (o *UserDatum) UserCouponAttachedUsers(mods ...qm.QueryMod) couponAttachedU
 	return CouponAttachedUsers(queryMods...)
 }
 
+// UserMailMagazineLogs retrieves all the mail_magazine_log's MailMagazineLogs with an executor via user_id column.
+func (o *UserDatum) UserMailMagazineLogs(mods ...qm.QueryMod) mailMagazineLogQuery {
+	var queryMods []qm.QueryMod
+	if len(mods) != 0 {
+		queryMods = append(queryMods, mods...)
+	}
+
+	queryMods = append(queryMods,
+		qm.Where("\"mail_magazine_log\".\"user_id\"=?", o.UserID),
+	)
+
+	return MailMagazineLogs(queryMods...)
+}
+
 // BookUserUserBooks retrieves all the user_book's UserBooks with an executor via book_user_id column.
 func (o *UserDatum) BookUserUserBooks(mods ...qm.QueryMod) userBookQuery {
 	var queryMods []qm.QueryMod
@@ -868,7 +892,7 @@ func (userDatumL) LoadUserCheckins(ctx context.Context, e boil.ContextExecutor, 
 			}
 
 			for _, a := range args {
-				if queries.Equal(a, obj.UserID) {
+				if a == obj.UserID {
 					continue Outer
 				}
 			}
@@ -926,7 +950,7 @@ func (userDatumL) LoadUserCheckins(ctx context.Context, e boil.ContextExecutor, 
 
 	for _, foreign := range resultSlice {
 		for _, local := range slice {
-			if queries.Equal(local.UserID, foreign.UserID) {
+			if local.UserID == foreign.UserID {
 				local.R.UserCheckins = append(local.R.UserCheckins, foreign)
 				if foreign.R == nil {
 					foreign.R = &checkinR{}
@@ -1044,6 +1068,120 @@ func (userDatumL) LoadUserCouponAttachedUsers(ctx context.Context, e boil.Contex
 				local.R.UserCouponAttachedUsers = append(local.R.UserCouponAttachedUsers, foreign)
 				if foreign.R == nil {
 					foreign.R = &couponAttachedUserR{}
+				}
+				foreign.R.User = local
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+// LoadUserMailMagazineLogs allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-M or N-M relationship.
+func (userDatumL) LoadUserMailMagazineLogs(ctx context.Context, e boil.ContextExecutor, singular bool, maybeUserDatum interface{}, mods queries.Applicator) error {
+	var slice []*UserDatum
+	var object *UserDatum
+
+	if singular {
+		var ok bool
+		object, ok = maybeUserDatum.(*UserDatum)
+		if !ok {
+			object = new(UserDatum)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeUserDatum)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeUserDatum))
+			}
+		}
+	} else {
+		s, ok := maybeUserDatum.(*[]*UserDatum)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeUserDatum)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeUserDatum))
+			}
+		}
+	}
+
+	args := make([]interface{}, 0, 1)
+	if singular {
+		if object.R == nil {
+			object.R = &userDatumR{}
+		}
+		args = append(args, object.UserID)
+	} else {
+	Outer:
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &userDatumR{}
+			}
+
+			for _, a := range args {
+				if a == obj.UserID {
+					continue Outer
+				}
+			}
+
+			args = append(args, obj.UserID)
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	query := NewQuery(
+		qm.From(`mail_magazine_log`),
+		qm.WhereIn(`mail_magazine_log.user_id in ?`, args...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load mail_magazine_log")
+	}
+
+	var resultSlice []*MailMagazineLog
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice mail_magazine_log")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results in eager load on mail_magazine_log")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for mail_magazine_log")
+	}
+
+	if len(mailMagazineLogAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+	if singular {
+		object.R.UserMailMagazineLogs = resultSlice
+		for _, foreign := range resultSlice {
+			if foreign.R == nil {
+				foreign.R = &mailMagazineLogR{}
+			}
+			foreign.R.User = object
+		}
+		return nil
+	}
+
+	for _, foreign := range resultSlice {
+		for _, local := range slice {
+			if local.UserID == foreign.UserID {
+				local.R.UserMailMagazineLogs = append(local.R.UserMailMagazineLogs, foreign)
+				if foreign.R == nil {
+					foreign.R = &mailMagazineLogR{}
 				}
 				foreign.R.User = local
 				break
@@ -1387,7 +1525,7 @@ func (o *UserDatum) AddUserCheckins(ctx context.Context, exec boil.ContextExecut
 	var err error
 	for _, rel := range related {
 		if insert {
-			queries.Assign(&rel.UserID, o.UserID)
+			rel.UserID = o.UserID
 			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
 				return errors.Wrap(err, "failed to insert into foreign table")
 			}
@@ -1408,7 +1546,7 @@ func (o *UserDatum) AddUserCheckins(ctx context.Context, exec boil.ContextExecut
 				return errors.Wrap(err, "failed to update foreign table")
 			}
 
-			queries.Assign(&rel.UserID, o.UserID)
+			rel.UserID = o.UserID
 		}
 	}
 
@@ -1429,80 +1567,6 @@ func (o *UserDatum) AddUserCheckins(ctx context.Context, exec boil.ContextExecut
 			rel.R.User = o
 		}
 	}
-	return nil
-}
-
-// SetUserCheckins removes all previously related items of the
-// user_datum replacing them completely with the passed
-// in related items, optionally inserting them as new records.
-// Sets o.R.User's UserCheckins accordingly.
-// Replaces o.R.UserCheckins with related.
-// Sets related.R.User's UserCheckins accordingly.
-func (o *UserDatum) SetUserCheckins(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Checkin) error {
-	query := "update \"checkin\" set \"user_id\" = null where \"user_id\" = $1"
-	values := []interface{}{o.UserID}
-	if boil.IsDebug(ctx) {
-		writer := boil.DebugWriterFrom(ctx)
-		fmt.Fprintln(writer, query)
-		fmt.Fprintln(writer, values)
-	}
-	_, err := exec.ExecContext(ctx, query, values...)
-	if err != nil {
-		return errors.Wrap(err, "failed to remove relationships before set")
-	}
-
-	if o.R != nil {
-		for _, rel := range o.R.UserCheckins {
-			queries.SetScanner(&rel.UserID, nil)
-			if rel.R == nil {
-				continue
-			}
-
-			rel.R.User = nil
-		}
-		o.R.UserCheckins = nil
-	}
-
-	return o.AddUserCheckins(ctx, exec, insert, related...)
-}
-
-// RemoveUserCheckins relationships from objects passed in.
-// Removes related items from R.UserCheckins (uses pointer comparison, removal does not keep order)
-// Sets related.R.User.
-func (o *UserDatum) RemoveUserCheckins(ctx context.Context, exec boil.ContextExecutor, related ...*Checkin) error {
-	if len(related) == 0 {
-		return nil
-	}
-
-	var err error
-	for _, rel := range related {
-		queries.SetScanner(&rel.UserID, nil)
-		if rel.R != nil {
-			rel.R.User = nil
-		}
-		if _, err = rel.Update(ctx, exec, boil.Whitelist("user_id")); err != nil {
-			return err
-		}
-	}
-	if o.R == nil {
-		return nil
-	}
-
-	for _, rel := range related {
-		for i, ri := range o.R.UserCheckins {
-			if rel != ri {
-				continue
-			}
-
-			ln := len(o.R.UserCheckins)
-			if ln > 1 && i < ln-1 {
-				o.R.UserCheckins[i] = o.R.UserCheckins[ln-1]
-			}
-			o.R.UserCheckins = o.R.UserCheckins[:ln-1]
-			break
-		}
-	}
-
 	return nil
 }
 
@@ -1550,6 +1614,59 @@ func (o *UserDatum) AddUserCouponAttachedUsers(ctx context.Context, exec boil.Co
 	for _, rel := range related {
 		if rel.R == nil {
 			rel.R = &couponAttachedUserR{
+				User: o,
+			}
+		} else {
+			rel.R.User = o
+		}
+	}
+	return nil
+}
+
+// AddUserMailMagazineLogs adds the given related objects to the existing relationships
+// of the user_datum, optionally inserting them as new records.
+// Appends related to o.R.UserMailMagazineLogs.
+// Sets related.R.User appropriately.
+func (o *UserDatum) AddUserMailMagazineLogs(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*MailMagazineLog) error {
+	var err error
+	for _, rel := range related {
+		if insert {
+			rel.UserID = o.UserID
+			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
+				return errors.Wrap(err, "failed to insert into foreign table")
+			}
+		} else {
+			updateQuery := fmt.Sprintf(
+				"UPDATE \"mail_magazine_log\" SET %s WHERE %s",
+				strmangle.SetParamNames("\"", "\"", 1, []string{"user_id"}),
+				strmangle.WhereClause("\"", "\"", 2, mailMagazineLogPrimaryKeyColumns),
+			)
+			values := []interface{}{o.UserID, rel.ID}
+
+			if boil.IsDebug(ctx) {
+				writer := boil.DebugWriterFrom(ctx)
+				fmt.Fprintln(writer, updateQuery)
+				fmt.Fprintln(writer, values)
+			}
+			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+				return errors.Wrap(err, "failed to update foreign table")
+			}
+
+			rel.UserID = o.UserID
+		}
+	}
+
+	if o.R == nil {
+		o.R = &userDatumR{
+			UserMailMagazineLogs: related,
+		}
+	} else {
+		o.R.UserMailMagazineLogs = append(o.R.UserMailMagazineLogs, related...)
+	}
+
+	for _, rel := range related {
+		if rel.R == nil {
+			rel.R = &mailMagazineLogR{
 				User: o,
 			}
 		} else {

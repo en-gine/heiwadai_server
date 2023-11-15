@@ -948,7 +948,7 @@ func (storeL) LoadCheckins(ctx context.Context, e boil.ContextExecutor, singular
 			}
 
 			for _, a := range args {
-				if queries.Equal(a, obj.ID) {
+				if a == obj.ID {
 					continue Outer
 				}
 			}
@@ -1006,7 +1006,7 @@ func (storeL) LoadCheckins(ctx context.Context, e boil.ContextExecutor, singular
 
 	for _, foreign := range resultSlice {
 		for _, local := range slice {
-			if queries.Equal(local.ID, foreign.StoreID) {
+			if local.ID == foreign.StoreID {
 				local.R.Checkins = append(local.R.Checkins, foreign)
 				if foreign.R == nil {
 					foreign.R = &checkinR{}
@@ -1298,7 +1298,7 @@ func (o *Store) AddCheckins(ctx context.Context, exec boil.ContextExecutor, inse
 	var err error
 	for _, rel := range related {
 		if insert {
-			queries.Assign(&rel.StoreID, o.ID)
+			rel.StoreID = o.ID
 			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
 				return errors.Wrap(err, "failed to insert into foreign table")
 			}
@@ -1319,7 +1319,7 @@ func (o *Store) AddCheckins(ctx context.Context, exec boil.ContextExecutor, inse
 				return errors.Wrap(err, "failed to update foreign table")
 			}
 
-			queries.Assign(&rel.StoreID, o.ID)
+			rel.StoreID = o.ID
 		}
 	}
 
@@ -1340,80 +1340,6 @@ func (o *Store) AddCheckins(ctx context.Context, exec boil.ContextExecutor, inse
 			rel.R.Store = o
 		}
 	}
-	return nil
-}
-
-// SetCheckins removes all previously related items of the
-// store replacing them completely with the passed
-// in related items, optionally inserting them as new records.
-// Sets o.R.Store's Checkins accordingly.
-// Replaces o.R.Checkins with related.
-// Sets related.R.Store's Checkins accordingly.
-func (o *Store) SetCheckins(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Checkin) error {
-	query := "update \"checkin\" set \"store_id\" = null where \"store_id\" = $1"
-	values := []interface{}{o.ID}
-	if boil.IsDebug(ctx) {
-		writer := boil.DebugWriterFrom(ctx)
-		fmt.Fprintln(writer, query)
-		fmt.Fprintln(writer, values)
-	}
-	_, err := exec.ExecContext(ctx, query, values...)
-	if err != nil {
-		return errors.Wrap(err, "failed to remove relationships before set")
-	}
-
-	if o.R != nil {
-		for _, rel := range o.R.Checkins {
-			queries.SetScanner(&rel.StoreID, nil)
-			if rel.R == nil {
-				continue
-			}
-
-			rel.R.Store = nil
-		}
-		o.R.Checkins = nil
-	}
-
-	return o.AddCheckins(ctx, exec, insert, related...)
-}
-
-// RemoveCheckins relationships from objects passed in.
-// Removes related items from R.Checkins (uses pointer comparison, removal does not keep order)
-// Sets related.R.Store.
-func (o *Store) RemoveCheckins(ctx context.Context, exec boil.ContextExecutor, related ...*Checkin) error {
-	if len(related) == 0 {
-		return nil
-	}
-
-	var err error
-	for _, rel := range related {
-		queries.SetScanner(&rel.StoreID, nil)
-		if rel.R != nil {
-			rel.R.Store = nil
-		}
-		if _, err = rel.Update(ctx, exec, boil.Whitelist("store_id")); err != nil {
-			return err
-		}
-	}
-	if o.R == nil {
-		return nil
-	}
-
-	for _, rel := range related {
-		for i, ri := range o.R.Checkins {
-			if rel != ri {
-				continue
-			}
-
-			ln := len(o.R.Checkins)
-			if ln > 1 && i < ln-1 {
-				o.R.Checkins[i] = o.R.Checkins[ln-1]
-			}
-			o.R.Checkins = o.R.Checkins[:ln-1]
-			break
-		}
-	}
-
 	return nil
 }
 

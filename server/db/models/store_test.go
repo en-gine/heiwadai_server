@@ -797,8 +797,9 @@ func testStoreToManyCheckins(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	queries.Assign(&b.StoreID, a.ID)
-	queries.Assign(&c.StoreID, a.ID)
+	b.StoreID = a.ID
+	c.StoreID = a.ID
+
 	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Fatal(err)
 	}
@@ -813,10 +814,10 @@ func testStoreToManyCheckins(t *testing.T) {
 
 	bFound, cFound := false, false
 	for _, v := range check {
-		if queries.Equal(v.StoreID, b.StoreID) {
+		if v.StoreID == b.StoreID {
 			bFound = true
 		}
-		if queries.Equal(v.StoreID, c.StoreID) {
+		if v.StoreID == c.StoreID {
 			cFound = true
 		}
 	}
@@ -1122,10 +1123,10 @@ func testStoreToManyAddOpCheckins(t *testing.T) {
 		first := x[0]
 		second := x[1]
 
-		if !queries.Equal(a.ID, first.StoreID) {
+		if a.ID != first.StoreID {
 			t.Error("foreign key was wrong value", a.ID, first.StoreID)
 		}
-		if !queries.Equal(a.ID, second.StoreID) {
+		if a.ID != second.StoreID {
 			t.Error("foreign key was wrong value", a.ID, second.StoreID)
 		}
 
@@ -1152,182 +1153,6 @@ func testStoreToManyAddOpCheckins(t *testing.T) {
 		}
 	}
 }
-
-func testStoreToManySetOpCheckins(t *testing.T) {
-	var err error
-
-	ctx := context.Background()
-	tx := MustTx(boil.BeginTx(ctx, nil))
-	defer func() { _ = tx.Rollback() }()
-
-	var a Store
-	var b, c, d, e Checkin
-
-	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, &a, storeDBTypes, false, strmangle.SetComplement(storePrimaryKeyColumns, storeColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
-	}
-	foreigners := []*Checkin{&b, &c, &d, &e}
-	for _, x := range foreigners {
-		if err = randomize.Struct(seed, x, checkinDBTypes, false, strmangle.SetComplement(checkinPrimaryKeyColumns, checkinColumnsWithoutDefault)...); err != nil {
-			t.Fatal(err)
-		}
-	}
-
-	if err = a.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-	if err = c.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-
-	err = a.SetCheckins(ctx, tx, false, &b, &c)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	count, err := a.Checkins().Count(ctx, tx)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if count != 2 {
-		t.Error("count was wrong:", count)
-	}
-
-	err = a.SetCheckins(ctx, tx, true, &d, &e)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	count, err = a.Checkins().Count(ctx, tx)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if count != 2 {
-		t.Error("count was wrong:", count)
-	}
-
-	if !queries.IsValuerNil(b.StoreID) {
-		t.Error("want b's foreign key value to be nil")
-	}
-	if !queries.IsValuerNil(c.StoreID) {
-		t.Error("want c's foreign key value to be nil")
-	}
-	if !queries.Equal(a.ID, d.StoreID) {
-		t.Error("foreign key was wrong value", a.ID, d.StoreID)
-	}
-	if !queries.Equal(a.ID, e.StoreID) {
-		t.Error("foreign key was wrong value", a.ID, e.StoreID)
-	}
-
-	if b.R.Store != nil {
-		t.Error("relationship was not removed properly from the foreign struct")
-	}
-	if c.R.Store != nil {
-		t.Error("relationship was not removed properly from the foreign struct")
-	}
-	if d.R.Store != &a {
-		t.Error("relationship was not added properly to the foreign struct")
-	}
-	if e.R.Store != &a {
-		t.Error("relationship was not added properly to the foreign struct")
-	}
-
-	if a.R.Checkins[0] != &d {
-		t.Error("relationship struct slice not set to correct value")
-	}
-	if a.R.Checkins[1] != &e {
-		t.Error("relationship struct slice not set to correct value")
-	}
-}
-
-func testStoreToManyRemoveOpCheckins(t *testing.T) {
-	var err error
-
-	ctx := context.Background()
-	tx := MustTx(boil.BeginTx(ctx, nil))
-	defer func() { _ = tx.Rollback() }()
-
-	var a Store
-	var b, c, d, e Checkin
-
-	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, &a, storeDBTypes, false, strmangle.SetComplement(storePrimaryKeyColumns, storeColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
-	}
-	foreigners := []*Checkin{&b, &c, &d, &e}
-	for _, x := range foreigners {
-		if err = randomize.Struct(seed, x, checkinDBTypes, false, strmangle.SetComplement(checkinPrimaryKeyColumns, checkinColumnsWithoutDefault)...); err != nil {
-			t.Fatal(err)
-		}
-	}
-
-	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-
-	err = a.AddCheckins(ctx, tx, true, foreigners...)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	count, err := a.Checkins().Count(ctx, tx)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if count != 4 {
-		t.Error("count was wrong:", count)
-	}
-
-	err = a.RemoveCheckins(ctx, tx, foreigners[:2]...)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	count, err = a.Checkins().Count(ctx, tx)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if count != 2 {
-		t.Error("count was wrong:", count)
-	}
-
-	if !queries.IsValuerNil(b.StoreID) {
-		t.Error("want b's foreign key value to be nil")
-	}
-	if !queries.IsValuerNil(c.StoreID) {
-		t.Error("want c's foreign key value to be nil")
-	}
-
-	if b.R.Store != nil {
-		t.Error("relationship was not removed properly from the foreign struct")
-	}
-	if c.R.Store != nil {
-		t.Error("relationship was not removed properly from the foreign struct")
-	}
-	if d.R.Store != &a {
-		t.Error("relationship to a should have been preserved")
-	}
-	if e.R.Store != &a {
-		t.Error("relationship to a should have been preserved")
-	}
-
-	if len(a.R.Checkins) != 2 {
-		t.Error("should have preserved two relationships")
-	}
-
-	// Removal doesn't do a stable deletion for performance so we have to flip the order
-	if a.R.Checkins[1] != &d {
-		t.Error("relationship to d should have been preserved")
-	}
-	if a.R.Checkins[0] != &e {
-		t.Error("relationship to e should have been preserved")
-	}
-}
-
 func testStoreToManyAddOpCouponStores(t *testing.T) {
 	var err error
 

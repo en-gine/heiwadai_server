@@ -24,6 +24,8 @@ func TestUpsert(t *testing.T) {
 
 	t.Run("MailMagazines", testMailMagazinesUpsert)
 
+	t.Run("MailMagazineLogs", testMailMagazineLogsUpsert)
+
 	t.Run("Messages", testMessagesUpsert)
 
 	t.Run("SchemaMigrations", testSchemaMigrationsUpsert)

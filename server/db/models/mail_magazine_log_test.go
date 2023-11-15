@@ -21,24 +21,24 @@ var (
 	_ = queries.Equal
 )
 
-func testCheckins(t *testing.T) {
+func testMailMagazineLogs(t *testing.T) {
 	t.Parallel()
 
-	query := Checkins()
+	query := MailMagazineLogs()
 
 	if query.Query == nil {
 		t.Error("expected a query, got nothing")
 	}
 }
 
-func testCheckinsDelete(t *testing.T) {
+func testMailMagazineLogsDelete(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Checkin{}
-	if err = randomize.Struct(seed, o, checkinDBTypes, true, checkinColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Checkin struct: %s", err)
+	o := &MailMagazineLog{}
+	if err = randomize.Struct(seed, o, mailMagazineLogDBTypes, true, mailMagazineLogColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize MailMagazineLog struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -54,7 +54,7 @@ func testCheckinsDelete(t *testing.T) {
 		t.Error("should only have deleted one row, but affected:", rowsAff)
 	}
 
-	count, err := Checkins().Count(ctx, tx)
+	count, err := MailMagazineLogs().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -64,14 +64,14 @@ func testCheckinsDelete(t *testing.T) {
 	}
 }
 
-func testCheckinsQueryDeleteAll(t *testing.T) {
+func testMailMagazineLogsQueryDeleteAll(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Checkin{}
-	if err = randomize.Struct(seed, o, checkinDBTypes, true, checkinColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Checkin struct: %s", err)
+	o := &MailMagazineLog{}
+	if err = randomize.Struct(seed, o, mailMagazineLogDBTypes, true, mailMagazineLogColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize MailMagazineLog struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -81,13 +81,13 @@ func testCheckinsQueryDeleteAll(t *testing.T) {
 		t.Error(err)
 	}
 
-	if rowsAff, err := Checkins().DeleteAll(ctx, tx); err != nil {
+	if rowsAff, err := MailMagazineLogs().DeleteAll(ctx, tx); err != nil {
 		t.Error(err)
 	} else if rowsAff != 1 {
 		t.Error("should only have deleted one row, but affected:", rowsAff)
 	}
 
-	count, err := Checkins().Count(ctx, tx)
+	count, err := MailMagazineLogs().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -97,14 +97,14 @@ func testCheckinsQueryDeleteAll(t *testing.T) {
 	}
 }
 
-func testCheckinsSliceDeleteAll(t *testing.T) {
+func testMailMagazineLogsSliceDeleteAll(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Checkin{}
-	if err = randomize.Struct(seed, o, checkinDBTypes, true, checkinColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Checkin struct: %s", err)
+	o := &MailMagazineLog{}
+	if err = randomize.Struct(seed, o, mailMagazineLogDBTypes, true, mailMagazineLogColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize MailMagazineLog struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -114,7 +114,7 @@ func testCheckinsSliceDeleteAll(t *testing.T) {
 		t.Error(err)
 	}
 
-	slice := CheckinSlice{o}
+	slice := MailMagazineLogSlice{o}
 
 	if rowsAff, err := slice.DeleteAll(ctx, tx); err != nil {
 		t.Error(err)
@@ -122,7 +122,7 @@ func testCheckinsSliceDeleteAll(t *testing.T) {
 		t.Error("should only have deleted one row, but affected:", rowsAff)
 	}
 
-	count, err := Checkins().Count(ctx, tx)
+	count, err := MailMagazineLogs().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -132,14 +132,14 @@ func testCheckinsSliceDeleteAll(t *testing.T) {
 	}
 }
 
-func testCheckinsExists(t *testing.T) {
+func testMailMagazineLogsExists(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Checkin{}
-	if err = randomize.Struct(seed, o, checkinDBTypes, true, checkinColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Checkin struct: %s", err)
+	o := &MailMagazineLog{}
+	if err = randomize.Struct(seed, o, mailMagazineLogDBTypes, true, mailMagazineLogColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize MailMagazineLog struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -149,23 +149,23 @@ func testCheckinsExists(t *testing.T) {
 		t.Error(err)
 	}
 
-	e, err := CheckinExists(ctx, tx, o.ID)
+	e, err := MailMagazineLogExists(ctx, tx, o.ID)
 	if err != nil {
-		t.Errorf("Unable to check if Checkin exists: %s", err)
+		t.Errorf("Unable to check if MailMagazineLog exists: %s", err)
 	}
 	if !e {
-		t.Errorf("Expected CheckinExists to return true, but got false.")
+		t.Errorf("Expected MailMagazineLogExists to return true, but got false.")
 	}
 }
 
-func testCheckinsFind(t *testing.T) {
+func testMailMagazineLogsFind(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Checkin{}
-	if err = randomize.Struct(seed, o, checkinDBTypes, true, checkinColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Checkin struct: %s", err)
+	o := &MailMagazineLog{}
+	if err = randomize.Struct(seed, o, mailMagazineLogDBTypes, true, mailMagazineLogColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize MailMagazineLog struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -175,24 +175,24 @@ func testCheckinsFind(t *testing.T) {
 		t.Error(err)
 	}
 
-	checkinFound, err := FindCheckin(ctx, tx, o.ID)
+	mailMagazineLogFound, err := FindMailMagazineLog(ctx, tx, o.ID)
 	if err != nil {
 		t.Error(err)
 	}
 
-	if checkinFound == nil {
+	if mailMagazineLogFound == nil {
 		t.Error("want a record, got nil")
 	}
 }
 
-func testCheckinsBind(t *testing.T) {
+func testMailMagazineLogsBind(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Checkin{}
-	if err = randomize.Struct(seed, o, checkinDBTypes, true, checkinColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Checkin struct: %s", err)
+	o := &MailMagazineLog{}
+	if err = randomize.Struct(seed, o, mailMagazineLogDBTypes, true, mailMagazineLogColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize MailMagazineLog struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -202,19 +202,19 @@ func testCheckinsBind(t *testing.T) {
 		t.Error(err)
 	}
 
-	if err = Checkins().Bind(ctx, tx, o); err != nil {
+	if err = MailMagazineLogs().Bind(ctx, tx, o); err != nil {
 		t.Error(err)
 	}
 }
 
-func testCheckinsOne(t *testing.T) {
+func testMailMagazineLogsOne(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Checkin{}
-	if err = randomize.Struct(seed, o, checkinDBTypes, true, checkinColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Checkin struct: %s", err)
+	o := &MailMagazineLog{}
+	if err = randomize.Struct(seed, o, mailMagazineLogDBTypes, true, mailMagazineLogColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize MailMagazineLog struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -224,38 +224,38 @@ func testCheckinsOne(t *testing.T) {
 		t.Error(err)
 	}
 
-	if x, err := Checkins().One(ctx, tx); err != nil {
+	if x, err := MailMagazineLogs().One(ctx, tx); err != nil {
 		t.Error(err)
 	} else if x == nil {
 		t.Error("expected to get a non nil record")
 	}
 }
 
-func testCheckinsAll(t *testing.T) {
+func testMailMagazineLogsAll(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	checkinOne := &Checkin{}
-	checkinTwo := &Checkin{}
-	if err = randomize.Struct(seed, checkinOne, checkinDBTypes, false, checkinColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Checkin struct: %s", err)
+	mailMagazineLogOne := &MailMagazineLog{}
+	mailMagazineLogTwo := &MailMagazineLog{}
+	if err = randomize.Struct(seed, mailMagazineLogOne, mailMagazineLogDBTypes, false, mailMagazineLogColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize MailMagazineLog struct: %s", err)
 	}
-	if err = randomize.Struct(seed, checkinTwo, checkinDBTypes, false, checkinColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Checkin struct: %s", err)
+	if err = randomize.Struct(seed, mailMagazineLogTwo, mailMagazineLogDBTypes, false, mailMagazineLogColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize MailMagazineLog struct: %s", err)
 	}
 
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
-	if err = checkinOne.Insert(ctx, tx, boil.Infer()); err != nil {
+	if err = mailMagazineLogOne.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Error(err)
 	}
-	if err = checkinTwo.Insert(ctx, tx, boil.Infer()); err != nil {
+	if err = mailMagazineLogTwo.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Error(err)
 	}
 
-	slice, err := Checkins().All(ctx, tx)
+	slice, err := MailMagazineLogs().All(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -265,31 +265,31 @@ func testCheckinsAll(t *testing.T) {
 	}
 }
 
-func testCheckinsCount(t *testing.T) {
+func testMailMagazineLogsCount(t *testing.T) {
 	t.Parallel()
 
 	var err error
 	seed := randomize.NewSeed()
-	checkinOne := &Checkin{}
-	checkinTwo := &Checkin{}
-	if err = randomize.Struct(seed, checkinOne, checkinDBTypes, false, checkinColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Checkin struct: %s", err)
+	mailMagazineLogOne := &MailMagazineLog{}
+	mailMagazineLogTwo := &MailMagazineLog{}
+	if err = randomize.Struct(seed, mailMagazineLogOne, mailMagazineLogDBTypes, false, mailMagazineLogColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize MailMagazineLog struct: %s", err)
 	}
-	if err = randomize.Struct(seed, checkinTwo, checkinDBTypes, false, checkinColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Checkin struct: %s", err)
+	if err = randomize.Struct(seed, mailMagazineLogTwo, mailMagazineLogDBTypes, false, mailMagazineLogColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize MailMagazineLog struct: %s", err)
 	}
 
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
-	if err = checkinOne.Insert(ctx, tx, boil.Infer()); err != nil {
+	if err = mailMagazineLogOne.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Error(err)
 	}
-	if err = checkinTwo.Insert(ctx, tx, boil.Infer()); err != nil {
+	if err = mailMagazineLogTwo.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Error(err)
 	}
 
-	count, err := Checkins().Count(ctx, tx)
+	count, err := MailMagazineLogs().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -299,155 +299,155 @@ func testCheckinsCount(t *testing.T) {
 	}
 }
 
-func checkinBeforeInsertHook(ctx context.Context, e boil.ContextExecutor, o *Checkin) error {
-	*o = Checkin{}
+func mailMagazineLogBeforeInsertHook(ctx context.Context, e boil.ContextExecutor, o *MailMagazineLog) error {
+	*o = MailMagazineLog{}
 	return nil
 }
 
-func checkinAfterInsertHook(ctx context.Context, e boil.ContextExecutor, o *Checkin) error {
-	*o = Checkin{}
+func mailMagazineLogAfterInsertHook(ctx context.Context, e boil.ContextExecutor, o *MailMagazineLog) error {
+	*o = MailMagazineLog{}
 	return nil
 }
 
-func checkinAfterSelectHook(ctx context.Context, e boil.ContextExecutor, o *Checkin) error {
-	*o = Checkin{}
+func mailMagazineLogAfterSelectHook(ctx context.Context, e boil.ContextExecutor, o *MailMagazineLog) error {
+	*o = MailMagazineLog{}
 	return nil
 }
 
-func checkinBeforeUpdateHook(ctx context.Context, e boil.ContextExecutor, o *Checkin) error {
-	*o = Checkin{}
+func mailMagazineLogBeforeUpdateHook(ctx context.Context, e boil.ContextExecutor, o *MailMagazineLog) error {
+	*o = MailMagazineLog{}
 	return nil
 }
 
-func checkinAfterUpdateHook(ctx context.Context, e boil.ContextExecutor, o *Checkin) error {
-	*o = Checkin{}
+func mailMagazineLogAfterUpdateHook(ctx context.Context, e boil.ContextExecutor, o *MailMagazineLog) error {
+	*o = MailMagazineLog{}
 	return nil
 }
 
-func checkinBeforeDeleteHook(ctx context.Context, e boil.ContextExecutor, o *Checkin) error {
-	*o = Checkin{}
+func mailMagazineLogBeforeDeleteHook(ctx context.Context, e boil.ContextExecutor, o *MailMagazineLog) error {
+	*o = MailMagazineLog{}
 	return nil
 }
 
-func checkinAfterDeleteHook(ctx context.Context, e boil.ContextExecutor, o *Checkin) error {
-	*o = Checkin{}
+func mailMagazineLogAfterDeleteHook(ctx context.Context, e boil.ContextExecutor, o *MailMagazineLog) error {
+	*o = MailMagazineLog{}
 	return nil
 }
 
-func checkinBeforeUpsertHook(ctx context.Context, e boil.ContextExecutor, o *Checkin) error {
-	*o = Checkin{}
+func mailMagazineLogBeforeUpsertHook(ctx context.Context, e boil.ContextExecutor, o *MailMagazineLog) error {
+	*o = MailMagazineLog{}
 	return nil
 }
 
-func checkinAfterUpsertHook(ctx context.Context, e boil.ContextExecutor, o *Checkin) error {
-	*o = Checkin{}
+func mailMagazineLogAfterUpsertHook(ctx context.Context, e boil.ContextExecutor, o *MailMagazineLog) error {
+	*o = MailMagazineLog{}
 	return nil
 }
 
-func testCheckinsHooks(t *testing.T) {
+func testMailMagazineLogsHooks(t *testing.T) {
 	t.Parallel()
 
 	var err error
 
 	ctx := context.Background()
-	empty := &Checkin{}
-	o := &Checkin{}
+	empty := &MailMagazineLog{}
+	o := &MailMagazineLog{}
 
 	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, o, checkinDBTypes, false); err != nil {
-		t.Errorf("Unable to randomize Checkin object: %s", err)
+	if err = randomize.Struct(seed, o, mailMagazineLogDBTypes, false); err != nil {
+		t.Errorf("Unable to randomize MailMagazineLog object: %s", err)
 	}
 
-	AddCheckinHook(boil.BeforeInsertHook, checkinBeforeInsertHook)
+	AddMailMagazineLogHook(boil.BeforeInsertHook, mailMagazineLogBeforeInsertHook)
 	if err = o.doBeforeInsertHooks(ctx, nil); err != nil {
 		t.Errorf("Unable to execute doBeforeInsertHooks: %s", err)
 	}
 	if !reflect.DeepEqual(o, empty) {
 		t.Errorf("Expected BeforeInsertHook function to empty object, but got: %#v", o)
 	}
-	checkinBeforeInsertHooks = []CheckinHook{}
+	mailMagazineLogBeforeInsertHooks = []MailMagazineLogHook{}
 
-	AddCheckinHook(boil.AfterInsertHook, checkinAfterInsertHook)
+	AddMailMagazineLogHook(boil.AfterInsertHook, mailMagazineLogAfterInsertHook)
 	if err = o.doAfterInsertHooks(ctx, nil); err != nil {
 		t.Errorf("Unable to execute doAfterInsertHooks: %s", err)
 	}
 	if !reflect.DeepEqual(o, empty) {
 		t.Errorf("Expected AfterInsertHook function to empty object, but got: %#v", o)
 	}
-	checkinAfterInsertHooks = []CheckinHook{}
+	mailMagazineLogAfterInsertHooks = []MailMagazineLogHook{}
 
-	AddCheckinHook(boil.AfterSelectHook, checkinAfterSelectHook)
+	AddMailMagazineLogHook(boil.AfterSelectHook, mailMagazineLogAfterSelectHook)
 	if err = o.doAfterSelectHooks(ctx, nil); err != nil {
 		t.Errorf("Unable to execute doAfterSelectHooks: %s", err)
 	}
 	if !reflect.DeepEqual(o, empty) {
 		t.Errorf("Expected AfterSelectHook function to empty object, but got: %#v", o)
 	}
-	checkinAfterSelectHooks = []CheckinHook{}
+	mailMagazineLogAfterSelectHooks = []MailMagazineLogHook{}
 
-	AddCheckinHook(boil.BeforeUpdateHook, checkinBeforeUpdateHook)
+	AddMailMagazineLogHook(boil.BeforeUpdateHook, mailMagazineLogBeforeUpdateHook)
 	if err = o.doBeforeUpdateHooks(ctx, nil); err != nil {
 		t.Errorf("Unable to execute doBeforeUpdateHooks: %s", err)
 	}
 	if !reflect.DeepEqual(o, empty) {
 		t.Errorf("Expected BeforeUpdateHook function to empty object, but got: %#v", o)
 	}
-	checkinBeforeUpdateHooks = []CheckinHook{}
+	mailMagazineLogBeforeUpdateHooks = []MailMagazineLogHook{}
 
-	AddCheckinHook(boil.AfterUpdateHook, checkinAfterUpdateHook)
+	AddMailMagazineLogHook(boil.AfterUpdateHook, mailMagazineLogAfterUpdateHook)
 	if err = o.doAfterUpdateHooks(ctx, nil); err != nil {
 		t.Errorf("Unable to execute doAfterUpdateHooks: %s", err)
 	}
 	if !reflect.DeepEqual(o, empty) {
 		t.Errorf("Expected AfterUpdateHook function to empty object, but got: %#v", o)
 	}
-	checkinAfterUpdateHooks = []CheckinHook{}
+	mailMagazineLogAfterUpdateHooks = []MailMagazineLogHook{}
 
-	AddCheckinHook(boil.BeforeDeleteHook, checkinBeforeDeleteHook)
+	AddMailMagazineLogHook(boil.BeforeDeleteHook, mailMagazineLogBeforeDeleteHook)
 	if err = o.doBeforeDeleteHooks(ctx, nil); err != nil {
 		t.Errorf("Unable to execute doBeforeDeleteHooks: %s", err)
 	}
 	if !reflect.DeepEqual(o, empty) {
 		t.Errorf("Expected BeforeDeleteHook function to empty object, but got: %#v", o)
 	}
-	checkinBeforeDeleteHooks = []CheckinHook{}
+	mailMagazineLogBeforeDeleteHooks = []MailMagazineLogHook{}
 
-	AddCheckinHook(boil.AfterDeleteHook, checkinAfterDeleteHook)
+	AddMailMagazineLogHook(boil.AfterDeleteHook, mailMagazineLogAfterDeleteHook)
 	if err = o.doAfterDeleteHooks(ctx, nil); err != nil {
 		t.Errorf("Unable to execute doAfterDeleteHooks: %s", err)
 	}
 	if !reflect.DeepEqual(o, empty) {
 		t.Errorf("Expected AfterDeleteHook function to empty object, but got: %#v", o)
 	}
-	checkinAfterDeleteHooks = []CheckinHook{}
+	mailMagazineLogAfterDeleteHooks = []MailMagazineLogHook{}
 
-	AddCheckinHook(boil.BeforeUpsertHook, checkinBeforeUpsertHook)
+	AddMailMagazineLogHook(boil.BeforeUpsertHook, mailMagazineLogBeforeUpsertHook)
 	if err = o.doBeforeUpsertHooks(ctx, nil); err != nil {
 		t.Errorf("Unable to execute doBeforeUpsertHooks: %s", err)
 	}
 	if !reflect.DeepEqual(o, empty) {
 		t.Errorf("Expected BeforeUpsertHook function to empty object, but got: %#v", o)
 	}
-	checkinBeforeUpsertHooks = []CheckinHook{}
+	mailMagazineLogBeforeUpsertHooks = []MailMagazineLogHook{}
 
-	AddCheckinHook(boil.AfterUpsertHook, checkinAfterUpsertHook)
+	AddMailMagazineLogHook(boil.AfterUpsertHook, mailMagazineLogAfterUpsertHook)
 	if err = o.doAfterUpsertHooks(ctx, nil); err != nil {
 		t.Errorf("Unable to execute doAfterUpsertHooks: %s", err)
 	}
 	if !reflect.DeepEqual(o, empty) {
 		t.Errorf("Expected AfterUpsertHook function to empty object, but got: %#v", o)
 	}
-	checkinAfterUpsertHooks = []CheckinHook{}
+	mailMagazineLogAfterUpsertHooks = []MailMagazineLogHook{}
 }
 
-func testCheckinsInsert(t *testing.T) {
+func testMailMagazineLogsInsert(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Checkin{}
-	if err = randomize.Struct(seed, o, checkinDBTypes, true, checkinColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Checkin struct: %s", err)
+	o := &MailMagazineLog{}
+	if err = randomize.Struct(seed, o, mailMagazineLogDBTypes, true, mailMagazineLogColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize MailMagazineLog struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -457,7 +457,7 @@ func testCheckinsInsert(t *testing.T) {
 		t.Error(err)
 	}
 
-	count, err := Checkins().Count(ctx, tx)
+	count, err := MailMagazineLogs().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -467,24 +467,24 @@ func testCheckinsInsert(t *testing.T) {
 	}
 }
 
-func testCheckinsInsertWhitelist(t *testing.T) {
+func testMailMagazineLogsInsertWhitelist(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Checkin{}
-	if err = randomize.Struct(seed, o, checkinDBTypes, true); err != nil {
-		t.Errorf("Unable to randomize Checkin struct: %s", err)
+	o := &MailMagazineLog{}
+	if err = randomize.Struct(seed, o, mailMagazineLogDBTypes, true); err != nil {
+		t.Errorf("Unable to randomize MailMagazineLog struct: %s", err)
 	}
 
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
-	if err = o.Insert(ctx, tx, boil.Whitelist(checkinColumnsWithoutDefault...)); err != nil {
+	if err = o.Insert(ctx, tx, boil.Whitelist(mailMagazineLogColumnsWithoutDefault...)); err != nil {
 		t.Error(err)
 	}
 
-	count, err := Checkins().Count(ctx, tx)
+	count, err := MailMagazineLogs().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -494,32 +494,32 @@ func testCheckinsInsertWhitelist(t *testing.T) {
 	}
 }
 
-func testCheckinToOneStoreUsingStore(t *testing.T) {
+func testMailMagazineLogToOneMailMagazineUsingMailMagazine(t *testing.T) {
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
 
-	var local Checkin
-	var foreign Store
+	var local MailMagazineLog
+	var foreign MailMagazine
 
 	seed := randomize.NewSeed()
-	if err := randomize.Struct(seed, &local, checkinDBTypes, false, checkinColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Checkin struct: %s", err)
+	if err := randomize.Struct(seed, &local, mailMagazineLogDBTypes, false, mailMagazineLogColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize MailMagazineLog struct: %s", err)
 	}
-	if err := randomize.Struct(seed, &foreign, storeDBTypes, false, storeColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Store struct: %s", err)
+	if err := randomize.Struct(seed, &foreign, mailMagazineDBTypes, false, mailMagazineColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize MailMagazine struct: %s", err)
 	}
 
 	if err := foreign.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Fatal(err)
 	}
 
-	local.StoreID = foreign.ID
+	local.MailMagazineID = foreign.ID
 	if err := local.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Fatal(err)
 	}
 
-	check, err := local.Store().One(ctx, tx)
+	check, err := local.MailMagazine().One(ctx, tx)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -529,24 +529,24 @@ func testCheckinToOneStoreUsingStore(t *testing.T) {
 	}
 
 	ranAfterSelectHook := false
-	AddStoreHook(boil.AfterSelectHook, func(ctx context.Context, e boil.ContextExecutor, o *Store) error {
+	AddMailMagazineHook(boil.AfterSelectHook, func(ctx context.Context, e boil.ContextExecutor, o *MailMagazine) error {
 		ranAfterSelectHook = true
 		return nil
 	})
 
-	slice := CheckinSlice{&local}
-	if err = local.L.LoadStore(ctx, tx, false, (*[]*Checkin)(&slice), nil); err != nil {
+	slice := MailMagazineLogSlice{&local}
+	if err = local.L.LoadMailMagazine(ctx, tx, false, (*[]*MailMagazineLog)(&slice), nil); err != nil {
 		t.Fatal(err)
 	}
-	if local.R.Store == nil {
+	if local.R.MailMagazine == nil {
 		t.Error("struct should have been eager loaded")
 	}
 
-	local.R.Store = nil
-	if err = local.L.LoadStore(ctx, tx, true, &local, nil); err != nil {
+	local.R.MailMagazine = nil
+	if err = local.L.LoadMailMagazine(ctx, tx, true, &local, nil); err != nil {
 		t.Fatal(err)
 	}
-	if local.R.Store == nil {
+	if local.R.MailMagazine == nil {
 		t.Error("struct should have been eager loaded")
 	}
 
@@ -555,17 +555,17 @@ func testCheckinToOneStoreUsingStore(t *testing.T) {
 	}
 }
 
-func testCheckinToOneUserDatumUsingUser(t *testing.T) {
+func testMailMagazineLogToOneUserDatumUsingUser(t *testing.T) {
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
 
-	var local Checkin
+	var local MailMagazineLog
 	var foreign UserDatum
 
 	seed := randomize.NewSeed()
-	if err := randomize.Struct(seed, &local, checkinDBTypes, false, checkinColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Checkin struct: %s", err)
+	if err := randomize.Struct(seed, &local, mailMagazineLogDBTypes, false, mailMagazineLogColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize MailMagazineLog struct: %s", err)
 	}
 	if err := randomize.Struct(seed, &foreign, userDatumDBTypes, false, userDatumColumnsWithDefault...); err != nil {
 		t.Errorf("Unable to randomize UserDatum struct: %s", err)
@@ -595,8 +595,8 @@ func testCheckinToOneUserDatumUsingUser(t *testing.T) {
 		return nil
 	})
 
-	slice := CheckinSlice{&local}
-	if err = local.L.LoadUser(ctx, tx, false, (*[]*Checkin)(&slice), nil); err != nil {
+	slice := MailMagazineLogSlice{&local}
+	if err = local.L.LoadUser(ctx, tx, false, (*[]*MailMagazineLog)(&slice), nil); err != nil {
 		t.Fatal(err)
 	}
 	if local.R.User == nil {
@@ -616,24 +616,24 @@ func testCheckinToOneUserDatumUsingUser(t *testing.T) {
 	}
 }
 
-func testCheckinToOneSetOpStoreUsingStore(t *testing.T) {
+func testMailMagazineLogToOneSetOpMailMagazineUsingMailMagazine(t *testing.T) {
 	var err error
 
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
 
-	var a Checkin
-	var b, c Store
+	var a MailMagazineLog
+	var b, c MailMagazine
 
 	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, &a, checkinDBTypes, false, strmangle.SetComplement(checkinPrimaryKeyColumns, checkinColumnsWithoutDefault)...); err != nil {
+	if err = randomize.Struct(seed, &a, mailMagazineLogDBTypes, false, strmangle.SetComplement(mailMagazineLogPrimaryKeyColumns, mailMagazineLogColumnsWithoutDefault)...); err != nil {
 		t.Fatal(err)
 	}
-	if err = randomize.Struct(seed, &b, storeDBTypes, false, strmangle.SetComplement(storePrimaryKeyColumns, storeColumnsWithoutDefault)...); err != nil {
+	if err = randomize.Struct(seed, &b, mailMagazineDBTypes, false, strmangle.SetComplement(mailMagazinePrimaryKeyColumns, mailMagazineColumnsWithoutDefault)...); err != nil {
 		t.Fatal(err)
 	}
-	if err = randomize.Struct(seed, &c, storeDBTypes, false, strmangle.SetComplement(storePrimaryKeyColumns, storeColumnsWithoutDefault)...); err != nil {
+	if err = randomize.Struct(seed, &c, mailMagazineDBTypes, false, strmangle.SetComplement(mailMagazinePrimaryKeyColumns, mailMagazineColumnsWithoutDefault)...); err != nil {
 		t.Fatal(err)
 	}
 
@@ -644,47 +644,47 @@ func testCheckinToOneSetOpStoreUsingStore(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	for i, x := range []*Store{&b, &c} {
-		err = a.SetStore(ctx, tx, i != 0, x)
+	for i, x := range []*MailMagazine{&b, &c} {
+		err = a.SetMailMagazine(ctx, tx, i != 0, x)
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		if a.R.Store != x {
+		if a.R.MailMagazine != x {
 			t.Error("relationship struct not set to correct value")
 		}
 
-		if x.R.Checkins[0] != &a {
+		if x.R.MailMagazineLogs[0] != &a {
 			t.Error("failed to append to foreign relationship struct")
 		}
-		if a.StoreID != x.ID {
-			t.Error("foreign key was wrong value", a.StoreID)
+		if a.MailMagazineID != x.ID {
+			t.Error("foreign key was wrong value", a.MailMagazineID)
 		}
 
-		zero := reflect.Zero(reflect.TypeOf(a.StoreID))
-		reflect.Indirect(reflect.ValueOf(&a.StoreID)).Set(zero)
+		zero := reflect.Zero(reflect.TypeOf(a.MailMagazineID))
+		reflect.Indirect(reflect.ValueOf(&a.MailMagazineID)).Set(zero)
 
 		if err = a.Reload(ctx, tx); err != nil {
 			t.Fatal("failed to reload", err)
 		}
 
-		if a.StoreID != x.ID {
-			t.Error("foreign key was wrong value", a.StoreID, x.ID)
+		if a.MailMagazineID != x.ID {
+			t.Error("foreign key was wrong value", a.MailMagazineID, x.ID)
 		}
 	}
 }
-func testCheckinToOneSetOpUserDatumUsingUser(t *testing.T) {
+func testMailMagazineLogToOneSetOpUserDatumUsingUser(t *testing.T) {
 	var err error
 
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
 
-	var a Checkin
+	var a MailMagazineLog
 	var b, c UserDatum
 
 	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, &a, checkinDBTypes, false, strmangle.SetComplement(checkinPrimaryKeyColumns, checkinColumnsWithoutDefault)...); err != nil {
+	if err = randomize.Struct(seed, &a, mailMagazineLogDBTypes, false, strmangle.SetComplement(mailMagazineLogPrimaryKeyColumns, mailMagazineLogColumnsWithoutDefault)...); err != nil {
 		t.Fatal(err)
 	}
 	if err = randomize.Struct(seed, &b, userDatumDBTypes, false, strmangle.SetComplement(userDatumPrimaryKeyColumns, userDatumColumnsWithoutDefault)...); err != nil {
@@ -711,7 +711,7 @@ func testCheckinToOneSetOpUserDatumUsingUser(t *testing.T) {
 			t.Error("relationship struct not set to correct value")
 		}
 
-		if x.R.UserCheckins[0] != &a {
+		if x.R.UserMailMagazineLogs[0] != &a {
 			t.Error("failed to append to foreign relationship struct")
 		}
 		if a.UserID != x.UserID {
@@ -731,14 +731,14 @@ func testCheckinToOneSetOpUserDatumUsingUser(t *testing.T) {
 	}
 }
 
-func testCheckinsReload(t *testing.T) {
+func testMailMagazineLogsReload(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Checkin{}
-	if err = randomize.Struct(seed, o, checkinDBTypes, true, checkinColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Checkin struct: %s", err)
+	o := &MailMagazineLog{}
+	if err = randomize.Struct(seed, o, mailMagazineLogDBTypes, true, mailMagazineLogColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize MailMagazineLog struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -753,14 +753,14 @@ func testCheckinsReload(t *testing.T) {
 	}
 }
 
-func testCheckinsReloadAll(t *testing.T) {
+func testMailMagazineLogsReloadAll(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Checkin{}
-	if err = randomize.Struct(seed, o, checkinDBTypes, true, checkinColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Checkin struct: %s", err)
+	o := &MailMagazineLog{}
+	if err = randomize.Struct(seed, o, mailMagazineLogDBTypes, true, mailMagazineLogColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize MailMagazineLog struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -770,21 +770,21 @@ func testCheckinsReloadAll(t *testing.T) {
 		t.Error(err)
 	}
 
-	slice := CheckinSlice{o}
+	slice := MailMagazineLogSlice{o}
 
 	if err = slice.ReloadAll(ctx, tx); err != nil {
 		t.Error(err)
 	}
 }
 
-func testCheckinsSelect(t *testing.T) {
+func testMailMagazineLogsSelect(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Checkin{}
-	if err = randomize.Struct(seed, o, checkinDBTypes, true, checkinColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Checkin struct: %s", err)
+	o := &MailMagazineLog{}
+	if err = randomize.Struct(seed, o, mailMagazineLogDBTypes, true, mailMagazineLogColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize MailMagazineLog struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -794,7 +794,7 @@ func testCheckinsSelect(t *testing.T) {
 		t.Error(err)
 	}
 
-	slice, err := Checkins().All(ctx, tx)
+	slice, err := MailMagazineLogs().All(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -805,25 +805,25 @@ func testCheckinsSelect(t *testing.T) {
 }
 
 var (
-	checkinDBTypes = map[string]string{`ID`: `uuid`, `StoreID`: `uuid`, `UserID`: `uuid`, `CheckInAt`: `timestamp with time zone`, `Archive`: `boolean`, `CreateAt`: `timestamp with time zone`, `UpdateAt`: `timestamp with time zone`}
-	_              = bytes.MinRead
+	mailMagazineLogDBTypes = map[string]string{`ID`: `bigint`, `MailMagazineID`: `uuid`, `UserID`: `uuid`, `Email`: `character varying`, `SentAt`: `timestamp with time zone`, `CreateAt`: `timestamp with time zone`, `UpdateAt`: `timestamp with time zone`}
+	_                      = bytes.MinRead
 )
 
-func testCheckinsUpdate(t *testing.T) {
+func testMailMagazineLogsUpdate(t *testing.T) {
 	t.Parallel()
 
-	if 0 == len(checkinPrimaryKeyColumns) {
+	if 0 == len(mailMagazineLogPrimaryKeyColumns) {
 		t.Skip("Skipping table with no primary key columns")
 	}
-	if len(checkinAllColumns) == len(checkinPrimaryKeyColumns) {
+	if len(mailMagazineLogAllColumns) == len(mailMagazineLogPrimaryKeyColumns) {
 		t.Skip("Skipping table with only primary key columns")
 	}
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Checkin{}
-	if err = randomize.Struct(seed, o, checkinDBTypes, true, checkinColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Checkin struct: %s", err)
+	o := &MailMagazineLog{}
+	if err = randomize.Struct(seed, o, mailMagazineLogDBTypes, true, mailMagazineLogColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize MailMagazineLog struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -833,7 +833,7 @@ func testCheckinsUpdate(t *testing.T) {
 		t.Error(err)
 	}
 
-	count, err := Checkins().Count(ctx, tx)
+	count, err := MailMagazineLogs().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -842,8 +842,8 @@ func testCheckinsUpdate(t *testing.T) {
 		t.Error("want one record, got:", count)
 	}
 
-	if err = randomize.Struct(seed, o, checkinDBTypes, true, checkinPrimaryKeyColumns...); err != nil {
-		t.Errorf("Unable to randomize Checkin struct: %s", err)
+	if err = randomize.Struct(seed, o, mailMagazineLogDBTypes, true, mailMagazineLogPrimaryKeyColumns...); err != nil {
+		t.Errorf("Unable to randomize MailMagazineLog struct: %s", err)
 	}
 
 	if rowsAff, err := o.Update(ctx, tx, boil.Infer()); err != nil {
@@ -853,18 +853,18 @@ func testCheckinsUpdate(t *testing.T) {
 	}
 }
 
-func testCheckinsSliceUpdateAll(t *testing.T) {
+func testMailMagazineLogsSliceUpdateAll(t *testing.T) {
 	t.Parallel()
 
-	if len(checkinAllColumns) == len(checkinPrimaryKeyColumns) {
+	if len(mailMagazineLogAllColumns) == len(mailMagazineLogPrimaryKeyColumns) {
 		t.Skip("Skipping table with only primary key columns")
 	}
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Checkin{}
-	if err = randomize.Struct(seed, o, checkinDBTypes, true, checkinColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Checkin struct: %s", err)
+	o := &MailMagazineLog{}
+	if err = randomize.Struct(seed, o, mailMagazineLogDBTypes, true, mailMagazineLogColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize MailMagazineLog struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -874,7 +874,7 @@ func testCheckinsSliceUpdateAll(t *testing.T) {
 		t.Error(err)
 	}
 
-	count, err := Checkins().Count(ctx, tx)
+	count, err := MailMagazineLogs().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -883,18 +883,18 @@ func testCheckinsSliceUpdateAll(t *testing.T) {
 		t.Error("want one record, got:", count)
 	}
 
-	if err = randomize.Struct(seed, o, checkinDBTypes, true, checkinPrimaryKeyColumns...); err != nil {
-		t.Errorf("Unable to randomize Checkin struct: %s", err)
+	if err = randomize.Struct(seed, o, mailMagazineLogDBTypes, true, mailMagazineLogPrimaryKeyColumns...); err != nil {
+		t.Errorf("Unable to randomize MailMagazineLog struct: %s", err)
 	}
 
 	// Remove Primary keys and unique columns from what we plan to update
 	var fields []string
-	if strmangle.StringSliceMatch(checkinAllColumns, checkinPrimaryKeyColumns) {
-		fields = checkinAllColumns
+	if strmangle.StringSliceMatch(mailMagazineLogAllColumns, mailMagazineLogPrimaryKeyColumns) {
+		fields = mailMagazineLogAllColumns
 	} else {
 		fields = strmangle.SetComplement(
-			checkinAllColumns,
-			checkinPrimaryKeyColumns,
+			mailMagazineLogAllColumns,
+			mailMagazineLogPrimaryKeyColumns,
 		)
 	}
 
@@ -912,7 +912,7 @@ func testCheckinsSliceUpdateAll(t *testing.T) {
 		}
 	}
 
-	slice := CheckinSlice{o}
+	slice := MailMagazineLogSlice{o}
 	if rowsAff, err := slice.UpdateAll(ctx, tx, updateMap); err != nil {
 		t.Error(err)
 	} else if rowsAff != 1 {
@@ -920,29 +920,29 @@ func testCheckinsSliceUpdateAll(t *testing.T) {
 	}
 }
 
-func testCheckinsUpsert(t *testing.T) {
+func testMailMagazineLogsUpsert(t *testing.T) {
 	t.Parallel()
 
-	if len(checkinAllColumns) == len(checkinPrimaryKeyColumns) {
+	if len(mailMagazineLogAllColumns) == len(mailMagazineLogPrimaryKeyColumns) {
 		t.Skip("Skipping table with only primary key columns")
 	}
 
 	seed := randomize.NewSeed()
 	var err error
 	// Attempt the INSERT side of an UPSERT
-	o := Checkin{}
-	if err = randomize.Struct(seed, &o, checkinDBTypes, true); err != nil {
-		t.Errorf("Unable to randomize Checkin struct: %s", err)
+	o := MailMagazineLog{}
+	if err = randomize.Struct(seed, &o, mailMagazineLogDBTypes, true); err != nil {
+		t.Errorf("Unable to randomize MailMagazineLog struct: %s", err)
 	}
 
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
 	if err = o.Upsert(ctx, tx, false, nil, boil.Infer(), boil.Infer()); err != nil {
-		t.Errorf("Unable to upsert Checkin: %s", err)
+		t.Errorf("Unable to upsert MailMagazineLog: %s", err)
 	}
 
-	count, err := Checkins().Count(ctx, tx)
+	count, err := MailMagazineLogs().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -951,15 +951,15 @@ func testCheckinsUpsert(t *testing.T) {
 	}
 
 	// Attempt the UPDATE side of an UPSERT
-	if err = randomize.Struct(seed, &o, checkinDBTypes, false, checkinPrimaryKeyColumns...); err != nil {
-		t.Errorf("Unable to randomize Checkin struct: %s", err)
+	if err = randomize.Struct(seed, &o, mailMagazineLogDBTypes, false, mailMagazineLogPrimaryKeyColumns...); err != nil {
+		t.Errorf("Unable to randomize MailMagazineLog struct: %s", err)
 	}
 
 	if err = o.Upsert(ctx, tx, true, nil, boil.Infer(), boil.Infer()); err != nil {
-		t.Errorf("Unable to upsert Checkin: %s", err)
+		t.Errorf("Unable to upsert MailMagazineLog: %s", err)
 	}
 
-	count, err = Checkins().Count(ctx, tx)
+	count, err = MailMagazineLogs().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}

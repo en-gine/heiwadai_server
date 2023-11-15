@@ -641,8 +641,9 @@ func testUserDatumToManyUserCheckins(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	queries.Assign(&b.UserID, a.UserID)
-	queries.Assign(&c.UserID, a.UserID)
+	b.UserID = a.UserID
+	c.UserID = a.UserID
+
 	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Fatal(err)
 	}
@@ -657,10 +658,10 @@ func testUserDatumToManyUserCheckins(t *testing.T) {
 
 	bFound, cFound := false, false
 	for _, v := range check {
-		if queries.Equal(v.UserID, b.UserID) {
+		if v.UserID == b.UserID {
 			bFound = true
 		}
-		if queries.Equal(v.UserID, c.UserID) {
+		if v.UserID == c.UserID {
 			cFound = true
 		}
 	}
@@ -763,6 +764,84 @@ func testUserDatumToManyUserCouponAttachedUsers(t *testing.T) {
 		t.Fatal(err)
 	}
 	if got := len(a.R.UserCouponAttachedUsers); got != 2 {
+		t.Error("number of eager loaded records wrong, got:", got)
+	}
+
+	if t.Failed() {
+		t.Logf("%#v", check)
+	}
+}
+
+func testUserDatumToManyUserMailMagazineLogs(t *testing.T) {
+	var err error
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+
+	var a UserDatum
+	var b, c MailMagazineLog
+
+	seed := randomize.NewSeed()
+	if err = randomize.Struct(seed, &a, userDatumDBTypes, true, userDatumColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize UserDatum struct: %s", err)
+	}
+
+	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	if err = randomize.Struct(seed, &b, mailMagazineLogDBTypes, false, mailMagazineLogColumnsWithDefault...); err != nil {
+		t.Fatal(err)
+	}
+	if err = randomize.Struct(seed, &c, mailMagazineLogDBTypes, false, mailMagazineLogColumnsWithDefault...); err != nil {
+		t.Fatal(err)
+	}
+
+	b.UserID = a.UserID
+	c.UserID = a.UserID
+
+	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+	if err = c.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	check, err := a.UserMailMagazineLogs().All(ctx, tx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	bFound, cFound := false, false
+	for _, v := range check {
+		if v.UserID == b.UserID {
+			bFound = true
+		}
+		if v.UserID == c.UserID {
+			cFound = true
+		}
+	}
+
+	if !bFound {
+		t.Error("expected to find b")
+	}
+	if !cFound {
+		t.Error("expected to find c")
+	}
+
+	slice := UserDatumSlice{&a}
+	if err = a.L.LoadUserMailMagazineLogs(ctx, tx, false, (*[]*UserDatum)(&slice), nil); err != nil {
+		t.Fatal(err)
+	}
+	if got := len(a.R.UserMailMagazineLogs); got != 2 {
+		t.Error("number of eager loaded records wrong, got:", got)
+	}
+
+	a.R.UserMailMagazineLogs = nil
+	if err = a.L.LoadUserMailMagazineLogs(ctx, tx, true, &a, nil); err != nil {
+		t.Fatal(err)
+	}
+	if got := len(a.R.UserMailMagazineLogs); got != 2 {
 		t.Error("number of eager loaded records wrong, got:", got)
 	}
 
@@ -972,10 +1051,10 @@ func testUserDatumToManyAddOpUserCheckins(t *testing.T) {
 		first := x[0]
 		second := x[1]
 
-		if !queries.Equal(a.UserID, first.UserID) {
+		if a.UserID != first.UserID {
 			t.Error("foreign key was wrong value", a.UserID, first.UserID)
 		}
-		if !queries.Equal(a.UserID, second.UserID) {
+		if a.UserID != second.UserID {
 			t.Error("foreign key was wrong value", a.UserID, second.UserID)
 		}
 
@@ -1002,182 +1081,6 @@ func testUserDatumToManyAddOpUserCheckins(t *testing.T) {
 		}
 	}
 }
-
-func testUserDatumToManySetOpUserCheckins(t *testing.T) {
-	var err error
-
-	ctx := context.Background()
-	tx := MustTx(boil.BeginTx(ctx, nil))
-	defer func() { _ = tx.Rollback() }()
-
-	var a UserDatum
-	var b, c, d, e Checkin
-
-	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, &a, userDatumDBTypes, false, strmangle.SetComplement(userDatumPrimaryKeyColumns, userDatumColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
-	}
-	foreigners := []*Checkin{&b, &c, &d, &e}
-	for _, x := range foreigners {
-		if err = randomize.Struct(seed, x, checkinDBTypes, false, strmangle.SetComplement(checkinPrimaryKeyColumns, checkinColumnsWithoutDefault)...); err != nil {
-			t.Fatal(err)
-		}
-	}
-
-	if err = a.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-	if err = c.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-
-	err = a.SetUserCheckins(ctx, tx, false, &b, &c)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	count, err := a.UserCheckins().Count(ctx, tx)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if count != 2 {
-		t.Error("count was wrong:", count)
-	}
-
-	err = a.SetUserCheckins(ctx, tx, true, &d, &e)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	count, err = a.UserCheckins().Count(ctx, tx)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if count != 2 {
-		t.Error("count was wrong:", count)
-	}
-
-	if !queries.IsValuerNil(b.UserID) {
-		t.Error("want b's foreign key value to be nil")
-	}
-	if !queries.IsValuerNil(c.UserID) {
-		t.Error("want c's foreign key value to be nil")
-	}
-	if !queries.Equal(a.UserID, d.UserID) {
-		t.Error("foreign key was wrong value", a.UserID, d.UserID)
-	}
-	if !queries.Equal(a.UserID, e.UserID) {
-		t.Error("foreign key was wrong value", a.UserID, e.UserID)
-	}
-
-	if b.R.User != nil {
-		t.Error("relationship was not removed properly from the foreign struct")
-	}
-	if c.R.User != nil {
-		t.Error("relationship was not removed properly from the foreign struct")
-	}
-	if d.R.User != &a {
-		t.Error("relationship was not added properly to the foreign struct")
-	}
-	if e.R.User != &a {
-		t.Error("relationship was not added properly to the foreign struct")
-	}
-
-	if a.R.UserCheckins[0] != &d {
-		t.Error("relationship struct slice not set to correct value")
-	}
-	if a.R.UserCheckins[1] != &e {
-		t.Error("relationship struct slice not set to correct value")
-	}
-}
-
-func testUserDatumToManyRemoveOpUserCheckins(t *testing.T) {
-	var err error
-
-	ctx := context.Background()
-	tx := MustTx(boil.BeginTx(ctx, nil))
-	defer func() { _ = tx.Rollback() }()
-
-	var a UserDatum
-	var b, c, d, e Checkin
-
-	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, &a, userDatumDBTypes, false, strmangle.SetComplement(userDatumPrimaryKeyColumns, userDatumColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
-	}
-	foreigners := []*Checkin{&b, &c, &d, &e}
-	for _, x := range foreigners {
-		if err = randomize.Struct(seed, x, checkinDBTypes, false, strmangle.SetComplement(checkinPrimaryKeyColumns, checkinColumnsWithoutDefault)...); err != nil {
-			t.Fatal(err)
-		}
-	}
-
-	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-
-	err = a.AddUserCheckins(ctx, tx, true, foreigners...)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	count, err := a.UserCheckins().Count(ctx, tx)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if count != 4 {
-		t.Error("count was wrong:", count)
-	}
-
-	err = a.RemoveUserCheckins(ctx, tx, foreigners[:2]...)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	count, err = a.UserCheckins().Count(ctx, tx)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if count != 2 {
-		t.Error("count was wrong:", count)
-	}
-
-	if !queries.IsValuerNil(b.UserID) {
-		t.Error("want b's foreign key value to be nil")
-	}
-	if !queries.IsValuerNil(c.UserID) {
-		t.Error("want c's foreign key value to be nil")
-	}
-
-	if b.R.User != nil {
-		t.Error("relationship was not removed properly from the foreign struct")
-	}
-	if c.R.User != nil {
-		t.Error("relationship was not removed properly from the foreign struct")
-	}
-	if d.R.User != &a {
-		t.Error("relationship to a should have been preserved")
-	}
-	if e.R.User != &a {
-		t.Error("relationship to a should have been preserved")
-	}
-
-	if len(a.R.UserCheckins) != 2 {
-		t.Error("should have preserved two relationships")
-	}
-
-	// Removal doesn't do a stable deletion for performance so we have to flip the order
-	if a.R.UserCheckins[1] != &d {
-		t.Error("relationship to d should have been preserved")
-	}
-	if a.R.UserCheckins[0] != &e {
-		t.Error("relationship to e should have been preserved")
-	}
-}
-
 func testUserDatumToManyAddOpUserCouponAttachedUsers(t *testing.T) {
 	var err error
 
@@ -1245,6 +1148,81 @@ func testUserDatumToManyAddOpUserCouponAttachedUsers(t *testing.T) {
 		}
 
 		count, err := a.UserCouponAttachedUsers().Count(ctx, tx)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if want := int64((i + 1) * 2); count != want {
+			t.Error("want", want, "got", count)
+		}
+	}
+}
+func testUserDatumToManyAddOpUserMailMagazineLogs(t *testing.T) {
+	var err error
+
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+
+	var a UserDatum
+	var b, c, d, e MailMagazineLog
+
+	seed := randomize.NewSeed()
+	if err = randomize.Struct(seed, &a, userDatumDBTypes, false, strmangle.SetComplement(userDatumPrimaryKeyColumns, userDatumColumnsWithoutDefault)...); err != nil {
+		t.Fatal(err)
+	}
+	foreigners := []*MailMagazineLog{&b, &c, &d, &e}
+	for _, x := range foreigners {
+		if err = randomize.Struct(seed, x, mailMagazineLogDBTypes, false, strmangle.SetComplement(mailMagazineLogPrimaryKeyColumns, mailMagazineLogColumnsWithoutDefault)...); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+	if err = c.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	foreignersSplitByInsertion := [][]*MailMagazineLog{
+		{&b, &c},
+		{&d, &e},
+	}
+
+	for i, x := range foreignersSplitByInsertion {
+		err = a.AddUserMailMagazineLogs(ctx, tx, i != 0, x...)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		first := x[0]
+		second := x[1]
+
+		if a.UserID != first.UserID {
+			t.Error("foreign key was wrong value", a.UserID, first.UserID)
+		}
+		if a.UserID != second.UserID {
+			t.Error("foreign key was wrong value", a.UserID, second.UserID)
+		}
+
+		if first.R.User != &a {
+			t.Error("relationship was not added properly to the foreign slice")
+		}
+		if second.R.User != &a {
+			t.Error("relationship was not added properly to the foreign slice")
+		}
+
+		if a.R.UserMailMagazineLogs[i*2] != first {
+			t.Error("relationship struct slice not set to correct value")
+		}
+		if a.R.UserMailMagazineLogs[i*2+1] != second {
+			t.Error("relationship struct slice not set to correct value")
+		}
+
+		count, err := a.UserMailMagazineLogs().Count(ctx, tx)
 		if err != nil {
 			t.Fatal(err)
 		}

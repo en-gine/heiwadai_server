@@ -10,6 +10,7 @@ import (
 type IUserQueryService interface {
 	GetByID(id uuid.UUID) (*entity.User, error)
 	GetByMail(mail string) (*entity.User, error)
-	GetUserByPrefecture([]*entity.Prefecture) ([]*entity.User, error)
+	GetMailOKUser(filterPrefectures *[]entity.Prefecture) ([]*entity.User, error)
+	GetMailOKUserCount(filterPrefectures *[]entity.Prefecture) (*int, error)
 	GetAll(query *types.UserQuery, pager *types.PageQuery) ([]*entity.User, error)
 }
