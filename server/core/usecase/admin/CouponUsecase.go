@@ -1,31 +1,32 @@
 package admin
 
 import (
+	"time"
+
 	"server/core/entity"
 	"server/core/errors"
-	"server/core/infra/action"
 	queryservice "server/core/infra/queryService"
 	"server/core/infra/repository"
-	"time"
 
 	"github.com/google/uuid"
 )
 
 type AdminCouponUsecase struct {
-	couponRepository repository.ICouponRepository
-	couponQuery      queryservice.ICouponQueryService
-	userCouponQuery  queryservice.IUserCouponQueryService
-	couponAction     action.IAttachCouponAction
-	storeQuery       queryservice.IStoreQueryService
+	couponRepository     repository.ICouponRepository
+	couponQuery          queryservice.ICouponQueryService
+	userCouponQuery      queryservice.IUserCouponQueryService
+	usercouponRepository repository.IUserCouponRepository
+	storeQuery           queryservice.IStoreQueryService
 }
 
 func NewAdminCouponUsecase(couponRepository repository.ICouponRepository, couponQuery queryservice.ICouponQueryService,
-	userCouponQuery queryservice.IUserCouponQueryService, couponAction action.IAttachCouponAction, storeQuery queryservice.IStoreQueryService) *AdminCouponUsecase {
+	userCouponQuery queryservice.IUserCouponQueryService, usercouponRepository repository.IUserCouponRepository, storeQuery queryservice.IStoreQueryService,
+) *AdminCouponUsecase {
 	return &AdminCouponUsecase{
-		couponRepository: couponRepository,
-		couponQuery:      couponQuery,
-		couponAction:     couponAction,
-		storeQuery:       storeQuery,
+		couponRepository:     couponRepository,
+		couponQuery:          couponQuery,
+		usercouponRepository: usercouponRepository,
+		storeQuery:           storeQuery,
 	}
 }
 
@@ -48,7 +49,6 @@ func (u *AdminCouponUsecase) CreateDefaultCoupon() *errors.DomainError {
 }
 
 func (u *AdminCouponUsecase) GetUsersCouponList(UserID uuid.UUID) ([]*entity.UserAttachedCoupon, *errors.DomainError) {
-
 	coupons, err := u.userCouponQuery.GetActiveAll(UserID)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())
@@ -63,7 +63,6 @@ func (u *AdminCouponUsecase) CreateCustomCoupon(
 	IsCombinationable bool,
 	Notices []string,
 ) (*entity.Coupon, *errors.DomainError) {
-
 	stores, err := u.storeQuery.GetActiveAll()
 	if err != nil {
 		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
@@ -87,9 +86,9 @@ func (u *AdminCouponUsecase) CreateCustomCoupon(
 
 	return customCoupon, nil
 }
+
 func (u *AdminCouponUsecase) SaveCustomCoupon(couponID uuid.UUID) error {
 	coupon, err := u.couponQuery.GetByID(couponID)
-
 	if err != nil {
 		return errors.NewDomainError(errors.QueryError, err.Error())
 	}
@@ -112,9 +111,9 @@ func (u *AdminCouponUsecase) SaveCustomCoupon(couponID uuid.UUID) error {
 	}
 	return nil
 }
+
 func (u *AdminCouponUsecase) AttachCustomCouponToAllUser(couponID uuid.UUID) (*int, *errors.DomainError) {
 	coupon, err := u.couponQuery.GetByID(couponID)
-
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())
 	}
@@ -125,7 +124,7 @@ func (u *AdminCouponUsecase) AttachCustomCouponToAllUser(couponID uuid.UUID) (*i
 		return nil, errors.NewDomainError(errors.UnPemitedOperation, "保存済ステータスのクーポンではありません。")
 	}
 
-	count, err := u.couponAction.Issue(coupon)
+	count, err := u.usercouponRepository.IssueAll(coupon)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.ActionError, err.Error())
 	}

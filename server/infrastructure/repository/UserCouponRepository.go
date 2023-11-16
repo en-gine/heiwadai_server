@@ -10,6 +10,7 @@ import (
 
 	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
+	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
 var _ repository.IUserCouponRepository = &UserCouponRepository{}
@@ -51,4 +52,26 @@ func (pr *UserCouponRepository) Save(ctx context.Context, userCoupon *entity.Use
 	}
 
 	return err
+}
+
+func (pr *UserCouponRepository) IssueAll(coupon *entity.Coupon) (int, error) {
+	queryMods := []qm.QueryMod{
+		qm.SQL("INSERT INTO ?", models.TableNames.CouponAttachedUser),
+		qm.SQL("(?, ?)", models.CouponAttachedUserColumns.CouponID, models.CouponAttachedUserColumns.UserID),
+		qm.Select(coupon.ID.String(), models.UserDatumColumns.UserID),
+		qm.From(models.TableNames.UserData),
+	}
+
+	res, err := models.NewQuery(
+		queryMods...,
+	).Exec(pr.db)
+	if err != nil {
+		return 0, err
+	}
+
+	count, err := res.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+	return int(count), nil
 }
