@@ -87,7 +87,7 @@ func (u *AdminCouponUsecase) CreateCustomCoupon(
 	return customCoupon, nil
 }
 
-func (u *AdminCouponUsecase) SaveCustomCoupon(couponID uuid.UUID) error {
+func (u *AdminCouponUsecase) SaveCustomCoupon(couponID uuid.UUID) *errors.DomainError {
 	coupon, err := u.couponQuery.GetByID(couponID)
 	if err != nil {
 		return errors.NewDomainError(errors.QueryError, err.Error())

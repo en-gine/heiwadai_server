@@ -23,3 +23,10 @@ message Coupon {
   repeated string Notices = 7;
   repeated shared.Store TargetStore = 8;
 }
+
+
+message UserAttachedCoupon{
+  string UserID = 1;
+  Coupon Coupon = 2;
+  google.protobuf.Timestamp UsedAt = 3; // time.Time
+}
