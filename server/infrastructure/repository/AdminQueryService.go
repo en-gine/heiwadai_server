@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+
 	"server/core/entity"
 	queryservice "server/core/infra/queryService"
 	"server/db/models"
@@ -32,9 +33,10 @@ func (pq *AdminQueryService) GetByID(id uuid.UUID) (*entity.Admin, error) {
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}
-	store := StoreModelToEntity(admin.R.BelongToStore)
+	store := StoreModelToEntity(admin.R.BelongToStore, nil)
 	return AdminModelToEntity(admin, store, admin.R.Admin.Email), nil
 }
+
 func (pq *AdminQueryService) GetByMail(mail string) (*entity.Admin, error) {
 	usermanager, err := models.UserManagers(models.UserManagerWhere.Email.EQ(mail)).One(context.Background(), pq.db)
 	if err == sql.ErrNoRows {
@@ -46,7 +48,7 @@ func (pq *AdminQueryService) GetByMail(mail string) (*entity.Admin, error) {
 	}
 
 	admin := usermanager.R.AdminAdmin
-	store := StoreModelToEntity(admin.R.BelongToStore)
+	store := StoreModelToEntity(admin.R.BelongToStore, nil)
 
 	return AdminModelToEntity(admin, store, usermanager.Email), nil
 }
@@ -61,14 +63,13 @@ func (pq *AdminQueryService) GetAll() ([]*entity.Admin, error) {
 	}
 	var result []*entity.Admin
 	for _, admin := range admins {
-		store := StoreModelToEntity(admin.R.BelongToStore)
+		store := StoreModelToEntity(admin.R.BelongToStore, nil)
 		result = append(result, AdminModelToEntity(admin, store, admin.R.Admin.Email))
 	}
 	return result, nil
 }
 
 func AdminModelToEntity(model *models.Admin, store *entity.Store, email string) *entity.Admin {
-
 	return entity.RegenAdmin(
 		uuid.MustParse(model.AdminID),
 		model.Name,

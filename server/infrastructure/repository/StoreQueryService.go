@@ -27,15 +27,23 @@ func NewStoreQueryService() *StoreQueryService {
 }
 
 func (pq *StoreQueryService) GetByID(id uuid.UUID) (*entity.Store, error) {
-	store, err := models.FindStore(context.Background(), pq.db, id.String())
+	ctx := context.Background()
+	store, err := models.FindStore(ctx, pq.db, id.String())
 	if err != nil {
 		return nil, err
 	}
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}
+	info, err := models.StayableStoreInfos(models.StayableStoreInfoWhere.StoreID.EQ(store.ID)).One(ctx, InitDB())
+	if err != nil {
+		return nil, err
+	}
+	if err == sql.ErrNoRows {
+		info = nil
+	}
 
-	return StoreModelToEntity(store), nil
+	return StoreModelToEntity(store, info), nil
 }
 
 func (pq *StoreQueryService) GetActiveAll() ([]*entity.Store, error) {
@@ -48,7 +56,7 @@ func (pq *StoreQueryService) GetActiveAll() ([]*entity.Store, error) {
 	}
 	var result []*entity.Store
 	for _, store := range stores {
-		result = append(result, StoreModelToEntity(store))
+		result = append(result, StoreModelToEntity(store, nil))
 	}
 	return result, nil
 }
@@ -96,7 +104,7 @@ func (pq *StoreQueryService) GetAll() ([]*entity.Store, error) {
 	}
 	var result []*entity.Store
 	for _, store := range stores {
-		result = append(result, StoreModelToEntity(store))
+		result = append(result, StoreModelToEntity(store, nil))
 	}
 	return result, nil
 }
@@ -114,7 +122,12 @@ func (pq *StoreQueryService) GetStayableByBookingID(bookingID string) (*entity.S
 	return nil, errors.New("該当のStayableStoreがBookingIDから見つけることが出来ません。")
 }
 
-func StoreModelToEntity(model *models.Store) *entity.Store {
+func StoreModelToEntity(model *models.Store, info *models.StayableStoreInfo) *entity.Store {
+	var stayableInfo *entity.StayableStoreInfo
+	if info != nil {
+		stayableInfo = StayableInfoToEntity(info)
+	}
+
 	return entity.RegenStore(
 		uuid.MustParse(model.ID),
 		model.Name,
@@ -128,12 +141,12 @@ func StoreModelToEntity(model *models.Store) *entity.Store {
 		model.IsActive,
 		uuid.MustParse(model.QRCode),
 		uuid.MustParse(model.UnLimitedQRCode),
+		stayableInfo,
 	)
 }
 
-func StayableStoreToEntity(store *models.Store, info *models.StayableStoreInfo) *entity.StayableStore {
-	entityStore := StoreModelToEntity(store)
-	entityInfo := entity.RegenStayableStoreInfo(
+func StayableInfoToEntity(info *models.StayableStoreInfo) *entity.StayableStoreInfo {
+	return entity.RegenStayableStoreInfo(
 		info.Parking,
 		info.Latitude,
 		info.Longitude,
@@ -141,5 +154,20 @@ func StayableStoreToEntity(store *models.Store, info *models.StayableStoreInfo) 
 		info.RestAPIURL,
 		info.BookingSystemID,
 	)
-	return entity.RegenStayableStore(entityStore, entityInfo)
+}
+
+func StayableStoreToEntity(store *models.Store, info *models.StayableStoreInfo) *entity.StayableStore {
+	var stayableInfo *entity.StayableStoreInfo
+	if info != nil {
+		stayableInfo = StayableInfoToEntity(info)
+	}
+	var storeEntity *entity.Store
+	if store != nil {
+		storeEntity = StoreModelToEntity(store, nil)
+	}
+
+	return entity.RegenStayableStore(
+		storeEntity,
+		stayableInfo,
+	)
 }

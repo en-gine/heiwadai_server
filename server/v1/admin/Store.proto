@@ -17,7 +17,7 @@ message StoreRegisterRequest {
   bool IsActive = 9;
   string QRCode = 10; 
   string UnLimitedQRCode = 11;
-  StayableInfo StayableInfo = 12;
+  optional StayableInfo StayableInfo = 12;
 }
 
 message StoreUpdateRequest {
@@ -48,10 +48,22 @@ message StayableInfo {
 message SoreIDRequest {
   string ID = 1;
 }
+
+message QRResponse {
+  string QRCode = 1;
+}
+
+message UnlimitQRResponse {
+  string UnlimitQRCode = 1;
+}
+
+
 service StoreController {
   rpc GetByID(SoreIDRequest) returns (server.shared.Store) {}
   rpc GetAll(google.protobuf.Empty) returns (server.shared.Stores) {}
-  rpc Register(StoreRegisterRequest) returns (google.protobuf.Empty) {}
-  rpc Update(StoreUpdateRequest) returns (google.protobuf.Empty) {}
+  rpc Register(StoreRegisterRequest) returns (server.shared.Store) {}
+  rpc Update(StoreUpdateRequest) returns (server.shared.Store) {}
+  rpc RegenQRCode(SoreIDRequest) returns (QRResponse) {}
+  rpc RegenUnlimitQRCode(SoreIDRequest) returns (UnlimitQRResponse) {}
 }
 

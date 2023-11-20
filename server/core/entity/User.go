@@ -23,6 +23,11 @@ type User struct {
 	AcceptMail    bool
 }
 
+type UserWichLastCheckin struct {
+	User          *User
+	LastCheckinAt *time.Time
+}
+
 func CreateUser(
 	ID uuid.UUID,
 	FirstName string,

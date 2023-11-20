@@ -16,6 +16,7 @@ message Store {
   bool IsActive = 10;
   string QRCode = 11; // uuid.UUID
   string UnLimitedQRCode = 12; // uuid.UUID
+  optional StayableStoreInfo StayableStoreInfo = 13;
 }
 
 message Stores {

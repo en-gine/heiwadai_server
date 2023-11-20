@@ -9,7 +9,7 @@ import (
 func RegisterGRPCService(mux *http.ServeMux) *http.ServeMux {
 	// リフレクション設定
 	reflector := grpcreflect.NewStaticReflector(
-		"user.v1.UserServer", // 作成したサービスを指定
+		"admin.v1.AdminServer", // 作成したサービスを指定
 	)
 	mux.Handle(grpcreflect.NewHandlerV1(reflector))
 	mux.Handle(grpcreflect.NewHandlerV1Alpha(reflector))
@@ -17,8 +17,6 @@ func RegisterGRPCService(mux *http.ServeMux) *http.ServeMux {
 }
 
 func NewAdminServer(mux *http.ServeMux) {
-
 	// authClient := action.NewAuthClient()
-	// requireAuth := router.NewAuthentificatable(&authClient)
-
+	// requireAuth := router.NewAuthentificatable(authClient)
 }

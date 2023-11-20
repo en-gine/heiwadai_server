@@ -4,10 +4,12 @@ import (
 	"context"
 
 	shared "server/api/v1/shared"
+	"server/api/v1/user"
 	userv1 "server/api/v1/user"
 	userv1connect "server/api/v1/user/userconnect"
 	"server/controller"
 	"server/controller/util"
+	"server/core/entity"
 	usecase "server/core/usecase/user"
 
 	connect "github.com/bufbuild/connect-go"
@@ -49,7 +51,13 @@ func (u *UserDataController) Update(ctx context.Context, req *connect.Request[us
 		return nil, controller.ErrorHandler(domainErr)
 	}
 
-	res := connect.NewResponse(&userv1.UserDataResponse{
+	res := UserEntityToResponse(user)
+	return connect.NewResponse(res), nil
+}
+
+func UserEntityToResponse(user *entity.User) *user.UserDataResponse {
+	return &userv1.UserDataResponse{
+		ID:            user.ID.String(),
 		FirstName:     user.FirstName,
 		LastName:      user.LastName,
 		FirstNameKana: user.FirstNameKana,
@@ -62,6 +70,5 @@ func (u *UserDataController) Update(ctx context.Context, req *connect.Request[us
 		Address:       user.Address,
 		Tel:           user.Tel,
 		AcceptMail:    user.AcceptMail,
-	})
-	return res, nil
+	}
 }

@@ -4,6 +4,9 @@ package server.admin;
 
 import "google/protobuf/empty.proto";
 import "v1/user/UserData.proto";
+import "v1/shared/Pager.proto";
+import "v1/shared/Prefecture.proto";
+import "google/protobuf/timestamp.proto";
 
 message UserUpdateDataRequest {
   server.user.UserUpdateDataRequest User = 1;
@@ -17,11 +20,34 @@ message UserDataResponse {
 	bool IsBlackCustomer  = 3;
 }
 
+message UserWithCheckIn {
+  server.user.UserDataResponse User = 1;
+  optional google.protobuf.Timestamp LastCheckinAt = 2;
+}
+message UserListResponse {
+  repeated UserWithCheckIn Users = 1;
+  shared.PageResponse PageResponse = 3;
+}
+
 message UserDeleteRequest{
   string ID = 1;
 }
 
+message SearchFilter{
+  optional string LastName = 1;
+  optional string FirstName = 2;
+  optional string LastNameKana = 3;
+  optional string FirstNameKana = 4;
+  optional server.shared.Prefecture Prefecture = 5;
+}
+
+message UserListFilterRequest{
+  SearchFilter Search = 1;
+  shared.Pager Pager = 2;
+}
+
 service UserDataController {
-  rpc Update(UserUpdateDataRequest) returns (google.protobuf.Empty) {}
+  rpc Update(UserUpdateDataRequest) returns (UserDataResponse) {}
   rpc Delete(UserDeleteRequest) returns (google.protobuf.Empty) {}
+  rpc GetList(UserListFilterRequest) returns (UserListResponse) {}// TODO add filter and pagination and LastCheckin
 }

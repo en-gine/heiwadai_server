@@ -21,8 +21,15 @@ func NewStoreUsecase(storeRepository repository.IStoreRepository, storeQuery que
 	}
 }
 
-func (u *StoreUsecase) GetList() ([]*entity.Store, *errors.DomainError) {
+func (u *StoreUsecase) GetStoreByID(storeID uuid.UUID) (*entity.Store, *errors.DomainError) {
+	store, err := u.storeQuery.GetByID(storeID)
+	if err != nil {
+		return nil, errors.NewDomainError(errors.QueryError, err.Error())
+	}
+	return store, nil
+}
 
+func (u *StoreUsecase) GetList() ([]*entity.Store, *errors.DomainError) {
 	stores, err := u.storeQuery.GetAll()
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())
@@ -46,7 +53,6 @@ func (u *StoreUsecase) Create(
 	RestAPIURL *string,
 	BookingSystemID *string,
 ) (*entity.Store, *errors.DomainError) {
-
 	var stayableInfo *entity.StayableStoreInfo
 	if Stayable {
 		if Parking == nil {
@@ -119,9 +125,7 @@ func (u *StoreUsecase) Update(
 	QRCode uuid.UUID,
 	UnLimitedQRCode uuid.UUID,
 ) (*entity.Store, *errors.DomainError) {
-
 	existStore, err := u.storeQuery.GetByID(storeID)
-
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryError, "店舗のデータ問合せに失敗しました。")
 	}
@@ -171,6 +175,7 @@ func (u *StoreUsecase) Update(
 		IsActive,
 		QRCode,
 		UnLimitedQRCode,
+		stayableInfo,
 	)
 
 	err = u.storeRepository.Save(updateStore, stayableInfo)
@@ -179,4 +184,40 @@ func (u *StoreUsecase) Update(
 	}
 
 	return updateStore, nil
+}
+
+func (u *StoreUsecase) RegenQR(storeID uuid.UUID) (*uuid.UUID, *errors.DomainError) {
+	store, err := u.storeQuery.GetByID(storeID)
+	if err != nil {
+		return nil, errors.NewDomainError(errors.QueryError, err.Error())
+	}
+
+	if store == nil {
+		return nil, errors.NewDomainError(errors.QueryDataNotFoundError, "対象の店舗が見つかりません")
+	}
+
+	qr, err := u.storeRepository.RegenQR(store.ID)
+	if err != nil {
+		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
+	}
+
+	return qr, nil
+}
+
+func (u *StoreUsecase) RegenUnlimitQR(storeID uuid.UUID) (*uuid.UUID, *errors.DomainError) {
+	store, err := u.storeQuery.GetByID(storeID)
+	if err != nil {
+		return nil, errors.NewDomainError(errors.QueryError, err.Error())
+	}
+
+	if store == nil {
+		return nil, errors.NewDomainError(errors.QueryDataNotFoundError, "対象の店舗が見つかりません")
+	}
+
+	qr, err := u.storeRepository.RegenUnlimitQR(store.ID)
+	if err != nil {
+		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
+	}
+
+	return qr, nil
 }

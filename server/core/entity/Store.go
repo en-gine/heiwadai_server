@@ -7,18 +7,19 @@ import (
 )
 
 type Store struct {
-	ID              uuid.UUID
-	Name            string
-	BranchName      *string
-	ZipCode         string
-	Address         string
-	Tel             string
-	SiteURL         string
-	StampImageURL   string
-	Stayable        bool
-	IsActive        bool
-	QRCode          uuid.UUID
-	UnLimitedQRCode uuid.UUID
+	ID                uuid.UUID
+	Name              string
+	BranchName        *string
+	ZipCode           string
+	Address           string
+	Tel               string
+	SiteURL           string
+	StampImageURL     string
+	Stayable          bool
+	IsActive          bool
+	QRCode            uuid.UUID
+	UnLimitedQRCode   uuid.UUID
+	StayableStoreInfo *StayableStoreInfo
 }
 
 type StayableStoreInfo struct {
@@ -46,19 +47,24 @@ func CreateStore(
 	Stayable bool,
 	StayableStoreInfo *StayableStoreInfo,
 ) (*Store, *errors.DomainError) {
+	if Stayable && StayableStoreInfo == nil {
+		return nil, errors.NewDomainError(errors.InvalidParameter, "宿泊可能な施設は宿泊施設情報を入力してください。")
+	}
+
 	return &Store{
-		ID:              uuid.New(),
-		Name:            Name,
-		BranchName:      BranchName,
-		ZipCode:         ZipCode,
-		Address:         Address,
-		Tel:             Tel,
-		SiteURL:         SiteURL,
-		StampImageURL:   StampImageURL,
-		Stayable:        Stayable,
-		IsActive:        true,
-		QRCode:          uuid.New(),
-		UnLimitedQRCode: uuid.New(),
+		ID:                uuid.New(),
+		Name:              Name,
+		BranchName:        BranchName,
+		ZipCode:           ZipCode,
+		Address:           Address,
+		Tel:               Tel,
+		SiteURL:           SiteURL,
+		StampImageURL:     StampImageURL,
+		Stayable:          Stayable,
+		IsActive:          true,
+		QRCode:            uuid.New(),
+		UnLimitedQRCode:   uuid.New(),
+		StayableStoreInfo: StayableStoreInfo,
 	}, nil
 }
 
@@ -112,20 +118,22 @@ func RegenStore(
 	IsActive bool,
 	QRCode uuid.UUID,
 	UnLimitedQRCode uuid.UUID,
+	StayableStoreInfo *StayableStoreInfo,
 ) *Store {
 	return &Store{
-		ID:              ID,
-		Name:            Name,
-		BranchName:      BranchName,
-		ZipCode:         ZipCode,
-		Address:         Address,
-		Tel:             Tel,
-		SiteURL:         SiteURL,
-		StampImageURL:   StampImageURL,
-		Stayable:        Stayable,
-		IsActive:        IsActive,
-		QRCode:          QRCode,
-		UnLimitedQRCode: UnLimitedQRCode,
+		ID:                ID,
+		Name:              Name,
+		BranchName:        BranchName,
+		ZipCode:           ZipCode,
+		Address:           Address,
+		Tel:               Tel,
+		SiteURL:           SiteURL,
+		StampImageURL:     StampImageURL,
+		Stayable:          Stayable,
+		IsActive:          IsActive,
+		QRCode:            QRCode,
+		UnLimitedQRCode:   UnLimitedQRCode,
+		StayableStoreInfo: StayableStoreInfo,
 	}
 }
 

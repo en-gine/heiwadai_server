@@ -51,7 +51,7 @@ func (u *MessageUsecase) Create(title string, content string, postDate time.Time
 	return Message, nil
 }
 
-func (u *MessageUsecase) Update(title *string, content *string, postDate time.Time, autherId uuid.UUID, MessageID uuid.UUID) (*entity.Message, *errors.DomainError) {
+func (u *MessageUsecase) Update(title *string, content *string, postDate *time.Time, autherId uuid.UUID, MessageID uuid.UUID) (*entity.Message, *errors.DomainError) {
 	oldMessage, err := u.MessageQuery.GetByID(MessageID)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())
@@ -62,6 +62,7 @@ func (u *MessageUsecase) Update(title *string, content *string, postDate time.Ti
 	}
 	var updateTitle string
 	var updateContent string
+	var updatePostDate time.Time
 	if title != nil {
 		updateTitle = *title
 	} else {
@@ -74,7 +75,12 @@ func (u *MessageUsecase) Update(title *string, content *string, postDate time.Ti
 		updateContent = oldMessage.Content
 	}
 
-	updateMessage := entity.RegenMessage(MessageID, updateTitle, updateContent, postDate, autherId, oldMessage.CreateAt)
+	if postDate != nil {
+		updatePostDate = *postDate
+	} else {
+		updatePostDate = oldMessage.DisplayDate
+	}
+	updateMessage := entity.RegenMessage(MessageID, updateTitle, updateContent, updatePostDate, autherId, oldMessage.CreateAt)
 
 	err = u.MessageRepository.Save(updateMessage)
 	if err != nil {
@@ -84,20 +90,20 @@ func (u *MessageUsecase) Update(title *string, content *string, postDate time.Ti
 	return updateMessage, nil
 }
 
-func (u *MessageUsecase) Delete(MessageID uuid.UUID) (*entity.Message, *errors.DomainError) {
+func (u *MessageUsecase) Delete(MessageID uuid.UUID) *errors.DomainError {
 	deleteMessage, err := u.MessageQuery.GetByID(MessageID)
 	if err != nil {
-		return nil, errors.NewDomainError(errors.QueryError, err.Error())
+		return errors.NewDomainError(errors.QueryError, err.Error())
 	}
 
 	if deleteMessage == nil {
-		return nil, errors.NewDomainError(errors.QueryDataNotFoundError, "対象の投稿が見つかりません")
+		return errors.NewDomainError(errors.QueryDataNotFoundError, "対象の投稿が見つかりません")
 	}
 
 	err = u.MessageRepository.Delete(MessageID)
 	if err != nil {
-		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
+		return errors.NewDomainError(errors.RepositoryError, err.Error())
 	}
 
-	return deleteMessage, nil
+	return nil
 }

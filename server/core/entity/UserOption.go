@@ -8,6 +8,30 @@ type UserOption struct {
 	IsBlackCustomer bool
 }
 type UserWithOption struct {
-	UserOption
-	User
+	User       *User
+	UserOption *UserOption
+}
+
+func CreateUserOption(
+	ID uuid.UUID,
+	InnerNote string,
+	IsBlackCustomer bool,
+) *UserOption {
+	return &UserOption{
+		ID:              ID,
+		InnerNote:       InnerNote,
+		IsBlackCustomer: IsBlackCustomer,
+	}
+}
+
+func RegenUserOption(
+	ID uuid.UUID,
+	InnerNote string,
+	IsBlackCustomer bool,
+) *UserOption {
+	return &UserOption{
+		ID:              ID,
+		InnerNote:       InnerNote,
+		IsBlackCustomer: IsBlackCustomer,
+	}
 }

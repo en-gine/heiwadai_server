@@ -105,3 +105,65 @@ func (pr *StoreRepository) Delete(storeID uuid.UUID) error {
 
 	return nil
 }
+
+func (pr *StoreRepository) RegenQR(storeID uuid.UUID) (*uuid.UUID, error) {
+	ctx := context.Background()
+	tran := NewTransaction()
+	err := tran.Begin(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	store, err := models.FindStore(ctx, pr.db, storeID.String())
+	if err != nil {
+		return nil, err
+	}
+	qrcode, err := uuid.NewRandom()
+	if err != nil {
+		return nil, err
+	}
+	store.QRCode = qrcode.String()
+	_, err = store.Update(ctx, pr.db, boil.Infer())
+	if err != nil {
+		tran.Rollback()
+		return nil, err
+	}
+	err = tran.Commit()
+	if err != nil {
+		tran.Rollback()
+		return nil, err
+	}
+
+	return &qrcode, nil
+}
+
+func (pr *StoreRepository) RegenUnlimitQR(storeID uuid.UUID) (*uuid.UUID, error) {
+	ctx := context.Background()
+	tran := NewTransaction()
+	err := tran.Begin(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	store, err := models.FindStore(ctx, pr.db, storeID.String())
+	if err != nil {
+		return nil, err
+	}
+	qrcode, err := uuid.NewRandom()
+	if err != nil {
+		return nil, err
+	}
+	store.UnLimitedQRCode = qrcode.String()
+	_, err = store.Update(ctx, pr.db, boil.Infer())
+	if err != nil {
+		tran.Rollback()
+		return nil, err
+	}
+	err = tran.Commit()
+	if err != nil {
+		tran.Rollback()
+		return nil, err
+	}
+
+	return &qrcode, nil
+}

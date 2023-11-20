@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+package server.admin;
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+import "v1/shared/Pager.proto";
+import "v1/shared/Prefecture.proto";
+
+message GetMailMagazineListRequest {
+  server.shared.Pager Pager = 1;
+}
+
+message MailMagazine {
+  string ID = 1;
+  string Title = 2;
+  string Content = 3;
+  string AuthorID = 4;
+  repeated server.shared.Prefecture TargetPrefecture = 5;
+  MailMagazineStatus MailMagazineStatus = 6; 
+  int32 UnsentCount = 7;
+  int32 SentCount = 8;
+  optional google.protobuf.Timestamp SentAt = 9;
+}
+
+enum MailMagazineStatus {
+  MailMagazineDraft = 0;
+  MailMagazineSaved = 1;
+  MailMagazineSentCompleted = 2;
+  MailMagazineSentUnCompleted = 3;
+}
+
+message MailMagazinesResponse {
+  repeated MailMagazine MailMagazines = 1;
+}
+
+
+message CreateDraftRequest {
+  string Title = 1;
+  string Content = 2;
+  repeated server.shared.Prefecture TargetPrefectures = 3;
+}
+
+message UpdateRequest {
+  string ID = 1;
+  optional string Title = 2;
+  optional string Content = 3;
+  repeated server.shared.Prefecture TargetPrefectures = 5;
+}
+
+message DeleteRequest {
+  string ID = 1;
+}
+
+message SendRequest {
+  string ID = 1;
+}
+
+
+service MailMagazineController {
+    rpc GetList(GetMailMagazineListRequest) returns (MailMagazinesResponse){}
+    rpc CreateDraft(CreateDraftRequest) returns (MailMagazine){}
+    rpc Update(UpdateRequest) returns (MailMagazine){}
+    rpc Delete(DeleteRequest) returns (google.protobuf.Empty){}
+    rpc Send(SendRequest) returns (google.protobuf.Empty){}
+}

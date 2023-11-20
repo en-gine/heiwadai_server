@@ -40,12 +40,16 @@ const (
 	// UserDataControllerDeleteProcedure is the fully-qualified name of the UserDataController's Delete
 	// RPC.
 	UserDataControllerDeleteProcedure = "/server.admin.UserDataController/Delete"
+	// UserDataControllerGetListProcedure is the fully-qualified name of the UserDataController's
+	// GetList RPC.
+	UserDataControllerGetListProcedure = "/server.admin.UserDataController/GetList"
 )
 
 // UserDataControllerClient is a client for the server.admin.UserDataController service.
 type UserDataControllerClient interface {
-	Update(context.Context, *connect_go.Request[admin.UserUpdateDataRequest]) (*connect_go.Response[emptypb.Empty], error)
+	Update(context.Context, *connect_go.Request[admin.UserUpdateDataRequest]) (*connect_go.Response[admin.UserDataResponse], error)
 	Delete(context.Context, *connect_go.Request[admin.UserDeleteRequest]) (*connect_go.Response[emptypb.Empty], error)
+	GetList(context.Context, *connect_go.Request[admin.UserListFilterRequest]) (*connect_go.Response[admin.UserListResponse], error)
 }
 
 // NewUserDataControllerClient constructs a client for the server.admin.UserDataController service.
@@ -58,7 +62,7 @@ type UserDataControllerClient interface {
 func NewUserDataControllerClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) UserDataControllerClient {
 	baseURL = strings.TrimRight(baseURL, "/")
 	return &userDataControllerClient{
-		update: connect_go.NewClient[admin.UserUpdateDataRequest, emptypb.Empty](
+		update: connect_go.NewClient[admin.UserUpdateDataRequest, admin.UserDataResponse](
 			httpClient,
 			baseURL+UserDataControllerUpdateProcedure,
 			opts...,
@@ -68,17 +72,23 @@ func NewUserDataControllerClient(httpClient connect_go.HTTPClient, baseURL strin
 			baseURL+UserDataControllerDeleteProcedure,
 			opts...,
 		),
+		getList: connect_go.NewClient[admin.UserListFilterRequest, admin.UserListResponse](
+			httpClient,
+			baseURL+UserDataControllerGetListProcedure,
+			opts...,
+		),
 	}
 }
 
 // userDataControllerClient implements UserDataControllerClient.
 type userDataControllerClient struct {
-	update *connect_go.Client[admin.UserUpdateDataRequest, emptypb.Empty]
-	delete *connect_go.Client[admin.UserDeleteRequest, emptypb.Empty]
+	update  *connect_go.Client[admin.UserUpdateDataRequest, admin.UserDataResponse]
+	delete  *connect_go.Client[admin.UserDeleteRequest, emptypb.Empty]
+	getList *connect_go.Client[admin.UserListFilterRequest, admin.UserListResponse]
 }
 
 // Update calls server.admin.UserDataController.Update.
-func (c *userDataControllerClient) Update(ctx context.Context, req *connect_go.Request[admin.UserUpdateDataRequest]) (*connect_go.Response[emptypb.Empty], error) {
+func (c *userDataControllerClient) Update(ctx context.Context, req *connect_go.Request[admin.UserUpdateDataRequest]) (*connect_go.Response[admin.UserDataResponse], error) {
 	return c.update.CallUnary(ctx, req)
 }
 
@@ -87,10 +97,16 @@ func (c *userDataControllerClient) Delete(ctx context.Context, req *connect_go.R
 	return c.delete.CallUnary(ctx, req)
 }
 
+// GetList calls server.admin.UserDataController.GetList.
+func (c *userDataControllerClient) GetList(ctx context.Context, req *connect_go.Request[admin.UserListFilterRequest]) (*connect_go.Response[admin.UserListResponse], error) {
+	return c.getList.CallUnary(ctx, req)
+}
+
 // UserDataControllerHandler is an implementation of the server.admin.UserDataController service.
 type UserDataControllerHandler interface {
-	Update(context.Context, *connect_go.Request[admin.UserUpdateDataRequest]) (*connect_go.Response[emptypb.Empty], error)
+	Update(context.Context, *connect_go.Request[admin.UserUpdateDataRequest]) (*connect_go.Response[admin.UserDataResponse], error)
 	Delete(context.Context, *connect_go.Request[admin.UserDeleteRequest]) (*connect_go.Response[emptypb.Empty], error)
+	GetList(context.Context, *connect_go.Request[admin.UserListFilterRequest]) (*connect_go.Response[admin.UserListResponse], error)
 }
 
 // NewUserDataControllerHandler builds an HTTP handler from the service implementation. It returns
@@ -109,12 +125,19 @@ func NewUserDataControllerHandler(svc UserDataControllerHandler, opts ...connect
 		svc.Delete,
 		opts...,
 	)
+	userDataControllerGetListHandler := connect_go.NewUnaryHandler(
+		UserDataControllerGetListProcedure,
+		svc.GetList,
+		opts...,
+	)
 	return "/server.admin.UserDataController/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case UserDataControllerUpdateProcedure:
 			userDataControllerUpdateHandler.ServeHTTP(w, r)
 		case UserDataControllerDeleteProcedure:
 			userDataControllerDeleteHandler.ServeHTTP(w, r)
+		case UserDataControllerGetListProcedure:
+			userDataControllerGetListHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -124,10 +147,14 @@ func NewUserDataControllerHandler(svc UserDataControllerHandler, opts ...connect
 // UnimplementedUserDataControllerHandler returns CodeUnimplemented from all methods.
 type UnimplementedUserDataControllerHandler struct{}
 
-func (UnimplementedUserDataControllerHandler) Update(context.Context, *connect_go.Request[admin.UserUpdateDataRequest]) (*connect_go.Response[emptypb.Empty], error) {
+func (UnimplementedUserDataControllerHandler) Update(context.Context, *connect_go.Request[admin.UserUpdateDataRequest]) (*connect_go.Response[admin.UserDataResponse], error) {
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.UserDataController.Update is not implemented"))
 }
 
 func (UnimplementedUserDataControllerHandler) Delete(context.Context, *connect_go.Request[admin.UserDeleteRequest]) (*connect_go.Response[emptypb.Empty], error) {
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.UserDataController.Delete is not implemented"))
+}
+
+func (UnimplementedUserDataControllerHandler) GetList(context.Context, *connect_go.Request[admin.UserListFilterRequest]) (*connect_go.Response[admin.UserListResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.UserDataController.GetList is not implemented"))
 }

@@ -41,7 +41,7 @@ func (pq *CouponQueryService) GetByID(id uuid.UUID) (*entity.Coupon, error) {
 	}
 	var TargetStores []*entity.Store
 	for _, store := range sotres {
-		TargetStores = append(TargetStores, StoreModelToEntity(store.R.Store))
+		TargetStores = append(TargetStores, StoreModelToEntity(store.R.Store, nil))
 	}
 
 	notices, err := coupon.CouponNotice().All(context.Background(), pq.db)
@@ -88,7 +88,7 @@ func (pq *CouponQueryService) GetCouponByType(couponType entity.CouponType) (*en
 	}
 	var TargetStores []*entity.Store
 	for _, store := range sotres {
-		TargetStores = append(TargetStores, StoreModelToEntity(store.R.Store))
+		TargetStores = append(TargetStores, StoreModelToEntity(store.R.Store, nil))
 	}
 
 	notices, err := coupon.CouponNotice().All(context.Background(), pq.db)

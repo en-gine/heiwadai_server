@@ -24,12 +24,12 @@ func NewUserDataUsecase(userRepository repository.IUserRepository, userQuery que
 	}
 }
 
-func (u *UserDataUsecase) GetAll(query *types.UserQuery, pager *types.PageQuery) ([]*entity.User, *errors.DomainError) {
-	users, err := u.userQuery.GetAll(query, pager)
+func (u *UserDataUsecase) GetList(query *types.UserQuery, pager *types.PageQuery) ([]*entity.UserWichLastCheckin, *types.PageResponse, *errors.DomainError) {
+	users, page, err := u.userQuery.GetList(query, pager)
 	if err != nil {
-		return nil, errors.NewDomainError(errors.QueryError, err.Error())
+		return nil, nil, errors.NewDomainError(errors.QueryError, err.Error())
 	}
-	return users, nil
+	return users, page, nil
 }
 
 func (u *UserDataUsecase) Update(
@@ -41,13 +41,15 @@ func (u *UserDataUsecase) Update(
 	CompanyName *string,
 	BirthDate *time.Time,
 	ZipCode *string,
-	Prefecture string,
+	PrefectureID int,
 	City *string,
 	Address *string,
 	Tel *string,
 	Mail string,
 	AcceptMail bool, // メルマガ配信可
-) (*entity.User, *errors.DomainError) {
+	InnerNoto string,
+	IsBlackCustomer bool,
+) (*entity.UserWithOption, *errors.DomainError) {
 	existUser, err := u.userQuery.GetByID(ID)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())
@@ -64,7 +66,7 @@ func (u *UserDataUsecase) Update(
 		return nil, errors.NewDomainError(errors.QueryDataNotFoundError, "このアドレスで登録されているユーザーが存在しません")
 	}
 
-	prefecture, domainErr := entity.StringToPrefecture(Prefecture)
+	prefecture, domainErr := entity.IntToPrefecture(PrefectureID)
 	if domainErr != nil {
 		return nil, domainErr
 	}
@@ -85,10 +87,43 @@ func (u *UserDataUsecase) Update(
 		Mail,
 		AcceptMail,
 	)
-	err = u.userRepository.Save(updateData, nil)
+	userOption := entity.CreateUserOption(ID, InnerNoto, IsBlackCustomer)
+
+	err = u.userRepository.Save(updateData, userOption)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
 	}
+	userWithOption := &entity.UserWithOption{
+		User:       updateData,
+		UserOption: userOption,
+	}
+	return userWithOption, nil
+}
 
-	return updateData, nil
+func (u *UserDataUsecase) Delete(ID uuid.UUID) *errors.DomainError {
+	user, err := u.userQuery.GetByID(ID)
+	if err != nil {
+		return errors.NewDomainError(errors.QueryError, err.Error())
+	}
+	if user == nil {
+		return errors.NewDomainError(errors.QueryDataNotFoundError, "登録されているユーザーが存在しません")
+	}
+
+	err = u.userRepository.Delete(ID)
+	if err != nil {
+		return errors.NewDomainError(errors.RepositoryError, err.Error())
+	}
+	return nil
+}
+
+func (u *UserDataUsecase) GetUserByID(ID uuid.UUID) (*entity.UserWithOption, *errors.DomainError) {
+	user, err := u.userQuery.GetByID(ID)
+	if err != nil {
+		return nil, errors.NewDomainError(errors.QueryError, err.Error())
+	}
+	if user == nil {
+		return nil, errors.NewDomainError(errors.QueryDataNotFoundError, "登録されているユーザーが存在しません")
+	}
+
+	return nil, nil
 }

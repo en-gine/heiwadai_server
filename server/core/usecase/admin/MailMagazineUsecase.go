@@ -109,26 +109,26 @@ func (u *MailMagazineUsecase) Update(title *string, content *string, targetPrefe
 	return updateMailMagazine, nil
 }
 
-func (u *MailMagazineUsecase) Delete(mailMagazineID uuid.UUID) (*entity.MailMagazine, *errors.DomainError) {
+func (u *MailMagazineUsecase) Delete(mailMagazineID uuid.UUID) *errors.DomainError {
 	deleteMailMagazine, err := u.mailMagazineQuery.GetByID(mailMagazineID)
 	if err != nil {
-		return nil, errors.NewDomainError(errors.QueryError, err.Error())
+		return errors.NewDomainError(errors.QueryError, err.Error())
 	}
 
 	if deleteMailMagazine == nil {
-		return nil, errors.NewDomainError(errors.QueryDataNotFoundError, "対象の投稿が見つかりません")
+		return errors.NewDomainError(errors.QueryDataNotFoundError, "対象の投稿が見つかりません")
 	}
 
 	if deleteMailMagazine.MailMagazineStatus == entity.MailMagazineSentCompleted || deleteMailMagazine.MailMagazineStatus == entity.MailMagazineSentUnCompleted {
-		return nil, errors.NewDomainError(errors.QueryDataNotFoundError, "送信処理済みのため削除できません")
+		return errors.NewDomainError(errors.QueryDataNotFoundError, "送信処理済みのため削除できません")
 	}
 
 	err = u.mailMagazineRepository.Delete(mailMagazineID)
 	if err != nil {
-		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
+		return errors.NewDomainError(errors.RepositoryError, err.Error())
 	}
 
-	return deleteMailMagazine, nil
+	return nil
 }
 
 func (u *MailMagazineUsecase) Send(mailMagazineID uuid.UUID) *errors.DomainError {

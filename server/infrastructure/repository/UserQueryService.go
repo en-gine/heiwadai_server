@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"time"
 
 	"server/core/entity"
 	queryservice "server/core/infra/queryService"
@@ -36,6 +37,20 @@ func (pq *UserQueryService) GetByID(id uuid.UUID) (*entity.User, error) {
 		return nil, nil
 	}
 	return UserModelToEntity(user, user.R.User.Email), nil
+}
+
+func (pq *UserQueryService) GetOptionByID(id uuid.UUID) (*entity.UserOption, error) {
+	option, err := models.FindUserOption(context.Background(), pq.db, id.String())
+	if err != nil {
+		return nil, err
+	}
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	return &entity.UserOption{
+		InnerNote:       option.InnerNote,
+		IsBlackCustomer: option.IsBlackCustomer,
+	}, nil
 }
 
 func (pq *UserQueryService) GetByMail(mail string) (*entity.User, error) {
@@ -105,7 +120,7 @@ func GetMailUserWhereMods(prefectures *[]entity.Prefecture) []qm.QueryMod {
 	}
 }
 
-func (pq *UserQueryService) GetAll(query *types.UserQuery, pager *types.PageQuery) ([]*entity.User, error) {
+func (pq *UserQueryService) GetList(query *types.UserQuery, pager *types.PageQuery) ([]*entity.UserWichLastCheckin, *types.PageResponse, error) {
 	var firstNameQuery qm.QueryMod = nil
 	if query.FirstName != nil {
 		firstNameQuery = models.UserDatumWhere.FirstName.EQ("%" + *query.FirstName + "%")
@@ -127,18 +142,53 @@ func (pq *UserQueryService) GetAll(query *types.UserQuery, pager *types.PageQuer
 		prefectureQuery = models.UserDatumWhere.Prefecture.EQ(query.Prefecture.ToInt())
 	}
 
-	userdata, err := models.UserData(firstNameQuery, lastNameQuery, firstNameKanaQuery, lastNameKanaQuery, prefectureQuery, qm.Limit(pager.Limit()), qm.Offset(pager.Offset())).All(context.Background(), pq.db)
+	userdata, err := models.UserData(
+		firstNameQuery, lastNameQuery, firstNameKanaQuery, lastNameKanaQuery, prefectureQuery,
+		qm.Limit(pager.Limit()), qm.Offset(pager.Offset()),
+		qm.Load(models.UserDatumRels.User),
+		qm.Load(models.UserDatumRels.UserCheckins, qm.OrderBy(models.CheckinColumns.CheckInAt+" desc"), qm.Limit(1)),
+	).All(context.Background(), pq.db)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	if err == sql.ErrNoRows {
-		return nil, nil
+		return nil, nil, nil
 	}
-	var result []*entity.User
+	var result []*entity.UserWichLastCheckin
 	for _, user := range userdata {
-		result = append(result, UserModelToEntity(user, user.R.User.Email))
+		u := UserModelToEntity(user, user.R.User.Email)
+		var lastCheckinAt *time.Time = nil
+		lastCheckIn := user.R.UserCheckins[0]
+		if lastCheckIn != nil {
+			lastCheckinAt = &lastCheckIn.CheckInAt
+		}
+		userWithCheckin := &entity.UserWichLastCheckin{
+			User:          u,
+			LastCheckinAt: lastCheckinAt,
+		}
+
+		result = append(result, userWithCheckin)
 	}
-	return result, nil
+
+	count, err := models.UserData(firstNameQuery, lastNameQuery, firstNameKanaQuery, lastNameKanaQuery, prefectureQuery).Count(context.Background(), pq.db)
+	if err != nil {
+		return nil, nil, err
+	}
+	if err == sql.ErrNoRows {
+		return nil, nil, nil
+	}
+
+	var pageResponse *types.PageResponse = nil
+	if pager != nil {
+		pageResponse = &types.PageResponse{
+			CurrentPage: *pager.CurrentPage,
+			PerPage:     *pager.PerPage,
+			TotalCount:  int(count),
+			TotalPage:   int(count) / *pager.PerPage,
+		}
+	}
+
+	return result, pageResponse, nil
 }
 
 func UserModelToEntity(model *models.UserDatum, email string) *entity.User {

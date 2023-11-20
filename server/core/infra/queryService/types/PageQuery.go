@@ -10,6 +10,13 @@ type PageQuery struct {
 	PerPage     *int
 }
 
+type PageResponse struct {
+	CurrentPage int
+	PerPage     int
+	TotalCount  int
+	TotalPage   int
+}
+
 func NewPageQuery(currentPage *int, perPage *int) *PageQuery {
 	if currentPage == nil {
 		tmp := DefaultCurrentPage

@@ -1,7 +1,6 @@
 PSQL_PASS_ENCODED := $(shell echo -n ${PSQL_PASS} | python3 -c "import urllib.parse; import sys; print(urllib.parse.quote(sys.stdin.read(), safe=''))")
 
 buf: #protoファイルからapiコードを自動生成
-	rm -rf ./api/v1/* && \
 	buf generate
 
 run: 
