@@ -6,6 +6,8 @@ import (
 	queryservice "server/core/infra/queryService"
 	"server/core/infra/queryService/types"
 	"server/core/infra/repository"
+
+	"github.com/google/uuid"
 )
 
 type UserCheckinUsecase struct {
@@ -21,10 +23,9 @@ func NewUserCheckinUsecase(
 	}
 }
 
-func (u *UserCheckinUsecase) GetRecent() ([]*entity.Checkin, *errors.DomainError) {
-	perPage := 30
+func (u *UserCheckinUsecase) GetAllRecent(limit int) ([]*entity.Checkin, *errors.DomainError) {
 	pager := &types.PageQuery{
-		PerPage: &perPage,
+		PerPage: &limit,
 	}
 	checkins, err := u.userCheckinQuery.GetAllUserAllCheckin(pager)
 	if err != nil {
@@ -32,4 +33,13 @@ func (u *UserCheckinUsecase) GetRecent() ([]*entity.Checkin, *errors.DomainError
 	}
 
 	return checkins, nil
+}
+
+func (u *UserCheckinUsecase) GetUserLog(userID uuid.UUID, pager *types.PageQuery) ([]*entity.Checkin, *types.PageResponse, *errors.DomainError) {
+	checkins, pageResponse, err := u.userCheckinQuery.GetMyAllCheckin(userID, pager)
+	if err != nil {
+		return nil, nil, errors.NewDomainError(errors.QueryError, err.Error())
+	}
+
+	return checkins, pageResponse, nil
 }

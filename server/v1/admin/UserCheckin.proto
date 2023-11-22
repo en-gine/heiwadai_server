@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package server.admin;
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+import "v1/shared/Pager.proto";
+
+option go_package = "server/api/v1";
+
+message CheckinData {
+	string ID = 1;
+	string StoreID = 2;
+  string StoreName = 3;
+  string StoreBranchName = 4;
+	string UserID = 5;
+  string UserFirstName = 6;
+  string UserLastName = 7;
+	optional google.protobuf.Timestamp CheckinAt = 8;
+	bool IsArchive = 9;
+}
+
+message CheckinsResponse {
+  repeated CheckinData Checkins = 1;
+  optional shared.PageResponse PageResponse = 2;
+}
+
+message GetRecentAllCheckinRequest {
+  int32 limit = 1;
+}
+message UserCheckinRequest {
+  string UserID = 1;
+  shared.Pager Pager = 2;
+}
+
+service UserCheckinController {
+  rpc GetAllRecent(GetRecentAllCheckinRequest) returns (CheckinsResponse) {}
+  rpc GetUserLog(UserCheckinRequest) returns (CheckinsResponse) {}
+}

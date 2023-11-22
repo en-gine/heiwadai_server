@@ -45,7 +45,6 @@ func CreateGuestData(
 	FirstNameKana string,
 	LastNameKana string,
 	CompanyName *string,
-	BirthDate time.Time,
 	ZipCode *string,
 	Prefecture *Prefecture,
 	City *string,

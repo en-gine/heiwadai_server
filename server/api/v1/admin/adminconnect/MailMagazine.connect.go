@@ -55,9 +55,9 @@ const (
 type MailMagazineControllerClient interface {
 	GetList(context.Context, *connect_go.Request[admin.GetMailMagazineListRequest]) (*connect_go.Response[admin.MailMagazinesResponse], error)
 	CreateDraft(context.Context, *connect_go.Request[admin.CreateDraftRequest]) (*connect_go.Response[admin.MailMagazine], error)
-	Update(context.Context, *connect_go.Request[admin.UpdateRequest]) (*connect_go.Response[admin.MailMagazine], error)
-	Delete(context.Context, *connect_go.Request[admin.DeleteRequest]) (*connect_go.Response[emptypb.Empty], error)
-	Send(context.Context, *connect_go.Request[admin.SendRequest]) (*connect_go.Response[emptypb.Empty], error)
+	Update(context.Context, *connect_go.Request[admin.UpdateMailMagazineRequest]) (*connect_go.Response[admin.MailMagazine], error)
+	Delete(context.Context, *connect_go.Request[admin.DeleteMailMagazineRequest]) (*connect_go.Response[emptypb.Empty], error)
+	Send(context.Context, *connect_go.Request[admin.SendMailMagazineRequest]) (*connect_go.Response[emptypb.Empty], error)
 }
 
 // NewMailMagazineControllerClient constructs a client for the server.admin.MailMagazineController
@@ -80,17 +80,17 @@ func NewMailMagazineControllerClient(httpClient connect_go.HTTPClient, baseURL s
 			baseURL+MailMagazineControllerCreateDraftProcedure,
 			opts...,
 		),
-		update: connect_go.NewClient[admin.UpdateRequest, admin.MailMagazine](
+		update: connect_go.NewClient[admin.UpdateMailMagazineRequest, admin.MailMagazine](
 			httpClient,
 			baseURL+MailMagazineControllerUpdateProcedure,
 			opts...,
 		),
-		delete: connect_go.NewClient[admin.DeleteRequest, emptypb.Empty](
+		delete: connect_go.NewClient[admin.DeleteMailMagazineRequest, emptypb.Empty](
 			httpClient,
 			baseURL+MailMagazineControllerDeleteProcedure,
 			opts...,
 		),
-		send: connect_go.NewClient[admin.SendRequest, emptypb.Empty](
+		send: connect_go.NewClient[admin.SendMailMagazineRequest, emptypb.Empty](
 			httpClient,
 			baseURL+MailMagazineControllerSendProcedure,
 			opts...,
@@ -102,9 +102,9 @@ func NewMailMagazineControllerClient(httpClient connect_go.HTTPClient, baseURL s
 type mailMagazineControllerClient struct {
 	getList     *connect_go.Client[admin.GetMailMagazineListRequest, admin.MailMagazinesResponse]
 	createDraft *connect_go.Client[admin.CreateDraftRequest, admin.MailMagazine]
-	update      *connect_go.Client[admin.UpdateRequest, admin.MailMagazine]
-	delete      *connect_go.Client[admin.DeleteRequest, emptypb.Empty]
-	send        *connect_go.Client[admin.SendRequest, emptypb.Empty]
+	update      *connect_go.Client[admin.UpdateMailMagazineRequest, admin.MailMagazine]
+	delete      *connect_go.Client[admin.DeleteMailMagazineRequest, emptypb.Empty]
+	send        *connect_go.Client[admin.SendMailMagazineRequest, emptypb.Empty]
 }
 
 // GetList calls server.admin.MailMagazineController.GetList.
@@ -118,17 +118,17 @@ func (c *mailMagazineControllerClient) CreateDraft(ctx context.Context, req *con
 }
 
 // Update calls server.admin.MailMagazineController.Update.
-func (c *mailMagazineControllerClient) Update(ctx context.Context, req *connect_go.Request[admin.UpdateRequest]) (*connect_go.Response[admin.MailMagazine], error) {
+func (c *mailMagazineControllerClient) Update(ctx context.Context, req *connect_go.Request[admin.UpdateMailMagazineRequest]) (*connect_go.Response[admin.MailMagazine], error) {
 	return c.update.CallUnary(ctx, req)
 }
 
 // Delete calls server.admin.MailMagazineController.Delete.
-func (c *mailMagazineControllerClient) Delete(ctx context.Context, req *connect_go.Request[admin.DeleteRequest]) (*connect_go.Response[emptypb.Empty], error) {
+func (c *mailMagazineControllerClient) Delete(ctx context.Context, req *connect_go.Request[admin.DeleteMailMagazineRequest]) (*connect_go.Response[emptypb.Empty], error) {
 	return c.delete.CallUnary(ctx, req)
 }
 
 // Send calls server.admin.MailMagazineController.Send.
-func (c *mailMagazineControllerClient) Send(ctx context.Context, req *connect_go.Request[admin.SendRequest]) (*connect_go.Response[emptypb.Empty], error) {
+func (c *mailMagazineControllerClient) Send(ctx context.Context, req *connect_go.Request[admin.SendMailMagazineRequest]) (*connect_go.Response[emptypb.Empty], error) {
 	return c.send.CallUnary(ctx, req)
 }
 
@@ -137,9 +137,9 @@ func (c *mailMagazineControllerClient) Send(ctx context.Context, req *connect_go
 type MailMagazineControllerHandler interface {
 	GetList(context.Context, *connect_go.Request[admin.GetMailMagazineListRequest]) (*connect_go.Response[admin.MailMagazinesResponse], error)
 	CreateDraft(context.Context, *connect_go.Request[admin.CreateDraftRequest]) (*connect_go.Response[admin.MailMagazine], error)
-	Update(context.Context, *connect_go.Request[admin.UpdateRequest]) (*connect_go.Response[admin.MailMagazine], error)
-	Delete(context.Context, *connect_go.Request[admin.DeleteRequest]) (*connect_go.Response[emptypb.Empty], error)
-	Send(context.Context, *connect_go.Request[admin.SendRequest]) (*connect_go.Response[emptypb.Empty], error)
+	Update(context.Context, *connect_go.Request[admin.UpdateMailMagazineRequest]) (*connect_go.Response[admin.MailMagazine], error)
+	Delete(context.Context, *connect_go.Request[admin.DeleteMailMagazineRequest]) (*connect_go.Response[emptypb.Empty], error)
+	Send(context.Context, *connect_go.Request[admin.SendMailMagazineRequest]) (*connect_go.Response[emptypb.Empty], error)
 }
 
 // NewMailMagazineControllerHandler builds an HTTP handler from the service implementation. It
@@ -202,14 +202,14 @@ func (UnimplementedMailMagazineControllerHandler) CreateDraft(context.Context, *
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.MailMagazineController.CreateDraft is not implemented"))
 }
 
-func (UnimplementedMailMagazineControllerHandler) Update(context.Context, *connect_go.Request[admin.UpdateRequest]) (*connect_go.Response[admin.MailMagazine], error) {
+func (UnimplementedMailMagazineControllerHandler) Update(context.Context, *connect_go.Request[admin.UpdateMailMagazineRequest]) (*connect_go.Response[admin.MailMagazine], error) {
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.MailMagazineController.Update is not implemented"))
 }
 
-func (UnimplementedMailMagazineControllerHandler) Delete(context.Context, *connect_go.Request[admin.DeleteRequest]) (*connect_go.Response[emptypb.Empty], error) {
+func (UnimplementedMailMagazineControllerHandler) Delete(context.Context, *connect_go.Request[admin.DeleteMailMagazineRequest]) (*connect_go.Response[emptypb.Empty], error) {
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.MailMagazineController.Delete is not implemented"))
 }
 
-func (UnimplementedMailMagazineControllerHandler) Send(context.Context, *connect_go.Request[admin.SendRequest]) (*connect_go.Response[emptypb.Empty], error) {
+func (UnimplementedMailMagazineControllerHandler) Send(context.Context, *connect_go.Request[admin.SendMailMagazineRequest]) (*connect_go.Response[emptypb.Empty], error) {
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.MailMagazineController.Send is not implemented"))
 }

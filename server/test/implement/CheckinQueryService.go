@@ -46,7 +46,7 @@ func TestCheckinQueryService(t *testing.T) {
 	})
 
 	t.Run("GetAllCheckin", func(t *testing.T) {
-		_, err := checkinQueryService.GetMyAllCheckin(user.ID, pager)
+		_, _, err := checkinQueryService.GetMyAllCheckin(user.ID, pager)
 		if err != nil {
 			t.Error("Error occurred while trying to get all checkins")
 		}

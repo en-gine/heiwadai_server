@@ -180,12 +180,7 @@ func (pq *UserQueryService) GetList(query *types.UserQuery, pager *types.PageQue
 
 	var pageResponse *types.PageResponse = nil
 	if pager != nil {
-		pageResponse = &types.PageResponse{
-			CurrentPage: *pager.CurrentPage,
-			PerPage:     *pager.PerPage,
-			TotalCount:  int(count),
-			TotalPage:   int(count) / *pager.PerPage,
-		}
+		pageResponse = types.NewPageResponse(pager, int(count))
 	}
 
 	return result, pageResponse, nil

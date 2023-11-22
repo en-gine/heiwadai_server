@@ -29,6 +29,7 @@ message GuestData {
   string FirstNameKana = 3;
   string LastNameKana = 4;
   optional string CompanyName = 5; // Optional field
+
   optional string ZipCode = 6; // Optional field
   optional server.shared.Prefecture Prefecture = 7;
   optional string City = 8; // Optional field
@@ -41,11 +42,11 @@ message Plan {
   string ID = 1;
   string Title = 2;
   uint32 Price = 3;
-  string ImageUrl = 4;
+  string ImageURL = 4;
   RoomType RoomType = 5;
   MealType MealType = 6;
   SmokeType SmokeType = 7;
-  string Overview = 8;
+  string OverView = 8;
   string StoreID = 9;
 }
 
@@ -79,21 +80,20 @@ message ReserveRequest {
 	uint32 TotalCost = 7; 
 	GuestData GuestData = 8;
 	Plan BookPlan = 9;
-	string  BookUserID = 10;
 	optional string Note = 11;
 }
 
-message BookID {
+message BookIDRequest {
   string ID = 1;
 }
 
 message BooksResponse {
-  BooksResponse Books = 1;
+  repeated BookResponse Books = 1;
 }
 
 service BookController {
   rpc GetMyBook(google.protobuf.Empty) returns (BooksResponse) {}
-  rpc GetBookByID(BookID) returns (BookResponse) {}
-  rpc Cancel(BookID) returns (google.protobuf.Empty) {}
+  rpc GetBookByID(BookIDRequest) returns (BookResponse) {}
+  rpc Cancel(BookIDRequest) returns (google.protobuf.Empty) {}
   rpc Reserve(ReserveRequest) returns (google.protobuf.Empty) {}
 }

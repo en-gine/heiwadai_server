@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"errors"
+
 	"server/api/v1/shared"
 	"server/api/v1/user"
 	userv1connect "server/api/v1/user/userconnect"
@@ -27,6 +28,7 @@ func NewCheckInController(checkinUsecase *usecase.UserCheckinUsecase) *CheckInCo
 		checkInUseCase: *checkinUsecase,
 	}
 }
+
 func (ac *CheckInController) GetStampCard(ctx context.Context, req *connect.Request[emptypb.Empty]) (*connect.Response[user.StampCardResponse], error) {
 	userID := ctx.Value("userID").(uuid.UUID)
 

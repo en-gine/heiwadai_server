@@ -107,7 +107,7 @@ func (uc *MailMagazineController) CreateDraft(ctx context.Context, req *connect.
 	}), nil
 }
 
-func (uc *MailMagazineController) Update(ctx context.Context, req *connect.Request[admin.UpdateRequest]) (*connect.Response[admin.MailMagazine], error) {
+func (uc *MailMagazineController) Update(ctx context.Context, req *connect.Request[admin.UpdateMailMagazineRequest]) (*connect.Response[admin.MailMagazine], error) {
 	adminID := ctx.Value("userID").(uuid.UUID)
 
 	if adminID == uuid.Nil {
@@ -149,7 +149,7 @@ func (uc *MailMagazineController) Update(ctx context.Context, req *connect.Reque
 	return connect.NewResponse(magazine), nil
 }
 
-func (uc *MailMagazineController) Delete(ctx context.Context, req *connect.Request[admin.DeleteRequest]) (*connect.Response[emptypb.Empty], error) {
+func (uc *MailMagazineController) Delete(ctx context.Context, req *connect.Request[admin.DeleteMailMagazineRequest]) (*connect.Response[emptypb.Empty], error) {
 	domainErr := uc.magazineUseCase.Delete(uuid.MustParse(req.Msg.ID))
 	if domainErr != nil {
 		controller.ErrorHandler(domainErr)
@@ -157,7 +157,7 @@ func (uc *MailMagazineController) Delete(ctx context.Context, req *connect.Reque
 	return connect.NewResponse(&emptypb.Empty{}), nil
 }
 
-func (uc *MailMagazineController) Send(ctx context.Context, req *connect.Request[admin.SendRequest]) (*connect.Response[emptypb.Empty], error) {
+func (uc *MailMagazineController) Send(ctx context.Context, req *connect.Request[admin.SendMailMagazineRequest]) (*connect.Response[emptypb.Empty], error) {
 	domainErr := uc.magazineUseCase.Send(uuid.MustParse(req.Msg.ID))
 	if domainErr != nil {
 		controller.ErrorHandler(domainErr)

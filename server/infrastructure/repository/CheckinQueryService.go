@@ -57,19 +57,26 @@ func (pq *CheckinQueryService) GetMyLastStoreCheckin(userID uuid.UUID, storeID u
 	return result, nil
 }
 
-func (pq *CheckinQueryService) GetMyAllCheckin(userID uuid.UUID, pager *types.PageQuery) ([]*entity.Checkin, error) {
+func (pq *CheckinQueryService) GetMyAllCheckin(userID uuid.UUID, pager *types.PageQuery) ([]*entity.Checkin, *types.PageResponse, error) {
 	checkins, err := models.Checkins(models.CheckinWhere.UserID.EQ(userID.String()), qm.Load(models.CheckinRels.User), qm.Load(models.CheckinRels.Store), qm.Limit(pager.Limit()), qm.Offset(pager.Offset())).All(context.Background(), pq.db)
+	count, err := models.Checkins(models.CheckinWhere.UserID.EQ(userID.String())).Count(context.Background(), pq.db)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	if err == sql.ErrNoRows {
-		return nil, nil
+		return nil, nil, nil
 	}
 	var result []*entity.Checkin
-	for _, coupon := range checkins {
-		result = append(result, CheckinModelToEntity(coupon, nil, nil))
+	for _, checkin := range checkins {
+		usr := UserModelToEntity(checkin.R.User, "")
+		store := StoreModelToEntity(checkin.R.Store, nil)
+		result = append(result, CheckinModelToEntity(checkin, usr, store))
 	}
-	return result, nil
+	var pageResponse *types.PageResponse = nil
+	if pager != nil {
+		pageResponse = types.NewPageResponse(pager, int(count))
+	}
+	return result, pageResponse, nil
 }
 
 func (pq *CheckinQueryService) GetAllUserAllCheckin(pager *types.PageQuery) ([]*entity.Checkin, error) {
@@ -81,8 +88,10 @@ func (pq *CheckinQueryService) GetAllUserAllCheckin(pager *types.PageQuery) ([]*
 		return nil, nil
 	}
 	var result []*entity.Checkin
-	for _, coupon := range checkins {
-		result = append(result, CheckinModelToEntity(coupon, nil, nil))
+	for _, checkin := range checkins {
+		usr := UserModelToEntity(checkin.R.User, "")
+		store := StoreModelToEntity(checkin.R.Store, nil)
+		result = append(result, CheckinModelToEntity(checkin, usr, store))
 	}
 	return result, nil
 }

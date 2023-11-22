@@ -49,8 +49,8 @@ const (
 // BookControllerClient is a client for the server.user.BookController service.
 type BookControllerClient interface {
 	GetMyBook(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[user.BooksResponse], error)
-	GetBookByID(context.Context, *connect_go.Request[user.BookID]) (*connect_go.Response[user.BookResponse], error)
-	Cancel(context.Context, *connect_go.Request[user.BookID]) (*connect_go.Response[emptypb.Empty], error)
+	GetBookByID(context.Context, *connect_go.Request[user.BookIDRequest]) (*connect_go.Response[user.BookResponse], error)
+	Cancel(context.Context, *connect_go.Request[user.BookIDRequest]) (*connect_go.Response[emptypb.Empty], error)
 	Reserve(context.Context, *connect_go.Request[user.ReserveRequest]) (*connect_go.Response[emptypb.Empty], error)
 }
 
@@ -69,12 +69,12 @@ func NewBookControllerClient(httpClient connect_go.HTTPClient, baseURL string, o
 			baseURL+BookControllerGetMyBookProcedure,
 			opts...,
 		),
-		getBookByID: connect_go.NewClient[user.BookID, user.BookResponse](
+		getBookByID: connect_go.NewClient[user.BookIDRequest, user.BookResponse](
 			httpClient,
 			baseURL+BookControllerGetBookByIDProcedure,
 			opts...,
 		),
-		cancel: connect_go.NewClient[user.BookID, emptypb.Empty](
+		cancel: connect_go.NewClient[user.BookIDRequest, emptypb.Empty](
 			httpClient,
 			baseURL+BookControllerCancelProcedure,
 			opts...,
@@ -90,8 +90,8 @@ func NewBookControllerClient(httpClient connect_go.HTTPClient, baseURL string, o
 // bookControllerClient implements BookControllerClient.
 type bookControllerClient struct {
 	getMyBook   *connect_go.Client[emptypb.Empty, user.BooksResponse]
-	getBookByID *connect_go.Client[user.BookID, user.BookResponse]
-	cancel      *connect_go.Client[user.BookID, emptypb.Empty]
+	getBookByID *connect_go.Client[user.BookIDRequest, user.BookResponse]
+	cancel      *connect_go.Client[user.BookIDRequest, emptypb.Empty]
 	reserve     *connect_go.Client[user.ReserveRequest, emptypb.Empty]
 }
 
@@ -101,12 +101,12 @@ func (c *bookControllerClient) GetMyBook(ctx context.Context, req *connect_go.Re
 }
 
 // GetBookByID calls server.user.BookController.GetBookByID.
-func (c *bookControllerClient) GetBookByID(ctx context.Context, req *connect_go.Request[user.BookID]) (*connect_go.Response[user.BookResponse], error) {
+func (c *bookControllerClient) GetBookByID(ctx context.Context, req *connect_go.Request[user.BookIDRequest]) (*connect_go.Response[user.BookResponse], error) {
 	return c.getBookByID.CallUnary(ctx, req)
 }
 
 // Cancel calls server.user.BookController.Cancel.
-func (c *bookControllerClient) Cancel(ctx context.Context, req *connect_go.Request[user.BookID]) (*connect_go.Response[emptypb.Empty], error) {
+func (c *bookControllerClient) Cancel(ctx context.Context, req *connect_go.Request[user.BookIDRequest]) (*connect_go.Response[emptypb.Empty], error) {
 	return c.cancel.CallUnary(ctx, req)
 }
 
@@ -118,8 +118,8 @@ func (c *bookControllerClient) Reserve(ctx context.Context, req *connect_go.Requ
 // BookControllerHandler is an implementation of the server.user.BookController service.
 type BookControllerHandler interface {
 	GetMyBook(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[user.BooksResponse], error)
-	GetBookByID(context.Context, *connect_go.Request[user.BookID]) (*connect_go.Response[user.BookResponse], error)
-	Cancel(context.Context, *connect_go.Request[user.BookID]) (*connect_go.Response[emptypb.Empty], error)
+	GetBookByID(context.Context, *connect_go.Request[user.BookIDRequest]) (*connect_go.Response[user.BookResponse], error)
+	Cancel(context.Context, *connect_go.Request[user.BookIDRequest]) (*connect_go.Response[emptypb.Empty], error)
 	Reserve(context.Context, *connect_go.Request[user.ReserveRequest]) (*connect_go.Response[emptypb.Empty], error)
 }
 
@@ -172,11 +172,11 @@ func (UnimplementedBookControllerHandler) GetMyBook(context.Context, *connect_go
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.BookController.GetMyBook is not implemented"))
 }
 
-func (UnimplementedBookControllerHandler) GetBookByID(context.Context, *connect_go.Request[user.BookID]) (*connect_go.Response[user.BookResponse], error) {
+func (UnimplementedBookControllerHandler) GetBookByID(context.Context, *connect_go.Request[user.BookIDRequest]) (*connect_go.Response[user.BookResponse], error) {
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.BookController.GetBookByID is not implemented"))
 }
 
-func (UnimplementedBookControllerHandler) Cancel(context.Context, *connect_go.Request[user.BookID]) (*connect_go.Response[emptypb.Empty], error) {
+func (UnimplementedBookControllerHandler) Cancel(context.Context, *connect_go.Request[user.BookIDRequest]) (*connect_go.Response[emptypb.Empty], error) {
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.BookController.Cancel is not implemented"))
 }
 

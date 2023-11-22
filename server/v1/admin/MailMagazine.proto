@@ -40,18 +40,18 @@ message CreateDraftRequest {
   repeated server.shared.Prefecture TargetPrefectures = 3;
 }
 
-message UpdateRequest {
+message UpdateMailMagazineRequest {
   string ID = 1;
   optional string Title = 2;
   optional string Content = 3;
   repeated server.shared.Prefecture TargetPrefectures = 5;
 }
 
-message DeleteRequest {
+message DeleteMailMagazineRequest {
   string ID = 1;
 }
 
-message SendRequest {
+message SendMailMagazineRequest {
   string ID = 1;
 }
 
@@ -59,7 +59,7 @@ message SendRequest {
 service MailMagazineController {
     rpc GetList(GetMailMagazineListRequest) returns (MailMagazinesResponse){}
     rpc CreateDraft(CreateDraftRequest) returns (MailMagazine){}
-    rpc Update(UpdateRequest) returns (MailMagazine){}
-    rpc Delete(DeleteRequest) returns (google.protobuf.Empty){}
-    rpc Send(SendRequest) returns (google.protobuf.Empty){}
+    rpc Update(UpdateMailMagazineRequest) returns (MailMagazine){}
+    rpc Delete(DeleteMailMagazineRequest) returns (google.protobuf.Empty){}
+    rpc Send(SendMailMagazineRequest) returns (google.protobuf.Empty){}
 }
