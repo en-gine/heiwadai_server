@@ -4,6 +4,8 @@ import (
 	usecase "server/core/usecase/user"
 
 	action "server/infrastructure/action"
+	bookingApiAvail "server/infrastructure/booking/avail"
+	bookingApiBook "server/infrastructure/booking/book"
 	implements "server/infrastructure/repository"
 	"server/infrastructure/wordpress"
 )
@@ -13,6 +15,7 @@ var (
 	userQueryService     = implements.NewUserQueryService()
 	authAction           = action.NewAuthClient()
 	userQuery            = implements.NewUserQueryService()
+	adminQuery           = implements.NewAdminQueryService()
 	storeRepository      = implements.NewStoreRepository()
 	checkInRepository    = implements.NewCheckinRepository()
 	couponRepository     = implements.NewCouponRepository()
@@ -22,8 +25,16 @@ var (
 	checkinQuery         = implements.NewCheckinQueryService()
 	couponQuery          = implements.NewCouponQueryService()
 	transaction          = implements.NewTransaction()
+	messageQuery         = implements.NewMessageQueryService()
+	messageRepository    = implements.NewMessageRepository()
 	bannerQuery          = wordpress.NewBannerQueryService()
 	postQuery            = wordpress.NewPostQueryService()
+	bookQuery            = implements.NewBookQueryService()
+	bookRepository       = implements.NewBookRepository()
+	planQuery            = bookingApiAvail.NewPlanQuery(storeQuery)
+	bookAPIRepository    = bookingApiBook.NewBookRepository(storeQuery, bookQuery)
+	userReportRepository = implements.NewUserReportRepository()
+	sendMailAction       = action.NewSendMailAction()
 )
 
 // var planQuery = booking.NewPlanQuery()
@@ -72,8 +83,31 @@ func InitializeStoreUsecase() *usecase.StoreUsecase {
 	)
 }
 
-// func InitializePlanUsecase() *usecase.PlanUsecase {
-// 	return usecase.NewPlanUsecase(
-// 		planQuery,
-// 	)
-// }
+func InitializePlanUsecase() *usecase.PlanUsecase {
+	return usecase.NewPlanUsecase(
+		planQuery,
+	)
+}
+
+func InitializeMessageUsecase() *usecase.MessageUsecase {
+	return usecase.NewMessageUsecase(
+		messageRepository,
+		messageQuery,
+	)
+}
+
+func InitializeBookUsecase() *usecase.BookUsecase {
+	return usecase.NewBookUsecase(
+		bookQuery,
+		bookRepository,
+		bookAPIRepository,
+	)
+}
+
+func InitializeUserReportUsecase() *usecase.UserReportUsecase {
+	return usecase.NewUserReportUsecase(
+		userQuery,
+		userReportRepository,
+		sendMailAction,
+	)
+}

@@ -121,7 +121,7 @@ func (uc *MessageController) Update(ctx context.Context, req *connect.Request[ad
 func (uc *MessageController) Delete(ctx context.Context, req *connect.Request[admin.MessageIDRequest]) (*connect.Response[emptypb.Empty], error) {
 	domainErr := uc.messageUseCase.Delete(uuid.MustParse(req.Msg.ID))
 	if domainErr != nil {
-		controller.ErrorHandler(domainErr)
+		return nil, controller.ErrorHandler(domainErr)
 	}
 	return connect.NewResponse(&emptypb.Empty{}), nil
 }

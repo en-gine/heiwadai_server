@@ -23,9 +23,8 @@ func RegisterGRPCService(mux *http.ServeMux) *http.ServeMux {
 }
 
 func NewUserServer(mux *http.ServeMux) {
-
 	authClient := action.NewAuthClient()
-	requireAuth := router.NewAuthentificatable(authClient)
+	requireAuth := router.NewAuthentificatable(authClient, userQuery, adminQuery, router.AuthTypeUser)
 
 	authUsecase := InitializeAuthUsecase()
 	authContoroller := usercontroller.NewAuthController(authUsecase)
@@ -62,9 +61,18 @@ func NewUserServer(mux *http.ServeMux) {
 	path, handler = userv1connect.NewCheckinControllerHandler(checkinContoroller, requireAuth)
 	mux.Handle(path, handler)
 
-	// planUsecase := InitializePlanUsecase()
-	// checkinContoroller := usercontroller.NewCheckInController(checkinUsecase)
-	// path, handler = userv1connect.NewCheckinControllerHandler(checkinContoroller, requireAuth)
-	// mux.Handle(path, handler)
+	bookUsecase := InitializeBookUsecase()
+	bookContoroller := usercontroller.NewBookController(bookUsecase)
+	path, handler = userv1connect.NewBookControllerHandler(bookContoroller, requireAuth)
+	mux.Handle(path, handler)
 
+	messageUsecase := InitializeMessageUsecase()
+	messageContoroller := usercontroller.NewMessageController(messageUsecase)
+	path, handler = userv1connect.NewMessageControllerHandler(messageContoroller, requireAuth)
+	mux.Handle(path, handler)
+
+	userReportUsecase := InitializeUserReportUsecase()
+	userReportContoroller := usercontroller.NewUserReportController(userReportUsecase)
+	path, handler = userv1connect.NewUserReportControllerHandler(userReportContoroller, requireAuth)
+	mux.Handle(path, handler)
 }

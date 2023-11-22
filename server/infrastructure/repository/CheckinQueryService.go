@@ -59,6 +59,10 @@ func (pq *CheckinQueryService) GetMyLastStoreCheckin(userID uuid.UUID, storeID u
 
 func (pq *CheckinQueryService) GetMyAllCheckin(userID uuid.UUID, pager *types.PageQuery) ([]*entity.Checkin, *types.PageResponse, error) {
 	checkins, err := models.Checkins(models.CheckinWhere.UserID.EQ(userID.String()), qm.Load(models.CheckinRels.User), qm.Load(models.CheckinRels.Store), qm.Limit(pager.Limit()), qm.Offset(pager.Offset())).All(context.Background(), pq.db)
+	if err != nil {
+		return nil, nil, err
+	}
+
 	count, err := models.Checkins(models.CheckinWhere.UserID.EQ(userID.String())).Count(context.Background(), pq.db)
 	if err != nil {
 		return nil, nil, err

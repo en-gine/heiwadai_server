@@ -8,17 +8,50 @@ import (
 )
 
 var (
-	authAction        = action.NewAuthClient()
-	storeRepo         = implements.NewStoreRepository()
-	storeQueryService = implements.NewStoreQueryService()
-	adminRepo         = implements.NewAdminRepository()
-	adminQueryService = implements.NewAdminQueryService()
+	authAction                = action.NewAuthClient()
+	storeRepository           = implements.NewStoreRepository()
+	storeQuery                = implements.NewStoreQueryService()
+	adminRepository           = implements.NewAdminRepository()
+	adminQuery                = implements.NewAdminQueryService()
+	couponRepository          = implements.NewCouponRepository()
+	couponQuery               = implements.NewCouponQueryService()
+	usercouponQuery           = implements.NewUserCouponQueryService()
+	usercouponRepository      = implements.NewUserCouponRepository()
+	messageQuery              = implements.NewMessageQueryService()
+	messageRepository         = implements.NewMessageRepository()
+	mailMagazineQuery         = implements.NewMailMagazineQueryService()
+	mailMagazineRepository    = implements.NewMailMagazineRepository()
+	mailMagazineLogQuery      = implements.NewMailMagazineLogQueryService()
+	mailMagazineLogRepository = implements.NewMailMagazineLogRepository()
+	checkinRepository         = implements.NewCheckinRepository()
+	sendMailAction            = action.NewSendMailAction()
+	userQuery                 = implements.NewUserQueryService()
 )
 
-func InitializeStoreUsecase() *usecase.StoreUsecase {
-	return usecase.NewStoreUsecase(storeRepo, storeQueryService)
+func InitializeAuthUsecase() *usecase.AuthUsecase {
+	return usecase.NewAuthUsecase(adminRepository, adminQuery, storeQuery, authAction)
 }
 
-func InitializeAuthUsecase() *usecase.AuthUsecase {
-	return usecase.NewAuthUsecase(adminRepo, adminQueryService, storeQueryService, authAction)
+func InitializeAdminDataUsecase() *usecase.AdminDataUsecase {
+	return usecase.NewAdminDataUsecase(adminRepository, adminQuery, storeQuery)
+}
+
+func InitializeAdminCouponUsecase() *usecase.AdminCouponUsecase {
+	return usecase.NewAdminCouponUsecase(couponRepository, couponQuery, usercouponQuery, usercouponRepository, storeQuery)
+}
+
+func InitializeMessageUsecase() *usecase.MessageUsecase {
+	return usecase.NewMessageUsecase(messageRepository, messageQuery)
+}
+
+func InitializeMailMagazineUsecase() *usecase.MailMagazineUsecase {
+	return usecase.NewMailMagazineUsecase(mailMagazineRepository, mailMagazineQuery, mailMagazineLogQuery, mailMagazineLogRepository, sendMailAction, userQuery)
+}
+
+func InitializeStoreUsecase() *usecase.StoreUsecase {
+	return usecase.NewStoreUsecase(storeRepository, storeQuery)
+}
+
+func InitializeUserCheckinUsecase() *usecase.UserCheckinUsecase {
+	return usecase.NewUserCheckinUsecase(checkinRepository)
 }

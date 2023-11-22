@@ -152,7 +152,7 @@ func (uc *MailMagazineController) Update(ctx context.Context, req *connect.Reque
 func (uc *MailMagazineController) Delete(ctx context.Context, req *connect.Request[admin.DeleteMailMagazineRequest]) (*connect.Response[emptypb.Empty], error) {
 	domainErr := uc.magazineUseCase.Delete(uuid.MustParse(req.Msg.ID))
 	if domainErr != nil {
-		controller.ErrorHandler(domainErr)
+		return nil, controller.ErrorHandler(domainErr)
 	}
 	return connect.NewResponse(&emptypb.Empty{}), nil
 }
@@ -160,7 +160,7 @@ func (uc *MailMagazineController) Delete(ctx context.Context, req *connect.Reque
 func (uc *MailMagazineController) Send(ctx context.Context, req *connect.Request[admin.SendMailMagazineRequest]) (*connect.Response[emptypb.Empty], error) {
 	domainErr := uc.magazineUseCase.Send(uuid.MustParse(req.Msg.ID))
 	if domainErr != nil {
-		controller.ErrorHandler(domainErr)
+		return nil, controller.ErrorHandler(domainErr)
 	}
 	return connect.NewResponse(&emptypb.Empty{}), nil
 }

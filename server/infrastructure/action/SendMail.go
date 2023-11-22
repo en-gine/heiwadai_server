@@ -12,7 +12,7 @@ import (
 	"server/infrastructure/logger"
 )
 
-var _ action.ISendMailAction = &SendMail{}
+var _ action.ISendMailAction = &SendMailAction{}
 
 var (
 	HOST = env.GetEnv(env.MailHost)
@@ -20,9 +20,13 @@ var (
 	PASS = env.GetEnv(env.MailPass)
 )
 
-type SendMail struct{}
+func NewSendMailAction() action.ISendMailAction {
+	return &SendMailAction{}
+}
 
-func (s *SendMail) SendAll(mails *[]string, From string, Title string, Body string) error {
+type SendMailAction struct{}
+
+func (s *SendMailAction) SendAll(mails *[]string, From string, Title string, Body string) error {
 	To := "no-reply@heiwadai-hotel.app" // 一斉送信の場合ダミー
 	err := s.SendMail(To, "", From, Title, Body, mails)
 	if err != nil {
@@ -31,7 +35,7 @@ func (s *SendMail) SendAll(mails *[]string, From string, Title string, Body stri
 	return nil
 }
 
-func (s *SendMail) Send(To string, CC string, From string, Title string, Body string) error {
+func (s *SendMailAction) Send(To string, CC string, From string, Title string, Body string) error {
 	err := s.SendMail(To, CC, From, Title, Body, nil)
 	if err != nil {
 		return err
@@ -39,7 +43,7 @@ func (s *SendMail) Send(To string, CC string, From string, Title string, Body st
 	return nil
 }
 
-func (s *SendMail) SendMail(To string, CC string, From string, Title string, Body string, BulkTo *[]string) error {
+func (s *SendMailAction) SendMail(To string, CC string, From string, Title string, Body string, BulkTo *[]string) error {
 	header := make(map[string]string)
 	header["From"] = From
 	header["To"] = To
@@ -74,10 +78,4 @@ func (s *SendMail) SendMail(To string, CC string, From string, Title string, Bod
 	}
 
 	return nil
-}
-
-func main() {
-	BulkTo := []string{"test@test.jp"}
-	BulkTo = append(BulkTo, "aaaa@bbbb.co.jp")
-	fmt.Printf("%v", BulkTo)
 }

@@ -23,9 +23,9 @@ type BookController struct {
 
 var _ userv1connect.BookControllerClient = &BookController{}
 
-func NewBookController(bannerUsecase *usecase.BookUsecase) *BookController {
+func NewBookController(bookUsecase *usecase.BookUsecase) *BookController {
 	return &BookController{
-		bookUseCase: *bannerUsecase,
+		bookUseCase: *bookUsecase,
 	}
 }
 

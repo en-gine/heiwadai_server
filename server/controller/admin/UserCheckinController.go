@@ -93,9 +93,7 @@ func (u *UserCheckinController) GetUserLog(ctx context.Context, req *connect.Req
 		)
 	}
 
-	var resPage *shared.PageResponse
-
-	resPage = &shared.PageResponse{
+	resPage := &shared.PageResponse{
 		TotalCount:  uint32(pageResponse.TotalCount),
 		CurrentPage: uint32(pageResponse.CurrentPage),
 		PerPage:     uint32(pageResponse.PerPage),

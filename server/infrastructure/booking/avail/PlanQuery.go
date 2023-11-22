@@ -33,7 +33,7 @@ func NewPlanQuery(storeQuery queryservice.IStoreQueryService) *PlanQuery {
 }
 
 func (p *PlanQuery) GetCalendar(
-	planID string,
+	planID string, //nolint:all
 	storeID uuid.UUID,
 	night int,
 	adult int,
@@ -53,7 +53,7 @@ func (p *PlanQuery) GetCalendar(
 
 	if env.GetEnv(env.TlbookingIsTest) == "true" {
 		hotelCode = "E69502"
-		planID = "14030824"
+		planID = "14030824" //nolint:all
 	}
 
 	mealsIncluded := MealTypeToQuery(mealType)
