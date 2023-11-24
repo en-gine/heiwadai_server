@@ -1,0 +1,3 @@
+[submodule "server/v1"]
+	path = server/v1
+	url = git@github.com:en-gine/heiwadai_proto.git

@@ -37,3 +37,10 @@ push:
 
 # deploy:
 # 	gcloud beta run deploy heiwadai-server --project heiwadai --region asia-northeast2 --platform managed --source .
+
+
+init-proto:
+	git submodule add git@github.com:en-gine/heiwadai_proto.git server/v1
+	
+update-proto:
+	git submodule update --remote
