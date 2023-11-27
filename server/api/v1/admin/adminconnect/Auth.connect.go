@@ -38,6 +38,8 @@ const (
 	AuthControllerRegisterProcedure = "/server.admin.AuthController/Register"
 	// AuthControllerSignUpProcedure is the fully-qualified name of the AuthController's SignUp RPC.
 	AuthControllerSignUpProcedure = "/server.admin.AuthController/SignUp"
+	// AuthControllerSignOutProcedure is the fully-qualified name of the AuthController's SignOut RPC.
+	AuthControllerSignOutProcedure = "/server.admin.AuthController/SignOut"
 	// AuthControllerSignInProcedure is the fully-qualified name of the AuthController's SignIn RPC.
 	AuthControllerSignInProcedure = "/server.admin.AuthController/SignIn"
 	// AuthControllerResetPasswordMailProcedure is the fully-qualified name of the AuthController's
@@ -55,6 +57,7 @@ const (
 type AuthControllerClient interface {
 	Register(context.Context, *connect_go.Request[admin.AdminRegisterRequest]) (*connect_go.Response[emptypb.Empty], error)
 	SignUp(context.Context, *connect_go.Request[admin.AdminAuthRequest]) (*connect_go.Response[emptypb.Empty], error)
+	SignOut(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[emptypb.Empty], error)
 	SignIn(context.Context, *connect_go.Request[admin.AdminAuthRequest]) (*connect_go.Response[admin.AdminAuthResponse], error)
 	ResetPasswordMail(context.Context, *connect_go.Request[admin.ResetPasswordRequest]) (*connect_go.Response[emptypb.Empty], error)
 	UpdatePassword(context.Context, *connect_go.Request[admin.UpdatePasswordRequest]) (*connect_go.Response[emptypb.Empty], error)
@@ -79,6 +82,11 @@ func NewAuthControllerClient(httpClient connect_go.HTTPClient, baseURL string, o
 		signUp: connect_go.NewClient[admin.AdminAuthRequest, emptypb.Empty](
 			httpClient,
 			baseURL+AuthControllerSignUpProcedure,
+			opts...,
+		),
+		signOut: connect_go.NewClient[emptypb.Empty, emptypb.Empty](
+			httpClient,
+			baseURL+AuthControllerSignOutProcedure,
 			opts...,
 		),
 		signIn: connect_go.NewClient[admin.AdminAuthRequest, admin.AdminAuthResponse](
@@ -108,6 +116,7 @@ func NewAuthControllerClient(httpClient connect_go.HTTPClient, baseURL string, o
 type authControllerClient struct {
 	register          *connect_go.Client[admin.AdminRegisterRequest, emptypb.Empty]
 	signUp            *connect_go.Client[admin.AdminAuthRequest, emptypb.Empty]
+	signOut           *connect_go.Client[emptypb.Empty, emptypb.Empty]
 	signIn            *connect_go.Client[admin.AdminAuthRequest, admin.AdminAuthResponse]
 	resetPasswordMail *connect_go.Client[admin.ResetPasswordRequest, emptypb.Empty]
 	updatePassword    *connect_go.Client[admin.UpdatePasswordRequest, emptypb.Empty]
@@ -122,6 +131,11 @@ func (c *authControllerClient) Register(ctx context.Context, req *connect_go.Req
 // SignUp calls server.admin.AuthController.SignUp.
 func (c *authControllerClient) SignUp(ctx context.Context, req *connect_go.Request[admin.AdminAuthRequest]) (*connect_go.Response[emptypb.Empty], error) {
 	return c.signUp.CallUnary(ctx, req)
+}
+
+// SignOut calls server.admin.AuthController.SignOut.
+func (c *authControllerClient) SignOut(ctx context.Context, req *connect_go.Request[emptypb.Empty]) (*connect_go.Response[emptypb.Empty], error) {
+	return c.signOut.CallUnary(ctx, req)
 }
 
 // SignIn calls server.admin.AuthController.SignIn.
@@ -148,6 +162,7 @@ func (c *authControllerClient) UpdateEmail(ctx context.Context, req *connect_go.
 type AuthControllerHandler interface {
 	Register(context.Context, *connect_go.Request[admin.AdminRegisterRequest]) (*connect_go.Response[emptypb.Empty], error)
 	SignUp(context.Context, *connect_go.Request[admin.AdminAuthRequest]) (*connect_go.Response[emptypb.Empty], error)
+	SignOut(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[emptypb.Empty], error)
 	SignIn(context.Context, *connect_go.Request[admin.AdminAuthRequest]) (*connect_go.Response[admin.AdminAuthResponse], error)
 	ResetPasswordMail(context.Context, *connect_go.Request[admin.ResetPasswordRequest]) (*connect_go.Response[emptypb.Empty], error)
 	UpdatePassword(context.Context, *connect_go.Request[admin.UpdatePasswordRequest]) (*connect_go.Response[emptypb.Empty], error)
@@ -168,6 +183,11 @@ func NewAuthControllerHandler(svc AuthControllerHandler, opts ...connect_go.Hand
 	authControllerSignUpHandler := connect_go.NewUnaryHandler(
 		AuthControllerSignUpProcedure,
 		svc.SignUp,
+		opts...,
+	)
+	authControllerSignOutHandler := connect_go.NewUnaryHandler(
+		AuthControllerSignOutProcedure,
+		svc.SignOut,
 		opts...,
 	)
 	authControllerSignInHandler := connect_go.NewUnaryHandler(
@@ -196,6 +216,8 @@ func NewAuthControllerHandler(svc AuthControllerHandler, opts ...connect_go.Hand
 			authControllerRegisterHandler.ServeHTTP(w, r)
 		case AuthControllerSignUpProcedure:
 			authControllerSignUpHandler.ServeHTTP(w, r)
+		case AuthControllerSignOutProcedure:
+			authControllerSignOutHandler.ServeHTTP(w, r)
 		case AuthControllerSignInProcedure:
 			authControllerSignInHandler.ServeHTTP(w, r)
 		case AuthControllerResetPasswordMailProcedure:
@@ -219,6 +241,10 @@ func (UnimplementedAuthControllerHandler) Register(context.Context, *connect_go.
 
 func (UnimplementedAuthControllerHandler) SignUp(context.Context, *connect_go.Request[admin.AdminAuthRequest]) (*connect_go.Response[emptypb.Empty], error) {
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.AuthController.SignUp is not implemented"))
+}
+
+func (UnimplementedAuthControllerHandler) SignOut(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[emptypb.Empty], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.AuthController.SignOut is not implemented"))
 }
 
 func (UnimplementedAuthControllerHandler) SignIn(context.Context, *connect_go.Request[admin.AdminAuthRequest]) (*connect_go.Response[admin.AdminAuthResponse], error) {

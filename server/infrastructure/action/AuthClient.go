@@ -70,6 +70,17 @@ func (au *AuthClient) SignIn(email string, password string) (*types.Token, error
 	}, nil
 }
 
+func (au *AuthClient) SignOut(token string) error {
+	ctx := context.Background()
+	err := au.client.Auth.SignOut(ctx, token)
+	if err != nil {
+		logger.Errorf("Error SignIn: %v", err)
+		return errors.New("Error SignIn" + err.Error())
+	}
+
+	return nil
+}
+
 func (au *AuthClient) Refresh(token string, refreshToken string) (*types.Token, error) {
 	ctx := context.Background()
 	data, err := au.client.Auth.RefreshUser(ctx, token, refreshToken)

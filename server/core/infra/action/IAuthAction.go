@@ -20,6 +20,7 @@ func (ut UserType) String() string {
 type IAuthAction interface {
 	SignUp(email string, password string, userType UserType) error
 	SignIn(email string, password string) (*types.Token, error)
+	SignOut(token string) error
 	Refresh(token string, refreshToken string) (*types.Token, error)
 	GetUserID(token string) (*uuid.UUID, error)
 	ResetPasswordMail(email string) error

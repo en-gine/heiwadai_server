@@ -21,7 +21,10 @@ var (
 	AuthTypeUser  AuthType = "user"
 )
 
-var UserIDKey keyType = "userID"
+var (
+	UserIDKey keyType = "userID"
+	TokenKey  keyType = "token"
+)
 
 type Authentificatable struct{}
 
@@ -69,10 +72,12 @@ func NewAuthentificatable(AuthClient action.IAuthAction, UserDataQuery queryserv
 			ctx = context.WithValue(ctx, UserIDKey, id)
 
 			res, err := next(ctx, req)
+
 			if Token != nil {
 				res.Header().Set("AccessToken:", Token.AccessToken)
 				res.Header().Set("RefreshToken:", *Token.RefreshToken)
 				res.Header().Set("Expire:", strconv.Itoa(*Token.ExpiresIn))
+				ctx = context.WithValue(ctx, TokenKey, Token.AccessToken)
 			}
 			return res, err
 		})

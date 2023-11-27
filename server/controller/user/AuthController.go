@@ -71,6 +71,19 @@ func (ac *AuthController) SignIn(ctx context.Context, req *connect.Request[user.
 	}), nil
 }
 
+func (ac *AuthController) SignOut(ctx context.Context, req *connect.Request[emptypb.Empty]) (*connect.Response[emptypb.Empty], error) {
+	token := ctx.Value("token").(string)
+	if token == "" {
+		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("ログインが必要です。"))
+	}
+	err := ac.authUseCase.SignOut(token)
+	if err != nil {
+		logger.Error(err.Error())
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("サインアウトに失敗しました。"))
+	}
+	return connect.NewResponse(&emptypb.Empty{}), nil
+}
+
 func (ac *AuthController) ResetPasswordMail(ctx context.Context, req *connect.Request[user.ResetPasswordRequest]) (*connect.Response[emptypb.Empty], error) {
 	msg := req.Msg
 	err := ac.authUseCase.ResetPasswordMail(msg.Email)
@@ -82,7 +95,12 @@ func (ac *AuthController) ResetPasswordMail(ctx context.Context, req *connect.Re
 
 func (ac *AuthController) UpdatePassword(ctx context.Context, req *connect.Request[user.UpdatePasswordRequest]) (*connect.Response[emptypb.Empty], error) {
 	msg := req.Msg
-	err := ac.authUseCase.UpdatePassword(msg.Password, msg.Token)
+	token := ctx.Value("token").(string)
+	if token == "" {
+		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("ログインが必要です。"))
+	}
+
+	err := ac.authUseCase.UpdatePassword(msg.Password, token)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeUnavailable, errors.New("パスワードの変更に失敗しました。\nネットワークの問題や同じパスワードに変更した、などの理由が考えられます。"))
 	}
@@ -92,7 +110,11 @@ func (ac *AuthController) UpdatePassword(ctx context.Context, req *connect.Reque
 
 func (ac *AuthController) UpdateEmail(ctx context.Context, req *connect.Request[user.UpdateEmailRequest]) (*connect.Response[emptypb.Empty], error) {
 	msg := req.Msg
-	err := ac.authUseCase.UpdateEmail(msg.Email, msg.Token)
+	token := ctx.Value("token").(string)
+	if token == "" {
+		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("ログインが必要です。"))
+	}
+	err := ac.authUseCase.UpdateEmail(msg.Email, token)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeUnavailable, errors.New("メールアドレスの変更に失敗しました。"))
 	}

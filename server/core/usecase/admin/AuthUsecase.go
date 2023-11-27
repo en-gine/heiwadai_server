@@ -19,7 +19,8 @@ type AuthUsecase struct {
 }
 
 func NewAuthUsecase(adminRepository repository.IAdminRepository, adminQuery queryservice.IAdminQueryService,
-	storeQuery queryservice.IStoreQueryService, authAction action.IAuthAction) *AuthUsecase {
+	storeQuery queryservice.IStoreQueryService, authAction action.IAuthAction,
+) *AuthUsecase {
 	return &AuthUsecase{
 		adminRepository: adminRepository,
 		adminQuery:      adminQuery,
@@ -33,9 +34,7 @@ func (u *AuthUsecase) Register(
 	storeID uuid.UUID,
 	email string,
 ) (*entity.Admin, *errors.DomainError) {
-
 	existAdmin, err := u.adminQuery.GetByMail(email)
-
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryDataNotFoundError, "ユーザーの検索に失敗しました")
 	}
@@ -46,7 +45,6 @@ func (u *AuthUsecase) Register(
 
 	// 招待メール送信
 	newID, err := u.authAction.InviteUserByEmail(email)
-
 	if err != nil {
 		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
 	}
@@ -58,7 +56,6 @@ func (u *AuthUsecase) Register(
 
 	if belongStore == nil {
 		return nil, errors.NewDomainError(errors.QueryDataNotFoundError, "IDで指定された店舗が見つかりません")
-
 	}
 
 	adminData := entity.RegenAdmin(
@@ -80,9 +77,18 @@ func (u *AuthUsecase) Register(
 func (u *AuthUsecase) SignUp(
 	Mail string,
 	Password string,
-
 ) error {
 	err := u.authAction.SignUp(Mail, Password, action.UserTypeUser)
+	if err != nil {
+		return errors.NewDomainError(errors.RepositoryError, err.Error())
+	}
+	return nil
+}
+
+func (u *AuthUsecase) SignOut(
+	token string,
+) error {
+	err := u.authAction.SignOut(token)
 	if err != nil {
 		return errors.NewDomainError(errors.RepositoryError, err.Error())
 	}

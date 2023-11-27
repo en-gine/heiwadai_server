@@ -98,6 +98,16 @@ func (u *AuthUsecase) SignUp(
 	return nil
 }
 
+func (u *AuthUsecase) SignOut(
+	token string,
+) error {
+	err := u.authAction.SignOut(token)
+	if err != nil {
+		return errors.NewDomainError(errors.RepositoryError, err.Error())
+	}
+	return nil
+}
+
 func (u *AuthUsecase) SignIn(
 	Mail string,
 	Password string,
