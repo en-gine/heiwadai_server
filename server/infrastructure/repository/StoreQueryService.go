@@ -32,14 +32,14 @@ func (pq *StoreQueryService) GetByID(id uuid.UUID) (*entity.Store, error) {
 	if err != nil {
 		return nil, err
 	}
-	if err == sql.ErrNoRows {
+	if store == nil {
 		return nil, nil
 	}
 	info, err := models.StayableStoreInfos(models.StayableStoreInfoWhere.StoreID.EQ(store.ID)).One(ctx, InitDB())
 	if err != nil {
 		return nil, err
 	}
-	if err == sql.ErrNoRows {
+	if info == nil {
 		info = nil
 	}
 
@@ -51,7 +51,7 @@ func (pq *StoreQueryService) GetActiveAll() ([]*entity.Store, error) {
 	if err != nil {
 		return nil, err
 	}
-	if err == sql.ErrNoRows {
+	if stores == nil {
 		return nil, nil
 	}
 	var result []*entity.Store
@@ -66,7 +66,7 @@ func (pq *StoreQueryService) GetStayableByID(id uuid.UUID) (*entity.StayableStor
 	if err != nil {
 		return nil, err
 	}
-	if err == sql.ErrNoRows {
+	if store == nil {
 		return nil, nil
 	}
 	infoModel, err := store.StayableStoreInfo().One(context.Background(), InitDB())
@@ -82,7 +82,7 @@ func (pq *StoreQueryService) GetStayables() ([]*entity.StayableStore, error) {
 	if err != nil {
 		return nil, err
 	}
-	if err == sql.ErrNoRows {
+	if stores == nil {
 		return nil, nil
 	}
 	var result []*entity.StayableStore
@@ -99,7 +99,7 @@ func (pq *StoreQueryService) GetAll() ([]*entity.Store, error) {
 	if err != nil {
 		return nil, err
 	}
-	if err == sql.ErrNoRows {
+	if stores == nil {
 		return nil, nil
 	}
 	var result []*entity.Store

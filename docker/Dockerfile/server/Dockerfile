@@ -28,7 +28,8 @@ RUN  go mod tidy & \
   go install -v github.com/rogpeppe/godef@latest & \
   go install -v github.com/stamblerre/gocode@latest & \
   go install -v golang.org/x/tools/cmd/goimports@latest & \
-  go install -v golang.org/x/tools/gopls@latest
+  go install -v golang.org/x/tools/gopls@latest & \
+  go get github.com/rs/cors
 
 ### For Lint
 RUN go install -v github.com/nishanths/exhaustive & \

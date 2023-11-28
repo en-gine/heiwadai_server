@@ -32,7 +32,7 @@ func (pq *UserReportQueryService) GetByID(id uuid.UUID) (*entity.UserReport, err
 	if err != nil {
 		return nil, err
 	}
-	if err == sql.ErrNoRows {
+	if rpt == nil {
 		return nil, nil
 	}
 	return UserReportModelToEntity(rpt), nil

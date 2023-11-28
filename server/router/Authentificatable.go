@@ -68,7 +68,9 @@ func NewAuthentificatable(AuthClient action.IAuthAction, UserDataQuery queryserv
 					return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("ユーザーとして登録されていません。"))
 				}
 			}
-
+			if Token != nil {
+				ctx = context.WithValue(ctx, TokenKey, Token.AccessToken)
+			}
 			ctx = context.WithValue(ctx, UserIDKey, id)
 
 			res, err := next(ctx, req)
@@ -77,7 +79,6 @@ func NewAuthentificatable(AuthClient action.IAuthAction, UserDataQuery queryserv
 				res.Header().Set("AccessToken:", Token.AccessToken)
 				res.Header().Set("RefreshToken:", *Token.RefreshToken)
 				res.Header().Set("Expire:", strconv.Itoa(*Token.ExpiresIn))
-				ctx = context.WithValue(ctx, TokenKey, Token.AccessToken)
 			}
 			return res, err
 		})

@@ -32,7 +32,7 @@ func (pq *CheckinQueryService) GetMyActiveCheckin(userID uuid.UUID) ([]*entity.C
 	if err != nil {
 		return nil, err
 	}
-	if err == sql.ErrNoRows {
+	if checkins == nil {
 		return nil, nil
 	}
 	var result []*entity.Checkin
@@ -45,7 +45,7 @@ func (pq *CheckinQueryService) GetMyActiveCheckin(userID uuid.UUID) ([]*entity.C
 
 func (pq *CheckinQueryService) GetMyLastStoreCheckin(userID uuid.UUID, storeID uuid.UUID) (*entity.Checkin, error) {
 	checkin, err := models.Checkins(models.CheckinWhere.UserID.EQ(userID.String()), models.CheckinWhere.StoreID.EQ(storeID.String()), qm.Load(models.CheckinRels.User), qm.Load(models.CheckinRels.Store), qm.OrderBy(`checkin_at desc`)).One(context.Background(), pq.db)
-	if err == sql.ErrNoRows {
+	if checkin == nil {
 		return nil, nil
 	}
 
@@ -63,13 +63,15 @@ func (pq *CheckinQueryService) GetMyAllCheckin(userID uuid.UUID, pager *types.Pa
 		return nil, nil, err
 	}
 
+	if checkins == nil {
+		return nil, nil, nil
+	}
+
 	count, err := models.Checkins(models.CheckinWhere.UserID.EQ(userID.String())).Count(context.Background(), pq.db)
 	if err != nil {
 		return nil, nil, err
 	}
-	if err == sql.ErrNoRows {
-		return nil, nil, nil
-	}
+
 	var result []*entity.Checkin
 	for _, checkin := range checkins {
 		usr := UserModelToEntity(checkin.R.User, "")
@@ -88,7 +90,7 @@ func (pq *CheckinQueryService) GetAllUserAllCheckin(pager *types.PageQuery) ([]*
 	if err != nil {
 		return nil, err
 	}
-	if err == sql.ErrNoRows {
+	if checkins == nil {
 		return nil, nil
 	}
 	var result []*entity.Checkin

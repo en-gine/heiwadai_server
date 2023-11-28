@@ -28,19 +28,23 @@ func NewCouponQueryService() *CouponQueryService {
 }
 
 func (pq *CouponQueryService) GetByID(id uuid.UUID) (*entity.Coupon, error) {
-	coupon, err := models.FindCoupon(context.Background(), pq.db, id.String())
+	coupon, err := models.Coupons(
+		models.CouponWhere.ID.EQ(id.String()),
+		qm.Load(models.CouponRels.CouponNotice),
+		qm.Load(models.CouponRels.CouponStore),
+	).One(context.Background(), pq.db)
 	if err != nil {
 		return nil, err
 	}
-	if err == sql.ErrNoRows {
+	if coupon == nil {
 		return nil, nil
 	}
-	sotres, err := coupon.CouponStore(qm.Load(models.CouponStoreRels.Store)).All(context.Background(), pq.db)
+	stores, err := coupon.CouponStore(qm.Load(models.CouponStoreRels.Store)).All(context.Background(), pq.db)
 	if err != nil {
 		return nil, err
 	}
 	var TargetStores []*entity.Store
-	for _, store := range sotres {
+	for _, store := range stores {
 		TargetStores = append(TargetStores, StoreModelToEntity(store.R.Store, nil))
 	}
 
@@ -62,7 +66,7 @@ func (pq *CouponQueryService) GetCouponListByType(couponType entity.CouponType, 
 	if err != nil {
 		return nil, err
 	}
-	if err == sql.ErrNoRows {
+	if coupons == nil {
 		return nil, nil
 	}
 	var result []*entity.Coupon
@@ -74,7 +78,7 @@ func (pq *CouponQueryService) GetCouponListByType(couponType entity.CouponType, 
 
 func (pq *CouponQueryService) GetCouponByType(couponType entity.CouponType) (*entity.Coupon, error) {
 	coupon, err := models.Coupons(models.CouponWhere.CouponType.EQ(couponType.ToInt())).One(context.Background(), pq.db)
-	if err == sql.ErrNoRows {
+	if coupon == nil {
 		return nil, nil
 	}
 
@@ -82,12 +86,17 @@ func (pq *CouponQueryService) GetCouponByType(couponType entity.CouponType) (*en
 		return nil, err
 	}
 
-	sotres, err := coupon.CouponStore(qm.Load(models.CouponStoreRels.Store)).All(context.Background(), pq.db)
+	stores, err := coupon.CouponStore(qm.Load(models.CouponStoreRels.Store)).All(context.Background(), pq.db)
 	if err != nil {
 		return nil, err
 	}
+
+	if stores != nil {
+		return nil, nil
+	}
+
 	var TargetStores []*entity.Store
-	for _, store := range sotres {
+	for _, store := range stores {
 		TargetStores = append(TargetStores, StoreModelToEntity(store.R.Store, nil))
 	}
 

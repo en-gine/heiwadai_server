@@ -9,6 +9,7 @@ import (
 	"server/db/models"
 
 	"github.com/google/uuid"
+	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
 var _ queryservice.IBookQueryService = &BookQueryService{}
@@ -26,11 +27,16 @@ func NewBookQueryService() *BookQueryService {
 }
 
 func (pq *BookQueryService) GetByID(bookID uuid.UUID) (*entity.Booking, error) {
-	book, err := models.FindUserBook(context.Background(), pq.db, bookID.String())
+	// book, err := models.FindUserBook(context.Background(), pq.db, bookID.String())
+	book, err := models.UserBooks(
+		models.UserBookWhere.ID.EQ(bookID.String()),
+		qm.Load(models.UserBookRels.GuestDatum),
+		qm.Load(models.UserBookRels.BookPlan),
+	).One(context.Background(), pq.db)
 	if err != nil {
 		return nil, err
 	}
-	if err == sql.ErrNoRows {
+	if book == nil {
 		return nil, nil
 	}
 	guest := book.R.GuestDatum
@@ -40,7 +46,10 @@ func (pq *BookQueryService) GetByID(bookID uuid.UUID) (*entity.Booking, error) {
 }
 
 func (pq *BookQueryService) GetMyBooking(userID uuid.UUID) ([]*entity.Booking, error) {
-	books, err := models.UserBooks(models.UserBookWhere.BookUserID.EQ(userID.String())).All(context.Background(), pq.db)
+	books, err := models.UserBooks(
+		models.UserBookWhere.BookUserID.EQ(userID.String()),
+		qm.Load(models.UserBookRels.GuestDatum),
+		qm.Load(models.UserBookRels.BookPlan)).All(context.Background(), pq.db)
 	var entities []*entity.Booking
 	for _, book := range books {
 		guest := book.R.GuestDatum
@@ -54,7 +63,7 @@ func (pq *BookQueryService) GetMyBooking(userID uuid.UUID) ([]*entity.Booking, e
 	if err != nil {
 		return nil, err
 	}
-	if err == sql.ErrNoRows {
+	if books == nil {
 		return nil, nil
 	}
 	return entities, nil

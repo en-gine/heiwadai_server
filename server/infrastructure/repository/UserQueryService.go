@@ -29,11 +29,15 @@ func NewUserQueryService() *UserQueryService {
 }
 
 func (pq *UserQueryService) GetByID(id uuid.UUID) (*entity.User, error) {
-	user, err := models.FindUserDatum(context.Background(), pq.db, id.String())
+	// user, err := models.FindUserDatum(context.Background(), pq.db, id.String())
+	user, err := models.UserData(
+		models.UserDatumWhere.UserID.EQ(id.String()),
+		qm.Load(models.UserDatumRels.User),
+	).One(context.Background(), pq.db)
 	if err != nil {
 		return nil, err
 	}
-	if err == sql.ErrNoRows {
+	if user == nil {
 		return nil, nil
 	}
 	return UserModelToEntity(user, user.R.User.Email), nil
@@ -44,7 +48,7 @@ func (pq *UserQueryService) GetOptionByID(id uuid.UUID) (*entity.UserOption, err
 	if err != nil {
 		return nil, err
 	}
-	if err == sql.ErrNoRows {
+	if option == nil {
 		return nil, nil
 	}
 	return &entity.UserOption{
@@ -54,8 +58,9 @@ func (pq *UserQueryService) GetOptionByID(id uuid.UUID) (*entity.UserOption, err
 }
 
 func (pq *UserQueryService) GetByMail(mail string) (*entity.User, error) {
-	usermanager, err := models.UserManagers(models.UserManagerWhere.Email.EQ(mail)).One(context.Background(), pq.db)
-	if err == sql.ErrNoRows {
+	usermanager, err := models.UserManagers(models.UserManagerWhere.Email.EQ(mail), qm.Load(models.UserManagerRels.UserUserDatum), models.UserManagerWhere.IsAdmin.EQ(false)).One(context.Background(), pq.db)
+
+	if usermanager == nil {
 		return nil, nil
 	}
 
@@ -70,14 +75,15 @@ func (pq *UserQueryService) GetMailOKUser(prefectures *[]entity.Prefecture) ([]*
 	var users []*models.UserDatum
 	var err error
 
-	qm := GetMailUserWhereMods(prefectures)
-	users, err = models.UserData(qm...).All(context.Background(), pq.db)
+	queryMods := GetMailUserWhereMods(prefectures)
+	queryMods = append(queryMods, qm.Load(models.UserDatumRels.User))
+	users, err = models.UserData(queryMods...).All(context.Background(), pq.db)
 
 	if err != nil {
 		return nil, err
 	}
 
-	if err == sql.ErrNoRows {
+	if users == nil {
 		return nil, nil
 	}
 	var entities []*entity.User
@@ -91,18 +97,14 @@ func (pq *UserQueryService) GetMailOKUser(prefectures *[]entity.Prefecture) ([]*
 func (pq *UserQueryService) GetMailOKUserCount(prefectures *[]entity.Prefecture) (*int, error) {
 	var err error
 	var count int
-	qm := GetMailUserWhereMods(prefectures)
-	int64Count, err := models.UserData(qm...).Count(context.Background(), pq.db)
+	queryMods := GetMailUserWhereMods(prefectures)
+	int64Count, err := models.UserData(queryMods...).Count(context.Background(), pq.db)
 	count = int(int64Count)
 
 	if err != nil {
 		return nil, err
 	}
 
-	if err == sql.ErrNoRows {
-		count = 0
-		return &count, nil
-	}
 	return &count, nil
 }
 
@@ -151,7 +153,7 @@ func (pq *UserQueryService) GetList(query *types.UserQuery, pager *types.PageQue
 	if err != nil {
 		return nil, nil, err
 	}
-	if err == sql.ErrNoRows {
+	if userdata == nil {
 		return nil, nil, nil
 	}
 	var result []*entity.UserWichLastCheckin
@@ -173,9 +175,6 @@ func (pq *UserQueryService) GetList(query *types.UserQuery, pager *types.PageQue
 	count, err := models.UserData(firstNameQuery, lastNameQuery, firstNameKanaQuery, lastNameKanaQuery, prefectureQuery).Count(context.Background(), pq.db)
 	if err != nil {
 		return nil, nil, err
-	}
-	if err == sql.ErrNoRows {
-		return nil, nil, nil
 	}
 
 	var pageResponse *types.PageResponse = nil

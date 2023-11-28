@@ -32,7 +32,7 @@ func (pq *MailMagazineQueryService) GetByID(id uuid.UUID) (*entity.MailMagazine,
 	if err != nil {
 		return nil, err
 	}
-	if err == sql.ErrNoRows {
+	if mgz == nil {
 		return nil, nil
 	}
 	return MailMagazineModelToEntity(mgz), nil

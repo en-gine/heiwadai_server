@@ -33,7 +33,7 @@ func (pq *MessageQueryService) GetByID(id uuid.UUID) (*entity.Message, error) {
 	if err != nil {
 		return nil, err
 	}
-	if err == sql.ErrNoRows {
+	if mgz == nil {
 		return nil, nil
 	}
 	return MessageModelToEntity(mgz), nil

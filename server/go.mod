@@ -15,6 +15,7 @@ require (
 	github.com/ktnyt/go-moji v1.0.0
 	github.com/lib/pq v1.10.9
 	github.com/patrickmn/go-cache v2.1.0+incompatible
+	github.com/rs/cors v1.10.1
 	github.com/spf13/viper v1.12.0
 	github.com/volatiletech/null/v8 v8.1.2
 	github.com/volatiletech/randomize v0.0.1

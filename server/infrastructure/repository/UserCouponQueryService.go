@@ -29,13 +29,15 @@ func NewUserCouponQueryService() *UserCouponQueryService {
 }
 
 func (pq *UserCouponQueryService) GetByID(userID uuid.UUID, couponID uuid.UUID) (*entity.UserAttachedCoupon, error) {
-	userCoupon, err := models.FindCouponAttachedUser(context.Background(), pq.db, couponID.String(), userID.String())
+	// userCoupon, err := models.FindCouponAttachedUser(context.Background(), pq.db, couponID.String(), userID.String())
+	userCoupon, err := models.CouponAttachedUsers(
+		models.CouponAttachedUserWhere.UserID.EQ(userID.String()),
+		qm.Load(models.CouponAttachedUserRels.Coupon),
+		models.CouponAttachedUserWhere.CouponID.EQ(couponID.String())).One(context.Background(), pq.db)
 	if err != nil {
 		return nil, err
 	}
-	if err == sql.ErrNoRows {
-		return nil, errors.New("該当のクーポンが見つかりません。")
-	}
+
 	if userCoupon == nil {
 		return nil, errors.New("該当のクーポンIDが見つかりません。")
 	}
@@ -52,11 +54,13 @@ func (pq *UserCouponQueryService) GetByID(userID uuid.UUID, couponID uuid.UUID) 
 }
 
 func (pq *UserCouponQueryService) GetActiveAll(userID uuid.UUID) ([]*entity.UserAttachedCoupon, error) {
-	userCoupons, err := models.CouponAttachedUsers(models.CouponAttachedUserWhere.UserID.EQ(userID.String()), models.CouponAttachedUserWhere.UsedAt.IsNull()).All(context.Background(), pq.db)
+	userCoupons, err := models.CouponAttachedUsers(models.CouponAttachedUserWhere.UserID.EQ(userID.String()),
+		qm.Load(models.CouponAttachedUserRels.Coupon),
+		models.CouponAttachedUserWhere.UsedAt.IsNull()).All(context.Background(), pq.db)
 	if err != nil {
 		return nil, err
 	}
-	if err == sql.ErrNoRows {
+	if userCoupons == nil {
 		return nil, nil
 	}
 
@@ -75,11 +79,13 @@ func (pq *UserCouponQueryService) GetActiveAll(userID uuid.UUID) ([]*entity.User
 }
 
 func (pq *UserCouponQueryService) GetAll(userID uuid.UUID, pager *types.PageQuery) ([]*entity.UserAttachedCoupon, error) {
-	userCoupons, err := models.CouponAttachedUsers(models.CouponAttachedUserWhere.UserID.EQ(userID.String()), qm.Limit(pager.Limit()), qm.Offset(pager.Offset())).All(context.Background(), pq.db)
+	userCoupons, err := models.CouponAttachedUsers(models.CouponAttachedUserWhere.UserID.EQ(userID.String()),
+		qm.Load(models.CouponAttachedUserRels.Coupon),
+		qm.Limit(pager.Limit()), qm.Offset(pager.Offset())).All(context.Background(), pq.db)
 	if err != nil {
 		return nil, err
 	}
-	if err == sql.ErrNoRows {
+	if userCoupons == nil {
 		return nil, nil
 	}
 	var result []*entity.UserAttachedCoupon
