@@ -144,3 +144,17 @@ func (u *AuthUsecase) UpdateEmail(
 	}
 	return nil
 }
+
+func (u *AuthUsecase) Refresh(
+	Token string,
+	RefreshToken string,
+) (*types.Token, error) {
+	tkn, err := u.authAction.Refresh(Token, RefreshToken)
+	if err != nil {
+		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
+	}
+	if tkn == nil {
+		return nil, errors.NewDomainError(errors.RepositoryError, "トークンの取得に失敗しました")
+	}
+	return tkn, nil
+}

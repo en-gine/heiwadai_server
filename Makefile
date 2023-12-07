@@ -13,7 +13,10 @@ restart:
 	docker compose restart
 
 run: 
-	docker compose exec server go run main.go
+	docker compose exec server go run .
+
+buf: 
+	docker compose exec server buf generate
 
 reload-env:
 	docker-compose --env-file .env up -d

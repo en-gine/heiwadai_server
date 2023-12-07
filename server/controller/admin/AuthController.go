@@ -108,3 +108,16 @@ func (ac *AuthController) UpdateEmail(ctx context.Context, req *connect.Request[
 	}
 	return connect.NewResponse(&emptypb.Empty{}), nil
 }
+
+func (ac *AuthController) Refresh(ctx context.Context, req *connect.Request[admin.AdminRefreshTokenRequest]) (*connect.Response[emptypb.Empty], error) {
+	msg := req.Msg
+	token := ctx.Value("token").(string)
+	if token == "" {
+		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("ログインが必要です。"))
+	}
+	_, err := ac.authUseCase.Refresh(token, msg.RefreshToken)
+	if err != nil {
+		return nil, connect.NewError(connect.CodeUnavailable, errors.New("トークンの再取得に失敗しました。"))
+	}
+	return connect.NewResponse(&emptypb.Empty{}), nil
+}
