@@ -61,7 +61,7 @@ type AuthControllerClient interface {
 	SignUp(context.Context, *connect_go.Request[user.UserAuthRequest]) (*connect_go.Response[emptypb.Empty], error)
 	SignIn(context.Context, *connect_go.Request[user.UserAuthRequest]) (*connect_go.Response[user.UserAuthResponse], error)
 	SignOut(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[emptypb.Empty], error)
-	Refresh(context.Context, *connect_go.Request[user.RefreshTokenRequest]) (*connect_go.Response[emptypb.Empty], error)
+	Refresh(context.Context, *connect_go.Request[user.RefreshTokenRequest]) (*connect_go.Response[user.UserAuthResponse], error)
 	ResetPasswordMail(context.Context, *connect_go.Request[user.ResetPasswordRequest]) (*connect_go.Response[emptypb.Empty], error)
 	UpdatePassword(context.Context, *connect_go.Request[user.UpdatePasswordRequest]) (*connect_go.Response[emptypb.Empty], error)
 	UpdateEmail(context.Context, *connect_go.Request[user.UpdateEmailRequest]) (*connect_go.Response[emptypb.Empty], error)
@@ -97,7 +97,7 @@ func NewAuthControllerClient(httpClient connect_go.HTTPClient, baseURL string, o
 			baseURL+AuthControllerSignOutProcedure,
 			opts...,
 		),
-		refresh: connect_go.NewClient[user.RefreshTokenRequest, emptypb.Empty](
+		refresh: connect_go.NewClient[user.RefreshTokenRequest, user.UserAuthResponse](
 			httpClient,
 			baseURL+AuthControllerRefreshProcedure,
 			opts...,
@@ -126,7 +126,7 @@ type authControllerClient struct {
 	signUp            *connect_go.Client[user.UserAuthRequest, emptypb.Empty]
 	signIn            *connect_go.Client[user.UserAuthRequest, user.UserAuthResponse]
 	signOut           *connect_go.Client[emptypb.Empty, emptypb.Empty]
-	refresh           *connect_go.Client[user.RefreshTokenRequest, emptypb.Empty]
+	refresh           *connect_go.Client[user.RefreshTokenRequest, user.UserAuthResponse]
 	resetPasswordMail *connect_go.Client[user.ResetPasswordRequest, emptypb.Empty]
 	updatePassword    *connect_go.Client[user.UpdatePasswordRequest, emptypb.Empty]
 	updateEmail       *connect_go.Client[user.UpdateEmailRequest, emptypb.Empty]
@@ -153,7 +153,7 @@ func (c *authControllerClient) SignOut(ctx context.Context, req *connect_go.Requ
 }
 
 // Refresh calls server.user.AuthController.Refresh.
-func (c *authControllerClient) Refresh(ctx context.Context, req *connect_go.Request[user.RefreshTokenRequest]) (*connect_go.Response[emptypb.Empty], error) {
+func (c *authControllerClient) Refresh(ctx context.Context, req *connect_go.Request[user.RefreshTokenRequest]) (*connect_go.Response[user.UserAuthResponse], error) {
 	return c.refresh.CallUnary(ctx, req)
 }
 
@@ -178,7 +178,7 @@ type AuthControllerHandler interface {
 	SignUp(context.Context, *connect_go.Request[user.UserAuthRequest]) (*connect_go.Response[emptypb.Empty], error)
 	SignIn(context.Context, *connect_go.Request[user.UserAuthRequest]) (*connect_go.Response[user.UserAuthResponse], error)
 	SignOut(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[emptypb.Empty], error)
-	Refresh(context.Context, *connect_go.Request[user.RefreshTokenRequest]) (*connect_go.Response[emptypb.Empty], error)
+	Refresh(context.Context, *connect_go.Request[user.RefreshTokenRequest]) (*connect_go.Response[user.UserAuthResponse], error)
 	ResetPasswordMail(context.Context, *connect_go.Request[user.ResetPasswordRequest]) (*connect_go.Response[emptypb.Empty], error)
 	UpdatePassword(context.Context, *connect_go.Request[user.UpdatePasswordRequest]) (*connect_go.Response[emptypb.Empty], error)
 	UpdateEmail(context.Context, *connect_go.Request[user.UpdateEmailRequest]) (*connect_go.Response[emptypb.Empty], error)
@@ -273,7 +273,7 @@ func (UnimplementedAuthControllerHandler) SignOut(context.Context, *connect_go.R
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.AuthController.SignOut is not implemented"))
 }
 
-func (UnimplementedAuthControllerHandler) Refresh(context.Context, *connect_go.Request[user.RefreshTokenRequest]) (*connect_go.Response[emptypb.Empty], error) {
+func (UnimplementedAuthControllerHandler) Refresh(context.Context, *connect_go.Request[user.RefreshTokenRequest]) (*connect_go.Response[user.UserAuthResponse], error) {
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.AuthController.Refresh is not implemented"))
 }
 

@@ -76,9 +76,9 @@ func NewAuthentificatable(AuthClient action.IAuthAction, UserDataQuery queryserv
 			res, err := next(ctx, req)
 
 			if Token != nil {
-				res.Header().Set("AccessToken:", Token.AccessToken)
-				res.Header().Set("RefreshToken:", *Token.RefreshToken)
-				res.Header().Set("Expire:", strconv.Itoa(*Token.ExpiresIn))
+				res.Header().Set("AccessToken", Token.AccessToken)
+				res.Header().Set("RefreshToken", *Token.RefreshToken)
+				res.Header().Set("Expire", strconv.Itoa(*Token.ExpiresIn))
 			}
 			return res, err
 		})
