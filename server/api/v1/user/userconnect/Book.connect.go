@@ -48,9 +48,13 @@ const (
 
 // BookControllerClient is a client for the server.user.BookController service.
 type BookControllerClient interface {
+	// 現在の自身の予約状況
 	GetMyBook(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[user.BooksResponse], error)
+	// 現在の自身の特定の予約の詳細を取得
 	GetBookByID(context.Context, *connect_go.Request[user.BookIDRequest]) (*connect_go.Response[user.BookResponse], error)
+	// 予約のキャンセル
 	Cancel(context.Context, *connect_go.Request[user.BookIDRequest]) (*connect_go.Response[emptypb.Empty], error)
+	// 予約情報からプランの予約
 	Reserve(context.Context, *connect_go.Request[user.ReserveRequest]) (*connect_go.Response[emptypb.Empty], error)
 }
 
@@ -117,9 +121,13 @@ func (c *bookControllerClient) Reserve(ctx context.Context, req *connect_go.Requ
 
 // BookControllerHandler is an implementation of the server.user.BookController service.
 type BookControllerHandler interface {
+	// 現在の自身の予約状況
 	GetMyBook(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[user.BooksResponse], error)
+	// 現在の自身の特定の予約の詳細を取得
 	GetBookByID(context.Context, *connect_go.Request[user.BookIDRequest]) (*connect_go.Response[user.BookResponse], error)
+	// 予約のキャンセル
 	Cancel(context.Context, *connect_go.Request[user.BookIDRequest]) (*connect_go.Response[emptypb.Empty], error)
+	// 予約情報からプランの予約
 	Reserve(context.Context, *connect_go.Request[user.ReserveRequest]) (*connect_go.Response[emptypb.Empty], error)
 }
 

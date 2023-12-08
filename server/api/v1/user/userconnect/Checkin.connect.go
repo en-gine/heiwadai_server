@@ -44,7 +44,9 @@ const (
 
 // CheckinControllerClient is a client for the server.user.CheckinController service.
 type CheckinControllerClient interface {
+	// 自身のスタンプカード取得（現在のチェックイン済情報と店舗のスタンプ画像が届く）
 	GetStampCard(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[user.StampCardResponse], error)
+	// 店舗に対するチェックイン（QRコード利用）
 	Checkin(context.Context, *connect_go.Request[user.CheckinRequest]) (*connect_go.Response[user.CheckinResponse], error)
 }
 
@@ -89,7 +91,9 @@ func (c *checkinControllerClient) Checkin(ctx context.Context, req *connect_go.R
 
 // CheckinControllerHandler is an implementation of the server.user.CheckinController service.
 type CheckinControllerHandler interface {
+	// 自身のスタンプカード取得（現在のチェックイン済情報と店舗のスタンプ画像が届く）
 	GetStampCard(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[user.StampCardResponse], error)
+	// 店舗に対するチェックイン（QRコード利用）
 	Checkin(context.Context, *connect_go.Request[user.CheckinRequest]) (*connect_go.Response[user.CheckinResponse], error)
 }
 

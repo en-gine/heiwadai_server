@@ -34,17 +34,19 @@ const (
 // reflection-formatted method names, remove the leading slash and convert the remaining slash to a
 // period.
 const (
+	// PostControllerGetPostsProcedure is the fully-qualified name of the PostController's GetPosts RPC.
+	PostControllerGetPostsProcedure = "/server.user.PostController/GetPosts"
 	// PostControllerGetPostByIDProcedure is the fully-qualified name of the PostController's
 	// GetPostByID RPC.
 	PostControllerGetPostByIDProcedure = "/server.user.PostController/GetPostByID"
-	// PostControllerGetPostsProcedure is the fully-qualified name of the PostController's GetPosts RPC.
-	PostControllerGetPostsProcedure = "/server.user.PostController/GetPosts"
 )
 
 // PostControllerClient is a client for the server.user.PostController service.
 type PostControllerClient interface {
-	GetPostByID(context.Context, *connect_go.Request[user.PostRequest]) (*connect_go.Response[user.PostResponse], error)
+	// お知らせ一覧を取得
 	GetPosts(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[user.PostsResponse], error)
+	// お知らせの詳細を取得
+	GetPostByID(context.Context, *connect_go.Request[user.PostRequest]) (*connect_go.Response[user.PostResponse], error)
 }
 
 // NewPostControllerClient constructs a client for the server.user.PostController service. By
@@ -57,14 +59,14 @@ type PostControllerClient interface {
 func NewPostControllerClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) PostControllerClient {
 	baseURL = strings.TrimRight(baseURL, "/")
 	return &postControllerClient{
-		getPostByID: connect_go.NewClient[user.PostRequest, user.PostResponse](
-			httpClient,
-			baseURL+PostControllerGetPostByIDProcedure,
-			opts...,
-		),
 		getPosts: connect_go.NewClient[emptypb.Empty, user.PostsResponse](
 			httpClient,
 			baseURL+PostControllerGetPostsProcedure,
+			opts...,
+		),
+		getPostByID: connect_go.NewClient[user.PostRequest, user.PostResponse](
+			httpClient,
+			baseURL+PostControllerGetPostByIDProcedure,
 			opts...,
 		),
 	}
@@ -72,13 +74,8 @@ func NewPostControllerClient(httpClient connect_go.HTTPClient, baseURL string, o
 
 // postControllerClient implements PostControllerClient.
 type postControllerClient struct {
-	getPostByID *connect_go.Client[user.PostRequest, user.PostResponse]
 	getPosts    *connect_go.Client[emptypb.Empty, user.PostsResponse]
-}
-
-// GetPostByID calls server.user.PostController.GetPostByID.
-func (c *postControllerClient) GetPostByID(ctx context.Context, req *connect_go.Request[user.PostRequest]) (*connect_go.Response[user.PostResponse], error) {
-	return c.getPostByID.CallUnary(ctx, req)
+	getPostByID *connect_go.Client[user.PostRequest, user.PostResponse]
 }
 
 // GetPosts calls server.user.PostController.GetPosts.
@@ -86,10 +83,17 @@ func (c *postControllerClient) GetPosts(ctx context.Context, req *connect_go.Req
 	return c.getPosts.CallUnary(ctx, req)
 }
 
+// GetPostByID calls server.user.PostController.GetPostByID.
+func (c *postControllerClient) GetPostByID(ctx context.Context, req *connect_go.Request[user.PostRequest]) (*connect_go.Response[user.PostResponse], error) {
+	return c.getPostByID.CallUnary(ctx, req)
+}
+
 // PostControllerHandler is an implementation of the server.user.PostController service.
 type PostControllerHandler interface {
-	GetPostByID(context.Context, *connect_go.Request[user.PostRequest]) (*connect_go.Response[user.PostResponse], error)
+	// お知らせ一覧を取得
 	GetPosts(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[user.PostsResponse], error)
+	// お知らせの詳細を取得
+	GetPostByID(context.Context, *connect_go.Request[user.PostRequest]) (*connect_go.Response[user.PostResponse], error)
 }
 
 // NewPostControllerHandler builds an HTTP handler from the service implementation. It returns the
@@ -98,22 +102,22 @@ type PostControllerHandler interface {
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
 func NewPostControllerHandler(svc PostControllerHandler, opts ...connect_go.HandlerOption) (string, http.Handler) {
-	postControllerGetPostByIDHandler := connect_go.NewUnaryHandler(
-		PostControllerGetPostByIDProcedure,
-		svc.GetPostByID,
-		opts...,
-	)
 	postControllerGetPostsHandler := connect_go.NewUnaryHandler(
 		PostControllerGetPostsProcedure,
 		svc.GetPosts,
 		opts...,
 	)
+	postControllerGetPostByIDHandler := connect_go.NewUnaryHandler(
+		PostControllerGetPostByIDProcedure,
+		svc.GetPostByID,
+		opts...,
+	)
 	return "/server.user.PostController/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
-		case PostControllerGetPostByIDProcedure:
-			postControllerGetPostByIDHandler.ServeHTTP(w, r)
 		case PostControllerGetPostsProcedure:
 			postControllerGetPostsHandler.ServeHTTP(w, r)
+		case PostControllerGetPostByIDProcedure:
+			postControllerGetPostByIDHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -123,10 +127,10 @@ func NewPostControllerHandler(svc PostControllerHandler, opts ...connect_go.Hand
 // UnimplementedPostControllerHandler returns CodeUnimplemented from all methods.
 type UnimplementedPostControllerHandler struct{}
 
-func (UnimplementedPostControllerHandler) GetPostByID(context.Context, *connect_go.Request[user.PostRequest]) (*connect_go.Response[user.PostResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.PostController.GetPostByID is not implemented"))
-}
-
 func (UnimplementedPostControllerHandler) GetPosts(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[user.PostsResponse], error) {
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.PostController.GetPosts is not implemented"))
+}
+
+func (UnimplementedPostControllerHandler) GetPostByID(context.Context, *connect_go.Request[user.PostRequest]) (*connect_go.Response[user.PostResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.PostController.GetPostByID is not implemented"))
 }

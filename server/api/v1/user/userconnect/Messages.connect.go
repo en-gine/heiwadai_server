@@ -40,6 +40,7 @@ const (
 
 // MessageControllerClient is a client for the server.user.MessageController service.
 type MessageControllerClient interface {
+	// 　ポップアップメッセージのリストを取得する（最後に取得したIDを元にリクエスト）
 	GetMessagesAfter(context.Context, *connect_go.Request[user.MessageRequest]) (*connect_go.Response[user.MessagesResponse], error)
 }
 
@@ -73,6 +74,7 @@ func (c *messageControllerClient) GetMessagesAfter(ctx context.Context, req *con
 
 // MessageControllerHandler is an implementation of the server.user.MessageController service.
 type MessageControllerHandler interface {
+	// 　ポップアップメッセージのリストを取得する（最後に取得したIDを元にリクエスト）
 	GetMessagesAfter(context.Context, *connect_go.Request[user.MessageRequest]) (*connect_go.Response[user.MessagesResponse], error)
 }
 

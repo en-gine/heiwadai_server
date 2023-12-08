@@ -40,6 +40,7 @@ const (
 
 // UserDataControllerClient is a client for the server.user.UserDataController service.
 type UserDataControllerClient interface {
+	// ユーザー情報の更新
 	Update(context.Context, *connect_go.Request[user.UserUpdateDataRequest]) (*connect_go.Response[user.UserDataResponse], error)
 }
 
@@ -73,6 +74,7 @@ func (c *userDataControllerClient) Update(ctx context.Context, req *connect_go.R
 
 // UserDataControllerHandler is an implementation of the server.user.UserDataController service.
 type UserDataControllerHandler interface {
+	// ユーザー情報の更新
 	Update(context.Context, *connect_go.Request[user.UserUpdateDataRequest]) (*connect_go.Response[user.UserDataResponse], error)
 }
 

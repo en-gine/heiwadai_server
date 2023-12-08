@@ -41,6 +41,7 @@ const (
 
 // BannerControllerClient is a client for the server.user.BannerController service.
 type BannerControllerClient interface {
+	// TOPバナーの取得 URLと画像URLを配列で返す
 	GetBanner(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[user.BannerResponse], error)
 }
 
@@ -74,6 +75,7 @@ func (c *bannerControllerClient) GetBanner(ctx context.Context, req *connect_go.
 
 // BannerControllerHandler is an implementation of the server.user.BannerController service.
 type BannerControllerHandler interface {
+	// TOPバナーの取得 URLと画像URLを配列で返す
 	GetBanner(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[user.BannerResponse], error)
 }
 

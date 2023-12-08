@@ -49,9 +49,13 @@ const (
 
 // StoreControllerClient is a client for the server.user.StoreController service.
 type StoreControllerClient interface {
+	// 店舗情報の詳細を取得
 	GetByID(context.Context, *connect_go.Request[user.SoreIDRequest]) (*connect_go.Response[shared.Store], error)
+	// 店舗情報の一覧を取得
 	GetAll(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[shared.Stores], error)
+	// ホテル（宿泊可能な店舗）の一覧を取得
 	GetStayables(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[shared.StayableStores], error)
+	// ホテル（宿泊可能な店舗）の詳細を取得
 	GetStayableByID(context.Context, *connect_go.Request[user.SoreIDRequest]) (*connect_go.Response[shared.StayableStore], error)
 }
 
@@ -118,9 +122,13 @@ func (c *storeControllerClient) GetStayableByID(ctx context.Context, req *connec
 
 // StoreControllerHandler is an implementation of the server.user.StoreController service.
 type StoreControllerHandler interface {
+	// 店舗情報の詳細を取得
 	GetByID(context.Context, *connect_go.Request[user.SoreIDRequest]) (*connect_go.Response[shared.Store], error)
+	// 店舗情報の一覧を取得
 	GetAll(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[shared.Stores], error)
+	// ホテル（宿泊可能な店舗）の一覧を取得
 	GetStayables(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[shared.StayableStores], error)
+	// ホテル（宿泊可能な店舗）の詳細を取得
 	GetStayableByID(context.Context, *connect_go.Request[user.SoreIDRequest]) (*connect_go.Response[shared.StayableStore], error)
 }
 

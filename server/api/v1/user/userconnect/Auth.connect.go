@@ -57,13 +57,21 @@ const (
 
 // AuthControllerClient is a client for the server.user.AuthController service.
 type AuthControllerClient interface {
+	// 初回ユーザー登録
 	Register(context.Context, *connect_go.Request[user.UserRegisterRequest]) (*connect_go.Response[emptypb.Empty], error)
+	// ユーザー登録後にメールアドレスの確認が完了し、パスワードを設定する
 	SignUp(context.Context, *connect_go.Request[user.UserAuthRequest]) (*connect_go.Response[emptypb.Empty], error)
+	// ログイン
 	SignIn(context.Context, *connect_go.Request[user.UserAuthRequest]) (*connect_go.Response[user.UserAuthResponse], error)
+	// ログアウト
 	SignOut(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[emptypb.Empty], error)
+	// リフレッシュトークンを使ってアクセストークンを更新する（通常は通信ヘッダーを用いて自動でリフレッシュしている）
 	Refresh(context.Context, *connect_go.Request[user.RefreshTokenRequest]) (*connect_go.Response[user.UserAuthResponse], error)
+	// パスワードリセット用メール送信
 	ResetPasswordMail(context.Context, *connect_go.Request[user.ResetPasswordRequest]) (*connect_go.Response[emptypb.Empty], error)
+	// パスワードアップデート
 	UpdatePassword(context.Context, *connect_go.Request[user.UpdatePasswordRequest]) (*connect_go.Response[emptypb.Empty], error)
+	// メールアドレス更新（認証メールが飛ぶ）
 	UpdateEmail(context.Context, *connect_go.Request[user.UpdateEmailRequest]) (*connect_go.Response[emptypb.Empty], error)
 }
 
@@ -174,13 +182,21 @@ func (c *authControllerClient) UpdateEmail(ctx context.Context, req *connect_go.
 
 // AuthControllerHandler is an implementation of the server.user.AuthController service.
 type AuthControllerHandler interface {
+	// 初回ユーザー登録
 	Register(context.Context, *connect_go.Request[user.UserRegisterRequest]) (*connect_go.Response[emptypb.Empty], error)
+	// ユーザー登録後にメールアドレスの確認が完了し、パスワードを設定する
 	SignUp(context.Context, *connect_go.Request[user.UserAuthRequest]) (*connect_go.Response[emptypb.Empty], error)
+	// ログイン
 	SignIn(context.Context, *connect_go.Request[user.UserAuthRequest]) (*connect_go.Response[user.UserAuthResponse], error)
+	// ログアウト
 	SignOut(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[emptypb.Empty], error)
+	// リフレッシュトークンを使ってアクセストークンを更新する（通常は通信ヘッダーを用いて自動でリフレッシュしている）
 	Refresh(context.Context, *connect_go.Request[user.RefreshTokenRequest]) (*connect_go.Response[user.UserAuthResponse], error)
+	// パスワードリセット用メール送信
 	ResetPasswordMail(context.Context, *connect_go.Request[user.ResetPasswordRequest]) (*connect_go.Response[emptypb.Empty], error)
+	// パスワードアップデート
 	UpdatePassword(context.Context, *connect_go.Request[user.UpdatePasswordRequest]) (*connect_go.Response[emptypb.Empty], error)
+	// メールアドレス更新（認証メールが飛ぶ）
 	UpdateEmail(context.Context, *connect_go.Request[user.UpdateEmailRequest]) (*connect_go.Response[emptypb.Empty], error)
 }
 
