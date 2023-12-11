@@ -111,7 +111,7 @@ func (ac *AuthController) UpdateEmail(ctx context.Context, req *connect.Request[
 
 func (ac *AuthController) Refresh(ctx context.Context, req *connect.Request[admin.AdminRefreshTokenRequest]) (*connect.Response[admin.AdminAuthResponse], error) {
 	msg := req.Msg
-	token := ctx.Value("token").(string)
+	token := msg.AccessToken
 	if token == "" {
 		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("ログインが必要です。"))
 	}

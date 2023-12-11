@@ -3,11 +3,12 @@ package router
 import (
 	"context"
 	"errors"
-	"strconv"
-	"strings"
-
+	"fmt"
 	"server/core/infra/action"
 	queryservice "server/core/infra/queryService"
+	"server/infrastructure/env"
+	"strconv"
+	"strings"
 
 	"github.com/bufbuild/connect-go"
 )
@@ -74,6 +75,11 @@ func NewAuthentificatable(AuthClient action.IAuthAction, UserDataQuery queryserv
 			ctx = context.WithValue(ctx, UserIDKey, id)
 
 			res, err := next(ctx, req)
+
+			if env.EnvMode == "dev" {
+				fmt.Printf("request: \n%s", req)
+				fmt.Printf("response: \n%s", res)
+			}
 
 			if Token != nil {
 				res.Header().Set("AccessToken", Token.AccessToken)
