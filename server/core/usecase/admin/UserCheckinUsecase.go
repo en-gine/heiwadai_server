@@ -17,16 +17,19 @@ type UserCheckinUsecase struct {
 
 func NewUserCheckinUsecase(
 	checkInRepository repository.ICheckinRepository,
+	userCheckinQuery queryservice.ICheckinQueryService,
 ) *UserCheckinUsecase {
 	return &UserCheckinUsecase{
 		checkInRepository: checkInRepository,
+		userCheckinQuery:  userCheckinQuery,
 	}
 }
 
 func (u *UserCheckinUsecase) GetAllRecent(limit int) ([]*entity.Checkin, *errors.DomainError) {
-	pager := &types.PageQuery{
-		PerPage: &limit,
-	}
+	pager := types.NewPageQuery(
+		nil,
+		&limit,
+	)
 	checkins, err := u.userCheckinQuery.GetAllUserAllCheckin(pager)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())

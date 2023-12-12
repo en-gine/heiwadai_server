@@ -4,11 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strconv"
+	"strings"
+
 	"server/core/infra/action"
 	queryservice "server/core/infra/queryService"
 	"server/infrastructure/env"
-	"strconv"
-	"strings"
 
 	"github.com/bufbuild/connect-go"
 )
@@ -36,11 +37,14 @@ func NewAuthentificatable(AuthClient action.IAuthAction, UserDataQuery queryserv
 		return connect.UnaryFunc(func(ctx context.Context, req connect.AnyRequest) (connect.AnyResponse, error) {
 			// リクエストヘッダーからTokenを取得する
 			authHeader := req.Header().Get("Authorization")
-			splitToken := strings.Split(authHeader, "Bearer ")
-			if len(splitToken) != 2 {
+			if authHeader == "" {
+				return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("認証ヘッダーが必要なアクセスです。"))
+			}
+
+			bearerToken := strings.Replace(authHeader, "Bearer ", "", 1)
+			if bearerToken == "" {
 				return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("トークンが見つかりません。"))
 			}
-			bearerToken := splitToken[1]
 
 			// リフレッシュトークン取得
 			refreshToken := req.Header().Get("X-Refresh-Token")
@@ -77,8 +81,8 @@ func NewAuthentificatable(AuthClient action.IAuthAction, UserDataQuery queryserv
 			res, err := next(ctx, req)
 
 			if env.EnvMode == "dev" {
-				fmt.Printf("request: \n%s", req)
-				fmt.Printf("response: \n%s", res)
+				fmt.Println(req)
+				fmt.Println(res)
 			}
 
 			if Token != nil {

@@ -55,10 +55,11 @@ func (uc *MessageController) GetList(ctx context.Context, req *connect.Request[a
 		perPage = int(*req.Msg.Pager.PerPage)
 	}
 
-	pager := &types.PageQuery{
-		CurrentPage: &currentPage,
-		PerPage:     &perPage,
-	}
+	pager := types.NewPageQuery(
+		&currentPage,
+		&perPage,
+	)
+
 	entities, domaiErr := uc.messageUseCase.GetList(pager)
 	if domaiErr != nil {
 		return nil, controller.ErrorHandler(domaiErr)

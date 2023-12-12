@@ -39,10 +39,10 @@ func (uc *MailMagazineController) GetList(ctx context.Context, req *connect.Requ
 		perPage = int(*req.Msg.Pager.PerPage)
 	}
 
-	pager := &types.PageQuery{
-		CurrentPage: &currentPage,
-		PerPage:     &perPage,
-	}
+	pager := types.NewPageQuery(
+		&currentPage,
+		&perPage,
+	)
 	entities, domaiErr := uc.magazineUseCase.GetList(pager)
 	if domaiErr != nil {
 		return nil, controller.ErrorHandler(domaiErr)

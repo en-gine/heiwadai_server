@@ -29,6 +29,7 @@ RUN  go mod tidy & \
   go install -v github.com/stamblerre/gocode@latest & \
   go install -v golang.org/x/tools/cmd/goimports@latest & \
   go install -v golang.org/x/tools/gopls@latest & \
+  go install -v github.com/cosmtrek/air@latest & \
   go get github.com/rs/cors
 
 ### For Lint

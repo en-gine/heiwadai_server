@@ -24,6 +24,7 @@ var (
 	mailMagazineLogQuery      = implements.NewMailMagazineLogQueryService()
 	mailMagazineLogRepository = implements.NewMailMagazineLogRepository()
 	checkinRepository         = implements.NewCheckinRepository()
+	userCheckinQuery          = implements.NewCheckinQueryService()
 	sendMailAction            = action.NewSendMailAction()
 	userQuery                 = implements.NewUserQueryService()
 )
@@ -53,5 +54,5 @@ func InitializeStoreUsecase() *usecase.StoreUsecase {
 }
 
 func InitializeUserCheckinUsecase() *usecase.UserCheckinUsecase {
-	return usecase.NewUserCheckinUsecase(checkinRepository)
+	return usecase.NewUserCheckinUsecase(checkinRepository, userCheckinQuery)
 }

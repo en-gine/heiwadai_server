@@ -7,6 +7,10 @@ run:
 	@make lint
 	go run .
 
+dev:
+	@make lint
+	air
+
 lint:
 	golangci-lint run
 
@@ -20,6 +24,7 @@ install-devtools:
 	go install -v golang.org/x/tools/cmd/goimports@latest & \
 	go install -v golang.org/x/tools/gopls@latest & \
 	go install -v github.com/nishanths/exhaustive & \
+	go install -v github.com/cosmtrek/air@latest & \
 	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.54.2
 
 install-buf:

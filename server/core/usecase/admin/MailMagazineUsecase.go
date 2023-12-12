@@ -172,14 +172,14 @@ func (u *MailMagazineUsecase) Send(mailMagazineID uuid.UUID) *errors.DomainError
 	}
 	atFirstUnsent := mgz.UnsentCount
 	for page := 1; page <= pages; page++ {
-		pager := types.PageQuery{
-			CurrentPage: &page,
-			PerPage:     &PerPage,
-		}
+		pager := types.NewPageQuery(
+			&page,
+			&PerPage,
+		)
 
 		prevSend := (page - 1) * 1000 // 一つ前のループまでの送信完了数
 
-		unsentMails, err := u.mailMagazineLogQuery.GetUnsentTargetMails(mailMagazineID, pager)
+		unsentMails, err := u.mailMagazineLogQuery.GetUnsentTargetMails(mailMagazineID, *pager)
 		if err != nil {
 			u.saveUncompleteMailMagazine(mgz, atFirstUnsent-prevSend, prevSend)
 			return errors.NewDomainError(errors.QueryError, err.Error())
@@ -191,7 +191,7 @@ func (u *MailMagazineUsecase) Send(mailMagazineID uuid.UUID) *errors.DomainError
 			return errors.NewDomainError(errors.RepositoryError, err.Error())
 		}
 		// 送信済みに更新
-		err = u.mailMagazineLogRepository.BulkMarkAsSent(mailMagazineID, pager)
+		err = u.mailMagazineLogRepository.BulkMarkAsSent(mailMagazineID, *pager)
 		if err != nil {
 			sendCount := page * 1000 // 送信完了予定数
 			if sendCount > count {

@@ -15,6 +15,9 @@ restart:
 run: 
 	docker compose exec server go run .
 
+dev:
+	docker compose exec server air
+
 buf: 
 	docker compose exec server buf generate
 

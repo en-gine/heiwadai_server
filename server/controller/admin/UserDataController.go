@@ -110,7 +110,10 @@ func (u *UserDataController) GetList(ctx context.Context, req *connect.Request[a
 		Prefecture:    pref,
 	}
 
-	pager := &types.PageQuery{}
+	pager := types.NewPageQuery(
+		nil,
+		nil,
+	)
 
 	users, pageResponse, domainErr := u.userUsecase.GetList(query, pager)
 	if domainErr != nil {
