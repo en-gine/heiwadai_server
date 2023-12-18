@@ -9,5 +9,5 @@ import (
 
 type IMailMagazineQueryService interface {
 	GetByID(id uuid.UUID) (*entity.MailMagazine, error)
-	GetAll(pager *types.PageQuery) ([]*entity.MailMagazine, types.PageResponse, error) // statusは不問
+	GetAll(pager *types.PageQuery) ([]*entity.MailMagazine, *types.PageResponse, error) // statusは不問
 }
