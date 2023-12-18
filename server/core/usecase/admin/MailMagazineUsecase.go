@@ -109,6 +109,15 @@ func (u *MailMagazineUsecase) Update(title *string, content *string, targetPrefe
 	return updateMailMagazine, nil
 }
 
+func (u *MailMagazineUsecase) GetByID(mailMagazineID uuid.UUID) (*entity.MailMagazine, *errors.DomainError) {
+	mgz, err := u.mailMagazineQuery.GetByID(mailMagazineID)
+	if err != nil {
+		return nil, errors.NewDomainError(errors.QueryError, err.Error())
+	}
+
+	return mgz, nil
+}
+
 func (u *MailMagazineUsecase) Delete(mailMagazineID uuid.UUID) *errors.DomainError {
 	deleteMailMagazine, err := u.mailMagazineQuery.GetByID(mailMagazineID)
 	if err != nil {

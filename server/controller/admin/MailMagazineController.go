@@ -83,6 +83,30 @@ func (uc *MailMagazineController) GetList(ctx context.Context, req *connect.Requ
 	return connect.NewResponse(result), nil
 }
 
+func (uc *MailMagazineController) GetByID(ctx context.Context, req *connect.Request[admin.MailMagazineIDRequest]) (*connect.Response[admin.MailMagazine], error) {
+	entity, domaiErr := uc.magazineUseCase.GetByID(uuid.MustParse(req.Msg.ID))
+	if domaiErr != nil {
+		return nil, controller.ErrorHandler(domaiErr)
+	}
+
+	var prefs []shared.Prefecture
+	for _, pref := range *entity.TargetPrefecture {
+		prefs = append(prefs, shared.Prefecture(pref))
+	}
+
+	result := &admin.MailMagazine{
+		ID:                 entity.ID.String(),
+		Title:              entity.Title,
+		Content:            entity.Content,
+		AuthorID:           entity.AuthorID.String(),
+		TargetPrefecture:   prefs,
+		MailMagazineStatus: admin.MailMagazineStatus(entity.MailMagazineStatus),
+		UnsentCount:        int32(entity.UnsentCount),
+		SentCount:          int32(entity.SentCount),
+	}
+	return connect.NewResponse(result), nil
+}
+
 func (uc *MailMagazineController) CreateDraft(ctx context.Context, req *connect.Request[admin.CreateDraftRequest]) (*connect.Response[admin.MailMagazine], error) {
 	adminID := ctx.Value("userID").(uuid.UUID)
 
