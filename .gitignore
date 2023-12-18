@@ -7,3 +7,4 @@
 node_modules
 /server/keys
 /server/log
+/server/tmp
