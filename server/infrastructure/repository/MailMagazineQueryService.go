@@ -38,16 +38,25 @@ func (pq *MailMagazineQueryService) GetByID(id uuid.UUID) (*entity.MailMagazine,
 	return MailMagazineModelToEntity(mgz), nil
 }
 
-func (pq *MailMagazineQueryService) GetAll(pager *types.PageQuery) ([]*entity.MailMagazine, error) {
+func (pq *MailMagazineQueryService) GetAll(pager *types.PageQuery) ([]*entity.MailMagazine, *types.PageResponse, error) {
 	mgzs, err := models.MailMagazines(qm.Limit(pager.Limit()), qm.Offset(pager.Offset())).All(context.Background(), pq.db)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	var result []*entity.MailMagazine
 	for _, mgz := range mgzs {
 		result = append(result, MailMagazineModelToEntity(mgz))
 	}
-	return result, nil
+	count, err := models.MailMagazines().Count(context.Background(), pq.db)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	var pageResponse *types.PageResponse = nil
+	if pager != nil {
+		pageResponse = types.NewPageResponse(pager, int(count))
+	}
+	return result, pageResponse, err
 }
 
 func MailMagazineModelToEntity(mgz *models.MailMagazine) *entity.MailMagazine {

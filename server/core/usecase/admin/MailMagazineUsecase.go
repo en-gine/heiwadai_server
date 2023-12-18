@@ -39,12 +39,12 @@ func NewMailMagazineUsecase(
 	}
 }
 
-func (u *MailMagazineUsecase) GetList(pager *types.PageQuery) ([]*entity.MailMagazine, *errors.DomainError) {
-	mailMagazines, err := u.mailMagazineQuery.GetAll(pager)
+func (u *MailMagazineUsecase) GetList(pager *types.PageQuery) ([]*entity.MailMagazine, *types.PageResponse, *errors.DomainError) {
+	mailMagazines, page, err := u.mailMagazineQuery.GetAll(pager)
 	if err != nil {
-		return nil, errors.NewDomainError(errors.QueryError, err.Error())
+		return nil, nil, errors.NewDomainError(errors.QueryError, err.Error())
 	}
-	return mailMagazines, nil
+	return mailMagazines, page, nil
 }
 
 func (u *MailMagazineUsecase) CreateDraft(title string, content string, targetPrefectures *[]entity.Prefecture, autherID uuid.UUID) (*entity.MailMagazine, *errors.DomainError) {

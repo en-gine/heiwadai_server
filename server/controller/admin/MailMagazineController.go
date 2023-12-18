@@ -43,7 +43,7 @@ func (uc *MailMagazineController) GetList(ctx context.Context, req *connect.Requ
 		&currentPage,
 		&perPage,
 	)
-	entities, domaiErr := uc.magazineUseCase.GetList(pager)
+	entities, pageResponse, domaiErr := uc.magazineUseCase.GetList(pager)
 	if domaiErr != nil {
 		return nil, controller.ErrorHandler(domaiErr)
 	}
@@ -69,8 +69,16 @@ func (uc *MailMagazineController) GetList(ctx context.Context, req *connect.Requ
 		}
 		mailMagazines = append(mailMagazines, magazine)
 	}
+	resPage := &shared.PageResponse{
+		TotalCount:  uint32(pageResponse.TotalCount),
+		CurrentPage: uint32(pageResponse.CurrentPage),
+		PerPage:     uint32(pageResponse.PerPage),
+		TotalPage:   uint32(pageResponse.TotalPage),
+	}
+
 	result := &admin.MailMagazinesResponse{
 		MailMagazines: mailMagazines,
+		PageResponse:  resPage,
 	}
 	return connect.NewResponse(result), nil
 }
