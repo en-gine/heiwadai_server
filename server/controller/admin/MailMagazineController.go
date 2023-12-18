@@ -65,6 +65,7 @@ func (uc *MailMagazineController) GetList(ctx context.Context, req *connect.Requ
 			MailMagazineStatus: admin.MailMagazineStatus(entity.MailMagazineStatus),
 			UnsentCount:        int32(entity.UnsentCount),
 			SentCount:          int32(entity.SentCount),
+			SentAt:             timestamppb.New(entity.CreateAt),
 		}
 		mailMagazines = append(mailMagazines, magazine)
 	}
@@ -94,6 +95,7 @@ func (uc *MailMagazineController) CreateDraft(ctx context.Context, req *connect.
 	if entity.SentAt != nil {
 		sentAt = timestamppb.New(*entity.SentAt)
 	}
+
 	return connect.NewResponse(&admin.MailMagazine{
 		ID:                 entity.ID.String(),
 		Title:              entity.Title,
@@ -104,6 +106,7 @@ func (uc *MailMagazineController) CreateDraft(ctx context.Context, req *connect.
 		UnsentCount:        int32(entity.UnsentCount),
 		SentCount:          int32(entity.SentCount),
 		SentAt:             sentAt,
+		CreateAt:           timestamppb.New(entity.CreateAt),
 	}), nil
 }
 
