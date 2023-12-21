@@ -47,7 +47,6 @@ func NewAuthentificatable(AuthClient action.IAuthAction, UserDataQuery queryserv
 			}
 
 			// リフレッシュトークン取得
-			fmt.Println(req.Header())
 			refreshToken := req.Header().Get("X-Refresh-Token")
 
 			Token, err := AuthClient.Refresh(bearerToken, refreshToken)
