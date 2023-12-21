@@ -10,7 +10,6 @@ import (
 	"server/infrastructure/logger"
 
 	connect "github.com/bufbuild/connect-go"
-	"github.com/google/uuid"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -26,41 +25,10 @@ func NewAuthController(authUsecase *usecase.AuthUsecase) *AuthController {
 	}
 }
 
-func (ac *AuthController) Register(ctx context.Context, req *connect.Request[admin.AdminRegisterRequest]) (*connect.Response[emptypb.Empty], error) {
-	msg := req.Msg
-
-	_, domaiErr := ac.authUseCase.Register(
-		msg.Name,
-		uuid.MustParse(msg.BelongStoreID),
-		msg.Mail,
-	)
-	return connect.NewResponse(&emptypb.Empty{}), domaiErr
-}
-
-func (ac *AuthController) SignUp(ctx context.Context, req *connect.Request[admin.AdminAuthRequest]) (*connect.Response[emptypb.Empty], error) {
-	msg := req.Msg
-	err := ac.authUseCase.SignUp(msg.Email, msg.Password)
-	if err != nil {
-		logger.Error(err.Error())
-		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("サインアップに失敗しました。"))
-	}
-	return connect.NewResponse(&emptypb.Empty{}), nil
-}
-
-func (ac *AuthController) SignIn(ctx context.Context, req *connect.Request[admin.AdminAuthRequest]) (*connect.Response[admin.AdminAuthResponse], error) {
-	msg := req.Msg
-	token, domainErr := ac.authUseCase.SignIn(msg.Email, msg.Password)
-	if domainErr != nil {
-		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("サインインに失敗しました。"))
-	}
-	return connect.NewResponse(&admin.AdminAuthResponse{
-		AccessToken:  token.AccessToken,
-		ExpiresIn:    int64(*token.ExpiresIn),
-		RefreshToken: *token.RefreshToken,
-	}), nil
-}
-
 func (ac *AuthController) SignOut(ctx context.Context, req *connect.Request[emptypb.Empty]) (*connect.Response[emptypb.Empty], error) {
+	if ctx.Value("token") == nil {
+		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("トークンが必要です。"))
+	}
 	token := ctx.Value("token").(string)
 	if token == "" {
 		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("ログインが必要です。"))
@@ -84,6 +52,10 @@ func (ac *AuthController) ResetPasswordMail(ctx context.Context, req *connect.Re
 
 func (ac *AuthController) UpdatePassword(ctx context.Context, req *connect.Request[admin.UpdatePasswordRequest]) (*connect.Response[emptypb.Empty], error) {
 	msg := req.Msg
+	if ctx.Value("token") == nil {
+		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("トークンが必要です。"))
+	}
+
 	token := ctx.Value("token").(string)
 	if token == "" {
 		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("ログインが必要です。"))
@@ -98,6 +70,9 @@ func (ac *AuthController) UpdatePassword(ctx context.Context, req *connect.Reque
 
 func (ac *AuthController) UpdateEmail(ctx context.Context, req *connect.Request[admin.UpdateEmailRequest]) (*connect.Response[emptypb.Empty], error) {
 	msg := req.Msg
+	if ctx.Value("token") == nil {
+		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("トークンが必要です。"))
+	}
 	token := ctx.Value("token").(string)
 	if token == "" {
 		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("ログインが必要です。"))
@@ -109,7 +84,7 @@ func (ac *AuthController) UpdateEmail(ctx context.Context, req *connect.Request[
 	return connect.NewResponse(&emptypb.Empty{}), nil
 }
 
-func (ac *AuthController) Refresh(ctx context.Context, req *connect.Request[admin.AdminRefreshTokenRequest]) (*connect.Response[admin.AdminAuthResponse], error) {
+func (ac *AuthController) Refresh(ctx context.Context, req *connect.Request[admin.AdminRefreshTokenRequest]) (*connect.Response[admin.AdminAuthTokenResponse], error) {
 	msg := req.Msg
 	token := msg.AccessToken
 	if token == "" {
@@ -119,7 +94,7 @@ func (ac *AuthController) Refresh(ctx context.Context, req *connect.Request[admi
 	if err != nil {
 		return nil, connect.NewError(connect.CodeUnavailable, errors.New("トークンの再取得に失敗しました。"))
 	}
-	return connect.NewResponse(&admin.AdminAuthResponse{
+	return connect.NewResponse(&admin.AdminAuthTokenResponse{
 		AccessToken:  tkn.AccessToken,
 		ExpiresIn:    int64(*tkn.ExpiresIn),
 		RefreshToken: *tkn.RefreshToken,

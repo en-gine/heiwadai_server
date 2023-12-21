@@ -15,8 +15,12 @@ func NewAdminServer(mux *http.ServeMux) {
 	requireAuth := router.NewAuthentificatable(authClient, userQuery, adminQuery, router.AuthTypeAdmin)
 
 	authUsecase := InitializeAuthUsecase()
+	anonAuthContoroller := admincontroller.NewAnonAuthController(authUsecase)
+	path, handler := adminv1connect.NewAnonAuthControllerHandler(anonAuthContoroller)
+	mux.Handle(path, handler)
+
 	authContoroller := admincontroller.NewAuthController(authUsecase)
-	path, handler := adminv1connect.NewAuthControllerHandler(authContoroller)
+	path, handler = adminv1connect.NewAuthControllerHandler(authContoroller)
 	mux.Handle(path, handler)
 
 	adminUsecase := InitializeAdminDataUsecase()

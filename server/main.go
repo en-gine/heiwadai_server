@@ -35,6 +35,7 @@ func main() {
 func RegisterGRPCService(mux *http.ServeMux) *http.ServeMux {
 	// リフレクション設定
 	reflector := grpcreflect.NewStaticReflector(
+		"server.user.AnonAuthController",
 		"server.user.AuthController",
 		"server.user.BannerController",
 		"server.user.BookController",
@@ -45,6 +46,7 @@ func RegisterGRPCService(mux *http.ServeMux) *http.ServeMux {
 		"server.user.StoreController",
 		"server.user.UserDataController",
 		"server.user.UserReportController",
+		"server.admin.AnonAuthController",
 		"server.admin.AuthController",
 		"server.admin.AdminDataController",
 		"server.admin.AuthController",

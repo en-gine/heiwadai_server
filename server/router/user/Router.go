@@ -15,8 +15,12 @@ func NewUserServer(mux *http.ServeMux) {
 	requireAuth := router.NewAuthentificatable(authClient, userQuery, adminQuery, router.AuthTypeUser)
 
 	authUsecase := InitializeAuthUsecase()
+	anonAuthContoroller := usercontroller.NewAnonAuthController(authUsecase)
+	path, handler := userv1connect.NewAnonAuthControllerHandler(anonAuthContoroller)
+	mux.Handle(path, handler)
+
 	authContoroller := usercontroller.NewAuthController(authUsecase)
-	path, handler := userv1connect.NewAuthControllerHandler(authContoroller)
+	path, handler = userv1connect.NewAuthControllerHandler(authContoroller, requireAuth)
 	mux.Handle(path, handler)
 
 	userUsecase := InitializeUserUsecase()
