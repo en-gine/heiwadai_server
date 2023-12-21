@@ -6,6 +6,7 @@ import (
 
 	"server/api/v1/admin"
 	adminv1connect "server/api/v1/admin/adminconnect"
+	"server/api/v1/shared"
 	"server/controller"
 	"server/controller/util"
 	"server/core/entity"
@@ -60,7 +61,7 @@ func (uc *MessageController) GetList(ctx context.Context, req *connect.Request[a
 		&perPage,
 	)
 
-	entities, domaiErr := uc.messageUseCase.GetList(pager)
+	entities, pageResponse, domaiErr := uc.messageUseCase.GetList(pager)
 	if domaiErr != nil {
 		return nil, controller.ErrorHandler(domaiErr)
 	}
@@ -70,8 +71,17 @@ func (uc *MessageController) GetList(ctx context.Context, req *connect.Request[a
 		message := MessageToResponse(entity)
 		msgs = append(msgs, message)
 	}
+
+	resPage := &shared.PageResponse{
+		TotalCount:  uint32(pageResponse.TotalCount),
+		CurrentPage: uint32(pageResponse.CurrentPage),
+		PerPage:     uint32(pageResponse.PerPage),
+		TotalPage:   uint32(pageResponse.TotalPage),
+	}
+
 	result := &admin.MessagesResponse{
-		Messages: msgs,
+		Messages:     msgs,
+		PageResponse: resPage,
 	}
 	return connect.NewResponse(result), nil
 }
@@ -134,5 +144,6 @@ func MessageToResponse(entity *entity.Message) *admin.MessageResponse {
 		Content:     entity.Content,
 		AuthorID:    entity.AuthorID.String(),
 		DisplayDate: timestamppb.New(entity.DisplayDate),
+		CreateAt:    timestamppb.New(entity.CreateAt),
 	}
 }

@@ -10,5 +10,5 @@ import (
 type IMessageQueryService interface {
 	GetByID(id uuid.UUID) (*entity.Message, error)
 	GetMessagesAfter(id *uuid.UUID) ([]*entity.Message, error)
-	GetAll(pager *types.PageQuery) ([]*entity.Message, error)
+	GetAll(pager *types.PageQuery) ([]*entity.Message, *types.PageResponse, error)
 }

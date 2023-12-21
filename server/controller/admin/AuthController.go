@@ -27,7 +27,7 @@ func NewAuthController(authUsecase *usecase.AuthUsecase) *AuthController {
 
 func (ac *AuthController) SignOut(ctx context.Context, req *connect.Request[emptypb.Empty]) (*connect.Response[emptypb.Empty], error) {
 	if ctx.Value("token") == nil {
-		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("トークンが必要です。"))
+		return connect.NewResponse(&emptypb.Empty{}), nil
 	}
 	token := ctx.Value("token").(string)
 	if token == "" {

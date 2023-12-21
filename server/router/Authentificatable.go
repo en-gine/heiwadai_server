@@ -10,6 +10,7 @@ import (
 	"server/core/infra/action"
 	queryservice "server/core/infra/queryService"
 	"server/infrastructure/env"
+	"server/infrastructure/logger"
 
 	"github.com/bufbuild/connect-go"
 )
@@ -80,17 +81,24 @@ func NewAuthentificatable(AuthClient action.IAuthAction, UserDataQuery queryserv
 
 			res, err := next(ctx, req)
 
-			if env.EnvMode == "dev" {
+			if env.GetEnv(env.EnvMode) == "dev" {
+				fmt.Println("----------------reqest----------------")
 				fmt.Println(req)
+				fmt.Println("----------------response--------------")
 				fmt.Println(res)
 			}
 
-			if Token != nil {
+			if err != nil {
+				logger.Error(err.Error())
+				return nil, connect.NewError(connect.CodeUnavailable, errors.New("サーバーエラーです。"))
+			}
+
+			if Token != nil && res != nil {
 				res.Header().Set("AccessToken", Token.AccessToken)
 				res.Header().Set("RefreshToken", *Token.RefreshToken)
 				res.Header().Set("Expire", strconv.Itoa(*Token.ExpiresIn))
 			}
-			return res, err
+			return res, nil
 		})
 	}
 	return connect.WithInterceptors(connect.UnaryInterceptorFunc(interceptor))

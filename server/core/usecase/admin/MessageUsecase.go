@@ -32,12 +32,12 @@ func (u *MessageUsecase) GetByID(id uuid.UUID) (*entity.Message, *errors.DomainE
 	return Message, nil
 }
 
-func (u *MessageUsecase) GetList(pager *types.PageQuery) ([]*entity.Message, *errors.DomainError) {
-	Messages, err := u.MessageQuery.GetAll(pager)
+func (u *MessageUsecase) GetList(pager *types.PageQuery) ([]*entity.Message, *types.PageResponse, *errors.DomainError) {
+	Messages, pageRes, err := u.MessageQuery.GetAll(pager)
 	if err != nil {
-		return nil, errors.NewDomainError(errors.QueryError, err.Error())
+		return nil, nil, errors.NewDomainError(errors.QueryError, err.Error())
 	}
-	return Messages, nil
+	return Messages, pageRes, nil
 }
 
 func (u *MessageUsecase) Create(title string, content string, postDate time.Time, autherID uuid.UUID) (*entity.Message, *errors.DomainError) {

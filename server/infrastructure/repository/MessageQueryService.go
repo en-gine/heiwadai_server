@@ -64,16 +64,25 @@ func (pq *MessageQueryService) GetMessagesAfter(ID *uuid.UUID) ([]*entity.Messag
 	return result, nil
 }
 
-func (pq *MessageQueryService) GetAll(pager *types.PageQuery) ([]*entity.Message, error) {
+func (pq *MessageQueryService) GetAll(pager *types.PageQuery) ([]*entity.Message, *types.PageResponse, error) {
 	msgs, err := models.Messages(qm.Limit(pager.Limit()), qm.Offset(pager.Offset())).All(context.Background(), pq.db)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	var result []*entity.Message
 	for _, mgz := range msgs {
 		result = append(result, MessageModelToEntity(mgz))
 	}
-	return result, nil
+	count, err := models.Messages().Count(context.Background(), pq.db)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	var pageResponse *types.PageResponse = nil
+	if pager != nil {
+		pageResponse = types.NewPageResponse(pager, int(count))
+	}
+	return result, pageResponse, nil
 }
 
 func MessageModelToEntity(mgz *models.Message) *entity.Message {
