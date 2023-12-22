@@ -9,6 +9,7 @@ import (
 	userv1connect "server/api/v1/user/userconnect"
 	"server/controller"
 	usecase "server/core/usecase/user"
+	"server/router"
 
 	"google.golang.org/protobuf/types/known/timestamppb"
 
@@ -30,12 +31,14 @@ func NewCheckInController(checkinUsecase *usecase.UserCheckinUsecase) *CheckInCo
 }
 
 func (ac *CheckInController) GetStampCard(ctx context.Context, req *connect.Request[emptypb.Empty]) (*connect.Response[user.StampCardResponse], error) {
-	userID := ctx.Value("userID").(uuid.UUID)
-
-	if userID == uuid.Nil {
+	if ctx.Value(router.UserIDKey) == nil {
 		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("ユーザーIDが取得できませんでした。"))
 	}
 
+	userID, err := uuid.Parse(ctx.Value(router.UserIDKey).(string))
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("ユーザーIDが取得できませんでした。UUIDの形式が不正です。"))
+	}
 	entity, domaiErr := ac.checkInUseCase.GetStampCard(userID)
 	if domaiErr != nil {
 		return nil, controller.ErrorHandler(domaiErr)
@@ -60,9 +63,13 @@ func (ac *CheckInController) GetStampCard(ctx context.Context, req *connect.Requ
 }
 
 func (ac *CheckInController) Checkin(ctx context.Context, req *connect.Request[user.CheckinRequest]) (*connect.Response[user.CheckinResponse], error) {
-	userID := ctx.Value("userID").(uuid.UUID)
-	if userID == uuid.Nil {
+	if ctx.Value(router.UserIDKey) == nil {
 		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("ユーザーIDが取得できませんでした。"))
+	}
+
+	userID, err := uuid.Parse(ctx.Value(router.UserIDKey).(string))
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("ユーザーIDが取得できませんでした。UUIDの形式が不正です。"))
 	}
 	qrHash, err := uuid.Parse(req.Msg.QrHash)
 	if err != nil {

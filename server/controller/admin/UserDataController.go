@@ -3,7 +3,6 @@ package admin
 import (
 	"context"
 
-	"server/api/v1/admin"
 	adminv1 "server/api/v1/admin"
 	"server/api/v1/shared"
 	userv1 "server/api/v1/user"
@@ -92,7 +91,7 @@ func (u *UserDataController) Delete(ctx context.Context, req *connect.Request[ad
 	return connect.NewResponse(&emptypb.Empty{}), nil
 }
 
-func (u *UserDataController) GetList(ctx context.Context, req *connect.Request[adminv1.UserListFilterRequest]) (*connect.Response[admin.UserListResponse], error) {
+func (u *UserDataController) GetList(ctx context.Context, req *connect.Request[adminv1.UserListFilterRequest]) (*connect.Response[adminv1.UserListResponse], error) {
 	msg := req.Msg
 	filter := msg.Search
 
@@ -120,12 +119,12 @@ func (u *UserDataController) GetList(ctx context.Context, req *connect.Request[a
 		return nil, controller.ErrorHandler(domainErr)
 	}
 
-	var res *admin.UserListResponse
-	var resUsers []*admin.UserWithCheckIn
+	var res *adminv1.UserListResponse
+	var resUsers []*adminv1.UserWithCheckIn
 	var resPage *shared.PageResponse
 	for _, user := range users {
 		resUsers = append(resUsers,
-			&admin.UserWithCheckIn{
+			&adminv1.UserWithCheckIn{
 				User:          userController.UserEntityToResponse(user.User),
 				LastCheckinAt: util.TimePtrToTimeStampPtr(user.LastCheckinAt),
 			},

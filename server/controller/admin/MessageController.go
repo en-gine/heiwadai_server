@@ -12,6 +12,7 @@ import (
 	"server/core/entity"
 	"server/core/infra/queryService/types"
 	usecase "server/core/usecase/admin"
+	"server/router"
 
 	connect "github.com/bufbuild/connect-go"
 	"github.com/google/uuid"
@@ -87,10 +88,13 @@ func (uc *MessageController) GetList(ctx context.Context, req *connect.Request[a
 }
 
 func (uc *MessageController) Create(ctx context.Context, req *connect.Request[admin.MessageCreateRequest]) (*connect.Response[admin.MessageResponse], error) {
-	adminID := ctx.Value("userID").(uuid.UUID)
-
-	if adminID == uuid.Nil {
+	if ctx.Value(router.UserIDKey) == nil {
 		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("ユーザーIDが取得できませんでした。"))
+	}
+
+	adminID, err := uuid.Parse(ctx.Value(router.UserIDKey).(string))
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("ユーザーIDが取得できませんでした。UUIDの形式が不正です。"))
 	}
 
 	msg := req.Msg
@@ -105,10 +109,13 @@ func (uc *MessageController) Create(ctx context.Context, req *connect.Request[ad
 }
 
 func (uc *MessageController) Update(ctx context.Context, req *connect.Request[admin.MessageUpdateRequest]) (*connect.Response[admin.MessageResponse], error) {
-	adminID := ctx.Value("userID").(uuid.UUID)
+	if ctx.Value(router.UserIDKey) == nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("ユーザーIDが取得できませんでした。UUIDがNULLです。"))
+	}
 
-	if adminID == uuid.Nil {
-		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("ユーザーIDが取得できませんでした。"))
+	adminID, err := uuid.Parse(ctx.Value(router.UserIDKey).(string))
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("ユーザーIDが取得できませんでした。UUIDの形式が不正です。"))
 	}
 
 	msg := req.Msg

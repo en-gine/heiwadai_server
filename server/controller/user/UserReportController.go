@@ -8,6 +8,7 @@ import (
 	userv1connect "server/api/v1/user/userconnect"
 	"server/controller"
 	usecase "server/core/usecase/user"
+	"server/router"
 
 	"github.com/bufbuild/connect-go"
 	"github.com/google/uuid"
@@ -27,10 +28,13 @@ func NewUserReportController(messageUsecase *usecase.UserReportUsecase) *UserRep
 }
 
 func (ac *UserReportController) Send(ctx context.Context, req *connect.Request[user.UserReportRequest]) (*connect.Response[emptypb.Empty], error) {
-	userID := ctx.Value("userID").(uuid.UUID)
-
-	if userID == uuid.Nil {
+	if ctx.Value(router.UserIDKey) == nil {
 		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("ユーザーIDが取得できませんでした。"))
+	}
+
+	userID, err := uuid.Parse(ctx.Value(router.UserIDKey).(string))
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("ユーザーIDが取得できませんでした。UUIDの形式が不正です。"))
 	}
 
 	domaiErr := ac.messageUseCase.Send(req.Msg.Title, req.Msg.Content, userID)

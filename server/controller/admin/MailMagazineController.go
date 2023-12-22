@@ -11,6 +11,7 @@ import (
 	"server/core/entity"
 	"server/core/infra/queryService/types"
 	usecase "server/core/usecase/admin"
+	"server/router"
 
 	connect "github.com/bufbuild/connect-go"
 	"github.com/google/uuid"
@@ -108,10 +109,13 @@ func (uc *MailMagazineController) GetByID(ctx context.Context, req *connect.Requ
 }
 
 func (uc *MailMagazineController) CreateDraft(ctx context.Context, req *connect.Request[admin.CreateDraftRequest]) (*connect.Response[admin.MailMagazine], error) {
-	adminID := ctx.Value("userID").(uuid.UUID)
-
-	if adminID == uuid.Nil {
+	if ctx.Value(router.UserIDKey) == nil {
 		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("ユーザーIDが取得できませんでした。"))
+	}
+
+	adminID, err := uuid.Parse(ctx.Value(router.UserIDKey).(string))
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("ユーザーIDが取得できませんでした。UUIDの形式が不正です。"))
 	}
 
 	msg := req.Msg
@@ -143,10 +147,13 @@ func (uc *MailMagazineController) CreateDraft(ctx context.Context, req *connect.
 }
 
 func (uc *MailMagazineController) Update(ctx context.Context, req *connect.Request[admin.UpdateMailMagazineRequest]) (*connect.Response[admin.MailMagazine], error) {
-	adminID := ctx.Value("userID").(uuid.UUID)
-
-	if adminID == uuid.Nil {
+	if ctx.Value(router.UserIDKey) == nil {
 		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("ユーザーIDが取得できませんでした。"))
+	}
+
+	adminID, err := uuid.Parse(ctx.Value(router.UserIDKey).(string))
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("ユーザーIDが取得できませんでした。UUIDの形式が不正です。"))
 	}
 
 	msg := req.Msg

@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 
-	"server/api/v1/admin"
 	adminv1 "server/api/v1/admin"
 	"server/api/v1/shared"
 
@@ -38,12 +37,12 @@ func (u *UserCheckinController) GetAllRecent(ctx context.Context, req *connect.R
 		return nil, controller.ErrorHandler(domaiErr)
 	}
 
-	var resCheckins []*admin.CheckinData
+	var resCheckins []*adminv1.CheckinData
 	for _, checkin := range checkin {
 		user := checkin.User
 		store := checkin.Store
 		resCheckins = append(resCheckins,
-			&admin.CheckinData{
+			&adminv1.CheckinData{
 				ID:              checkin.ID.String(),
 				UserID:          user.ID.String(),
 				StoreID:         store.ID.String(),
@@ -60,7 +59,7 @@ func (u *UserCheckinController) GetAllRecent(ctx context.Context, req *connect.R
 	return res, nil
 }
 
-func (u *UserCheckinController) GetUserLog(ctx context.Context, req *connect.Request[adminv1.UserCheckinRequest]) (*connect.Response[admin.CheckinsResponse], error) {
+func (u *UserCheckinController) GetUserLog(ctx context.Context, req *connect.Request[adminv1.UserCheckinRequest]) (*connect.Response[adminv1.CheckinsResponse], error) {
 	msg := req.Msg
 	userID, err := uuid.Parse(msg.UserID)
 	if err != nil {
@@ -77,12 +76,12 @@ func (u *UserCheckinController) GetUserLog(ctx context.Context, req *connect.Req
 		return nil, controller.ErrorHandler(domaiErr)
 	}
 
-	var resCheckins []*admin.CheckinData
+	var resCheckins []*adminv1.CheckinData
 	for _, checkin := range checkin {
 		user := checkin.User
 		store := checkin.Store
 		resCheckins = append(resCheckins,
-			&admin.CheckinData{
+			&adminv1.CheckinData{
 				ID:              checkin.ID.String(),
 				UserID:          user.ID.String(),
 				StoreID:         store.ID.String(),

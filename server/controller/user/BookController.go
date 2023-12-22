@@ -10,6 +10,7 @@ import (
 	"server/controller"
 	"server/core/entity"
 	usecase "server/core/usecase/user"
+	"server/router"
 
 	connect "github.com/bufbuild/connect-go"
 	"github.com/google/uuid"
@@ -30,7 +31,14 @@ func NewBookController(bookUsecase *usecase.BookUsecase) *BookController {
 }
 
 func (ac *BookController) GetMyBook(ctx context.Context, req *connect.Request[emptypb.Empty]) (*connect.Response[user.BooksResponse], error) {
-	userID := ctx.Value("userID").(uuid.UUID)
+	if ctx.Value(router.UserIDKey) == nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("ユーザーIDが取得できませんでした。"))
+	}
+
+	userID, err := uuid.Parse(ctx.Value(router.UserIDKey).(string))
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("ユーザーIDが取得できませんでした。UUIDの形式が不正です。"))
+	}
 
 	if userID == uuid.Nil {
 		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("ユーザーIDが取得できませんでした。"))
@@ -80,10 +88,13 @@ func (ac *BookController) Cancel(ctx context.Context, req *connect.Request[user.
 }
 
 func (ac *BookController) Reserve(ctx context.Context, req *connect.Request[user.ReserveRequest]) (*connect.Response[emptypb.Empty], error) {
-	userID := ctx.Value("userID").(uuid.UUID)
-
-	if userID == uuid.Nil {
+	if ctx.Value(router.UserIDKey) == nil {
 		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("ユーザーIDが取得できませんでした。"))
+	}
+
+	userID, err := uuid.Parse(ctx.Value(router.UserIDKey).(string))
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("ユーザーIDが取得できませんでした。UUIDの形式が不正です。"))
 	}
 
 	var pref *entity.Prefecture = nil

@@ -8,6 +8,7 @@ import (
 	userv1connect "server/api/v1/user/userconnect"
 	"server/controller"
 	usecase "server/core/usecase/user"
+	"server/router"
 
 	"google.golang.org/protobuf/types/known/timestamppb"
 
@@ -28,10 +29,13 @@ func NewMyCouponController(couponUsecase *usecase.UserAttachedCouponUsecase) *My
 	}
 }
 func (ac *MyCouponController) GetDetail(ctx context.Context, req *connect.Request[user.CouponIDRequest]) (*connect.Response[shared.Coupon], error) {
-	userID := ctx.Value("userID").(uuid.UUID)
-
-	if userID == uuid.Nil {
+	if ctx.Value(router.UserIDKey) == nil {
 		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("ユーザーIDが取得できませんでした。"))
+	}
+
+	userID, err := uuid.Parse(ctx.Value(router.UserIDKey).(string))
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("ユーザーIDが取得できませんでした。UUIDの形式が不正です。"))
 	}
 
 	couponID, err := uuid.Parse(req.Msg.ID)
@@ -66,9 +70,13 @@ func (ac *MyCouponController) GetDetail(ctx context.Context, req *connect.Reques
 }
 
 func (ac *MyCouponController) GetList(ctx context.Context, req *connect.Request[emptypb.Empty]) (*connect.Response[user.MyCouponsResponse], error) {
-	userID := ctx.Value("userID").(uuid.UUID)
-	if userID == uuid.Nil {
+	if ctx.Value(router.UserIDKey) == nil {
 		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("ユーザーIDが取得できませんでした。"))
+	}
+
+	userID, err := uuid.Parse(ctx.Value(router.UserIDKey).(string))
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("ユーザーIDが取得できませんでした。UUIDの形式が不正です。"))
 	}
 
 	entities, domaiErr := ac.couponUseCase.GetMyList(userID)
@@ -103,9 +111,13 @@ func (ac *MyCouponController) Use(ctx context.Context, req *connect.Request[user
 		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("UUIDが正しい形式ではありません。"))
 	}
 
-	userID := ctx.Value("userID").(uuid.UUID)
-	if userID == uuid.Nil {
+	if ctx.Value(router.UserIDKey) == nil {
 		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("ユーザーIDが取得できませんでした。"))
+	}
+
+	userID, err := uuid.Parse(ctx.Value(router.UserIDKey).(string))
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("ユーザーIDが取得できませんでした。UUIDの形式が不正です。"))
 	}
 	domaiErr := ac.couponUseCase.UseMyCoupon(userID, couponID)
 	if domaiErr != nil {

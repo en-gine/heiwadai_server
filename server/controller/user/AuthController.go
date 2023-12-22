@@ -9,6 +9,7 @@ import (
 	"server/controller/util"
 	usecase "server/core/usecase/user"
 	"server/infrastructure/logger"
+	"server/router"
 
 	connect "github.com/bufbuild/connect-go"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -49,10 +50,10 @@ func (ac *AuthController) Register(ctx context.Context, req *connect.Request[use
 }
 
 func (ac *AuthController) SignOut(ctx context.Context, req *connect.Request[emptypb.Empty]) (*connect.Response[emptypb.Empty], error) {
-	if ctx.Value("token") == nil {
+	if ctx.Value(router.TokenKey) == nil {
 		return connect.NewResponse(&emptypb.Empty{}), nil
 	}
-	token := ctx.Value("token").(string)
+	token := ctx.Value(router.TokenKey).(string)
 	if token == "" {
 		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("ログインが必要です。"))
 	}
@@ -66,10 +67,10 @@ func (ac *AuthController) SignOut(ctx context.Context, req *connect.Request[empt
 
 func (ac *AuthController) UpdatePassword(ctx context.Context, req *connect.Request[user.UpdatePasswordRequest]) (*connect.Response[emptypb.Empty], error) {
 	msg := req.Msg
-	if ctx.Value("token") == nil {
+	if ctx.Value(router.TokenKey) == nil {
 		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("トークンが必要です。"))
 	}
-	token := ctx.Value("token").(string)
+	token := ctx.Value(router.TokenKey).(string)
 	if token == "" {
 		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("ログインが必要です。"))
 	}
@@ -84,10 +85,10 @@ func (ac *AuthController) UpdatePassword(ctx context.Context, req *connect.Reque
 
 func (ac *AuthController) UpdateEmail(ctx context.Context, req *connect.Request[user.UpdateEmailRequest]) (*connect.Response[emptypb.Empty], error) {
 	msg := req.Msg
-	if ctx.Value("token") == nil {
+	if ctx.Value(router.TokenKey) == nil {
 		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("トークンが必要です。"))
 	}
-	token := ctx.Value("token").(string)
+	token := ctx.Value(router.TokenKey).(string)
 	if token == "" {
 		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("ログインが必要です。"))
 	}

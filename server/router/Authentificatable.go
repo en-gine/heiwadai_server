@@ -86,6 +86,8 @@ func NewAuthentificatable(AuthClient action.IAuthAction, UserDataQuery queryserv
 				fmt.Println(req)
 				fmt.Println("----------------response--------------")
 				fmt.Println(res)
+				fmt.Println("----------------userID--------------")
+				fmt.Println(id)
 			}
 
 			if err != nil {
