@@ -6,6 +6,7 @@ import (
 
 	"server/api/v1/user"
 	userv1connect "server/api/v1/user/userconnect"
+	"server/controller"
 	"server/controller/util"
 	usecase "server/core/usecase/user"
 	"server/infrastructure/logger"
@@ -46,7 +47,11 @@ func (ac *AuthController) Register(ctx context.Context, req *connect.Request[use
 		msg.AcceptMail,
 		msg.AcceptTerm,
 	)
-	return connect.NewResponse(&emptypb.Empty{}), domaiErr
+	if domaiErr != nil {
+		return nil, controller.ErrorHandler(domaiErr)
+	}
+
+	return connect.NewResponse(&emptypb.Empty{}), nil
 }
 
 func (ac *AuthController) SignOut(ctx context.Context, req *connect.Request[emptypb.Empty]) (*connect.Response[emptypb.Empty], error) {

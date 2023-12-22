@@ -39,9 +39,13 @@ func (ac *StoreController) GetByID(ctx context.Context, req *connect.Request[use
 	if domaiErr != nil {
 		return nil, controller.ErrorHandler(domaiErr)
 	}
+	if domaiErr != nil {
+		return nil, controller.ErrorHandler(domaiErr)
+	}
+
 	resposnse := StoreToResponse(store)
 
-	return connect.NewResponse(resposnse), domaiErr
+	return connect.NewResponse(resposnse), nil
 }
 
 func (ac *StoreController) GetAll(ctx context.Context, req *connect.Request[emptypb.Empty]) (*connect.Response[shared.Stores], error) {
@@ -77,7 +81,7 @@ func (ac *StoreController) GetStayableByID(ctx context.Context, req *connect.Req
 	return connect.NewResponse(&shared.StayableStore{
 		Store: store,
 		Info:  info,
-	}), domaiErr
+	}), nil
 }
 
 func (ac *StoreController) GetStayables(ctx context.Context, req *connect.Request[emptypb.Empty]) (*connect.Response[shared.StayableStores], error) {
@@ -93,10 +97,13 @@ func (ac *StoreController) GetStayables(ctx context.Context, req *connect.Reques
 			Info:  info,
 		})
 	}
+	if domaiErr != nil {
+		return nil, controller.ErrorHandler(domaiErr)
+	}
 
 	return connect.NewResponse(&shared.StayableStores{
 		StayableStores: resStores,
-	}), domaiErr
+	}), nil
 }
 
 func StoreToResponse(store *entity.Store) *shared.Store {

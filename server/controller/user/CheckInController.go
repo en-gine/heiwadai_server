@@ -104,5 +104,5 @@ func (ac *CheckInController) Checkin(ctx context.Context, req *connect.Request[u
 		MayCoupon: coupon,
 	}
 
-	return connect.NewResponse(response), domaiErr
+	return connect.NewResponse(response), nil
 }

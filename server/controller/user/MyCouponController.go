@@ -100,7 +100,7 @@ func (ac *MyCouponController) GetList(ctx context.Context, req *connect.Request[
 		Coupons: response,
 	}
 
-	return connect.NewResponse(resposnse), domaiErr
+	return connect.NewResponse(resposnse), nil
 }
 
 func (ac *MyCouponController) Use(ctx context.Context, req *connect.Request[user.CouponIDRequest]) (*connect.Response[emptypb.Empty], error) {

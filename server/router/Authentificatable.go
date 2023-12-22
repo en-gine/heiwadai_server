@@ -77,7 +77,7 @@ func NewAuthentificatable(AuthClient action.IAuthAction, UserDataQuery queryserv
 			if Token != nil {
 				ctx = context.WithValue(ctx, TokenKey, Token.AccessToken)
 			}
-			ctx = context.WithValue(ctx, UserIDKey, id)
+			ctx = context.WithValue(ctx, UserIDKey, id.String())
 
 			res, err := next(ctx, req)
 
@@ -92,7 +92,7 @@ func NewAuthentificatable(AuthClient action.IAuthAction, UserDataQuery queryserv
 
 			if err != nil {
 				logger.Error(err.Error())
-				return nil, connect.NewError(connect.CodeUnavailable, errors.New("サーバーエラーです。"))
+				// return nil, err
 			}
 
 			if Token != nil && res != nil {

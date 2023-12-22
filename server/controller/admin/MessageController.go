@@ -45,7 +45,7 @@ func (uc *MessageController) GetByID(ctx context.Context, req *connect.Request[a
 	}
 	resMessage := MessageToResponse(message)
 
-	return connect.NewResponse(resMessage), domaiErr
+	return connect.NewResponse(resMessage), nil
 }
 
 func (uc *MessageController) GetList(ctx context.Context, req *connect.Request[admin.GetMessageRequest]) (*connect.Response[admin.MessagesResponse], error) {

@@ -41,7 +41,7 @@ func (ac *StoreController) GetByID(ctx context.Context, req *connect.Request[adm
 	}
 	resStore := StoreToResponse(store)
 
-	return connect.NewResponse(resStore), domaiErr
+	return connect.NewResponse(resStore), nil
 }
 
 func (ac *StoreController) GetAll(ctx context.Context, req *connect.Request[emptypb.Empty]) (*connect.Response[shared.Stores], error) {
@@ -81,7 +81,7 @@ func (ac *StoreController) Register(ctx context.Context, req *connect.Request[ad
 		return nil, controller.ErrorHandler(domaiErr)
 	}
 	resStore := StoreToResponse(store)
-	return connect.NewResponse(resStore), domaiErr
+	return connect.NewResponse(resStore), nil
 }
 
 func (ac *StoreController) Update(ctx context.Context, req *connect.Request[admin.StoreUpdateRequest]) (*connect.Response[shared.Store], error) {
@@ -122,7 +122,7 @@ func (ac *StoreController) Update(ctx context.Context, req *connect.Request[admi
 		return nil, controller.ErrorHandler(domaiErr)
 	}
 	resStore := StoreToResponse(store)
-	return connect.NewResponse(resStore), domaiErr
+	return connect.NewResponse(resStore), nil
 }
 
 func (ac *StoreController) RegenQRCode(ctx context.Context, req *connect.Request[admin.SoreIDRequest]) (*connect.Response[admin.QRResponse], error) {

@@ -6,6 +6,7 @@ import (
 
 	"server/api/v1/user"
 	userv1connect "server/api/v1/user/userconnect"
+	"server/controller"
 	"server/controller/util"
 	usecase "server/core/usecase/user"
 	"server/infrastructure/logger"
@@ -45,7 +46,11 @@ func (ac *AnonAuthController) Register(ctx context.Context, req *connect.Request
 		msg.AcceptMail,
 		msg.AcceptTerm,
 	)
-	return connect.NewResponse(&emptypb.Empty{}), domaiErr
+	if domaiErr != nil {
+		return nil, controller.ErrorHandler(domaiErr)
+	}
+
+	return connect.NewResponse(&emptypb.Empty{}), nil
 }
 
 func (ac *AnonAuthController) SignUp(ctx context.Context, req *connect.Request[user.UserAuthRequest]) (*connect.Response[emptypb.Empty], error) {
