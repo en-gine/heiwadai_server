@@ -60,8 +60,8 @@ func (ac *AdminCouponController) GetUserCouponList(ctx context.Context, req *con
 	return connect.NewResponse(result), nil
 }
 
-func (ac *AdminCouponController) CreateCustomCoupon(ctx context.Context, req *connect.Request[admin.CreateCustomCouponRequest]) (*connect.Response[emptypb.Empty], error) {
-	_, domaiErr := ac.couponUseCase.CreateCustomCoupon(
+func (ac *AdminCouponController) CreateCustomCoupon(ctx context.Context, req *connect.Request[admin.CreateCustomCouponRequest]) (*connect.Response[shared.Coupon], error) {
+	entity, domaiErr := ac.couponUseCase.CreateCustomCoupon(
 		req.Msg.Name,
 		uint(req.Msg.DiscountAmount),
 		req.Msg.ExpireAt.AsTime(),
@@ -72,7 +72,9 @@ func (ac *AdminCouponController) CreateCustomCoupon(ctx context.Context, req *co
 		return nil, controller.ErrorHandler(domaiErr)
 	}
 
-	return connect.NewResponse(&emptypb.Empty{}), nil
+	cpn := EntityToResCoupon(entity)
+
+	return connect.NewResponse(cpn), nil
 }
 
 func (ac *AdminCouponController) GetCustomCouponByID(ctx context.Context, req *connect.Request[admin.CouponIDRequest]) (*connect.Response[shared.Coupon], error) {

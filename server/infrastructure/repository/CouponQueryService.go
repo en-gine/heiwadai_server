@@ -66,9 +66,6 @@ func (pq *CouponQueryService) GetCouponListByType(couponType entity.CouponType, 
 	if err != nil {
 		return nil, nil, err
 	}
-	if coupons == nil {
-		return nil, nil, nil
-	}
 	var result []*entity.Coupon
 	for _, coupon := range coupons {
 		result = append(result, CouponModelToEntity(coupon, nil, nil))

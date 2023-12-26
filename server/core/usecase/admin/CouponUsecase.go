@@ -133,6 +133,7 @@ func (u *AdminCouponUsecase) GetCustomCouponList(pager *types.PageQuery) ([]*ent
 	if err != nil {
 		return nil, nil, errors.NewDomainError(errors.QueryError, err.Error())
 	}
+
 	return coupons, pageRes, nil
 }
 
