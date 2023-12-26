@@ -154,5 +154,6 @@ func EntityToResCoupon(entity *entity.Coupon) *shared.Coupon {
 		DiscountAmount:    uint32(entity.DiscountAmount),
 		ExpireAt:          timestamppb.New(entity.ExpireAt),
 		IsCombinationable: entity.IsCombinationable,
+		CreateAt:          timestamppb.New(entity.CreateAt),
 	}
 }

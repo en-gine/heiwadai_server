@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"errors"
+
 	"server/api/v1/shared"
 	"server/api/v1/user"
 	userv1connect "server/api/v1/user/userconnect"
@@ -28,6 +29,7 @@ func NewMyCouponController(couponUsecase *usecase.UserAttachedCouponUsecase) *My
 		couponUseCase: *couponUsecase,
 	}
 }
+
 func (ac *MyCouponController) GetDetail(ctx context.Context, req *connect.Request[user.CouponIDRequest]) (*connect.Response[shared.Coupon], error) {
 	if ctx.Value(router.UserIDKey) == nil {
 		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("ユーザーIDが取得できませんでした。"))
@@ -64,6 +66,7 @@ func (ac *MyCouponController) GetDetail(ctx context.Context, req *connect.Reques
 		IsCombinationable: coupon.Coupon.IsCombinationable,
 		TargetStore:       TargetStores,
 		Notices:           coupon.Coupon.Notices,
+		CreateAt:          timestamppb.New(coupon.Coupon.CreateAt),
 	}
 
 	return connect.NewResponse(result), nil
@@ -93,6 +96,7 @@ func (ac *MyCouponController) GetList(ctx context.Context, req *connect.Request[
 			DiscountAmount:    uint32(coupon.Coupon.DiscountAmount),
 			ExpireAt:          timestamppb.New(coupon.Coupon.ExpireAt),
 			IsCombinationable: coupon.Coupon.IsCombinationable,
+			CreateAt:          timestamppb.New(coupon.Coupon.CreateAt),
 		})
 	}
 
@@ -104,7 +108,6 @@ func (ac *MyCouponController) GetList(ctx context.Context, req *connect.Request[
 }
 
 func (ac *MyCouponController) Use(ctx context.Context, req *connect.Request[user.CouponIDRequest]) (*connect.Response[emptypb.Empty], error) {
-
 	id := req.Msg.ID
 	couponID, err := uuid.Parse(id)
 	if err != nil {
