@@ -6,6 +6,7 @@ import (
 	"server/core/entity"
 	"server/core/errors"
 	queryservice "server/core/infra/queryService"
+	"server/core/infra/queryService/types"
 	"server/core/infra/repository"
 
 	"github.com/google/uuid"
@@ -110,6 +111,29 @@ func (u *AdminCouponUsecase) SaveCustomCoupon(couponID uuid.UUID) *errors.Domain
 		return errors.NewDomainError(errors.RepositoryError, err.Error())
 	}
 	return nil
+}
+
+func (u *AdminCouponUsecase) GetCustomCouponByID(couponID uuid.UUID) (*entity.Coupon, *errors.DomainError) {
+	coupon, err := u.couponQuery.GetByID(couponID)
+	if err != nil {
+		return nil, errors.NewDomainError(errors.QueryError, err.Error())
+	}
+	if coupon == nil {
+		return nil, errors.NewDomainError(errors.QueryDataNotFoundError, "該当のクーポンIDが見つかりません。")
+	}
+	if coupon.CouponType != entity.CouponCustom {
+		return nil, errors.NewDomainError(errors.QueryDataNotFoundError, "該当のクーポンIDが見つかりません。")
+	}
+
+	return coupon, nil
+}
+
+func (u *AdminCouponUsecase) GetCustomCouponList(pager *types.PageQuery) ([]*entity.Coupon, *types.PageResponse, *errors.DomainError) {
+	coupons, pageRes, err := u.couponQuery.GetCouponListByType(entity.CouponCustom, pager)
+	if err != nil {
+		return nil, nil, errors.NewDomainError(errors.QueryError, err.Error())
+	}
+	return coupons, pageRes, nil
 }
 
 func (u *AdminCouponUsecase) AttachCustomCouponToAllUser(couponID uuid.UUID) (*int, *errors.DomainError) {

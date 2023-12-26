@@ -51,7 +51,7 @@ func (s MailMagazineStatus) String() string {
 	}
 }
 
-func CreateDraftMailMagazine(
+func CreateSavedMailMagazine(
 	Title string,
 	Content string,
 	TargetPrefecture *[]Prefecture,

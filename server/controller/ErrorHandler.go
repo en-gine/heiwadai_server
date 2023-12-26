@@ -23,6 +23,8 @@ func ErrorHandler(domainErr *errors.DomainError) *connect.Error {
 		return connect.NewError(connect.CodeInternal, domainErr)
 	case errors.QueryDataNotFoundError:
 		return connect.NewError(connect.CodeNotFound, domainErr)
+	case errors.ErrorUnknown:
+		return connect.NewError(connect.CodeUnknown, domainErr)
 	default:
 		return connect.NewError(connect.CodeUnknown, domainErr)
 	}

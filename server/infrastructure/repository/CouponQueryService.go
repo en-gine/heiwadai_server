@@ -61,19 +61,27 @@ func (pq *CouponQueryService) GetByID(id uuid.UUID) (*entity.Coupon, error) {
 	return CouponModelToEntity(coupon, noticeResult, TargetStores), nil
 }
 
-func (pq *CouponQueryService) GetCouponListByType(couponType entity.CouponType, pager *types.PageQuery) ([]*entity.Coupon, error) {
+func (pq *CouponQueryService) GetCouponListByType(couponType entity.CouponType, pager *types.PageQuery) ([]*entity.Coupon, *types.PageResponse, error) {
 	coupons, err := models.Coupons(models.CouponWhere.CouponType.EQ(couponType.ToInt()), qm.Limit(pager.Limit()), qm.Offset(pager.Offset())).All(context.Background(), pq.db)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	if coupons == nil {
-		return nil, nil
+		return nil, nil, nil
 	}
 	var result []*entity.Coupon
 	for _, coupon := range coupons {
 		result = append(result, CouponModelToEntity(coupon, nil, nil))
 	}
-	return result, nil
+
+	count, err := models.Coupons(models.CouponWhere.CouponType.EQ(couponType.ToInt())).Count(context.Background(), pq.db)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	pageResponse := types.NewPageResponse(pager, int(count))
+
+	return result, pageResponse, err
 }
 
 func (pq *CouponQueryService) GetCouponByType(couponType entity.CouponType) (*entity.Coupon, error) {

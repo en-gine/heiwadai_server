@@ -41,19 +41,20 @@ func NewMailMagazineUsecase(
 
 func (u *MailMagazineUsecase) GetList(pager *types.PageQuery) ([]*entity.MailMagazine, *types.PageResponse, *errors.DomainError) {
 	mailMagazines, page, err := u.mailMagazineQuery.GetAll(pager)
+
 	if err != nil {
 		return nil, nil, errors.NewDomainError(errors.QueryError, err.Error())
 	}
 	return mailMagazines, page, nil
 }
 
-func (u *MailMagazineUsecase) CreateDraft(title string, content string, targetPrefectures *[]entity.Prefecture, autherID uuid.UUID) (*entity.MailMagazine, *errors.DomainError) {
+func (u *MailMagazineUsecase) SaveDraft(title string, content string, targetPrefectures *[]entity.Prefecture, autherID uuid.UUID) (*entity.MailMagazine, *errors.DomainError) {
 	maySendCount, err := u.userQueryService.GetMailOKUserCount(targetPrefectures)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())
 	}
 
-	mailMagazine := entity.CreateDraftMailMagazine(title, content, targetPrefectures, *maySendCount, autherID)
+	mailMagazine := entity.CreateSavedMailMagazine(title, content, targetPrefectures, *maySendCount, autherID)
 
 	err = u.mailMagazineRepository.Save(mailMagazine)
 	if err != nil {

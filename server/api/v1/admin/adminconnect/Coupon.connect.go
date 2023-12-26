@@ -11,6 +11,7 @@ import (
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	http "net/http"
 	admin "server/api/v1/admin"
+	shared "server/api/v1/shared"
 	strings "strings"
 )
 
@@ -43,6 +44,12 @@ const (
 	// AdminCouponControllerSaveCustomCouponProcedure is the fully-qualified name of the
 	// AdminCouponController's SaveCustomCoupon RPC.
 	AdminCouponControllerSaveCustomCouponProcedure = "/server.admin.AdminCouponController/SaveCustomCoupon"
+	// AdminCouponControllerGetCustomCouponByIDProcedure is the fully-qualified name of the
+	// AdminCouponController's GetCustomCouponByID RPC.
+	AdminCouponControllerGetCustomCouponByIDProcedure = "/server.admin.AdminCouponController/GetCustomCouponByID"
+	// AdminCouponControllerGetCustomCouponListProcedure is the fully-qualified name of the
+	// AdminCouponController's GetCustomCouponList RPC.
+	AdminCouponControllerGetCustomCouponListProcedure = "/server.admin.AdminCouponController/GetCustomCouponList"
 	// AdminCouponControllerAttachCustomCouponToAllUserProcedure is the fully-qualified name of the
 	// AdminCouponController's AttachCustomCouponToAllUser RPC.
 	AdminCouponControllerAttachCustomCouponToAllUserProcedure = "/server.admin.AdminCouponController/AttachCustomCouponToAllUser"
@@ -53,6 +60,8 @@ type AdminCouponControllerClient interface {
 	GetUserCouponList(context.Context, *connect_go.Request[admin.UserIDRequest]) (*connect_go.Response[admin.UserAttachedCouponsResponse], error)
 	CreateCustomCoupon(context.Context, *connect_go.Request[admin.CreateCustomCouponRequest]) (*connect_go.Response[emptypb.Empty], error)
 	SaveCustomCoupon(context.Context, *connect_go.Request[admin.CouponIDRequest]) (*connect_go.Response[emptypb.Empty], error)
+	GetCustomCouponByID(context.Context, *connect_go.Request[admin.CouponIDRequest]) (*connect_go.Response[shared.Coupon], error)
+	GetCustomCouponList(context.Context, *connect_go.Request[shared.Pager]) (*connect_go.Response[admin.CouponListResponse], error)
 	AttachCustomCouponToAllUser(context.Context, *connect_go.Request[admin.CouponIDRequest]) (*connect_go.Response[admin.AffectedCountResponse], error)
 }
 
@@ -81,6 +90,16 @@ func NewAdminCouponControllerClient(httpClient connect_go.HTTPClient, baseURL st
 			baseURL+AdminCouponControllerSaveCustomCouponProcedure,
 			opts...,
 		),
+		getCustomCouponByID: connect_go.NewClient[admin.CouponIDRequest, shared.Coupon](
+			httpClient,
+			baseURL+AdminCouponControllerGetCustomCouponByIDProcedure,
+			opts...,
+		),
+		getCustomCouponList: connect_go.NewClient[shared.Pager, admin.CouponListResponse](
+			httpClient,
+			baseURL+AdminCouponControllerGetCustomCouponListProcedure,
+			opts...,
+		),
 		attachCustomCouponToAllUser: connect_go.NewClient[admin.CouponIDRequest, admin.AffectedCountResponse](
 			httpClient,
 			baseURL+AdminCouponControllerAttachCustomCouponToAllUserProcedure,
@@ -94,6 +113,8 @@ type adminCouponControllerClient struct {
 	getUserCouponList           *connect_go.Client[admin.UserIDRequest, admin.UserAttachedCouponsResponse]
 	createCustomCoupon          *connect_go.Client[admin.CreateCustomCouponRequest, emptypb.Empty]
 	saveCustomCoupon            *connect_go.Client[admin.CouponIDRequest, emptypb.Empty]
+	getCustomCouponByID         *connect_go.Client[admin.CouponIDRequest, shared.Coupon]
+	getCustomCouponList         *connect_go.Client[shared.Pager, admin.CouponListResponse]
 	attachCustomCouponToAllUser *connect_go.Client[admin.CouponIDRequest, admin.AffectedCountResponse]
 }
 
@@ -112,6 +133,16 @@ func (c *adminCouponControllerClient) SaveCustomCoupon(ctx context.Context, req 
 	return c.saveCustomCoupon.CallUnary(ctx, req)
 }
 
+// GetCustomCouponByID calls server.admin.AdminCouponController.GetCustomCouponByID.
+func (c *adminCouponControllerClient) GetCustomCouponByID(ctx context.Context, req *connect_go.Request[admin.CouponIDRequest]) (*connect_go.Response[shared.Coupon], error) {
+	return c.getCustomCouponByID.CallUnary(ctx, req)
+}
+
+// GetCustomCouponList calls server.admin.AdminCouponController.GetCustomCouponList.
+func (c *adminCouponControllerClient) GetCustomCouponList(ctx context.Context, req *connect_go.Request[shared.Pager]) (*connect_go.Response[admin.CouponListResponse], error) {
+	return c.getCustomCouponList.CallUnary(ctx, req)
+}
+
 // AttachCustomCouponToAllUser calls server.admin.AdminCouponController.AttachCustomCouponToAllUser.
 func (c *adminCouponControllerClient) AttachCustomCouponToAllUser(ctx context.Context, req *connect_go.Request[admin.CouponIDRequest]) (*connect_go.Response[admin.AffectedCountResponse], error) {
 	return c.attachCustomCouponToAllUser.CallUnary(ctx, req)
@@ -123,6 +154,8 @@ type AdminCouponControllerHandler interface {
 	GetUserCouponList(context.Context, *connect_go.Request[admin.UserIDRequest]) (*connect_go.Response[admin.UserAttachedCouponsResponse], error)
 	CreateCustomCoupon(context.Context, *connect_go.Request[admin.CreateCustomCouponRequest]) (*connect_go.Response[emptypb.Empty], error)
 	SaveCustomCoupon(context.Context, *connect_go.Request[admin.CouponIDRequest]) (*connect_go.Response[emptypb.Empty], error)
+	GetCustomCouponByID(context.Context, *connect_go.Request[admin.CouponIDRequest]) (*connect_go.Response[shared.Coupon], error)
+	GetCustomCouponList(context.Context, *connect_go.Request[shared.Pager]) (*connect_go.Response[admin.CouponListResponse], error)
 	AttachCustomCouponToAllUser(context.Context, *connect_go.Request[admin.CouponIDRequest]) (*connect_go.Response[admin.AffectedCountResponse], error)
 }
 
@@ -147,6 +180,16 @@ func NewAdminCouponControllerHandler(svc AdminCouponControllerHandler, opts ...c
 		svc.SaveCustomCoupon,
 		opts...,
 	)
+	adminCouponControllerGetCustomCouponByIDHandler := connect_go.NewUnaryHandler(
+		AdminCouponControllerGetCustomCouponByIDProcedure,
+		svc.GetCustomCouponByID,
+		opts...,
+	)
+	adminCouponControllerGetCustomCouponListHandler := connect_go.NewUnaryHandler(
+		AdminCouponControllerGetCustomCouponListProcedure,
+		svc.GetCustomCouponList,
+		opts...,
+	)
 	adminCouponControllerAttachCustomCouponToAllUserHandler := connect_go.NewUnaryHandler(
 		AdminCouponControllerAttachCustomCouponToAllUserProcedure,
 		svc.AttachCustomCouponToAllUser,
@@ -160,6 +203,10 @@ func NewAdminCouponControllerHandler(svc AdminCouponControllerHandler, opts ...c
 			adminCouponControllerCreateCustomCouponHandler.ServeHTTP(w, r)
 		case AdminCouponControllerSaveCustomCouponProcedure:
 			adminCouponControllerSaveCustomCouponHandler.ServeHTTP(w, r)
+		case AdminCouponControllerGetCustomCouponByIDProcedure:
+			adminCouponControllerGetCustomCouponByIDHandler.ServeHTTP(w, r)
+		case AdminCouponControllerGetCustomCouponListProcedure:
+			adminCouponControllerGetCustomCouponListHandler.ServeHTTP(w, r)
 		case AdminCouponControllerAttachCustomCouponToAllUserProcedure:
 			adminCouponControllerAttachCustomCouponToAllUserHandler.ServeHTTP(w, r)
 		default:
@@ -181,6 +228,14 @@ func (UnimplementedAdminCouponControllerHandler) CreateCustomCoupon(context.Cont
 
 func (UnimplementedAdminCouponControllerHandler) SaveCustomCoupon(context.Context, *connect_go.Request[admin.CouponIDRequest]) (*connect_go.Response[emptypb.Empty], error) {
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.AdminCouponController.SaveCustomCoupon is not implemented"))
+}
+
+func (UnimplementedAdminCouponControllerHandler) GetCustomCouponByID(context.Context, *connect_go.Request[admin.CouponIDRequest]) (*connect_go.Response[shared.Coupon], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.AdminCouponController.GetCustomCouponByID is not implemented"))
+}
+
+func (UnimplementedAdminCouponControllerHandler) GetCustomCouponList(context.Context, *connect_go.Request[shared.Pager]) (*connect_go.Response[admin.CouponListResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.AdminCouponController.GetCustomCouponList is not implemented"))
 }
 
 func (UnimplementedAdminCouponControllerHandler) AttachCustomCouponToAllUser(context.Context, *connect_go.Request[admin.CouponIDRequest]) (*connect_go.Response[admin.AffectedCountResponse], error) {

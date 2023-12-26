@@ -56,7 +56,10 @@ func (uc *MailMagazineController) GetList(ctx context.Context, req *connect.Requ
 		for _, pref := range *entity.TargetPrefecture {
 			prefs = append(prefs, shared.Prefecture(pref))
 		}
-
+		var sentAt *timestamppb.Timestamp
+		if entity.SentAt != nil {
+			sentAt = timestamppb.New(*entity.SentAt)
+		}
 		magazine := &admin.MailMagazine{
 			ID:                 entity.ID.String(),
 			Title:              entity.Title,
@@ -66,7 +69,8 @@ func (uc *MailMagazineController) GetList(ctx context.Context, req *connect.Requ
 			MailMagazineStatus: admin.MailMagazineStatus(entity.MailMagazineStatus),
 			UnsentCount:        int32(entity.UnsentCount),
 			SentCount:          int32(entity.SentCount),
-			SentAt:             timestamppb.New(entity.CreateAt),
+			SentAt:             sentAt,
+			CreateAt:           timestamppb.New(entity.CreateAt),
 		}
 		mailMagazines = append(mailMagazines, magazine)
 	}
@@ -108,7 +112,7 @@ func (uc *MailMagazineController) GetByID(ctx context.Context, req *connect.Requ
 	return connect.NewResponse(result), nil
 }
 
-func (uc *MailMagazineController) CreateDraft(ctx context.Context, req *connect.Request[admin.CreateDraftRequest]) (*connect.Response[admin.MailMagazine], error) {
+func (uc *MailMagazineController) SaveDraft(ctx context.Context, req *connect.Request[admin.SaveDraftRequest]) (*connect.Response[admin.MailMagazine], error) {
 	if ctx.Value(router.UserIDKey) == nil {
 		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("ユーザーIDが取得できませんでした。"))
 	}
@@ -123,7 +127,7 @@ func (uc *MailMagazineController) CreateDraft(ctx context.Context, req *connect.
 	for _, pref := range msg.TargetPrefectures {
 		prefs = append(prefs, entity.Prefecture(pref))
 	}
-	entity, domainErr := uc.magazineUseCase.CreateDraft(msg.Title, msg.Content, &prefs, adminID)
+	entity, domainErr := uc.magazineUseCase.SaveDraft(msg.Title, msg.Content, &prefs, adminID)
 	if domainErr != nil {
 		return nil, controller.ErrorHandler(domainErr)
 	}
@@ -173,8 +177,12 @@ func (uc *MailMagazineController) Update(ctx context.Context, req *connect.Reque
 	}
 
 	var reqPrefs []shared.Prefecture
-	for _, pref := range *entity.TargetPrefecture {
-		reqPrefs = append(reqPrefs, shared.Prefecture(pref))
+
+	if entity.TargetPrefecture != nil {
+		reqPrefs = make([]shared.Prefecture, len(*entity.TargetPrefecture))
+		for _, pref := range *entity.TargetPrefecture {
+			reqPrefs = append(reqPrefs, shared.Prefecture(pref))
+		}
 	}
 
 	magazine := &admin.MailMagazine{
