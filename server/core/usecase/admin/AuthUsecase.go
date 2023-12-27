@@ -106,6 +106,11 @@ func (u *AuthUsecase) SignIn(
 	if existUser == nil {
 		return nil, errors.NewDomainError(errors.QueryDataNotFoundError, "このアドレスで登録されているユーザーが存在しません")
 	}
+
+	if existUser.IsActive == false {
+		return nil, errors.NewDomainError(errors.UnPemitedOperation, "このアドレスで登録されているユーザーは無効化されています")
+	}
+
 	token, err := u.authAction.SignIn(Mail, Password)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())

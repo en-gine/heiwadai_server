@@ -120,6 +120,15 @@ func (u *AuthUsecase) SignIn(
 		return nil, errors.NewDomainError(errors.QueryDataNotFoundError, "このアドレスで登録されているユーザーが存在しません")
 	}
 
+	userOption, err := u.userQuery.GetOptionByID(existUser.ID)
+	if err != nil {
+		return nil, errors.NewDomainError(errors.QueryError, err.Error())
+	}
+
+	if userOption.IsBlackCustomer == true {
+		return nil, errors.NewDomainError(errors.UnPemitedOperation, "このアドレスで登録されているユーザーは無効化されています")
+	}
+
 	token, err := u.authAction.SignIn(Mail, Password)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
