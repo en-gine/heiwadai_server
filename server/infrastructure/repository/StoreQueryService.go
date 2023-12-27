@@ -136,7 +136,7 @@ func StoreModelToEntity(model *models.Store, info *models.StayableStoreInfo) *en
 		model.Address,
 		model.Tel,
 		model.SiteURL,
-		model.StampImageURL,
+		model.StampImage,
 		model.Stayable,
 		model.IsActive,
 		uuid.MustParse(model.QRCode),

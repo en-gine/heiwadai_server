@@ -31,7 +31,7 @@ type Store struct {
 	Address         string      `boil:"address" json:"address" toml:"address" yaml:"address"`
 	Tel             string      `boil:"tel" json:"tel" toml:"tel" yaml:"tel"`
 	SiteURL         string      `boil:"site_url" json:"site_url" toml:"site_url" yaml:"site_url"`
-	StampImageURL   string      `boil:"stamp_image_url" json:"stamp_image_url" toml:"stamp_image_url" yaml:"stamp_image_url"`
+	StampImage      string      `boil:"stamp_image" json:"stamp_image" toml:"stamp_image" yaml:"stamp_image"`
 	Stayable        bool        `boil:"stayable" json:"stayable" toml:"stayable" yaml:"stayable"`
 	IsActive        bool        `boil:"is_active" json:"is_active" toml:"is_active" yaml:"is_active"`
 	QRCode          string      `boil:"qr_code" json:"qr_code" toml:"qr_code" yaml:"qr_code"`
@@ -51,7 +51,7 @@ var StoreColumns = struct {
 	Address         string
 	Tel             string
 	SiteURL         string
-	StampImageURL   string
+	StampImage      string
 	Stayable        string
 	IsActive        string
 	QRCode          string
@@ -66,7 +66,7 @@ var StoreColumns = struct {
 	Address:         "address",
 	Tel:             "tel",
 	SiteURL:         "site_url",
-	StampImageURL:   "stamp_image_url",
+	StampImage:      "stamp_image",
 	Stayable:        "stayable",
 	IsActive:        "is_active",
 	QRCode:          "qr_code",
@@ -83,7 +83,7 @@ var StoreTableColumns = struct {
 	Address         string
 	Tel             string
 	SiteURL         string
-	StampImageURL   string
+	StampImage      string
 	Stayable        string
 	IsActive        string
 	QRCode          string
@@ -98,7 +98,7 @@ var StoreTableColumns = struct {
 	Address:         "store.address",
 	Tel:             "store.tel",
 	SiteURL:         "store.site_url",
-	StampImageURL:   "store.stamp_image_url",
+	StampImage:      "store.stamp_image",
 	Stayable:        "store.stayable",
 	IsActive:        "store.is_active",
 	QRCode:          "store.qr_code",
@@ -117,7 +117,7 @@ var StoreWhere = struct {
 	Address         whereHelperstring
 	Tel             whereHelperstring
 	SiteURL         whereHelperstring
-	StampImageURL   whereHelperstring
+	StampImage      whereHelperstring
 	Stayable        whereHelperbool
 	IsActive        whereHelperbool
 	QRCode          whereHelperstring
@@ -132,7 +132,7 @@ var StoreWhere = struct {
 	Address:         whereHelperstring{field: "\"store\".\"address\""},
 	Tel:             whereHelperstring{field: "\"store\".\"tel\""},
 	SiteURL:         whereHelperstring{field: "\"store\".\"site_url\""},
-	StampImageURL:   whereHelperstring{field: "\"store\".\"stamp_image_url\""},
+	StampImage:      whereHelperstring{field: "\"store\".\"stamp_image\""},
 	Stayable:        whereHelperbool{field: "\"store\".\"stayable\""},
 	IsActive:        whereHelperbool{field: "\"store\".\"is_active\""},
 	QRCode:          whereHelperstring{field: "\"store\".\"qr_code\""},
@@ -209,8 +209,8 @@ func (r *storeR) GetCouponStores() CouponStoreSlice {
 type storeL struct{}
 
 var (
-	storeAllColumns            = []string{"id", "name", "branch_name", "zip_code", "address", "tel", "site_url", "stamp_image_url", "stayable", "is_active", "qr_code", "un_limited_qr_code", "create_at", "update_at"}
-	storeColumnsWithoutDefault = []string{"id", "name", "zip_code", "address", "tel", "site_url", "stamp_image_url", "stayable", "is_active", "qr_code", "un_limited_qr_code"}
+	storeAllColumns            = []string{"id", "name", "branch_name", "zip_code", "address", "tel", "site_url", "stamp_image", "stayable", "is_active", "qr_code", "un_limited_qr_code", "create_at", "update_at"}
+	storeColumnsWithoutDefault = []string{"id", "name", "zip_code", "address", "tel", "site_url", "stamp_image", "stayable", "is_active", "qr_code", "un_limited_qr_code"}
 	storeColumnsWithDefault    = []string{"branch_name", "create_at", "update_at"}
 	storePrimaryKeyColumns     = []string{"id"}
 	storeGeneratedColumns      = []string{}

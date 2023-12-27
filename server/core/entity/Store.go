@@ -14,7 +14,7 @@ type Store struct {
 	Address           string
 	Tel               string
 	SiteURL           string
-	StampImageURL     string
+	StampImage        string
 	Stayable          bool
 	IsActive          bool
 	QRCode            uuid.UUID
@@ -43,7 +43,7 @@ func CreateStore(
 	Address string,
 	Tel string,
 	SiteURL string,
-	StampImageURL string,
+	StampImage string,
 	Stayable bool,
 	StayableStoreInfo *StayableStoreInfo,
 ) (*Store, *errors.DomainError) {
@@ -59,7 +59,7 @@ func CreateStore(
 		Address:           Address,
 		Tel:               Tel,
 		SiteURL:           SiteURL,
-		StampImageURL:     StampImageURL,
+		StampImage:        StampImage,
 		Stayable:          Stayable,
 		IsActive:          true,
 		QRCode:            uuid.New(),
@@ -113,7 +113,7 @@ func RegenStore(
 	Address string,
 	Tel string,
 	SiteURL string,
-	StampImageURL string,
+	StampImage string,
 	Stayable bool,
 	IsActive bool,
 	QRCode uuid.UUID,
@@ -128,7 +128,7 @@ func RegenStore(
 		Address:           Address,
 		Tel:               Tel,
 		SiteURL:           SiteURL,
-		StampImageURL:     StampImageURL,
+		StampImage:        StampImage,
 		Stayable:          Stayable,
 		IsActive:          IsActive,
 		QRCode:            QRCode,

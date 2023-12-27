@@ -63,24 +63,20 @@ func (u *AdminCouponUsecase) CreateCustomCoupon(
 	ExpireAt time.Time,
 	IsCombinationable bool,
 	Notices []string,
+	TargetStore []*entity.Store,
 ) (*entity.Coupon, *errors.DomainError) {
-	stores, err := u.storeQuery.GetActiveAll()
-	if err != nil {
-		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
-	}
-
 	customCoupon, domainErr := entity.CreateCustomCoupon(
 		Name,
 		DiscountAmount,
 		ExpireAt,
 		IsCombinationable,
 		Notices,
-		stores,
+		TargetStore,
 	)
 	if domainErr != nil {
 		return nil, domainErr
 	}
-	err = u.couponRepository.Save(customCoupon)
+	err := u.couponRepository.Save(customCoupon)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
 	}
@@ -88,7 +84,15 @@ func (u *AdminCouponUsecase) CreateCustomCoupon(
 	return customCoupon, nil
 }
 
-func (u *AdminCouponUsecase) SaveCustomCoupon(couponID uuid.UUID) *errors.DomainError {
+func (u *AdminCouponUsecase) SaveCustomCoupon(
+	couponID uuid.UUID,
+	Name string,
+	DiscountAmount uint,
+	ExpireAt time.Time,
+	IsCombinationable bool,
+	Notices []string,
+	TargetStore []*entity.Store,
+) *errors.DomainError {
 	coupon, err := u.couponQuery.GetByID(couponID)
 	if err != nil {
 		return errors.NewDomainError(errors.QueryError, err.Error())
@@ -100,12 +104,22 @@ func (u *AdminCouponUsecase) SaveCustomCoupon(couponID uuid.UUID) *errors.Domain
 		return errors.NewDomainError(errors.UnPemitedOperation, "下書き状態のクーポンではありません。")
 	}
 
-	saveCoupon, domainErr := entity.SaveCustomCoupon(coupon)
+	coupon, domainErr := entity.SaveCustomCoupon(
+		coupon.ID,
+		Name,
+		DiscountAmount,
+		ExpireAt,
+		IsCombinationable,
+		Notices,
+		TargetStore,
+		coupon.CreateAt,
+	)
+
 	if domainErr != nil {
 		return domainErr
 	}
 
-	err = u.couponRepository.Save(saveCoupon)
+	err = u.couponRepository.Save(coupon)
 
 	if err != nil {
 		return errors.NewDomainError(errors.RepositoryError, err.Error())

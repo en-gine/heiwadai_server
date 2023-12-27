@@ -61,12 +61,25 @@ func (ac *AdminCouponController) GetUserCouponList(ctx context.Context, req *con
 }
 
 func (ac *AdminCouponController) CreateCustomCoupon(ctx context.Context, req *connect.Request[admin.CreateCustomCouponRequest]) (*connect.Response[shared.Coupon], error) {
+	var TargetStores []*entity.Store
+	for _, id := range req.Msg.TargetStoresID {
+		storeId, err := uuid.Parse(id)
+		if err != nil {
+			return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("StoreのUUIDが正しい形式ではありません。"))
+		}
+
+		TargetStores = append(TargetStores, &entity.Store{
+			ID: storeId,
+		})
+	}
+
 	entity, domaiErr := ac.couponUseCase.CreateCustomCoupon(
 		req.Msg.Name,
 		uint(req.Msg.DiscountAmount),
 		req.Msg.ExpireAt.AsTime(),
 		req.Msg.IsCombinationable,
 		req.Msg.Notices,
+		TargetStores,
 	)
 	if domaiErr != nil {
 		return nil, controller.ErrorHandler(domaiErr)
@@ -118,13 +131,23 @@ func (ac *AdminCouponController) GetCustomCouponList(ctx context.Context, req *c
 	return connect.NewResponse(result), nil
 }
 
-func (ac *AdminCouponController) SaveCustomCoupon(ctx context.Context, req *connect.Request[admin.CouponIDRequest]) (*connect.Response[emptypb.Empty], error) {
+func (ac *AdminCouponController) SaveCustomCoupon(ctx context.Context, req *connect.Request[admin.SaveCustomCouponRequest]) (*connect.Response[emptypb.Empty], error) {
 	couponID, err := uuid.Parse(req.Msg.ID)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("UUIDが正しい形式ではありません。"))
 	}
+	var TargetStores []*entity.Store
+	for _, id := range req.Msg.TargetStoresID {
+		storeId, err := uuid.Parse(id)
+		if err != nil {
+			return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("StoreのUUIDが正しい形式ではありません。"))
+		}
 
-	domaiErr := ac.couponUseCase.SaveCustomCoupon(couponID)
+		TargetStores = append(TargetStores, &entity.Store{
+			ID: storeId,
+		})
+	}
+	domaiErr := ac.couponUseCase.SaveCustomCoupon(couponID, req.Msg.Name, uint(req.Msg.DiscountAmount), req.Msg.ExpireAt.AsTime(), req.Msg.IsCombinationable, req.Msg.Notices, TargetStores)
 	if domaiErr != nil {
 		return nil, controller.ErrorHandler(domaiErr)
 	}

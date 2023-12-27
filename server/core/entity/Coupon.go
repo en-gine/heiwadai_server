@@ -169,20 +169,27 @@ func CreateCustomCoupon(
 }
 
 func SaveCustomCoupon(
-	DraftCoupon *Coupon,
+	ID uuid.UUID,
+	Name string,
+	DiscountAmount uint,
+	ExpireAt time.Time,
+	IsCombinationable bool,
+	Notices []string,
+	TargetStore []*Store,
+	CreateAt time.Time,
 ) (*Coupon, *errors.DomainError) {
-	return newCoupon(
-		DraftCoupon.ID,
-		DraftCoupon.Name,
+	return RegenCoupon(
+		ID,
+		Name,
 		CouponCustom,
-		DraftCoupon.DiscountAmount,
-		DraftCoupon.ExpireAt,
-		DraftCoupon.IsCombinationable,
-		DraftCoupon.Notices,
-		DraftCoupon.TargetStore,
-		DraftCoupon.CreateAt,
+		DiscountAmount,
+		ExpireAt,
+		IsCombinationable,
+		Notices,
+		TargetStore,
+		CreateAt,
 		CouponSaved,
-	)
+	), nil
 }
 
 func RegenCoupon(
