@@ -33,14 +33,22 @@ const (
 // reflection-formatted method names, remove the leading slash and convert the remaining slash to a
 // period.
 const (
+	// AdminDataControllerGetByIDProcedure is the fully-qualified name of the AdminDataController's
+	// GetByID RPC.
+	AdminDataControllerGetByIDProcedure = "/server.admin.AdminDataController/GetByID"
 	// AdminDataControllerUpdateProcedure is the fully-qualified name of the AdminDataController's
 	// Update RPC.
 	AdminDataControllerUpdateProcedure = "/server.admin.AdminDataController/Update"
+	// AdminDataControllerGetAllProcedure is the fully-qualified name of the AdminDataController's
+	// GetAll RPC.
+	AdminDataControllerGetAllProcedure = "/server.admin.AdminDataController/GetAll"
 )
 
 // AdminDataControllerClient is a client for the server.admin.AdminDataController service.
 type AdminDataControllerClient interface {
+	GetByID(context.Context, *connect_go.Request[admin.AdminDataRequest]) (*connect_go.Response[admin.AdminDataResponse], error)
 	Update(context.Context, *connect_go.Request[admin.AdminUpdateDataRequest]) (*connect_go.Response[admin.AdminDataResponse], error)
+	GetAll(context.Context, *connect_go.Request[admin.AdminListRequest]) (*connect_go.Response[admin.AdminListResponse], error)
 }
 
 // NewAdminDataControllerClient constructs a client for the server.admin.AdminDataController
@@ -53,9 +61,19 @@ type AdminDataControllerClient interface {
 func NewAdminDataControllerClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) AdminDataControllerClient {
 	baseURL = strings.TrimRight(baseURL, "/")
 	return &adminDataControllerClient{
+		getByID: connect_go.NewClient[admin.AdminDataRequest, admin.AdminDataResponse](
+			httpClient,
+			baseURL+AdminDataControllerGetByIDProcedure,
+			opts...,
+		),
 		update: connect_go.NewClient[admin.AdminUpdateDataRequest, admin.AdminDataResponse](
 			httpClient,
 			baseURL+AdminDataControllerUpdateProcedure,
+			opts...,
+		),
+		getAll: connect_go.NewClient[admin.AdminListRequest, admin.AdminListResponse](
+			httpClient,
+			baseURL+AdminDataControllerGetAllProcedure,
 			opts...,
 		),
 	}
@@ -63,7 +81,14 @@ func NewAdminDataControllerClient(httpClient connect_go.HTTPClient, baseURL stri
 
 // adminDataControllerClient implements AdminDataControllerClient.
 type adminDataControllerClient struct {
-	update *connect_go.Client[admin.AdminUpdateDataRequest, admin.AdminDataResponse]
+	getByID *connect_go.Client[admin.AdminDataRequest, admin.AdminDataResponse]
+	update  *connect_go.Client[admin.AdminUpdateDataRequest, admin.AdminDataResponse]
+	getAll  *connect_go.Client[admin.AdminListRequest, admin.AdminListResponse]
+}
+
+// GetByID calls server.admin.AdminDataController.GetByID.
+func (c *adminDataControllerClient) GetByID(ctx context.Context, req *connect_go.Request[admin.AdminDataRequest]) (*connect_go.Response[admin.AdminDataResponse], error) {
+	return c.getByID.CallUnary(ctx, req)
 }
 
 // Update calls server.admin.AdminDataController.Update.
@@ -71,9 +96,16 @@ func (c *adminDataControllerClient) Update(ctx context.Context, req *connect_go.
 	return c.update.CallUnary(ctx, req)
 }
 
+// GetAll calls server.admin.AdminDataController.GetAll.
+func (c *adminDataControllerClient) GetAll(ctx context.Context, req *connect_go.Request[admin.AdminListRequest]) (*connect_go.Response[admin.AdminListResponse], error) {
+	return c.getAll.CallUnary(ctx, req)
+}
+
 // AdminDataControllerHandler is an implementation of the server.admin.AdminDataController service.
 type AdminDataControllerHandler interface {
+	GetByID(context.Context, *connect_go.Request[admin.AdminDataRequest]) (*connect_go.Response[admin.AdminDataResponse], error)
 	Update(context.Context, *connect_go.Request[admin.AdminUpdateDataRequest]) (*connect_go.Response[admin.AdminDataResponse], error)
+	GetAll(context.Context, *connect_go.Request[admin.AdminListRequest]) (*connect_go.Response[admin.AdminListResponse], error)
 }
 
 // NewAdminDataControllerHandler builds an HTTP handler from the service implementation. It returns
@@ -82,15 +114,29 @@ type AdminDataControllerHandler interface {
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
 func NewAdminDataControllerHandler(svc AdminDataControllerHandler, opts ...connect_go.HandlerOption) (string, http.Handler) {
+	adminDataControllerGetByIDHandler := connect_go.NewUnaryHandler(
+		AdminDataControllerGetByIDProcedure,
+		svc.GetByID,
+		opts...,
+	)
 	adminDataControllerUpdateHandler := connect_go.NewUnaryHandler(
 		AdminDataControllerUpdateProcedure,
 		svc.Update,
 		opts...,
 	)
+	adminDataControllerGetAllHandler := connect_go.NewUnaryHandler(
+		AdminDataControllerGetAllProcedure,
+		svc.GetAll,
+		opts...,
+	)
 	return "/server.admin.AdminDataController/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
+		case AdminDataControllerGetByIDProcedure:
+			adminDataControllerGetByIDHandler.ServeHTTP(w, r)
 		case AdminDataControllerUpdateProcedure:
 			adminDataControllerUpdateHandler.ServeHTTP(w, r)
+		case AdminDataControllerGetAllProcedure:
+			adminDataControllerGetAllHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -100,6 +146,14 @@ func NewAdminDataControllerHandler(svc AdminDataControllerHandler, opts ...conne
 // UnimplementedAdminDataControllerHandler returns CodeUnimplemented from all methods.
 type UnimplementedAdminDataControllerHandler struct{}
 
+func (UnimplementedAdminDataControllerHandler) GetByID(context.Context, *connect_go.Request[admin.AdminDataRequest]) (*connect_go.Response[admin.AdminDataResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.AdminDataController.GetByID is not implemented"))
+}
+
 func (UnimplementedAdminDataControllerHandler) Update(context.Context, *connect_go.Request[admin.AdminUpdateDataRequest]) (*connect_go.Response[admin.AdminDataResponse], error) {
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.AdminDataController.Update is not implemented"))
+}
+
+func (UnimplementedAdminDataControllerHandler) GetAll(context.Context, *connect_go.Request[admin.AdminListRequest]) (*connect_go.Response[admin.AdminListResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.AdminDataController.GetAll is not implemented"))
 }

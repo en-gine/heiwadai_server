@@ -30,7 +30,6 @@ func (u *AdminDataUsecase) Update(
 	Mail string,
 	storeID uuid.UUID,
 ) (*entity.Admin, *errors.DomainError) {
-
 	existAdmin, err := u.adminQuery.GetByID(ID)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())
@@ -54,7 +53,6 @@ func (u *AdminDataUsecase) Update(
 
 	if belongStore == nil {
 		return nil, errors.NewDomainError(errors.QueryDataNotFoundError, "IDで指定された店舗が見つかりません")
-
 	}
 
 	updateData := entity.RegenAdmin(
@@ -70,4 +68,26 @@ func (u *AdminDataUsecase) Update(
 	}
 
 	return updateData, nil
+}
+
+func (u *AdminDataUsecase) GetByID(ID uuid.UUID) (*entity.Admin, *errors.DomainError) {
+	admin, err := u.adminQuery.GetByID(ID)
+	if err != nil {
+		return nil, errors.NewDomainError(errors.QueryError, err.Error())
+	}
+	if admin == nil {
+		return nil, errors.NewDomainError(errors.QueryDataNotFoundError, "該当のユーザーが見つかりません。")
+	}
+	return admin, nil
+}
+
+func (u *AdminDataUsecase) GetAll() ([]*entity.Admin, *errors.DomainError) {
+	admins, err := u.adminQuery.GetAll()
+	if err != nil {
+		return nil, errors.NewDomainError(errors.QueryError, err.Error())
+	}
+	if admins == nil {
+		return nil, errors.NewDomainError(errors.QueryDataNotFoundError, "該当のユーザーが見つかりません。")
+	}
+	return admins, nil
 }
