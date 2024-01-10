@@ -2,6 +2,8 @@ package admin
 
 import (
 	"context"
+	"errors"
+	"fmt"
 
 	adminv1 "server/api/v1/admin"
 	adminv1connect "server/api/v1/admin/adminconnect"
@@ -28,13 +30,21 @@ func NewAdminDataController(adminusecase *usecase.AdminDataUsecase) *AdminDataCo
 
 func (u *AdminDataController) Update(ctx context.Context, req *connect.Request[adminv1.AdminUpdateDataRequest]) (*connect.Response[adminv1.AdminDataResponse], error) {
 	msg := req.Msg
+	fmt.Println(msg.ID)
+	adminId, err := uuid.Parse(msg.ID)
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("Idの形式が正しくありません"))
+	}
+	storeId, err := uuid.Parse(msg.StoreID)
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("storeIdの形式が正しくありません"))
+	}
 
 	admin, domainErr := u.usecase.Update(
-		uuid.MustParse(msg.ID),
+		adminId,
 		msg.Name,
 		msg.IsActive,
-		msg.Mail,
-		uuid.MustParse(msg.StoreID),
+		storeId,
 	)
 	if domainErr != nil {
 		return nil, controller.ErrorHandler(domainErr)

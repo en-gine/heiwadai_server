@@ -27,7 +27,6 @@ func (u *AdminDataUsecase) Update(
 	ID uuid.UUID,
 	Name string,
 	IsActive bool,
-	Mail string,
 	storeID uuid.UUID,
 ) (*entity.Admin, *errors.DomainError) {
 	existAdmin, err := u.adminQuery.GetByID(ID)
@@ -36,14 +35,6 @@ func (u *AdminDataUsecase) Update(
 	}
 	if existAdmin == nil {
 		return nil, errors.NewDomainError(errors.QueryDataNotFoundError, "登録されているユーザーが存在しません")
-	}
-
-	existAdmin, err = u.adminQuery.GetByMail(Mail)
-	if err != nil {
-		return nil, errors.NewDomainError(errors.QueryError, err.Error())
-	}
-	if existAdmin == nil {
-		return nil, errors.NewDomainError(errors.QueryDataNotFoundError, "このアドレスで登録されているユーザーが存在しません")
 	}
 
 	belongStore, err := u.storeQuery.GetByID(storeID)
@@ -58,7 +49,7 @@ func (u *AdminDataUsecase) Update(
 	updateData := entity.RegenAdmin(
 		ID,
 		Name,
-		Mail,
+		existAdmin.Mail,
 		IsActive,
 		existAdmin.IsConfirmed,
 		belongStore,

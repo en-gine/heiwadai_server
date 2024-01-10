@@ -10,7 +10,6 @@ import (
 	"server/core/infra/action"
 	queryservice "server/core/infra/queryService"
 	"server/infrastructure/env"
-	"server/infrastructure/logger"
 
 	"github.com/bufbuild/connect-go"
 )
@@ -78,21 +77,20 @@ func NewAuthentificatable(AuthClient action.IAuthAction, UserDataQuery queryserv
 				ctx = context.WithValue(ctx, TokenKey, Token.AccessToken)
 			}
 			ctx = context.WithValue(ctx, UserIDKey, id.String())
-
-			res, err := next(ctx, req)
-
 			if env.GetEnv(env.EnvMode) == "dev" {
 				fmt.Println("----------------reqest----------------")
 				fmt.Println(req)
-				fmt.Println("----------------response--------------")
-				fmt.Println(res)
 				fmt.Println("----------------userID--------------")
 				fmt.Println(id)
 			}
-
+			res, err := next(ctx, req)
 			if err != nil {
-				logger.Error(err.Error())
-				// return nil, err
+				// logger.Error(err.Error())
+				return nil, err
+			}
+			if env.GetEnv(env.EnvMode) == "dev" {
+				fmt.Println("----------------response--------------")
+				fmt.Println(res)
 			}
 
 			if Token != nil && res != nil {
