@@ -63,6 +63,7 @@ func (u *AuthUsecase) Register(
 		name,
 		email,
 		true,
+		false,
 		belongStore,
 	)
 
@@ -107,7 +108,7 @@ func (u *AuthUsecase) SignIn(
 		return nil, errors.NewDomainError(errors.QueryDataNotFoundError, "このアドレスで登録されているユーザーが存在しません")
 	}
 
-	if existUser.IsActive == false {
+	if !existUser.IsActive {
 		return nil, errors.NewDomainError(errors.UnPemitedOperation, "このアドレスで登録されているユーザーは無効化されています")
 	}
 
@@ -116,6 +117,16 @@ func (u *AuthUsecase) SignIn(
 		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
 	}
 	return token, nil
+}
+
+func (u *AuthUsecase) ReInviteMail(
+	Mail string,
+) *errors.DomainError {
+	_, err := u.authAction.InviteUserByEmail(Mail)
+	if err != nil {
+		return errors.NewDomainError(errors.RepositoryError, err.Error())
+	}
+	return nil
 }
 
 func (u *AuthUsecase) ResetPasswordMail(

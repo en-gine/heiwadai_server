@@ -9,6 +9,7 @@ import (
 	queryservice "server/core/infra/queryService"
 	"server/core/infra/queryService/types"
 	"server/db/models"
+	"server/infrastructure/logger"
 
 	"github.com/google/uuid"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -31,7 +32,11 @@ func NewMessageQueryService() *MessageQueryService {
 func (pq *MessageQueryService) GetByID(id uuid.UUID) (*entity.Message, error) {
 	mgz, err := models.FindMessage(context.Background(), pq.db, id.String())
 	if err != nil {
-		return nil, err
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		logger.Error(err.Error())
+		return nil, nil
 	}
 	if mgz == nil {
 		return nil, nil
@@ -45,7 +50,11 @@ func (pq *MessageQueryService) GetMessagesAfter(ID *uuid.UUID) ([]*entity.Messag
 	var lastCreateAt *time.Time
 	msg, err := models.FindMessage(context.Background(), pq.db, ID.String())
 	if err != nil {
-		return nil, err
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		logger.Error(err.Error())
+		return nil, nil
 	}
 	if msg != nil {
 		lastCreateAt = &msg.CreateAt
@@ -55,7 +64,11 @@ func (pq *MessageQueryService) GetMessagesAfter(ID *uuid.UUID) ([]*entity.Messag
 
 	msgs, err = models.Messages(models.MessageWhere.CreateAt.GT(*lastCreateAt)).All(context.Background(), pq.db)
 	if err != nil {
-		return nil, err
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		logger.Error(err.Error())
+		return nil, nil
 	}
 	var result []*entity.Message
 	for _, mgz := range msgs {

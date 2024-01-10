@@ -8,6 +8,7 @@ import (
 	queryservice "server/core/infra/queryService"
 	"server/core/infra/queryService/types"
 	"server/db/models"
+	"server/infrastructure/logger"
 
 	"github.com/google/uuid"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -30,7 +31,11 @@ func NewUserReportQueryService() *UserReportQueryService {
 func (pq *UserReportQueryService) GetByID(id uuid.UUID) (*entity.UserReport, error) {
 	rpt, err := models.FindUserReport(context.Background(), pq.db, id.String())
 	if err != nil {
-		return nil, err
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		logger.Error(err.Error())
+		return nil, nil
 	}
 	if rpt == nil {
 		return nil, nil
@@ -41,7 +46,11 @@ func (pq *UserReportQueryService) GetByID(id uuid.UUID) (*entity.UserReport, err
 func (pq *UserReportQueryService) GetAll(pager *types.PageQuery) ([]*entity.UserReport, error) {
 	msgs, err := models.UserReports(qm.Limit(pager.Limit()), qm.Offset(pager.Offset())).All(context.Background(), pq.db)
 	if err != nil {
-		return nil, err
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		logger.Error(err.Error())
+		return nil, nil
 	}
 	var result []*entity.UserReport
 	for _, rpt := range msgs {

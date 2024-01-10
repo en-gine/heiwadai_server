@@ -1,8 +1,12 @@
 package action
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
+	"fmt"
+	"net/http"
 
 	"server/core/infra/action"
 	"server/core/infra/types"
@@ -16,12 +20,15 @@ import (
 var _ action.IAuthAction = &AuthClient{}
 
 type AuthClient struct {
-	client *supa.Client
+	client      *supa.Client
+	apiKey      string
+	adminAppURL *string
 }
 
 func NewAuthClient() *AuthClient {
 	authURL := env.GetEnv(env.SupabaseUrl)
 	authKey := env.GetEnv(env.SupabaseKey)
+	adminAppURL := env.GetEnv(env.AdminAppURL)
 	if authURL == "" {
 		panic("SUPABASE_URL is not set")
 	}
@@ -31,7 +38,9 @@ func NewAuthClient() *AuthClient {
 	client := supa.CreateClient(authURL, authKey)
 
 	return &AuthClient{
-		client: client,
+		client:      client,
+		apiKey:      authKey,
+		adminAppURL: &adminAppURL,
 	}
 }
 
@@ -120,7 +129,9 @@ func (au *AuthClient) UpdatePassword(password string, token string) error {
 
 func (au *AuthClient) InviteUserByEmail(email string) (uuid.UUID, error) {
 	ctx := context.Background()
-	user, err := au.client.Auth.InviteUserByEmail(ctx, email)
+	user, err := au.inviteUserByEmail(ctx, email, &InvliteOption{
+		RedirectTo: au.adminAppURL,
+	})
 	if err != nil {
 		logger.Errorf("Error InviteUserByEmail: %v", err)
 		return uuid.Nil, err
@@ -152,4 +163,68 @@ func (au *AuthClient) GetUserID(token string) (*uuid.UUID, error) {
 	userID := uuid.MustParse(user.ID)
 
 	return &userID, nil
+}
+
+// ---------------Supabase-goを仕方なく拡張
+type InvliteOption struct {
+	RedirectTo *string                 `json:"redirectTo"`
+	Data       *map[string]interface{} `json:"data"`
+}
+
+// InviteUserByEmail sends an invite link to the given email. Returns a user.
+func (au *AuthClient) inviteUserByEmail(ctx context.Context, email string, option *InvliteOption) (*supa.User, error) {
+	reqBody, _ := json.Marshal(map[string]string{"email": email})
+	reqURL := fmt.Sprintf("%s/%s/invite", au.client.BaseURL, supa.AuthEndpoint)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, reqURL, bytes.NewBuffer(reqBody))
+	if err != nil {
+		return nil, err
+	}
+
+	au.injectAuthorizationHeader(req, au.apiKey)
+	req.Header.Set("Content-Type", "application/json")
+	res := supa.User{}
+	if err := au.sendRequest(req, &res); err != nil {
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+func (au *AuthClient) injectAuthorizationHeader(req *http.Request, value string) {
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", value))
+}
+func (au *AuthClient) sendRequest(req *http.Request, v interface{}) error {
+	var errRes supa.ErrorResponse
+	hasCustomError, err := au.sendCustomRequest(req, v, &errRes)
+
+	if err != nil {
+		return err
+	} else if hasCustomError {
+		return &errRes
+	}
+
+	return nil
+}
+func (au *AuthClient) sendCustomRequest(req *http.Request, successValue interface{}, errorValue interface{}) (bool, error) {
+	req.Header.Set("apikey", au.apiKey)
+	res, err := au.client.HTTPClient.Do(req)
+	if err != nil {
+		return true, err
+	}
+
+	defer res.Body.Close()
+	statusOK := res.StatusCode >= http.StatusOK && res.StatusCode < 300
+	if !statusOK {
+		if err = json.NewDecoder(res.Body).Decode(&errorValue); err == nil {
+			return true, nil
+		}
+
+		return false, fmt.Errorf("unknown, status code: %d", res.StatusCode)
+	} else if res.StatusCode != http.StatusNoContent {
+		if err = json.NewDecoder(res.Body).Decode(&successValue); err != nil {
+			return false, err
+		}
+	}
+
+	return false, nil
 }

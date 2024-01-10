@@ -82,10 +82,11 @@ func (u *AdminDataController) GetAll(ctx context.Context, req *connect.Request[a
 
 func AdminEntityToResponse(entity *entity.Admin) *adminv1.AdminDataResponse {
 	return &adminv1.AdminDataResponse{
-		ID:       entity.ID.String(),
-		Name:     entity.Name,
-		IsActive: entity.IsActive,
-		Mail:     entity.Mail,
-		StoreID:  entity.BelongStore.ID.String(),
+		ID:          entity.ID.String(),
+		Name:        entity.Name,
+		IsActive:    entity.IsActive,
+		Mail:        entity.Mail,
+		StoreID:     entity.BelongStore.ID.String(),
+		IsConfirmed: entity.IsConfirmed,
 	}
 }

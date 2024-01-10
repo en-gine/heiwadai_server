@@ -6,11 +6,13 @@ import (
 
 	"server/api/v1/admin"
 	adminv1connect "server/api/v1/admin/adminconnect"
+	"server/controller"
 	usecase "server/core/usecase/admin"
 	"server/infrastructure/logger"
 	"server/router"
 
 	connect "github.com/bufbuild/connect-go"
+	"github.com/google/uuid"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -78,7 +80,7 @@ func (ac *AuthController) UpdateEmail(ctx context.Context, req *connect.Request[
 	if token == "" {
 		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("ログインが必要です。"))
 	}
-	err := ac.authUseCase.UpdateEmail(msg.Email, token)
+	err := ac.authUseCase.UpdateEmail(msg.Mail, token)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeUnavailable, errors.New("メールアドレスの変更に失敗しました。"))
 	}
@@ -100,4 +102,37 @@ func (ac *AuthController) Refresh(ctx context.Context, req *connect.Request[admi
 		ExpiresIn:    int64(*tkn.ExpiresIn),
 		RefreshToken: *tkn.RefreshToken,
 	}), nil
+}
+
+func (ac *AuthController) Register(ctx context.Context, req *connect.Request[admin.AdminRegisterRequest]) (*connect.Response[admin.AdminRegisterResponse], error) {
+	msg := req.Msg
+	storeID, err := uuid.Parse(req.Msg.BelongStoreID)
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("所属店舗のUUIDが正しい形式ではありません。"))
+	}
+	data, domaiErr := ac.authUseCase.Register(
+		msg.Name,
+		storeID,
+		msg.Mail,
+	)
+	if domaiErr != nil {
+		return nil, controller.ErrorHandler(domaiErr)
+	}
+
+	return connect.NewResponse(&admin.AdminRegisterResponse{
+		ID: data.ID.String(),
+	}), nil
+}
+
+func (ac *AuthController) ResendInviteMail(ctx context.Context, req *connect.Request[admin.ResendInviteRequest]) (*connect.Response[emptypb.Empty], error) {
+	msg := req.Msg
+
+	domaiErr := ac.authUseCase.ReInviteMail(
+		msg.Mail,
+	)
+	if domaiErr != nil {
+		return nil, controller.ErrorHandler(domaiErr)
+	}
+
+	return connect.NewResponse(&emptypb.Empty{}), nil
 }

@@ -8,6 +8,7 @@ import (
 	"server/core/entity"
 	queryservice "server/core/infra/queryService"
 	"server/db/models"
+	"server/infrastructure/logger"
 
 	"github.com/google/uuid"
 )
@@ -30,14 +31,22 @@ func (pq *StoreQueryService) GetByID(id uuid.UUID) (*entity.Store, error) {
 	ctx := context.Background()
 	store, err := models.FindStore(ctx, pq.db, id.String())
 	if err != nil {
-		return nil, err
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		logger.Error(err.Error())
+		return nil, nil
 	}
 	if store == nil {
 		return nil, nil
 	}
 	info, err := models.StayableStoreInfos(models.StayableStoreInfoWhere.StoreID.EQ(store.ID)).One(ctx, InitDB())
 	if err != nil {
-		return nil, err
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		logger.Error(err.Error())
+		return nil, nil
 	}
 	if info == nil {
 		info = nil
@@ -49,7 +58,11 @@ func (pq *StoreQueryService) GetByID(id uuid.UUID) (*entity.Store, error) {
 func (pq *StoreQueryService) GetActiveAll() ([]*entity.Store, error) {
 	stores, err := models.Stores(models.StoreWhere.IsActive.EQ(true)).All(context.Background(), pq.db)
 	if err != nil {
-		return nil, err
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		logger.Error(err.Error())
+		return nil, nil
 	}
 	if stores == nil {
 		return nil, nil
@@ -64,14 +77,22 @@ func (pq *StoreQueryService) GetActiveAll() ([]*entity.Store, error) {
 func (pq *StoreQueryService) GetStayableByID(id uuid.UUID) (*entity.StayableStore, error) {
 	store, err := models.FindStore(context.Background(), pq.db, id.String())
 	if err != nil {
-		return nil, err
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		logger.Error(err.Error())
+		return nil, nil
 	}
 	if store == nil {
 		return nil, nil
 	}
 	infoModel, err := store.StayableStoreInfo().One(context.Background(), InitDB())
 	if err != nil {
-		return nil, err
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		logger.Error(err.Error())
+		return nil, nil
 	}
 
 	return StayableStoreToEntity(store, infoModel), nil
@@ -80,7 +101,11 @@ func (pq *StoreQueryService) GetStayableByID(id uuid.UUID) (*entity.StayableStor
 func (pq *StoreQueryService) GetStayables() ([]*entity.StayableStore, error) {
 	stores, err := models.Stores(models.StoreWhere.IsActive.EQ(true), models.StoreWhere.Stayable.EQ(true)).All(context.Background(), pq.db)
 	if err != nil {
-		return nil, err
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		logger.Error(err.Error())
+		return nil, nil
 	}
 	if stores == nil {
 		return nil, nil
@@ -97,7 +122,11 @@ func (pq *StoreQueryService) GetStayables() ([]*entity.StayableStore, error) {
 func (pq *StoreQueryService) GetAll() ([]*entity.Store, error) {
 	stores, err := models.Stores().All(context.Background(), pq.db)
 	if err != nil {
-		return nil, err
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		logger.Error(err.Error())
+		return nil, nil
 	}
 	if stores == nil {
 		return nil, nil
@@ -112,7 +141,11 @@ func (pq *StoreQueryService) GetAll() ([]*entity.Store, error) {
 func (pq *StoreQueryService) GetStayableByBookingID(bookingID string) (*entity.StayableStore, error) {
 	stayables, err := pq.GetStayables()
 	if err != nil {
-		return nil, err
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		logger.Error(err.Error())
+		return nil, nil
 	}
 	for _, stayable := range stayables {
 		if stayable.BookingSystemID == bookingID {

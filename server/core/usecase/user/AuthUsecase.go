@@ -125,7 +125,7 @@ func (u *AuthUsecase) SignIn(
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())
 	}
 
-	if userOption.IsBlackCustomer == true {
+	if userOption.IsBlackCustomer {
 		return nil, errors.NewDomainError(errors.UnPemitedOperation, "このアドレスで登録されているユーザーは無効化されています")
 	}
 

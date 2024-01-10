@@ -58,6 +58,8 @@ const (
 	TestUserPass  EnvKey = "TEST_USER_PASS"
 	TestAdminMail EnvKey = "TEST_ADMIN_MAIL"
 
+	AdminAppURL EnvKey = "ADMIN_APP_URL"
+
 	FirebaseType                    EnvKey = "FIREBASE_type"
 	FirebaseProjectId               EnvKey = "FIREBASE_project_id"
 	FirebasePrivateKeyId            EnvKey = "FIREBASE_private_key_id"
@@ -108,6 +110,8 @@ func InitEnv() {
 			TestUserMail:  os.Getenv(string(TestUserMail)),
 			TestUserPass:  os.Getenv(string(TestUserPass)),
 			TestAdminMail: os.Getenv(string(TestAdminMail)),
+
+			AdminAppURL: os.Getenv(string(AdminAppURL)),
 
 			FirebaseType:                    os.Getenv(string(FirebaseType)),
 			FirebaseProjectId:               os.Getenv(string(FirebaseProjectId)),

@@ -60,6 +60,7 @@ func (u *AdminDataUsecase) Update(
 		Name,
 		Mail,
 		IsActive,
+		existAdmin.IsConfirmed,
 		belongStore,
 	)
 	err = u.adminRepository.Update(updateData)

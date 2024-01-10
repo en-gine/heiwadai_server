@@ -8,6 +8,7 @@ import (
 	queryservice "server/core/infra/queryService"
 	"server/core/infra/queryService/types"
 	"server/db/models"
+	"server/infrastructure/logger"
 
 	"github.com/google/uuid"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -30,7 +31,11 @@ func NewMailMagazineQueryService() *MailMagazineQueryService {
 func (pq *MailMagazineQueryService) GetByID(id uuid.UUID) (*entity.MailMagazine, error) {
 	mgz, err := models.FindMailMagazine(context.Background(), pq.db, id.String())
 	if err != nil {
-		return nil, err
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		logger.Error(err.Error())
+		return nil, nil
 	}
 	if mgz == nil {
 		return nil, nil

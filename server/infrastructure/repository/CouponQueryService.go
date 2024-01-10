@@ -8,6 +8,7 @@ import (
 	queryservice "server/core/infra/queryService"
 	"server/core/infra/queryService/types"
 	"server/db/models"
+	"server/infrastructure/logger"
 
 	"github.com/google/uuid"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -34,14 +35,22 @@ func (pq *CouponQueryService) GetByID(id uuid.UUID) (*entity.Coupon, error) {
 		qm.Load(models.CouponRels.CouponStore),
 	).One(context.Background(), pq.db)
 	if err != nil {
-		return nil, err
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		logger.Error(err.Error())
+		return nil, nil
 	}
 	if coupon == nil {
 		return nil, nil
 	}
 	stores, err := coupon.CouponStore(qm.Load(models.CouponStoreRels.Store)).All(context.Background(), pq.db)
 	if err != nil {
-		return nil, err
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		logger.Error(err.Error())
+		return nil, nil
 	}
 	var TargetStores []*entity.Store
 	for _, store := range stores {
@@ -50,7 +59,11 @@ func (pq *CouponQueryService) GetByID(id uuid.UUID) (*entity.Coupon, error) {
 
 	notices, err := coupon.CouponNotice().All(context.Background(), pq.db)
 	if err != nil {
-		return nil, err
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		logger.Error(err.Error())
+		return nil, nil
 	}
 
 	var noticeResult []string
@@ -88,12 +101,20 @@ func (pq *CouponQueryService) GetCouponByType(couponType entity.CouponType) (*en
 	}
 
 	if err != nil {
-		return nil, err
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		logger.Error(err.Error())
+		return nil, nil
 	}
 
 	stores, err := coupon.CouponStore(qm.Load(models.CouponStoreRels.Store)).All(context.Background(), pq.db)
 	if err != nil {
-		return nil, err
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		logger.Error(err.Error())
+		return nil, nil
 	}
 
 	if stores != nil {
@@ -107,7 +128,11 @@ func (pq *CouponQueryService) GetCouponByType(couponType entity.CouponType) (*en
 
 	notices, err := coupon.CouponNotice().All(context.Background(), pq.db)
 	if err != nil {
-		return nil, err
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		logger.Error(err.Error())
+		return nil, nil
 	}
 	var noticeResult []string
 	for _, notice := range notices {

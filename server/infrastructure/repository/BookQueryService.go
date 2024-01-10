@@ -7,6 +7,7 @@ import (
 	"server/core/entity"
 	queryservice "server/core/infra/queryService"
 	"server/db/models"
+	"server/infrastructure/logger"
 
 	"github.com/google/uuid"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -34,7 +35,11 @@ func (pq *BookQueryService) GetByID(bookID uuid.UUID) (*entity.Booking, error) {
 		qm.Load(models.UserBookRels.BookPlan),
 	).One(context.Background(), pq.db)
 	if err != nil {
-		return nil, err
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		logger.Error(err.Error())
+		return nil, nil
 	}
 	if book == nil {
 		return nil, nil
@@ -61,7 +66,11 @@ func (pq *BookQueryService) GetMyBooking(userID uuid.UUID) ([]*entity.Booking, e
 		entities = append(entities, entity)
 	}
 	if err != nil {
-		return nil, err
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		logger.Error(err.Error())
+		return nil, nil
 	}
 	if books == nil {
 		return nil, nil
@@ -76,12 +85,20 @@ func (pq *BookQueryService) GetBookRequestDataID() (*string, error) {
 	query := pq.db.QueryRow("SELECT generate_booking_number()")
 	err := query.Err()
 	if err != nil {
-		return nil, err
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		logger.Error(err.Error())
+		return nil, nil
 	}
 
 	err = query.Scan(&reqID)
 	if err != nil {
-		return nil, err
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		logger.Error(err.Error())
+		return nil, nil
 	}
 
 	return &reqID, nil

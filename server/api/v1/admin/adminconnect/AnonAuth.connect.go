@@ -34,9 +34,6 @@ const (
 // reflection-formatted method names, remove the leading slash and convert the remaining slash to a
 // period.
 const (
-	// AnonAuthControllerRegisterProcedure is the fully-qualified name of the AnonAuthController's
-	// Register RPC.
-	AnonAuthControllerRegisterProcedure = "/server.admin.AnonAuthController/Register"
 	// AnonAuthControllerSignUpProcedure is the fully-qualified name of the AnonAuthController's SignUp
 	// RPC.
 	AnonAuthControllerSignUpProcedure = "/server.admin.AnonAuthController/SignUp"
@@ -51,7 +48,6 @@ const (
 // AnonAuthControllerClient is a client for the server.admin.AnonAuthController service.
 type AnonAuthControllerClient interface {
 	// トークン不要
-	Register(context.Context, *connect_go.Request[admin.AdminRegisterRequest]) (*connect_go.Response[emptypb.Empty], error)
 	SignUp(context.Context, *connect_go.Request[admin.AdminAuthRequest]) (*connect_go.Response[emptypb.Empty], error)
 	SignIn(context.Context, *connect_go.Request[admin.AdminAuthRequest]) (*connect_go.Response[admin.AnonAuthTokenResponse], error)
 	ResetPasswordMail(context.Context, *connect_go.Request[admin.ResetPasswordRequest]) (*connect_go.Response[emptypb.Empty], error)
@@ -67,11 +63,6 @@ type AnonAuthControllerClient interface {
 func NewAnonAuthControllerClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) AnonAuthControllerClient {
 	baseURL = strings.TrimRight(baseURL, "/")
 	return &anonAuthControllerClient{
-		register: connect_go.NewClient[admin.AdminRegisterRequest, emptypb.Empty](
-			httpClient,
-			baseURL+AnonAuthControllerRegisterProcedure,
-			opts...,
-		),
 		signUp: connect_go.NewClient[admin.AdminAuthRequest, emptypb.Empty](
 			httpClient,
 			baseURL+AnonAuthControllerSignUpProcedure,
@@ -92,15 +83,9 @@ func NewAnonAuthControllerClient(httpClient connect_go.HTTPClient, baseURL strin
 
 // anonAuthControllerClient implements AnonAuthControllerClient.
 type anonAuthControllerClient struct {
-	register          *connect_go.Client[admin.AdminRegisterRequest, emptypb.Empty]
 	signUp            *connect_go.Client[admin.AdminAuthRequest, emptypb.Empty]
 	signIn            *connect_go.Client[admin.AdminAuthRequest, admin.AnonAuthTokenResponse]
 	resetPasswordMail *connect_go.Client[admin.ResetPasswordRequest, emptypb.Empty]
-}
-
-// Register calls server.admin.AnonAuthController.Register.
-func (c *anonAuthControllerClient) Register(ctx context.Context, req *connect_go.Request[admin.AdminRegisterRequest]) (*connect_go.Response[emptypb.Empty], error) {
-	return c.register.CallUnary(ctx, req)
 }
 
 // SignUp calls server.admin.AnonAuthController.SignUp.
@@ -121,7 +106,6 @@ func (c *anonAuthControllerClient) ResetPasswordMail(ctx context.Context, req *c
 // AnonAuthControllerHandler is an implementation of the server.admin.AnonAuthController service.
 type AnonAuthControllerHandler interface {
 	// トークン不要
-	Register(context.Context, *connect_go.Request[admin.AdminRegisterRequest]) (*connect_go.Response[emptypb.Empty], error)
 	SignUp(context.Context, *connect_go.Request[admin.AdminAuthRequest]) (*connect_go.Response[emptypb.Empty], error)
 	SignIn(context.Context, *connect_go.Request[admin.AdminAuthRequest]) (*connect_go.Response[admin.AnonAuthTokenResponse], error)
 	ResetPasswordMail(context.Context, *connect_go.Request[admin.ResetPasswordRequest]) (*connect_go.Response[emptypb.Empty], error)
@@ -133,11 +117,6 @@ type AnonAuthControllerHandler interface {
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
 func NewAnonAuthControllerHandler(svc AnonAuthControllerHandler, opts ...connect_go.HandlerOption) (string, http.Handler) {
-	anonAuthControllerRegisterHandler := connect_go.NewUnaryHandler(
-		AnonAuthControllerRegisterProcedure,
-		svc.Register,
-		opts...,
-	)
 	anonAuthControllerSignUpHandler := connect_go.NewUnaryHandler(
 		AnonAuthControllerSignUpProcedure,
 		svc.SignUp,
@@ -155,8 +134,6 @@ func NewAnonAuthControllerHandler(svc AnonAuthControllerHandler, opts ...connect
 	)
 	return "/server.admin.AnonAuthController/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
-		case AnonAuthControllerRegisterProcedure:
-			anonAuthControllerRegisterHandler.ServeHTTP(w, r)
 		case AnonAuthControllerSignUpProcedure:
 			anonAuthControllerSignUpHandler.ServeHTTP(w, r)
 		case AnonAuthControllerSignInProcedure:
@@ -171,10 +148,6 @@ func NewAnonAuthControllerHandler(svc AnonAuthControllerHandler, opts ...connect
 
 // UnimplementedAnonAuthControllerHandler returns CodeUnimplemented from all methods.
 type UnimplementedAnonAuthControllerHandler struct{}
-
-func (UnimplementedAnonAuthControllerHandler) Register(context.Context, *connect_go.Request[admin.AdminRegisterRequest]) (*connect_go.Response[emptypb.Empty], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.AnonAuthController.Register is not implemented"))
-}
 
 func (UnimplementedAnonAuthControllerHandler) SignUp(context.Context, *connect_go.Request[admin.AdminAuthRequest]) (*connect_go.Response[emptypb.Empty], error) {
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.AnonAuthController.SignUp is not implemented"))

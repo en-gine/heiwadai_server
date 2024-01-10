@@ -9,6 +9,7 @@ import (
 	queryservice "server/core/infra/queryService"
 	"server/core/infra/queryService/types"
 	"server/db/models"
+	"server/infrastructure/logger"
 
 	"github.com/google/uuid"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -35,7 +36,11 @@ func (pq *UserQueryService) GetByID(id uuid.UUID) (*entity.User, error) {
 		qm.Load(models.UserDatumRels.User),
 	).One(context.Background(), pq.db)
 	if err != nil {
-		return nil, err
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		logger.Error(err.Error())
+		return nil, nil
 	}
 	if user == nil {
 		return nil, nil
@@ -46,7 +51,11 @@ func (pq *UserQueryService) GetByID(id uuid.UUID) (*entity.User, error) {
 func (pq *UserQueryService) GetOptionByID(id uuid.UUID) (*entity.UserOption, error) {
 	option, err := models.FindUserOption(context.Background(), pq.db, id.String())
 	if err != nil {
-		return nil, err
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		logger.Error(err.Error())
+		return nil, nil
 	}
 	if option == nil {
 		return nil, nil
@@ -65,7 +74,11 @@ func (pq *UserQueryService) GetByMail(mail string) (*entity.User, error) {
 	}
 
 	if err != nil {
-		return nil, err
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		logger.Error(err.Error())
+		return nil, nil
 	}
 
 	return UserModelToEntity(usermanager.R.UserUserDatum, usermanager.Email), nil
@@ -80,7 +93,11 @@ func (pq *UserQueryService) GetMailOKUser(prefectures *[]entity.Prefecture) ([]*
 	users, err = models.UserData(queryMods...).All(context.Background(), pq.db)
 
 	if err != nil {
-		return nil, err
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		logger.Error(err.Error())
+		return nil, nil
 	}
 
 	if users == nil {
@@ -102,14 +119,18 @@ func (pq *UserQueryService) GetMailOKUserCount(prefectures *[]entity.Prefecture)
 	count = int(int64Count)
 
 	if err != nil {
-		return nil, err
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		logger.Error(err.Error())
+		return nil, nil
 	}
 
 	return &count, nil
 }
 
-// CountとAll両方で使えるようにクエリのみ返す
 func GetMailUserWhereMods(prefectures *[]entity.Prefecture) []qm.QueryMod {
+	// CountとAll両方で使えるようにクエリのみ返す
 	var preIds []int
 
 	if prefectures == nil {

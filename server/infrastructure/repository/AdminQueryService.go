@@ -7,6 +7,7 @@ import (
 	"server/core/entity"
 	queryservice "server/core/infra/queryService"
 	"server/db/models"
+	"server/infrastructure/logger"
 
 	"github.com/google/uuid"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -29,7 +30,11 @@ func NewAdminQueryService() *AdminQueryService {
 func (pq *AdminQueryService) GetByID(id uuid.UUID) (*entity.Admin, error) {
 	admin, err := models.Admins(qm.Load(models.AdminRels.BelongToStore), qm.Load(models.AdminRels.Admin), models.AdminWhere.AdminID.EQ(id.String())).One(context.Background(), pq.db)
 	if err != nil {
-		return nil, err
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		logger.Error(err.Error())
+		return nil, nil
 	}
 	if admin == nil {
 		return nil, nil
@@ -44,6 +49,10 @@ func (pq *AdminQueryService) GetByMail(mail string) (*entity.Admin, error) {
 		qm.Load(models.UserManagerRels.AdminAdmin),
 		models.UserManagerWhere.IsAdmin.EQ(true)).One(context.Background(), pq.db)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		logger.Error(err.Error())
 		return nil, err
 	}
 
@@ -57,6 +66,10 @@ func (pq *AdminQueryService) GetByMail(mail string) (*entity.Admin, error) {
 	}
 	modelStore, err := models.Stores(models.StoreWhere.ID.EQ(admin.BelongTo)).One(context.Background(), pq.db)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		logger.Error(err.Error())
 		return nil, err
 	}
 
@@ -71,7 +84,11 @@ func (pq *AdminQueryService) GetByMail(mail string) (*entity.Admin, error) {
 func (pq *AdminQueryService) GetAll() ([]*entity.Admin, error) {
 	admins, err := models.Admins(qm.Load(models.AdminRels.Admin), qm.Load(models.AdminRels.BelongToStore)).All(context.Background(), pq.db)
 	if err != nil {
-		return nil, err
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		logger.Error(err.Error())
+		return nil, nil
 	}
 	if admins == nil {
 		return nil, nil
@@ -84,12 +101,34 @@ func (pq *AdminQueryService) GetAll() ([]*entity.Admin, error) {
 	return result, nil
 }
 
+func GetAdminIsConfirmed(adminID uuid.UUID) (bool, error) {
+	db := InitDB()
+	var confirmedAt *string
+	err := db.QueryRow("SELECT email_confirmed_at FROM auth.users WHERE id = $1", adminID.String()).Scan(&confirmedAt)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return false, nil
+		}
+		logger.Error(err.Error())
+		return false, err
+	}
+	if confirmedAt == nil {
+		return false, nil
+	}
+	return true, nil
+}
+
 func AdminModelToEntity(model *models.Admin, store *entity.Store, email string) *entity.Admin {
+	isConfirmed, err := GetAdminIsConfirmed(uuid.MustParse(model.AdminID))
+	if err != nil {
+		return nil
+	}
 	return entity.RegenAdmin(
 		uuid.MustParse(model.AdminID),
 		model.Name,
 		email,
 		model.IsActive,
+		isConfirmed,
 		store,
 	)
 }

@@ -7,6 +7,7 @@ import (
 	queryservice "server/core/infra/queryService"
 	"server/core/infra/queryService/types"
 	"server/db/models"
+	"server/infrastructure/logger"
 
 	"github.com/google/uuid"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -37,7 +38,11 @@ func (pq *MailMagazineLogQueryService) GetUnsentTargetAllCount(mailMagazineID uu
 func (pq *MailMagazineLogQueryService) GetUnsentTargetMails(mailMagazineID uuid.UUID, pager types.PageQuery) (*[]string, error) {
 	mails, err := models.MailMagazineLogs(qm.Select(models.MailMagazineLogColumns.Email), models.MailMagazineLogWhere.MailMagazineID.EQ(mailMagazineID.String()), qm.Limit(pager.Limit()), qm.Offset(pager.Offset())).All(context.Background(), pq.db)
 	if err != nil {
-		return nil, err
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		logger.Error(err.Error())
+		return nil, nil
 	}
 	mailStrs := make([]string, len(mails))
 

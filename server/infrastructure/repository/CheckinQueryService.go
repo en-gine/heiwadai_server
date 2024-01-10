@@ -8,6 +8,7 @@ import (
 	queryservice "server/core/infra/queryService"
 	"server/core/infra/queryService/types"
 	"server/db/models"
+	"server/infrastructure/logger"
 
 	"github.com/google/uuid"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -30,7 +31,11 @@ func NewCheckinQueryService() *CheckinQueryService {
 func (pq *CheckinQueryService) GetMyActiveCheckin(userID uuid.UUID) ([]*entity.Checkin, error) {
 	checkins, err := models.Checkins(models.CheckinWhere.UserID.EQ(userID.String()), qm.Load(models.CheckinRels.User), qm.Load(models.CheckinRels.Store), models.CheckinWhere.Archive.EQ(false), models.CheckinWhere.UserID.EQ(userID.String())).All(context.Background(), pq.db)
 	if err != nil {
-		return nil, err
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		logger.Error(err.Error())
+		return nil, nil
 	}
 	if checkins == nil {
 		return nil, nil
@@ -50,7 +55,11 @@ func (pq *CheckinQueryService) GetMyLastStoreCheckin(userID uuid.UUID, storeID u
 	}
 
 	if err != nil {
-		return nil, err
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		logger.Error(err.Error())
+		return nil, nil
 	}
 
 	result := CheckinModelToEntity(checkin, nil, nil)
@@ -88,7 +97,11 @@ func (pq *CheckinQueryService) GetMyAllCheckin(userID uuid.UUID, pager *types.Pa
 func (pq *CheckinQueryService) GetAllUserAllCheckin(pager *types.PageQuery) ([]*entity.Checkin, error) {
 	checkins, err := models.Checkins(qm.Load(models.CheckinRels.User), qm.Load(models.CheckinRels.Store), qm.Limit(pager.Limit()), qm.Offset(pager.Offset())).All(context.Background(), pq.db)
 	if err != nil {
-		return nil, err
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		logger.Error(err.Error())
+		return nil, nil
 	}
 	if checkins == nil {
 		return nil, nil
