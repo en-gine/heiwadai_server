@@ -11,6 +11,7 @@ import (
 
 	connect "github.com/bufbuild/connect-go"
 	"github.com/google/uuid"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type AdminDataController struct {
@@ -78,6 +79,22 @@ func (u *AdminDataController) GetAll(ctx context.Context, req *connect.Request[a
 	return connect.NewResponse(&adminv1.AdminListResponse{
 		Admins: resAdmins,
 	}), nil
+}
+
+func (u *AdminDataController) Delete(ctx context.Context, req *connect.Request[adminv1.AdminDataRequest]) (*connect.Response[emptypb.Empty], error) {
+	msg := req.Msg
+
+	adminId, err := uuid.Parse(msg.ID)
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, err)
+	}
+
+	domainErr := u.usecase.Delete(adminId)
+	if domainErr != nil {
+		return nil, controller.ErrorHandler(domainErr)
+	}
+
+	return connect.NewResponse(&emptypb.Empty{}), nil
 }
 
 func AdminEntityToResponse(entity *entity.Admin) *adminv1.AdminDataResponse {

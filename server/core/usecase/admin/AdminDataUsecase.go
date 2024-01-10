@@ -82,6 +82,25 @@ func (u *AdminDataUsecase) GetByID(ID uuid.UUID) (*entity.Admin, *errors.DomainE
 	return admin, nil
 }
 
+func (u *AdminDataUsecase) Delete(ID uuid.UUID) *errors.DomainError {
+	admin, err := u.adminQuery.GetByID(ID)
+	if err != nil {
+		return errors.NewDomainError(errors.QueryError, err.Error())
+	}
+	if admin == nil {
+		return errors.NewDomainError(errors.QueryDataNotFoundError, "該当のユーザーが見つかりません。")
+	}
+
+	err = u.adminRepository.Delete(ID)
+	if err != nil {
+		return errors.NewDomainError(errors.QueryError, err.Error())
+	}
+	if admin == nil {
+		return errors.NewDomainError(errors.QueryDataNotFoundError, "該当のユーザーが見つかりません。")
+	}
+	return nil
+}
+
 func (u *AdminDataUsecase) GetAll() ([]*entity.Admin, *errors.DomainError) {
 	admins, err := u.adminQuery.GetAll()
 	if err != nil {

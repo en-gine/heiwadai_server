@@ -8,6 +8,7 @@ import (
 	context "context"
 	errors "errors"
 	connect_go "github.com/bufbuild/connect-go"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	http "net/http"
 	admin "server/api/v1/admin"
 	strings "strings"
@@ -42,6 +43,9 @@ const (
 	// AdminDataControllerGetAllProcedure is the fully-qualified name of the AdminDataController's
 	// GetAll RPC.
 	AdminDataControllerGetAllProcedure = "/server.admin.AdminDataController/GetAll"
+	// AdminDataControllerDeleteProcedure is the fully-qualified name of the AdminDataController's
+	// Delete RPC.
+	AdminDataControllerDeleteProcedure = "/server.admin.AdminDataController/Delete"
 )
 
 // AdminDataControllerClient is a client for the server.admin.AdminDataController service.
@@ -49,6 +53,7 @@ type AdminDataControllerClient interface {
 	GetByID(context.Context, *connect_go.Request[admin.AdminDataRequest]) (*connect_go.Response[admin.AdminDataResponse], error)
 	Update(context.Context, *connect_go.Request[admin.AdminUpdateDataRequest]) (*connect_go.Response[admin.AdminDataResponse], error)
 	GetAll(context.Context, *connect_go.Request[admin.AdminListRequest]) (*connect_go.Response[admin.AdminListResponse], error)
+	Delete(context.Context, *connect_go.Request[admin.AdminDataRequest]) (*connect_go.Response[emptypb.Empty], error)
 }
 
 // NewAdminDataControllerClient constructs a client for the server.admin.AdminDataController
@@ -76,6 +81,11 @@ func NewAdminDataControllerClient(httpClient connect_go.HTTPClient, baseURL stri
 			baseURL+AdminDataControllerGetAllProcedure,
 			opts...,
 		),
+		delete: connect_go.NewClient[admin.AdminDataRequest, emptypb.Empty](
+			httpClient,
+			baseURL+AdminDataControllerDeleteProcedure,
+			opts...,
+		),
 	}
 }
 
@@ -84,6 +94,7 @@ type adminDataControllerClient struct {
 	getByID *connect_go.Client[admin.AdminDataRequest, admin.AdminDataResponse]
 	update  *connect_go.Client[admin.AdminUpdateDataRequest, admin.AdminDataResponse]
 	getAll  *connect_go.Client[admin.AdminListRequest, admin.AdminListResponse]
+	delete  *connect_go.Client[admin.AdminDataRequest, emptypb.Empty]
 }
 
 // GetByID calls server.admin.AdminDataController.GetByID.
@@ -101,11 +112,17 @@ func (c *adminDataControllerClient) GetAll(ctx context.Context, req *connect_go.
 	return c.getAll.CallUnary(ctx, req)
 }
 
+// Delete calls server.admin.AdminDataController.Delete.
+func (c *adminDataControllerClient) Delete(ctx context.Context, req *connect_go.Request[admin.AdminDataRequest]) (*connect_go.Response[emptypb.Empty], error) {
+	return c.delete.CallUnary(ctx, req)
+}
+
 // AdminDataControllerHandler is an implementation of the server.admin.AdminDataController service.
 type AdminDataControllerHandler interface {
 	GetByID(context.Context, *connect_go.Request[admin.AdminDataRequest]) (*connect_go.Response[admin.AdminDataResponse], error)
 	Update(context.Context, *connect_go.Request[admin.AdminUpdateDataRequest]) (*connect_go.Response[admin.AdminDataResponse], error)
 	GetAll(context.Context, *connect_go.Request[admin.AdminListRequest]) (*connect_go.Response[admin.AdminListResponse], error)
+	Delete(context.Context, *connect_go.Request[admin.AdminDataRequest]) (*connect_go.Response[emptypb.Empty], error)
 }
 
 // NewAdminDataControllerHandler builds an HTTP handler from the service implementation. It returns
@@ -129,6 +146,11 @@ func NewAdminDataControllerHandler(svc AdminDataControllerHandler, opts ...conne
 		svc.GetAll,
 		opts...,
 	)
+	adminDataControllerDeleteHandler := connect_go.NewUnaryHandler(
+		AdminDataControllerDeleteProcedure,
+		svc.Delete,
+		opts...,
+	)
 	return "/server.admin.AdminDataController/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case AdminDataControllerGetByIDProcedure:
@@ -137,6 +159,8 @@ func NewAdminDataControllerHandler(svc AdminDataControllerHandler, opts ...conne
 			adminDataControllerUpdateHandler.ServeHTTP(w, r)
 		case AdminDataControllerGetAllProcedure:
 			adminDataControllerGetAllHandler.ServeHTTP(w, r)
+		case AdminDataControllerDeleteProcedure:
+			adminDataControllerDeleteHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -156,4 +180,8 @@ func (UnimplementedAdminDataControllerHandler) Update(context.Context, *connect_
 
 func (UnimplementedAdminDataControllerHandler) GetAll(context.Context, *connect_go.Request[admin.AdminListRequest]) (*connect_go.Response[admin.AdminListResponse], error) {
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.AdminDataController.GetAll is not implemented"))
+}
+
+func (UnimplementedAdminDataControllerHandler) Delete(context.Context, *connect_go.Request[admin.AdminDataRequest]) (*connect_go.Response[emptypb.Empty], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.AdminDataController.Delete is not implemented"))
 }
