@@ -49,7 +49,7 @@ func (pr *StoreRepository) Save(updateStore *entity.Store, stayableInfo *entity.
 	if err != nil {
 		return err
 	}
-	err = store.Upsert(ctx, pr.db, true, []string{"id"}, boil.Infer(), boil.Infer())
+	err = store.Upsert(ctx, tran.Tx, true, []string{"id"}, boil.Infer(), boil.Infer())
 	if err != nil {
 		tran.Rollback()
 		return err
@@ -65,7 +65,7 @@ func (pr *StoreRepository) Save(updateStore *entity.Store, stayableInfo *entity.
 			RestAPIURL:      stayableInfo.RestAPIURL,
 			BookingSystemID: stayableInfo.BookingSystemID,
 		}
-		err = StayableStoreInfo.Upsert(ctx, pr.db, true, []string{"store_id"}, boil.Infer(), boil.Infer())
+		err = StayableStoreInfo.Upsert(ctx, tran.Tx, true, []string{"store_id"}, boil.Infer(), boil.Infer())
 		if err != nil {
 			tran.Rollback()
 			return err
@@ -88,11 +88,11 @@ func (pr *StoreRepository) Delete(storeID uuid.UUID) error {
 		return err
 	}
 
-	deleteStore, err := models.FindStore(ctx, pr.db, storeID.String())
+	deleteStore, err := models.FindStore(ctx, tran.Tx, storeID.String())
 	if err != nil {
 		return err
 	}
-	_, err = deleteStore.Delete(ctx, pr.db)
+	_, err = deleteStore.Delete(ctx, tran.Tx)
 	if err != nil {
 		tran.Rollback()
 		return err
@@ -114,7 +114,7 @@ func (pr *StoreRepository) RegenQR(storeID uuid.UUID) (*uuid.UUID, error) {
 		return nil, err
 	}
 
-	store, err := models.FindStore(ctx, pr.db, storeID.String())
+	store, err := models.FindStore(ctx, tran.Tx, storeID.String())
 	if err != nil {
 		return nil, err
 	}
@@ -123,7 +123,7 @@ func (pr *StoreRepository) RegenQR(storeID uuid.UUID) (*uuid.UUID, error) {
 		return nil, err
 	}
 	store.QRCode = qrcode.String()
-	_, err = store.Update(ctx, pr.db, boil.Infer())
+	_, err = store.Update(ctx, tran.Tx, boil.Infer())
 	if err != nil {
 		tran.Rollback()
 		return nil, err
@@ -145,7 +145,7 @@ func (pr *StoreRepository) RegenUnlimitQR(storeID uuid.UUID) (*uuid.UUID, error)
 		return nil, err
 	}
 
-	store, err := models.FindStore(ctx, pr.db, storeID.String())
+	store, err := models.FindStore(ctx, tran.Tx, storeID.String())
 	if err != nil {
 		return nil, err
 	}
@@ -154,7 +154,7 @@ func (pr *StoreRepository) RegenUnlimitQR(storeID uuid.UUID) (*uuid.UUID, error)
 		return nil, err
 	}
 	store.UnLimitedQRCode = qrcode.String()
-	_, err = store.Update(ctx, pr.db, boil.Infer())
+	_, err = store.Update(ctx, tran.Tx, boil.Infer())
 	if err != nil {
 		tran.Rollback()
 		return nil, err

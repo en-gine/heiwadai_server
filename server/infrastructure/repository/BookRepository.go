@@ -86,17 +86,17 @@ func (pq *BookRepository) Save(entity *entity.Booking) error {
 		return err
 	}
 
-	err = plan.Upsert(ctx, pq.db, true, []string{"id"}, boil.Infer(), boil.Infer())
+	err = plan.Upsert(ctx, tran, true, []string{"id"}, boil.Infer(), boil.Infer())
 	if err != nil {
 		return err
 	}
 
-	err = guest.Upsert(ctx, pq.db, true, []string{"id"}, boil.Infer(), boil.Infer())
+	err = guest.Upsert(ctx, tran, true, []string{"id"}, boil.Infer(), boil.Infer())
 	if err != nil {
 		return err
 	}
 
-	err = book.Upsert(ctx, pq.db, true, []string{"id"}, boil.Infer(), boil.Infer())
+	err = book.Upsert(ctx, tran, true, []string{"id"}, boil.Infer(), boil.Infer())
 	if err != nil {
 		return err
 	}

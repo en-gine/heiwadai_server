@@ -49,7 +49,7 @@ func (ur *UserRepository) Save(updateUser *entity.User, updateUserOption *entity
 		Tel:           null.StringFromPtr(updateUser.Tel),
 		AcceptMail:    updateUser.AcceptMail,
 	}
-	err = user.Upsert(ctx, ur.db, true, []string{"user_id"}, boil.Infer(), boil.Infer())
+	err = user.Upsert(ctx, tran.Tx, true, []string{"user_id"}, boil.Infer(), boil.Infer())
 	if err != nil {
 		tran.Rollback()
 		return err
@@ -60,7 +60,7 @@ func (ur *UserRepository) Save(updateUser *entity.User, updateUserOption *entity
 			InnerNote:       updateUserOption.InnerNote,
 			IsBlackCustomer: updateUserOption.IsBlackCustomer,
 		}
-		err := userOption.Upsert(ctx, ur.db, true, []string{"user_id"}, boil.Infer(), boil.Infer())
+		err := userOption.Upsert(ctx, tran.Tx, true, []string{"user_id"}, boil.Infer(), boil.Infer())
 		if err != nil {
 			tran.Rollback()
 			return err
@@ -82,33 +82,33 @@ func (ur *UserRepository) Delete(userID uuid.UUID) error {
 	if err != nil {
 		return err
 	}
-	deleteUserManager, err := models.FindUserManager(ctx, ur.db, userID.String())
+	deleteUserManager, err := models.FindUserManager(ctx, tran.Tx, userID.String())
 	if err != nil {
 		tran.Rollback()
 		return err
 	}
-	_, err = deleteUserManager.Delete(ctx, ur.db)
+	_, err = deleteUserManager.Delete(ctx, tran.Tx)
 	if err != nil {
 		tran.Rollback()
 		return err
 	}
 
-	deleteUserData, err := models.FindUserDatum(ctx, ur.db, userID.String())
+	deleteUserData, err := models.FindUserDatum(ctx, tran.Tx, userID.String())
 	if err != nil {
 		tran.Rollback()
 		return err
 	}
-	_, err = deleteUserData.Delete(ctx, ur.db)
+	_, err = deleteUserData.Delete(ctx, tran.Tx)
 	if err != nil {
 		tran.Rollback()
 		return err
 	}
-	deleteUserOption, err := models.FindUserOption(ctx, ur.db, userID.String())
+	deleteUserOption, err := models.FindUserOption(ctx, tran.Tx, userID.String())
 	if err != nil {
 		tran.Rollback()
 		return err
 	}
-	_, err = deleteUserOption.Delete(ctx, ur.db)
+	_, err = deleteUserOption.Delete(ctx, tran.Tx)
 	if err != nil {
 		tran.Rollback()
 		return err

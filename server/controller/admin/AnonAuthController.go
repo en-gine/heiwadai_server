@@ -48,6 +48,15 @@ func (ac *AnonAuthController) SignIn(ctx context.Context, req *connect.Request[a
 	}), nil
 }
 
+func (ac *AnonAuthController) SetNewPassword(ctx context.Context, req *connect.Request[admin.SetNewPasswordRequest]) (*connect.Response[emptypb.Empty], error) {
+	msg := req.Msg
+	err := ac.authUseCase.UpdatePassword(msg.AccessToken, msg.Password)
+	if err != nil {
+		return nil, connect.NewError(connect.CodeUnavailable, errors.New("パスワードの登録に失敗しました。"))
+	}
+	return connect.NewResponse(&emptypb.Empty{}), nil
+}
+
 func (ac *AnonAuthController) ResetPasswordMail(ctx context.Context, req *connect.Request[admin.ResetPasswordRequest]) (*connect.Response[emptypb.Empty], error) {
 	msg := req.Msg
 	err := ac.authUseCase.ResetPasswordMail(msg.Email)

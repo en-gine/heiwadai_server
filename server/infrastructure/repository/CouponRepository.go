@@ -44,12 +44,12 @@ func (pr *CouponRepository) Save(updateCoupon *entity.Coupon) error {
 		return err
 	}
 
-	deleteNotices, err := models.FindCoupon(ctx, pr.db, updateCoupon.ID.String())
+	deleteNotices, err := models.FindCoupon(ctx, tx.Tx, updateCoupon.ID.String())
 	if err != nil {
 		tx.Rollback()
 		return err
 	}
-	_, err = deleteNotices.Delete(ctx, pr.db)
+	_, err = deleteNotices.Delete(ctx, tx.Tx)
 	if err != nil {
 		tx.Rollback()
 		return err
@@ -60,20 +60,20 @@ func (pr *CouponRepository) Save(updateCoupon *entity.Coupon) error {
 			CouponID: updateCoupon.ID.String(),
 			Notice:   notice,
 		}
-		err = modelNotice.Insert(ctx, pr.db, boil.Infer())
+		err = modelNotice.Insert(ctx, tx.Tx, boil.Infer())
 		if err != nil {
 			tx.Rollback()
 			return err
 		}
 	}
 
-	deleteStores, err := models.FindCoupon(ctx, pr.db, updateCoupon.ID.String())
+	deleteStores, err := models.FindCoupon(ctx, tx.Tx, updateCoupon.ID.String())
 	if err != nil {
 		tx.Rollback()
 		return err
 	}
 
-	_, err = deleteStores.Delete(ctx, pr.db)
+	_, err = deleteStores.Delete(ctx, tx.Tx)
 
 	if err != nil {
 		tx.Rollback()
@@ -85,14 +85,14 @@ func (pr *CouponRepository) Save(updateCoupon *entity.Coupon) error {
 			CouponID: updateCoupon.ID.String(),
 			StoreID:  store.ID.String(),
 		}
-		err = modelStore.Insert(ctx, pr.db, boil.Infer())
+		err = modelStore.Insert(ctx, tx.Tx, boil.Infer())
 		if err != nil {
 			tx.Rollback()
 			return err
 		}
 	}
 
-	err = coupon.Upsert(ctx, pr.db, true, []string{"id"}, boil.Infer(), boil.Infer())
+	err = coupon.Upsert(ctx, tx.Tx, true, []string{"id"}, boil.Infer(), boil.Infer())
 	if err != nil {
 		tx.Rollback()
 		return err

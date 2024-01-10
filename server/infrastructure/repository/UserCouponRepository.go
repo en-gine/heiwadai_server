@@ -40,7 +40,7 @@ func (pr *UserCouponRepository) Save(ctx context.Context, userCoupon *entity.Use
 		return err
 	}
 
-	err = coupon.Upsert(ctx, pr.db, true, []string{"coupon_id", "user_id"}, boil.Infer(), boil.Infer())
+	err = coupon.Upsert(ctx, tx.Tx, true, []string{"coupon_id", "user_id"}, boil.Infer(), boil.Infer())
 	if err != nil {
 		tx.Rollback()
 	}

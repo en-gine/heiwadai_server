@@ -11,8 +11,9 @@ import (
 var _ repository.ITransaction = &Transaction{}
 
 type Transaction struct {
-	db *sql.DB
-	tx *sql.Tx
+	db  *sql.DB
+	ctx *context.Context
+	Tx  *sql.Tx
 }
 
 func NewTransaction() *Transaction {
@@ -24,17 +25,18 @@ func NewTransaction() *Transaction {
 }
 
 func (r *Transaction) Begin(ctx context.Context) error {
+	r.ctx = &ctx
 	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
 		logger.Errorf("begin transaction error: %v", err)
 		return err
 	}
-	r.tx = tx
+	r.Tx = tx
 	return nil
 }
 
 func (r *Transaction) Commit() error {
-	err := r.tx.Commit()
+	err := r.Tx.Commit()
 	if err != nil {
 		logger.Errorf("commit error: %v", err)
 		return err
@@ -43,8 +45,12 @@ func (r *Transaction) Commit() error {
 }
 
 func (r *Transaction) Rollback() {
-	err := r.tx.Rollback()
+	err := r.Tx.Rollback()
 	if err != nil {
 		logger.Errorf("rollback error: %v", err)
 	}
+}
+
+func (r *Transaction) Exec(query string, args ...interface{}) (sql.Result, error) {
+	return r.Tx.ExecContext(*r.ctx, query, args...)
 }

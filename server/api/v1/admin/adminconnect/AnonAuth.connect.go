@@ -43,6 +43,9 @@ const (
 	// AnonAuthControllerResetPasswordMailProcedure is the fully-qualified name of the
 	// AnonAuthController's ResetPasswordMail RPC.
 	AnonAuthControllerResetPasswordMailProcedure = "/server.admin.AnonAuthController/ResetPasswordMail"
+	// AnonAuthControllerSetNewPasswordProcedure is the fully-qualified name of the AnonAuthController's
+	// SetNewPassword RPC.
+	AnonAuthControllerSetNewPasswordProcedure = "/server.admin.AnonAuthController/SetNewPassword"
 )
 
 // AnonAuthControllerClient is a client for the server.admin.AnonAuthController service.
@@ -51,6 +54,7 @@ type AnonAuthControllerClient interface {
 	SignUp(context.Context, *connect_go.Request[admin.AdminAuthRequest]) (*connect_go.Response[emptypb.Empty], error)
 	SignIn(context.Context, *connect_go.Request[admin.AdminAuthRequest]) (*connect_go.Response[admin.AnonAuthTokenResponse], error)
 	ResetPasswordMail(context.Context, *connect_go.Request[admin.ResetPasswordRequest]) (*connect_go.Response[emptypb.Empty], error)
+	SetNewPassword(context.Context, *connect_go.Request[admin.SetNewPasswordRequest]) (*connect_go.Response[emptypb.Empty], error)
 }
 
 // NewAnonAuthControllerClient constructs a client for the server.admin.AnonAuthController service.
@@ -78,6 +82,11 @@ func NewAnonAuthControllerClient(httpClient connect_go.HTTPClient, baseURL strin
 			baseURL+AnonAuthControllerResetPasswordMailProcedure,
 			opts...,
 		),
+		setNewPassword: connect_go.NewClient[admin.SetNewPasswordRequest, emptypb.Empty](
+			httpClient,
+			baseURL+AnonAuthControllerSetNewPasswordProcedure,
+			opts...,
+		),
 	}
 }
 
@@ -86,6 +95,7 @@ type anonAuthControllerClient struct {
 	signUp            *connect_go.Client[admin.AdminAuthRequest, emptypb.Empty]
 	signIn            *connect_go.Client[admin.AdminAuthRequest, admin.AnonAuthTokenResponse]
 	resetPasswordMail *connect_go.Client[admin.ResetPasswordRequest, emptypb.Empty]
+	setNewPassword    *connect_go.Client[admin.SetNewPasswordRequest, emptypb.Empty]
 }
 
 // SignUp calls server.admin.AnonAuthController.SignUp.
@@ -103,12 +113,18 @@ func (c *anonAuthControllerClient) ResetPasswordMail(ctx context.Context, req *c
 	return c.resetPasswordMail.CallUnary(ctx, req)
 }
 
+// SetNewPassword calls server.admin.AnonAuthController.SetNewPassword.
+func (c *anonAuthControllerClient) SetNewPassword(ctx context.Context, req *connect_go.Request[admin.SetNewPasswordRequest]) (*connect_go.Response[emptypb.Empty], error) {
+	return c.setNewPassword.CallUnary(ctx, req)
+}
+
 // AnonAuthControllerHandler is an implementation of the server.admin.AnonAuthController service.
 type AnonAuthControllerHandler interface {
 	// トークン不要
 	SignUp(context.Context, *connect_go.Request[admin.AdminAuthRequest]) (*connect_go.Response[emptypb.Empty], error)
 	SignIn(context.Context, *connect_go.Request[admin.AdminAuthRequest]) (*connect_go.Response[admin.AnonAuthTokenResponse], error)
 	ResetPasswordMail(context.Context, *connect_go.Request[admin.ResetPasswordRequest]) (*connect_go.Response[emptypb.Empty], error)
+	SetNewPassword(context.Context, *connect_go.Request[admin.SetNewPasswordRequest]) (*connect_go.Response[emptypb.Empty], error)
 }
 
 // NewAnonAuthControllerHandler builds an HTTP handler from the service implementation. It returns
@@ -132,6 +148,11 @@ func NewAnonAuthControllerHandler(svc AnonAuthControllerHandler, opts ...connect
 		svc.ResetPasswordMail,
 		opts...,
 	)
+	anonAuthControllerSetNewPasswordHandler := connect_go.NewUnaryHandler(
+		AnonAuthControllerSetNewPasswordProcedure,
+		svc.SetNewPassword,
+		opts...,
+	)
 	return "/server.admin.AnonAuthController/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case AnonAuthControllerSignUpProcedure:
@@ -140,6 +161,8 @@ func NewAnonAuthControllerHandler(svc AnonAuthControllerHandler, opts ...connect
 			anonAuthControllerSignInHandler.ServeHTTP(w, r)
 		case AnonAuthControllerResetPasswordMailProcedure:
 			anonAuthControllerResetPasswordMailHandler.ServeHTTP(w, r)
+		case AnonAuthControllerSetNewPasswordProcedure:
+			anonAuthControllerSetNewPasswordHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -159,4 +182,8 @@ func (UnimplementedAnonAuthControllerHandler) SignIn(context.Context, *connect_g
 
 func (UnimplementedAnonAuthControllerHandler) ResetPasswordMail(context.Context, *connect_go.Request[admin.ResetPasswordRequest]) (*connect_go.Response[emptypb.Empty], error) {
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.AnonAuthController.ResetPasswordMail is not implemented"))
+}
+
+func (UnimplementedAnonAuthControllerHandler) SetNewPassword(context.Context, *connect_go.Request[admin.SetNewPasswordRequest]) (*connect_go.Response[emptypb.Empty], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.AnonAuthController.SetNewPassword is not implemented"))
 }
