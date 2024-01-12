@@ -2,6 +2,7 @@ package admin
 
 import (
 	"context"
+	"errors"
 
 	adminv1 "server/api/v1/admin"
 	"server/api/v1/shared"
@@ -83,8 +84,32 @@ func (u *UserDataController) Update(ctx context.Context, req *connect.Request[ad
 	return res, nil
 }
 
+func (u *UserDataController) GetByID(ctx context.Context, req *connect.Request[adminv1.UserGetIDRequest]) (*connect.Response[adminv1.UserDataResponse], error) {
+	msg := req.Msg
+	userID, err := uuid.Parse(msg.ID)
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("UUIDが正しい形式ではありません。"))
+	}
+
+	usr, domainErr := u.userUsecase.GetUserByID(userID)
+	if domainErr != nil {
+		return nil, controller.ErrorHandler(domainErr)
+	}
+	res := connect.NewResponse(&adminv1.UserDataResponse{
+		User:            userController.UserEntityToResponse(usr.User),
+		InnerNote:       usr.UserOption.InnerNote,
+		IsBlackCustomer: usr.UserOption.IsBlackCustomer,
+	})
+	return res, nil
+}
+
 func (u *UserDataController) Delete(ctx context.Context, req *connect.Request[adminv1.UserDeleteRequest]) (*connect.Response[emptypb.Empty], error) {
-	domainErr := u.userUsecase.Delete(uuid.MustParse(req.Msg.ID))
+	msg := req.Msg
+	userID, err := uuid.Parse(msg.ID)
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("UUIDが正しい形式ではありません。"))
+	}
+	domainErr := u.userUsecase.Delete(userID)
 	if domainErr != nil {
 		return nil, controller.ErrorHandler(domainErr)
 	}

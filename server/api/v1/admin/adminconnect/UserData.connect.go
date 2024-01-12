@@ -34,6 +34,9 @@ const (
 // reflection-formatted method names, remove the leading slash and convert the remaining slash to a
 // period.
 const (
+	// UserDataControllerGetByIDProcedure is the fully-qualified name of the UserDataController's
+	// GetByID RPC.
+	UserDataControllerGetByIDProcedure = "/server.admin.UserDataController/GetByID"
 	// UserDataControllerUpdateProcedure is the fully-qualified name of the UserDataController's Update
 	// RPC.
 	UserDataControllerUpdateProcedure = "/server.admin.UserDataController/Update"
@@ -47,6 +50,7 @@ const (
 
 // UserDataControllerClient is a client for the server.admin.UserDataController service.
 type UserDataControllerClient interface {
+	GetByID(context.Context, *connect_go.Request[admin.UserGetIDRequest]) (*connect_go.Response[admin.UserDataResponse], error)
 	Update(context.Context, *connect_go.Request[admin.UserUpdateDataRequest]) (*connect_go.Response[admin.UserDataResponse], error)
 	Delete(context.Context, *connect_go.Request[admin.UserDeleteRequest]) (*connect_go.Response[emptypb.Empty], error)
 	GetList(context.Context, *connect_go.Request[admin.UserListFilterRequest]) (*connect_go.Response[admin.UserListResponse], error)
@@ -62,6 +66,11 @@ type UserDataControllerClient interface {
 func NewUserDataControllerClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) UserDataControllerClient {
 	baseURL = strings.TrimRight(baseURL, "/")
 	return &userDataControllerClient{
+		getByID: connect_go.NewClient[admin.UserGetIDRequest, admin.UserDataResponse](
+			httpClient,
+			baseURL+UserDataControllerGetByIDProcedure,
+			opts...,
+		),
 		update: connect_go.NewClient[admin.UserUpdateDataRequest, admin.UserDataResponse](
 			httpClient,
 			baseURL+UserDataControllerUpdateProcedure,
@@ -82,9 +91,15 @@ func NewUserDataControllerClient(httpClient connect_go.HTTPClient, baseURL strin
 
 // userDataControllerClient implements UserDataControllerClient.
 type userDataControllerClient struct {
+	getByID *connect_go.Client[admin.UserGetIDRequest, admin.UserDataResponse]
 	update  *connect_go.Client[admin.UserUpdateDataRequest, admin.UserDataResponse]
 	delete  *connect_go.Client[admin.UserDeleteRequest, emptypb.Empty]
 	getList *connect_go.Client[admin.UserListFilterRequest, admin.UserListResponse]
+}
+
+// GetByID calls server.admin.UserDataController.GetByID.
+func (c *userDataControllerClient) GetByID(ctx context.Context, req *connect_go.Request[admin.UserGetIDRequest]) (*connect_go.Response[admin.UserDataResponse], error) {
+	return c.getByID.CallUnary(ctx, req)
 }
 
 // Update calls server.admin.UserDataController.Update.
@@ -104,6 +119,7 @@ func (c *userDataControllerClient) GetList(ctx context.Context, req *connect_go.
 
 // UserDataControllerHandler is an implementation of the server.admin.UserDataController service.
 type UserDataControllerHandler interface {
+	GetByID(context.Context, *connect_go.Request[admin.UserGetIDRequest]) (*connect_go.Response[admin.UserDataResponse], error)
 	Update(context.Context, *connect_go.Request[admin.UserUpdateDataRequest]) (*connect_go.Response[admin.UserDataResponse], error)
 	Delete(context.Context, *connect_go.Request[admin.UserDeleteRequest]) (*connect_go.Response[emptypb.Empty], error)
 	GetList(context.Context, *connect_go.Request[admin.UserListFilterRequest]) (*connect_go.Response[admin.UserListResponse], error)
@@ -115,6 +131,11 @@ type UserDataControllerHandler interface {
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
 func NewUserDataControllerHandler(svc UserDataControllerHandler, opts ...connect_go.HandlerOption) (string, http.Handler) {
+	userDataControllerGetByIDHandler := connect_go.NewUnaryHandler(
+		UserDataControllerGetByIDProcedure,
+		svc.GetByID,
+		opts...,
+	)
 	userDataControllerUpdateHandler := connect_go.NewUnaryHandler(
 		UserDataControllerUpdateProcedure,
 		svc.Update,
@@ -132,6 +153,8 @@ func NewUserDataControllerHandler(svc UserDataControllerHandler, opts ...connect
 	)
 	return "/server.admin.UserDataController/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
+		case UserDataControllerGetByIDProcedure:
+			userDataControllerGetByIDHandler.ServeHTTP(w, r)
 		case UserDataControllerUpdateProcedure:
 			userDataControllerUpdateHandler.ServeHTTP(w, r)
 		case UserDataControllerDeleteProcedure:
@@ -146,6 +169,10 @@ func NewUserDataControllerHandler(svc UserDataControllerHandler, opts ...connect
 
 // UnimplementedUserDataControllerHandler returns CodeUnimplemented from all methods.
 type UnimplementedUserDataControllerHandler struct{}
+
+func (UnimplementedUserDataControllerHandler) GetByID(context.Context, *connect_go.Request[admin.UserGetIDRequest]) (*connect_go.Response[admin.UserDataResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.UserDataController.GetByID is not implemented"))
+}
 
 func (UnimplementedUserDataControllerHandler) Update(context.Context, *connect_go.Request[admin.UserUpdateDataRequest]) (*connect_go.Response[admin.UserDataResponse], error) {
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.UserDataController.Update is not implemented"))
