@@ -121,22 +121,31 @@ func (u *UserDataController) GetList(ctx context.Context, req *connect.Request[a
 	filter := msg.Search
 
 	var pref *entity.Prefecture = nil
-	if pref != nil {
+	if filter.Prefecture != nil {
 		tmp := entity.Prefecture(*filter.Prefecture)
 		pref = &tmp
 	}
 
-	query := &types.UserQuery{
-		FirstName:     filter.FirstName,
-		LastName:      filter.LastName,
-		FirstNameKana: filter.FirstNameKana,
-		LastNameKana:  filter.LastNameKana,
-		Prefecture:    pref,
+	var query *types.UserQuery = nil
+	if filter != nil {
+		query = &types.UserQuery{
+			FirstName:     filter.FirstName,
+			LastName:      filter.LastName,
+			FirstNameKana: filter.FirstNameKana,
+			LastNameKana:  filter.LastNameKana,
+			Prefecture:    pref,
+		}
 	}
-
+	var currentPage, perPage int
+	if req.Msg.Pager.CurrentPage != nil {
+		currentPage = int(*req.Msg.Pager.CurrentPage)
+	}
+	if req.Msg.Pager.PerPage != nil {
+		perPage = int(*req.Msg.Pager.PerPage)
+	}
 	pager := types.NewPageQuery(
-		nil,
-		nil,
+		&currentPage,
+		&perPage,
 	)
 
 	users, pageResponse, domainErr := u.userUsecase.GetList(query, pager)
@@ -156,12 +165,22 @@ func (u *UserDataController) GetList(ctx context.Context, req *connect.Request[a
 		)
 	}
 
-	resPage = &shared.PageResponse{
-		TotalCount:  uint32(pageResponse.TotalCount),
-		CurrentPage: uint32(pageResponse.CurrentPage),
-		PerPage:     uint32(pageResponse.PerPage),
-		TotalPage:   uint32(pageResponse.TotalPage),
+	if pageResponse != nil {
+		resPage = &shared.PageResponse{
+			TotalCount:  uint32(pageResponse.TotalCount),
+			CurrentPage: uint32(pageResponse.CurrentPage),
+			PerPage:     uint32(pageResponse.PerPage),
+			TotalPage:   uint32(pageResponse.TotalPage),
+		}
+	} else {
+		resPage = &shared.PageResponse{
+			TotalCount:  0,
+			CurrentPage: 0,
+			PerPage:     0,
+			TotalPage:   0,
+		}
 	}
+
 	res = &adminv1.UserListResponse{
 		Users:        resUsers,
 		PageResponse: resPage,

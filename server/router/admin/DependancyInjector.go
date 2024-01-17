@@ -25,6 +25,8 @@ var (
 	mailMagazineLogRepository = implements.NewMailMagazineLogRepository()
 	checkinRepository         = implements.NewCheckinRepository()
 	userCheckinQuery          = implements.NewCheckinQueryService()
+	userDataRepository        = implements.NewUserRepository()
+	userDataQuery             = implements.NewUserQueryService()
 	sendMailAction            = action.NewSendMailAction()
 	userQuery                 = implements.NewUserQueryService()
 )
@@ -39,6 +41,10 @@ func InitializeAdminDataUsecase() *usecase.AdminDataUsecase {
 
 func InitializeAdminCouponUsecase() *usecase.AdminCouponUsecase {
 	return usecase.NewAdminCouponUsecase(couponRepository, couponQuery, usercouponQuery, usercouponRepository, storeQuery)
+}
+
+func InitializeUserDataUsecase() *usecase.UserDataUsecase {
+	return usecase.NewUserDataUsecase(userDataRepository, userDataQuery)
 }
 
 func InitializeMessageUsecase() *usecase.MessageUsecase {

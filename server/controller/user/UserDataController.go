@@ -69,6 +69,7 @@ func UserEntityToResponse(user *entity.User) *user.UserDataResponse {
 		City:          user.City,
 		Address:       user.Address,
 		Tel:           user.Tel,
+		Mail:          user.Mail,
 		AcceptMail:    user.AcceptMail,
 	}
 }

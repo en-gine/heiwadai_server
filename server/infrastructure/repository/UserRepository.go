@@ -54,18 +54,26 @@ func (ur *UserRepository) Save(updateUser *entity.User, updateUserOption *entity
 		tran.Rollback()
 		return err
 	}
+	var userOption *models.UserOption
 	if updateUserOption != nil {
-		userOption := models.UserOption{
+		userOption = &models.UserOption{
 			UserID:          updateUser.ID.String(),
 			InnerNote:       updateUserOption.InnerNote,
 			IsBlackCustomer: updateUserOption.IsBlackCustomer,
 		}
-		err := userOption.Upsert(ctx, tran.Tx, true, []string{"user_id"}, boil.Infer(), boil.Infer())
-		if err != nil {
-			tran.Rollback()
-			return err
+	} else {
+		userOption = &models.UserOption{
+			UserID:          updateUser.ID.String(),
+			InnerNote:       "",
+			IsBlackCustomer: false,
 		}
 	}
+	err = userOption.Upsert(ctx, tran.Tx, true, []string{"user_id"}, boil.Infer(), boil.Infer())
+	if err != nil {
+		tran.Rollback()
+		return err
+	}
+
 	err = tran.Commit()
 	if err != nil {
 		tran.Rollback()

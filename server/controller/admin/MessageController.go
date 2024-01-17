@@ -73,11 +73,22 @@ func (uc *MessageController) GetList(ctx context.Context, req *connect.Request[a
 		msgs = append(msgs, message)
 	}
 
-	resPage := &shared.PageResponse{
-		TotalCount:  uint32(pageResponse.TotalCount),
-		CurrentPage: uint32(pageResponse.CurrentPage),
-		PerPage:     uint32(pageResponse.PerPage),
-		TotalPage:   uint32(pageResponse.TotalPage),
+	var resPage *shared.PageResponse
+
+	if pageResponse != nil {
+		resPage = &shared.PageResponse{
+			TotalCount:  uint32(pageResponse.TotalCount),
+			CurrentPage: uint32(pageResponse.CurrentPage),
+			PerPage:     uint32(pageResponse.PerPage),
+			TotalPage:   uint32(pageResponse.TotalPage),
+		}
+	} else {
+		resPage = &shared.PageResponse{
+			TotalCount:  0,
+			CurrentPage: 0,
+			PerPage:     0,
+			TotalPage:   0,
+		}
 	}
 
 	result := &admin.MessagesResponse{

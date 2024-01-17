@@ -118,15 +118,25 @@ func (ac *AdminCouponController) GetCustomCouponList(ctx context.Context, req *c
 		cpn := EntityToResCoupon(coupon)
 		resCoupons = append(resCoupons, cpn)
 	}
-
-	result := &admin.CouponListResponse{
-		Coupons: resCoupons,
-		PageResponse: &shared.PageResponse{
+	var resPage *shared.PageResponse
+	if pageRes != nil {
+		resPage = &shared.PageResponse{
 			TotalCount:  uint32(pageRes.TotalCount),
 			CurrentPage: uint32(pageRes.CurrentPage),
 			PerPage:     uint32(pageRes.PerPage),
 			TotalPage:   uint32(pageRes.TotalPage),
-		},
+		}
+	} else {
+		resPage = &shared.PageResponse{
+			TotalCount:  0,
+			CurrentPage: 0,
+			PerPage:     0,
+			TotalPage:   0,
+		}
+	}
+	result := &admin.CouponListResponse{
+		Coupons:      resCoupons,
+		PageResponse: resPage,
 	}
 	return connect.NewResponse(result), nil
 }

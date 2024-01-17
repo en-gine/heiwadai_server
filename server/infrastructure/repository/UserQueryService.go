@@ -144,34 +144,20 @@ func GetMailUserWhereMods(prefectures *[]entity.Prefecture) []qm.QueryMod {
 }
 
 func (pq *UserQueryService) GetList(query *types.UserQuery, pager *types.PageQuery) ([]*entity.UserWichLastCheckin, *types.PageResponse, error) {
-	var firstNameQuery qm.QueryMod = nil
-	if query.FirstName != nil {
-		firstNameQuery = models.UserDatumWhere.FirstName.EQ("%" + *query.FirstName + "%")
-	}
-	var lastNameQuery qm.QueryMod = nil
-	if query.FirstName != nil {
-		lastNameQuery = models.UserDatumWhere.LastName.EQ("%" + *query.LastName + "%")
-	}
-	var firstNameKanaQuery qm.QueryMod = nil
-	if query.FirstNameKana != nil {
-		firstNameKanaQuery = models.UserDatumWhere.FirstNameKana.EQ("%" + *query.FirstNameKana + "%")
-	}
-	var lastNameKanaQuery qm.QueryMod = nil
-	if query.LastNameKana != nil {
-		lastNameKanaQuery = models.UserDatumWhere.LastNameKana.EQ("%" + *query.LastNameKana + "%")
-	}
-	var prefectureQuery qm.QueryMod = nil
-	if query.LastNameKana != nil {
-		prefectureQuery = models.UserDatumWhere.Prefecture.EQ(query.Prefecture.ToInt())
-	}
-
-	userdata, err := models.UserData(
-		firstNameQuery, lastNameQuery, firstNameKanaQuery, lastNameKanaQuery, prefectureQuery,
-		qm.Limit(pager.Limit()), qm.Offset(pager.Offset()),
+	userFilterMods := GetUserListFilterMods(query)
+	userListMods := []qm.QueryMod{
 		qm.Load(models.UserDatumRels.User),
-		qm.Load(models.UserDatumRels.UserCheckins, qm.OrderBy(models.CheckinColumns.CheckInAt+" desc"), qm.Limit(1)),
+		qm.Load(models.UserDatumRels.UserCheckins,
+			qm.OrderBy(models.CheckinColumns.CheckInAt+" desc"),
+			qm.Limit(1)),
+	}
+	userdata, err := models.UserData(
+		append(userFilterMods, userListMods...)...,
 	).All(context.Background(), pq.db)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil, nil
+		}
 		return nil, nil, err
 	}
 	if userdata == nil {
@@ -180,8 +166,11 @@ func (pq *UserQueryService) GetList(query *types.UserQuery, pager *types.PageQue
 	var result []*entity.UserWichLastCheckin
 	for _, user := range userdata {
 		u := UserModelToEntity(user, user.R.User.Email)
+		var lastCheckIn *models.Checkin = nil
 		var lastCheckinAt *time.Time = nil
-		lastCheckIn := user.R.UserCheckins[0]
+		if user.R.UserCheckins != nil {
+			lastCheckIn = user.R.UserCheckins[0]
+		}
 		if lastCheckIn != nil {
 			lastCheckinAt = &lastCheckIn.CheckInAt
 		}
@@ -193,7 +182,7 @@ func (pq *UserQueryService) GetList(query *types.UserQuery, pager *types.PageQue
 		result = append(result, userWithCheckin)
 	}
 
-	count, err := models.UserData(firstNameQuery, lastNameQuery, firstNameKanaQuery, lastNameKanaQuery, prefectureQuery).Count(context.Background(), pq.db)
+	count, err := models.UserData(userFilterMods...).Count(context.Background(), pq.db)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -204,6 +193,41 @@ func (pq *UserQueryService) GetList(query *types.UserQuery, pager *types.PageQue
 	}
 
 	return result, pageResponse, nil
+}
+
+func GetUserListFilterMods(query *types.UserQuery) []qm.QueryMod {
+	var qmMods []qm.QueryMod
+	// CountとAll両方で使えるようにクエリのみ返す
+	var firstNameQuery qm.QueryMod
+	var lastNameQuery qm.QueryMod
+	var firstNameKanaQuery qm.QueryMod
+	var lastNameKanaQuery qm.QueryMod
+	var prefectureQuery qm.QueryMod
+
+	if query != nil {
+		if query.FirstName != nil {
+			firstNameQuery = models.UserDatumWhere.FirstName.EQ("%" + *query.FirstName + "%")
+			qmMods = append(qmMods, firstNameQuery)
+		}
+		if query.LastName != nil {
+			lastNameQuery = models.UserDatumWhere.LastName.EQ("%" + *query.LastName + "%")
+			qmMods = append(qmMods, lastNameQuery)
+		}
+		if query.FirstNameKana != nil {
+			firstNameKanaQuery = models.UserDatumWhere.FirstNameKana.EQ("%" + *query.FirstNameKana + "%")
+			qmMods = append(qmMods, firstNameKanaQuery)
+		}
+		if query.LastNameKana != nil {
+			lastNameKanaQuery = models.UserDatumWhere.LastNameKana.EQ("%" + *query.LastNameKana + "%")
+			qmMods = append(qmMods, lastNameKanaQuery)
+		}
+		if query.Prefecture != nil {
+			prefectureQuery = models.UserDatumWhere.Prefecture.EQ(query.Prefecture.ToInt())
+			qmMods = append(qmMods, prefectureQuery)
+		}
+	}
+
+	return qmMods
 }
 
 func UserModelToEntity(model *models.UserDatum, email string) *entity.User {

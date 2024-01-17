@@ -124,6 +124,13 @@ func (u *UserDataUsecase) GetUserByID(ID uuid.UUID) (*entity.UserWithOption, *er
 	if user == nil {
 		return nil, errors.NewDomainError(errors.QueryDataNotFoundError, "登録されているユーザーが存在しません")
 	}
+	option, err := u.userQuery.GetOptionByID(ID)
+	if err != nil {
+		return nil, errors.NewDomainError(errors.QueryError, err.Error())
+	}
 
-	return nil, nil
+	return &entity.UserWithOption{
+		User:       user,
+		UserOption: option,
+	}, nil
 }

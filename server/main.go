@@ -29,7 +29,50 @@ func main() {
 	fmt.Println(msg)
 	EchoMyIP()
 	port := env.GetEnv(env.ServerPort)
-	log.Fatal(http.ListenAndServe(":"+port, cors.AllowAll().Handler(h2c.NewHandler(mux, &http2.Server{})))) // リフレクションを有効にする
+	corsHandler := AllowCors()
+	wrappedHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodOptions {
+			corsHandler.HandlerFunc(w, r)
+			// w.WriteHeader(http.StatusOK)
+			return // Preflightリクエストをここで終了
+		}
+		h2c.NewHandler(mux, &http2.Server{}).ServeHTTP(w, r)
+	})
+
+	log.Fatal(http.ListenAndServe(":"+port, wrappedHandler))
+}
+
+func AllowCors() *cors.Cors {
+	return cors.New(cors.Options{
+		AllowedOrigins: []string{"*"},
+		AllowedMethods: []string{
+			http.MethodGet,
+			http.MethodPost,
+			http.MethodPut,
+			http.MethodPatch,
+			http.MethodDelete,
+			http.MethodOptions,
+		},
+		AllowedHeaders: []string{
+			"Accept-Encoding",
+			"Authorization",
+			"Content-Type",
+			"Connect-Protocol-Version",
+			"Connect-Timeout-Ms",
+			"Grpc-Timeout",
+			"X-Grpc-Web",
+			"X-User-Agent",
+			"X-Refresh-Token",
+			"User-Agent",
+			"Referer",
+			"Connection",
+			"Cookie",
+			"Access-Control-Request-Method",
+			"Access-Control-Request-Headers",
+			"Origin",
+		},
+		AllowCredentials: true,
+	})
 }
 
 func RegisterGRPCService(mux *http.ServeMux) *http.ServeMux {

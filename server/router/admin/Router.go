@@ -52,4 +52,9 @@ func NewAdminServer(mux *http.ServeMux) {
 	checkinContoroller := admincontroller.NewUserCheckinController(checkinUsecase)
 	path, handler = adminv1connect.NewUserCheckinControllerHandler(checkinContoroller, requireAuth)
 	mux.Handle(path, handler)
+
+	userDataUsecase := InitializeUserDataUsecase()
+	userDataContoroller := admincontroller.NewUserDataController(userDataUsecase, checkinUsecase)
+	path, handler = adminv1connect.NewUserDataControllerHandler(userDataContoroller, requireAuth)
+	mux.Handle(path, handler)
 }

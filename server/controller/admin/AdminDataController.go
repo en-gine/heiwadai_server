@@ -3,7 +3,6 @@ package admin
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	adminv1 "server/api/v1/admin"
 	adminv1connect "server/api/v1/admin/adminconnect"
@@ -30,21 +29,20 @@ func NewAdminDataController(adminusecase *usecase.AdminDataUsecase) *AdminDataCo
 
 func (u *AdminDataController) Update(ctx context.Context, req *connect.Request[adminv1.AdminUpdateDataRequest]) (*connect.Response[adminv1.AdminDataResponse], error) {
 	msg := req.Msg
-	fmt.Println(msg.ID)
-	adminId, err := uuid.Parse(msg.ID)
+	adminID, err := uuid.Parse(msg.ID)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("Idの形式が正しくありません"))
 	}
-	storeId, err := uuid.Parse(msg.StoreID)
+	storeID, err := uuid.Parse(msg.StoreID)
 	if err != nil {
-		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("storeIdの形式が正しくありません"))
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("storeIDの形式が正しくありません"))
 	}
 
 	admin, domainErr := u.usecase.Update(
-		adminId,
+		adminID,
 		msg.Name,
 		msg.IsActive,
-		storeId,
+		storeID,
 	)
 	if domainErr != nil {
 		return nil, controller.ErrorHandler(domainErr)
@@ -59,12 +57,12 @@ func (u *AdminDataController) Update(ctx context.Context, req *connect.Request[a
 func (u *AdminDataController) GetByID(ctx context.Context, req *connect.Request[adminv1.AdminDataRequest]) (*connect.Response[adminv1.AdminDataResponse], error) {
 	msg := req.Msg
 
-	adminId, err := uuid.Parse(msg.ID)
+	adminID, err := uuid.Parse(msg.ID)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInvalidArgument, err)
 	}
 
-	entity, domainErr := u.usecase.GetByID(adminId)
+	entity, domainErr := u.usecase.GetByID(adminID)
 	if domainErr != nil {
 		return nil, controller.ErrorHandler(domainErr)
 	}
@@ -94,12 +92,12 @@ func (u *AdminDataController) GetAll(ctx context.Context, req *connect.Request[a
 func (u *AdminDataController) Delete(ctx context.Context, req *connect.Request[adminv1.AdminDataRequest]) (*connect.Response[emptypb.Empty], error) {
 	msg := req.Msg
 
-	adminId, err := uuid.Parse(msg.ID)
+	adminID, err := uuid.Parse(msg.ID)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInvalidArgument, err)
 	}
 
-	domainErr := u.usecase.Delete(adminId)
+	domainErr := u.usecase.Delete(adminID)
 	if domainErr != nil {
 		return nil, controller.ErrorHandler(domainErr)
 	}

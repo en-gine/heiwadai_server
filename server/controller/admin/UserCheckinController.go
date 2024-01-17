@@ -92,11 +92,22 @@ func (u *UserCheckinController) GetUserLog(ctx context.Context, req *connect.Req
 		)
 	}
 
-	resPage := &shared.PageResponse{
-		TotalCount:  uint32(pageResponse.TotalCount),
-		CurrentPage: uint32(pageResponse.CurrentPage),
-		PerPage:     uint32(pageResponse.PerPage),
-		TotalPage:   uint32(pageResponse.TotalPage),
+	var resPage *shared.PageResponse
+
+	if pageResponse != nil {
+		resPage = &shared.PageResponse{
+			TotalCount:  uint32(pageResponse.TotalCount),
+			CurrentPage: uint32(pageResponse.CurrentPage),
+			PerPage:     uint32(pageResponse.PerPage),
+			TotalPage:   uint32(pageResponse.TotalPage),
+		}
+	} else {
+		resPage = &shared.PageResponse{
+			TotalCount:  0,
+			CurrentPage: 0,
+			PerPage:     0,
+			TotalPage:   0,
+		}
 	}
 	res := &adminv1.CheckinsResponse{
 		Checkins:     resCheckins,
