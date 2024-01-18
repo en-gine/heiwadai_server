@@ -29,17 +29,8 @@ func main() {
 	fmt.Println(msg)
 	EchoMyIP()
 	port := env.GetEnv(env.ServerPort)
-	corsHandler := AllowCors()
-	wrappedHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			corsHandler.HandlerFunc(w, r)
-			// w.WriteHeader(http.StatusOK)
-			return // Preflightリクエストをここで終了
-		}
-		h2c.NewHandler(mux, &http2.Server{}).ServeHTTP(w, r)
-	})
+	log.Fatal(http.ListenAndServe(":"+port, AllowCors().Handler(h2c.NewHandler(mux, &http2.Server{})))) // リフレクションを有効にする
 
-	log.Fatal(http.ListenAndServe(":"+port, wrappedHandler))
 }
 
 func AllowCors() *cors.Cors {
