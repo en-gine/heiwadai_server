@@ -48,6 +48,15 @@ func (u *MailMagazineUsecase) GetList(pager *types.PageQuery) ([]*entity.MailMag
 	return mailMagazines, page, nil
 }
 
+func (u *MailMagazineUsecase) GetLogList(userID uuid.UUID, pager types.PageQuery) ([]*entity.MailMagazineLogWithTitle, *types.PageResponse, *errors.DomainError) {
+	mailMagazines, pageRes, err := u.mailMagazineLogQuery.GetUserLogList(userID, pager)
+
+	if err != nil {
+		return nil, nil, errors.NewDomainError(errors.QueryError, err.Error())
+	}
+	return mailMagazines, pageRes, nil
+}
+
 func (u *MailMagazineUsecase) SaveDraft(title string, content string, targetPrefectures *[]entity.Prefecture, autherID uuid.UUID) (*entity.MailMagazine, *errors.DomainError) {
 	maySendCount, err := u.userQueryService.GetMailOKUserCount(targetPrefectures)
 	if err != nil {

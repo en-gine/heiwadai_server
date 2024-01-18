@@ -99,6 +99,71 @@ func (uc *MailMagazineController) GetList(ctx context.Context, req *connect.Requ
 	return connect.NewResponse(result), nil
 }
 
+func (uc *MailMagazineController) GetUserLogList(ctx context.Context, req *connect.Request[admin.UserLogListRequest]) (*connect.Response[admin.UserMailMagazineLogResponse], error) {
+
+	userID, err := uuid.Parse(req.Msg.UserID)
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("ユーザーIDが取得できませんでした。UUIDの形式が不正です。"))
+	}
+
+	var currentPage, perPage int
+	if req.Msg.Pager.CurrentPage != nil {
+		currentPage = int(*req.Msg.Pager.CurrentPage)
+	}
+	if req.Msg.Pager.PerPage != nil {
+		perPage = int(*req.Msg.Pager.PerPage)
+	}
+
+	pager := types.NewPageQuery(
+		&currentPage,
+		&perPage,
+	)
+
+	entities, pageResponse, domaiErr := uc.magazineUseCase.GetLogList(userID, *pager)
+	if domaiErr != nil {
+		return nil, controller.ErrorHandler(domaiErr)
+	}
+
+	var magazineLog []*admin.UserMailMagazineLog
+
+	for _, entity := range entities {
+		var sentAt *timestamppb.Timestamp
+		if entity.Log.SentAt != nil {
+			sentAt = timestamppb.New(*entity.Log.SentAt)
+		}
+		log := &admin.UserMailMagazineLog{
+			ID:     entity.Log.MailMagazineID.String(),
+			UserID: entity.Log.UserID.String(),
+			Title:  entity.Title,
+			SentAt: sentAt,
+		}
+		magazineLog = append(magazineLog, log)
+	}
+	var resPage *shared.PageResponse
+
+	if pageResponse != nil {
+		resPage = &shared.PageResponse{
+			TotalCount:  uint32(pageResponse.TotalCount),
+			CurrentPage: uint32(pageResponse.CurrentPage),
+			PerPage:     uint32(pageResponse.PerPage),
+			TotalPage:   uint32(pageResponse.TotalPage),
+		}
+	} else {
+		resPage = &shared.PageResponse{
+			TotalCount:  0,
+			CurrentPage: 0,
+			PerPage:     0,
+			TotalPage:   0,
+		}
+	}
+
+	result := &admin.UserMailMagazineLogResponse{
+		UserLogs:     magazineLog,
+		PageResponse: resPage,
+	}
+	return connect.NewResponse(result), nil
+}
+
 func (uc *MailMagazineController) GetByID(ctx context.Context, req *connect.Request[admin.MailMagazineIDRequest]) (*connect.Response[admin.MailMagazine], error) {
 	entity, domaiErr := uc.magazineUseCase.GetByID(uuid.MustParse(req.Msg.ID))
 	if domaiErr != nil {

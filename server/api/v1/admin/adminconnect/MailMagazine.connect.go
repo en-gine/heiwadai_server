@@ -40,6 +40,9 @@ const (
 	// MailMagazineControllerGetByIDProcedure is the fully-qualified name of the
 	// MailMagazineController's GetByID RPC.
 	MailMagazineControllerGetByIDProcedure = "/server.admin.MailMagazineController/GetByID"
+	// MailMagazineControllerGetUserLogListProcedure is the fully-qualified name of the
+	// MailMagazineController's GetUserLogList RPC.
+	MailMagazineControllerGetUserLogListProcedure = "/server.admin.MailMagazineController/GetUserLogList"
 	// MailMagazineControllerSaveDraftProcedure is the fully-qualified name of the
 	// MailMagazineController's SaveDraft RPC.
 	MailMagazineControllerSaveDraftProcedure = "/server.admin.MailMagazineController/SaveDraft"
@@ -58,6 +61,7 @@ const (
 type MailMagazineControllerClient interface {
 	GetList(context.Context, *connect_go.Request[admin.GetMailMagazineListRequest]) (*connect_go.Response[admin.MailMagazinesResponse], error)
 	GetByID(context.Context, *connect_go.Request[admin.MailMagazineIDRequest]) (*connect_go.Response[admin.MailMagazine], error)
+	GetUserLogList(context.Context, *connect_go.Request[admin.UserLogListRequest]) (*connect_go.Response[admin.UserMailMagazineLogResponse], error)
 	SaveDraft(context.Context, *connect_go.Request[admin.SaveDraftRequest]) (*connect_go.Response[admin.MailMagazine], error)
 	Update(context.Context, *connect_go.Request[admin.UpdateMailMagazineRequest]) (*connect_go.Response[admin.MailMagazine], error)
 	Delete(context.Context, *connect_go.Request[admin.DeleteMailMagazineRequest]) (*connect_go.Response[emptypb.Empty], error)
@@ -82,6 +86,11 @@ func NewMailMagazineControllerClient(httpClient connect_go.HTTPClient, baseURL s
 		getByID: connect_go.NewClient[admin.MailMagazineIDRequest, admin.MailMagazine](
 			httpClient,
 			baseURL+MailMagazineControllerGetByIDProcedure,
+			opts...,
+		),
+		getUserLogList: connect_go.NewClient[admin.UserLogListRequest, admin.UserMailMagazineLogResponse](
+			httpClient,
+			baseURL+MailMagazineControllerGetUserLogListProcedure,
 			opts...,
 		),
 		saveDraft: connect_go.NewClient[admin.SaveDraftRequest, admin.MailMagazine](
@@ -109,12 +118,13 @@ func NewMailMagazineControllerClient(httpClient connect_go.HTTPClient, baseURL s
 
 // mailMagazineControllerClient implements MailMagazineControllerClient.
 type mailMagazineControllerClient struct {
-	getList   *connect_go.Client[admin.GetMailMagazineListRequest, admin.MailMagazinesResponse]
-	getByID   *connect_go.Client[admin.MailMagazineIDRequest, admin.MailMagazine]
-	saveDraft *connect_go.Client[admin.SaveDraftRequest, admin.MailMagazine]
-	update    *connect_go.Client[admin.UpdateMailMagazineRequest, admin.MailMagazine]
-	delete    *connect_go.Client[admin.DeleteMailMagazineRequest, emptypb.Empty]
-	send      *connect_go.Client[admin.SendMailMagazineRequest, emptypb.Empty]
+	getList        *connect_go.Client[admin.GetMailMagazineListRequest, admin.MailMagazinesResponse]
+	getByID        *connect_go.Client[admin.MailMagazineIDRequest, admin.MailMagazine]
+	getUserLogList *connect_go.Client[admin.UserLogListRequest, admin.UserMailMagazineLogResponse]
+	saveDraft      *connect_go.Client[admin.SaveDraftRequest, admin.MailMagazine]
+	update         *connect_go.Client[admin.UpdateMailMagazineRequest, admin.MailMagazine]
+	delete         *connect_go.Client[admin.DeleteMailMagazineRequest, emptypb.Empty]
+	send           *connect_go.Client[admin.SendMailMagazineRequest, emptypb.Empty]
 }
 
 // GetList calls server.admin.MailMagazineController.GetList.
@@ -125,6 +135,11 @@ func (c *mailMagazineControllerClient) GetList(ctx context.Context, req *connect
 // GetByID calls server.admin.MailMagazineController.GetByID.
 func (c *mailMagazineControllerClient) GetByID(ctx context.Context, req *connect_go.Request[admin.MailMagazineIDRequest]) (*connect_go.Response[admin.MailMagazine], error) {
 	return c.getByID.CallUnary(ctx, req)
+}
+
+// GetUserLogList calls server.admin.MailMagazineController.GetUserLogList.
+func (c *mailMagazineControllerClient) GetUserLogList(ctx context.Context, req *connect_go.Request[admin.UserLogListRequest]) (*connect_go.Response[admin.UserMailMagazineLogResponse], error) {
+	return c.getUserLogList.CallUnary(ctx, req)
 }
 
 // SaveDraft calls server.admin.MailMagazineController.SaveDraft.
@@ -152,6 +167,7 @@ func (c *mailMagazineControllerClient) Send(ctx context.Context, req *connect_go
 type MailMagazineControllerHandler interface {
 	GetList(context.Context, *connect_go.Request[admin.GetMailMagazineListRequest]) (*connect_go.Response[admin.MailMagazinesResponse], error)
 	GetByID(context.Context, *connect_go.Request[admin.MailMagazineIDRequest]) (*connect_go.Response[admin.MailMagazine], error)
+	GetUserLogList(context.Context, *connect_go.Request[admin.UserLogListRequest]) (*connect_go.Response[admin.UserMailMagazineLogResponse], error)
 	SaveDraft(context.Context, *connect_go.Request[admin.SaveDraftRequest]) (*connect_go.Response[admin.MailMagazine], error)
 	Update(context.Context, *connect_go.Request[admin.UpdateMailMagazineRequest]) (*connect_go.Response[admin.MailMagazine], error)
 	Delete(context.Context, *connect_go.Request[admin.DeleteMailMagazineRequest]) (*connect_go.Response[emptypb.Empty], error)
@@ -172,6 +188,11 @@ func NewMailMagazineControllerHandler(svc MailMagazineControllerHandler, opts ..
 	mailMagazineControllerGetByIDHandler := connect_go.NewUnaryHandler(
 		MailMagazineControllerGetByIDProcedure,
 		svc.GetByID,
+		opts...,
+	)
+	mailMagazineControllerGetUserLogListHandler := connect_go.NewUnaryHandler(
+		MailMagazineControllerGetUserLogListProcedure,
+		svc.GetUserLogList,
 		opts...,
 	)
 	mailMagazineControllerSaveDraftHandler := connect_go.NewUnaryHandler(
@@ -200,6 +221,8 @@ func NewMailMagazineControllerHandler(svc MailMagazineControllerHandler, opts ..
 			mailMagazineControllerGetListHandler.ServeHTTP(w, r)
 		case MailMagazineControllerGetByIDProcedure:
 			mailMagazineControllerGetByIDHandler.ServeHTTP(w, r)
+		case MailMagazineControllerGetUserLogListProcedure:
+			mailMagazineControllerGetUserLogListHandler.ServeHTTP(w, r)
 		case MailMagazineControllerSaveDraftProcedure:
 			mailMagazineControllerSaveDraftHandler.ServeHTTP(w, r)
 		case MailMagazineControllerUpdateProcedure:
@@ -223,6 +246,10 @@ func (UnimplementedMailMagazineControllerHandler) GetList(context.Context, *conn
 
 func (UnimplementedMailMagazineControllerHandler) GetByID(context.Context, *connect_go.Request[admin.MailMagazineIDRequest]) (*connect_go.Response[admin.MailMagazine], error) {
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.MailMagazineController.GetByID is not implemented"))
+}
+
+func (UnimplementedMailMagazineControllerHandler) GetUserLogList(context.Context, *connect_go.Request[admin.UserLogListRequest]) (*connect_go.Response[admin.UserMailMagazineLogResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.MailMagazineController.GetUserLogList is not implemented"))
 }
 
 func (UnimplementedMailMagazineControllerHandler) SaveDraft(context.Context, *connect_go.Request[admin.SaveDraftRequest]) (*connect_go.Response[admin.MailMagazine], error) {

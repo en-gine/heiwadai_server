@@ -27,6 +27,11 @@ type MailMagazineLog struct {
 	SentAt         *time.Time
 }
 
+type MailMagazineLogWithTitle struct {
+	Log   *MailMagazineLog
+	Title string
+}
+
 type MailMagazineStatus int
 
 const (
