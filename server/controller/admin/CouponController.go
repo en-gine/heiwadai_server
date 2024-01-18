@@ -31,17 +31,37 @@ func NewAdminCouponController(couponUsecase *usecase.AdminCouponUsecase) *AdminC
 	}
 }
 
-func (ac *AdminCouponController) GetUserCouponList(ctx context.Context, req *connect.Request[admin.UserIDRequest]) (*connect.Response[admin.UserAttachedCouponsResponse], error) {
+func (ac *AdminCouponController) GetUserCouponList(ctx context.Context, req *connect.Request[admin.UserCouponRequest]) (*connect.Response[admin.UserAttachedCouponsResponse], error) {
 	userID, err := uuid.Parse(req.Msg.ID)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("UUIDが正しい形式ではありません。"))
 	}
+	perPage := int(*req.Msg.Pager.PerPage)
+	page := int(*req.Msg.Pager.CurrentPage)
 
-	entities, domaiErr := ac.couponUseCase.GetUsersCouponList(userID)
+	pager := types.NewPageQuery(&perPage, &page)
+
+	entities, pageRes, domaiErr := ac.couponUseCase.GetUsersCouponList(userID, pager)
 	if domaiErr != nil {
 		return nil, controller.ErrorHandler(domaiErr)
 	}
+	var resPage *shared.PageResponse
 
+	if pageRes != nil {
+		resPage = &shared.PageResponse{
+			TotalCount:  uint32(pageRes.TotalCount),
+			CurrentPage: uint32(pageRes.CurrentPage),
+			PerPage:     uint32(pageRes.PerPage),
+			TotalPage:   uint32(pageRes.TotalPage),
+		}
+	} else {
+		resPage = &shared.PageResponse{
+			TotalCount:  0,
+			CurrentPage: 0,
+			PerPage:     0,
+			TotalPage:   0,
+		}
+	}
 	var attachedCoupons []*shared.UserAttachedCoupon
 	for _, entity := range entities {
 		cpn := EntityToResCoupon(entity.Coupon)
@@ -55,6 +75,7 @@ func (ac *AdminCouponController) GetUserCouponList(ctx context.Context, req *con
 	}
 	result := &admin.UserAttachedCouponsResponse{
 		UserAttachedCoupons: attachedCoupons,
+		PageResponse:        resPage,
 	}
 
 	return connect.NewResponse(result), nil

@@ -87,21 +87,34 @@ func (pq *UserCouponQueryService) GetActiveAll(userID uuid.UUID) ([]*entity.User
 	return result, nil
 }
 
-func (pq *UserCouponQueryService) GetAll(userID uuid.UUID, pager *types.PageQuery) ([]*entity.UserAttachedCoupon, error) {
+func (pq *UserCouponQueryService) GetAll(userID uuid.UUID, pager *types.PageQuery) ([]*entity.UserAttachedCoupon, *types.PageResponse, error) {
 	userCoupons, err := models.CouponAttachedUsers(models.CouponAttachedUserWhere.UserID.EQ(userID.String()),
 		qm.Load(models.CouponAttachedUserRels.Coupon),
 		qm.Limit(pager.Limit()), qm.Offset(pager.Offset())).All(context.Background(), pq.db)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, nil
+			return nil, nil, nil
 		}
 		logger.Error(err.Error())
-		return nil, nil
+		return nil, nil, nil
 	}
 	if userCoupons == nil {
-		return nil, nil
+		return nil, nil, nil
 	}
+
+	count, err := models.UserData(models.CouponAttachedUserWhere.UserID.EQ(userID.String()),
+		qm.Load(models.CouponAttachedUserRels.Coupon)).Count(context.Background(), pq.db)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	var pageResponse *types.PageResponse = nil
+	if pager != nil {
+		pageResponse = types.NewPageResponse(pager, int(count))
+	}
+
 	var result []*entity.UserAttachedCoupon
+
 	for _, userCoupon := range userCoupons {
 		coupon := userCoupon.R.Coupon
 		entityCoupon := CouponModelToEntity(coupon, nil, nil)
@@ -112,5 +125,5 @@ func (pq *UserCouponQueryService) GetAll(userID uuid.UUID, pager *types.PageQuer
 		)
 		result = append(result, entityUserCoupon)
 	}
-	return result, nil
+	return result, pageResponse, err
 }
