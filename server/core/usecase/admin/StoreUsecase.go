@@ -3,6 +3,7 @@ package admin
 import (
 	"server/core/entity"
 	"server/core/errors"
+	"server/core/infra/action"
 	queryservice "server/core/infra/queryService"
 	"server/core/infra/repository"
 
@@ -12,12 +13,14 @@ import (
 type StoreUsecase struct {
 	storeRepository repository.IStoreRepository
 	storeQuery      queryservice.IStoreQueryService
+	fileUploader    action.IFileAction
 }
 
-func NewStoreUsecase(storeRepository repository.IStoreRepository, storeQuery queryservice.IStoreQueryService) *StoreUsecase {
+func NewStoreUsecase(storeRepository repository.IStoreRepository, storeQuery queryservice.IStoreQueryService, fileUploader action.IFileAction) *StoreUsecase {
 	return &StoreUsecase{
 		storeRepository: storeRepository,
 		storeQuery:      storeQuery,
+		fileUploader:    fileUploader,
 	}
 }
 
@@ -44,7 +47,7 @@ func (u *StoreUsecase) Create(
 	Address string,
 	Tel string,
 	SiteURL string,
-	StampImage string,
+	StampImageData string,
 	Stayable bool,
 	Parking *string,
 	Latitude *float64,
@@ -83,21 +86,28 @@ func (u *StoreUsecase) Create(
 		)
 	}
 
+	newID := uuid.New()
+	StampImageURL, err := u.fileUploader.Upload(&StampImageData, newID.String())
+	if err != nil {
+		return nil, errors.NewDomainError(errors.ActionError, err.Error())
+	}
 	store, domainErr := entity.CreateStore(
+		newID,
 		Name,
 		BranchName,
 		ZipCode,
 		Address,
 		Tel,
 		SiteURL,
-		StampImage,
+		*StampImageURL,
 		Stayable,
 		stayableInfo,
 	)
 	if domainErr != nil {
 		return nil, domainErr
 	}
-	err := u.storeRepository.Save(store, stayableInfo)
+
+	err = u.storeRepository.Save(store, stayableInfo)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
 	}
@@ -113,7 +123,7 @@ func (u *StoreUsecase) Update(
 	Address string,
 	Tel string,
 	SiteURL string,
-	StampImage string,
+	StampImageData string,
 	Stayable bool,
 	Parking *string,
 	Latitude *float64,
@@ -162,6 +172,10 @@ func (u *StoreUsecase) Update(
 			*BookingSystemID,
 		)
 	}
+	StampImageURL, err := u.fileUploader.Upload(&StampImageData, storeID.String())
+	if err != nil {
+		return nil, errors.NewDomainError(errors.ActionError, err.Error())
+	}
 	updateStore := entity.RegenStore(
 		storeID,
 		Name,
@@ -170,7 +184,7 @@ func (u *StoreUsecase) Update(
 		Address,
 		Tel,
 		SiteURL,
-		StampImage,
+		*StampImageURL,
 		Stayable,
 		IsActive,
 		QRCode,

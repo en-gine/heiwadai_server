@@ -1,5 +1,6 @@
 package action
 
 type IFileAction interface {
-	PostFile(base64Image *string, fileName string) (*string, error)
+	// Upload base64 image to cloud storage and return the URL
+	Upload(base64Image *string, fileName string) (*string, error)
 }

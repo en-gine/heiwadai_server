@@ -28,6 +28,7 @@ var (
 	userDataRepository        = implements.NewUserRepository()
 	userDataQuery             = implements.NewUserQueryService()
 	sendMailAction            = action.NewSendMailAction()
+	fileUploaderAction        = action.NewFileClient()
 	userQuery                 = implements.NewUserQueryService()
 )
 
@@ -56,7 +57,7 @@ func InitializeMailMagazineUsecase() *usecase.MailMagazineUsecase {
 }
 
 func InitializeStoreUsecase() *usecase.StoreUsecase {
-	return usecase.NewStoreUsecase(storeRepository, storeQuery)
+	return usecase.NewStoreUsecase(storeRepository, storeQuery, fileUploaderAction)
 }
 
 func InitializeUserCheckinUsecase() *usecase.UserCheckinUsecase {

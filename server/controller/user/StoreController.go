@@ -115,7 +115,7 @@ func StoreToResponse(store *entity.Store) *shared.Store {
 		Address:         store.Address,
 		Tel:             store.Tel,
 		SiteURL:         store.SiteURL,
-		StampImage:      store.StampImage,
+		StampImageURL:   store.StampImageURL,
 		Stayable:        store.Stayable,
 		IsActive:        store.IsActive,
 		QRCode:          store.QRCode.String(),

@@ -36,7 +36,7 @@ func (pr *StoreRepository) Save(updateStore *entity.Store, stayableInfo *entity.
 		Address:         updateStore.Address,
 		Tel:             updateStore.Tel,
 		SiteURL:         updateStore.SiteURL,
-		StampImage:      updateStore.StampImage,
+		StampImageURL:   updateStore.StampImageURL,
 		Stayable:        updateStore.Stayable,
 		IsActive:        updateStore.IsActive,
 		QRCode:          updateStore.QRCode.String(),

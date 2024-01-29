@@ -6,9 +6,10 @@ import (
 	"errors"
 	"log"
 	"mime"
+	"strings"
+
 	"server/core/infra/action"
 	"server/infrastructure/env"
-	"strings"
 
 	storage_go "github.com/supabase-community/storage-go"
 )
@@ -26,23 +27,18 @@ var (
 	authkey   = env.GetEnv(env.SupabaseKey)
 )
 
-func NewFileClient() (*FileClient, error) {
+func NewFileClient() *FileClient {
 	projectID := env.GetEnv(env.SupabaseProjectID)
-	bucket := env.GetEnv(env.SupabaseBucket)
 	authkey := env.GetEnv(env.SupabaseKey)
 
 	client := storage_go.NewClient("https://"+projectID+".supabase.co/storage/v1", authkey, nil)
-	result, err := client.GetBucket(bucket)
-	if err != nil {
-		return nil, err
-	}
+
 	return &FileClient{
 		client: client,
-		bucket: &result,
-	}, nil
+	}
 }
 
-func (fc *FileClient) PostFile(base64Image *string, filename string) (*string, error) {
+func (fc *FileClient) Upload(base64Image *string, filename string) (*string, error) {
 	if base64Image == nil {
 		return nil, errors.New("base64エンコードされたImageデータが見つかりません。")
 	}

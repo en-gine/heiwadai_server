@@ -43,7 +43,7 @@ CREATE TABLE store (
     address           VARCHAR NOT NULL,
     tel               VARCHAR NOT NULL,
     site_url          VARCHAR NOT NULL,
-    stamp_image       TEXT NOT NULL,
+    stamp_image_url   VARCHAR NOT NULL,
     stayable          BOOLEAN NOT NULL,
     is_active         BOOLEAN NOT NULL,
     qr_code           UUID NOT NULL,
