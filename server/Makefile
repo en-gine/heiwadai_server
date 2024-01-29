@@ -81,3 +81,5 @@ book:
 send:
 	go run /server/test/mailTest/.
 
+upload:
+	go run /server/test/upload/.

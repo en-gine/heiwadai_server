@@ -36,6 +36,9 @@ const (
 	SupabaseUrl EnvKey = "SUPABASE_URL"
 	SupabaseKey EnvKey = "SUPABASE_KEY"
 
+	SupabaseProjectID EnvKey = "SUPABASE_PROJECT_ID"
+	SupabaseBucket    EnvKey = "SUPABASE_BUCKET"
+
 	RabbitmqDefaultUser EnvKey = "RABBITMQ_DEFAULT_USER"
 	RabbitmqDefaultPass EnvKey = "RABBITMQ_DEFAULT_PASS"
 
@@ -89,6 +92,9 @@ func InitEnv() {
 
 			SupabaseUrl: os.Getenv(string(SupabaseUrl)),
 			SupabaseKey: os.Getenv(string(SupabaseKey)),
+
+			SupabaseProjectID: os.Getenv(string(SupabaseProjectID)),
+			SupabaseBucket:    os.Getenv(string(SupabaseBucket)),
 
 			RabbitmqDefaultUser: os.Getenv(string(RabbitmqDefaultUser)),
 			RabbitmqDefaultPass: os.Getenv(string(RabbitmqDefaultPass)),
