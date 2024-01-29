@@ -46,6 +46,7 @@ const (
 	MailPort EnvKey = "MAIL_PORT"
 	MailFrom EnvKey = "MAIL_FROM"
 	MailPass EnvKey = "MAIL_PASS"
+	MailUser EnvKey = "MAIL_USER"
 
 	TlbookingIsTest        EnvKey = "TLBOOKING_IS_TEST"
 	TlbookingAvailApiUrl   EnvKey = "TLBOOKING_AVAIL_API_URL"
@@ -99,6 +100,7 @@ func InitEnv() {
 			MailPort: os.Getenv(string(MailPort)),
 			MailFrom: os.Getenv(string(MailFrom)),
 			MailPass: os.Getenv(string(MailPass)),
+			MailUser: os.Getenv(string(MailUser)),
 
 			TlbookingIsTest:        os.Getenv(string(TlbookingIsTest)),
 			TlbookingAvailApiUrl:   os.Getenv(string(TlbookingAvailApiUrl)),

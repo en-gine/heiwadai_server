@@ -2,6 +2,7 @@ package entity
 
 import (
 	"time"
+	"unicode/utf8"
 
 	"server/core/errors"
 
@@ -84,7 +85,7 @@ func newCoupon(
 	CreateAt time.Time,
 	Status CouponStatus,
 ) (*Coupon, *errors.DomainError) {
-	if len(Name) > 10 {
+	if utf8.RuneCountInString(Name) > 10 {
 		return nil, errors.NewDomainError(errors.InvalidParameter, "クーポン名は10文字以内にしてください")
 	}
 	if ExpireAt.Before(time.Now()) {

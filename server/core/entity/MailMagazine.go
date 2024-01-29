@@ -70,6 +70,7 @@ func CreateSavedMailMagazine(
 		UnsentCount:        MaySentCount,
 		SentCount:          0,
 		AuthorID:           AuthorID,
+		TargetPrefecture:   TargetPrefecture,
 		MailMagazineStatus: MailMagazineDraft,
 		CreateAt:           time.Now(),
 	}
@@ -91,6 +92,7 @@ func UpdateMailMagazine(
 		SentCount:          0,
 		AuthorID:           AuthorID,
 		MailMagazineStatus: MailMagazineSaved,
+		TargetPrefecture:   TargetPrefecture,
 		UpdateAt:           time.Now(),
 	}
 }
@@ -112,6 +114,7 @@ func CreateUnCompleteMailMagazine(
 		Content:            Content,
 		SentCount:          SentCount,
 		AuthorID:           AuthorID,
+		TargetPrefecture:   TargetPrefecture,
 		MailMagazineStatus: MailMagazineSentUnCompleted,
 		SentAt:             &sentAt,
 	}
@@ -133,6 +136,7 @@ func CreateSentCompleteMailMagazine(
 		Content:            Content,
 		SentCount:          SentCount,
 		AuthorID:           AuthorID,
+		TargetPrefecture:   TargetPrefecture,
 		MailMagazineStatus: MailMagazineSentCompleted,
 		SentAt:             &sentAt,
 	}
@@ -159,6 +163,7 @@ func RegenMailMagazine(
 		UnsentCount:        UnsentCount,
 		SentCount:          SentCount,
 		MailMagazineStatus: MailMagazineStatus,
+		TargetPrefecture:   TargetPrefecture,
 		SentAt:             SentAt,
 		CreateAt:           CreateAt,
 		UpdateAt:           UpdateAt,

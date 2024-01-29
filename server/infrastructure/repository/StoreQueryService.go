@@ -40,13 +40,10 @@ func (pq *StoreQueryService) GetByID(id uuid.UUID) (*entity.Store, error) {
 	if store == nil {
 		return nil, nil
 	}
-	info, err := models.StayableStoreInfos(models.StayableStoreInfoWhere.StoreID.EQ(store.ID)).One(ctx, InitDB())
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, nil
-		}
+	info, err := models.StayableStoreInfos(models.StayableStoreInfoWhere.StoreID.EQ(store.ID)).One(ctx, pq.db)
+	if err != nil && err != sql.ErrNoRows {
 		logger.Error(err.Error())
-		return nil, nil
+		return nil, err
 	}
 	if info == nil {
 		info = nil

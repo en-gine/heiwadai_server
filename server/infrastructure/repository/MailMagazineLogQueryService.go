@@ -58,9 +58,7 @@ func (pq *MailMagazineLogQueryService) GetUserLogList(userID uuid.UUID, pager ty
 		return nil, nil, err
 	}
 
-	var pageResponse *types.PageResponse = nil
-
-	pageResponse = types.NewPageResponse(&pager, int(count))
+	pageResponse := types.NewPageResponse(&pager, int(count))
 	return result, pageResponse, err
 }
 

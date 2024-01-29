@@ -41,7 +41,6 @@ func NewMailMagazineUsecase(
 
 func (u *MailMagazineUsecase) GetList(pager *types.PageQuery) ([]*entity.MailMagazine, *types.PageResponse, *errors.DomainError) {
 	mailMagazines, page, err := u.mailMagazineQuery.GetAll(pager)
-
 	if err != nil {
 		return nil, nil, errors.NewDomainError(errors.QueryError, err.Error())
 	}
@@ -50,7 +49,6 @@ func (u *MailMagazineUsecase) GetList(pager *types.PageQuery) ([]*entity.MailMag
 
 func (u *MailMagazineUsecase) GetLogList(userID uuid.UUID, pager types.PageQuery) ([]*entity.MailMagazineLogWithTitle, *types.PageResponse, *errors.DomainError) {
 	mailMagazines, pageRes, err := u.mailMagazineLogQuery.GetUserLogList(userID, pager)
-
 	if err != nil {
 		return nil, nil, errors.NewDomainError(errors.QueryError, err.Error())
 	}
@@ -219,6 +217,13 @@ func (u *MailMagazineUsecase) Send(mailMagazineID uuid.UUID) *errors.DomainError
 			u.saveUncompleteMailMagazine(mgz, atFirstUnsent-prevSend, sendCount)
 			return errors.NewDomainError(errors.RepositoryError, err.Error())
 		}
+	}
+
+	completeCount := mgz.UnsentCount + mgz.SentCount
+	completeMagazine := entity.CreateSentCompleteMailMagazine(mgz.ID, mgz.Title, mgz.TargetPrefecture, completeCount, mgz.Content, mgz.AuthorID)
+	err = u.mailMagazineRepository.Save(completeMagazine)
+	if err != nil {
+		return errors.NewDomainError(errors.RepositoryError, err.Error())
 	}
 
 	return nil

@@ -7,6 +7,7 @@ import (
 	"server/core/entity"
 	repository "server/core/infra/repository"
 	"server/db/models"
+	"server/infrastructure/logger"
 
 	"github.com/google/uuid"
 	"github.com/volatiletech/null/v8"
@@ -29,7 +30,6 @@ func NewMailMagazineRepository() *MailMagazineRepository {
 
 func (pq *MailMagazineRepository) Save(mailMagazine *entity.MailMagazine) error {
 	var prefs []int64
-
 	if mailMagazine.TargetPrefecture == nil {
 		prefs = []int64{}
 	} else {
@@ -55,6 +55,7 @@ func (pq *MailMagazineRepository) Save(mailMagazine *entity.MailMagazine) error 
 
 	err := mgz.Upsert(context.Background(), pq.db, true, []string{"id"}, boil.Infer(), boil.Infer())
 	if err != nil {
+		logger.Errorf(err.Error())
 		return err
 	}
 	return nil
@@ -66,6 +67,7 @@ func (pq *MailMagazineRepository) Delete(magazineID uuid.UUID) error {
 	}
 	_, err := mgz.Delete(context.Background(), pq.db)
 	if err != nil {
+		logger.Errorf(err.Error())
 		return err
 	}
 	return nil

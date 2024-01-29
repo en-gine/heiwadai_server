@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"time"
 
 	"server/core/entity"
@@ -31,14 +32,13 @@ func NewMailMagazineLogRepository() *MailMagazineLogRepository {
 func (pq *MailMagazineLogRepository) BulkCopyToLogAsUnsent(magazineID uuid.UUID, filterPref *[]entity.Prefecture) error {
 	mailUserWhere := GetMailUserWhereMods(filterPref)
 	queryMods := []qm.QueryMod{
-		qm.SQL("INSERT INTO ?", models.TableNames.MailMagazineLog),
-		qm.SQL("(?, ?, ?)", models.MailMagazineLogColumns.MailMagazineID, models.MailMagazineLogColumns.UserID, models.UserManagerColumns.Email),
-		qm.Select(magazineID.String(), models.UserDatumColumns.UserID),
-		qm.From(models.TableNames.UserData),
-		qm.InnerJoin(models.TableNames.UserManager+" on ? = ?", models.UserManagerColumns.ID, models.UserDatumColumns.UserID),
+		qm.SQL("INSERT INTO " + models.TableNames.MailMagazineLog +
+			"(" + models.MailMagazineLogColumns.MailMagazineID + "," + models.MailMagazineLogColumns.UserID + "," + models.UserManagerColumns.Email + ")" +
+			" SELECT '" + magazineID.String() + "', " + models.UserDatumColumns.UserID + ", " + models.UserManagerColumns.Email + " FROM " + models.TableNames.UserData +
+			" INNER JOIN " + models.TableNames.UserManager + " ON " + models.TableNames.UserManager + ".id = " + models.TableNames.UserData + "." + models.UserDatumColumns.UserID),
 	}
 	queryMods = append(queryMods, mailUserWhere...)
-
+	fmt.Println(queryMods)
 	_, err := models.NewQuery(
 		queryMods...,
 	).Exec(pq.db)

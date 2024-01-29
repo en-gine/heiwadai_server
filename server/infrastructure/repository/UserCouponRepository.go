@@ -56,10 +56,10 @@ func (pr *UserCouponRepository) Save(ctx context.Context, userCoupon *entity.Use
 
 func (pr *UserCouponRepository) IssueAll(coupon *entity.Coupon) (int, error) {
 	queryMods := []qm.QueryMod{
-		qm.SQL("INSERT INTO ?", models.TableNames.CouponAttachedUser),
-		qm.SQL("(?, ?)", models.CouponAttachedUserColumns.CouponID, models.CouponAttachedUserColumns.UserID),
-		qm.Select(coupon.ID.String(), models.UserDatumColumns.UserID),
-		qm.From(models.TableNames.UserData),
+		qm.SQL("INSERT INTO " + models.TableNames.CouponAttachedUser +
+			" (" + models.TableNames.CouponAttachedUser + "." + models.CouponAttachedUserColumns.CouponID + ", " +
+			models.TableNames.CouponAttachedUser + "." + models.CouponAttachedUserColumns.UserID + ")" +
+			" SELECT '" + coupon.ID.String() + "', " + models.UserDatumColumns.UserID + " FROM " + models.TableNames.UserData),
 	}
 
 	res, err := models.NewQuery(

@@ -193,6 +193,7 @@ func (au *AuthClient) inviteUserByEmail(ctx context.Context, email string, optio
 func (au *AuthClient) injectAuthorizationHeader(req *http.Request, value string) {
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", value))
 }
+
 func (au *AuthClient) sendRequest(req *http.Request, v interface{}) error {
 	var errRes supa.ErrorResponse
 	hasCustomError, err := au.sendCustomRequest(req, v, &errRes)
@@ -205,6 +206,7 @@ func (au *AuthClient) sendRequest(req *http.Request, v interface{}) error {
 
 	return nil
 }
+
 func (au *AuthClient) sendCustomRequest(req *http.Request, successValue interface{}, errorValue interface{}) (bool, error) {
 	req.Header.Set("apikey", au.apiKey)
 	res, err := au.client.HTTPClient.Do(req)

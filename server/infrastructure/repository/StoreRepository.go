@@ -49,6 +49,7 @@ func (pr *StoreRepository) Save(updateStore *entity.Store, stayableInfo *entity.
 	if err != nil {
 		return err
 	}
+	tran.Tx.QueryContext(ctx, "SET CONSTRAINTS ALL DEFERRED;") // トランザクション内で外部キー制約を無効化
 	err = store.Upsert(ctx, tran.Tx, true, []string{"id"}, boil.Infer(), boil.Infer())
 	if err != nil {
 		tran.Rollback()

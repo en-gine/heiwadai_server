@@ -76,5 +76,8 @@ seeder-server:
 	cd /server/db/seeder && go run . -OnlyServer
 
 book:
-	go run /server/bookingTest/.
+	go run /server/test/bookingTest/.
+
+send:
+	go run /server/test/mailTest/.
 

@@ -2,6 +2,7 @@ package action
 
 import (
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"mime"
 	"net/smtp"
@@ -15,9 +16,10 @@ import (
 var _ action.ISendMailAction = &SendMailAction{}
 
 var (
-	HOST = env.GetEnv(env.MailHost)
-	PORT = env.GetEnv(env.MailPort)
-	PASS = env.GetEnv(env.MailPass)
+	MAILHOST = env.GetEnv(env.MailHost)
+	MAILPORT = env.GetEnv(env.MailPort)
+	MAILPASS = env.GetEnv(env.MailPass)
+	MAILUSER = env.GetEnv(env.MailUser)
 )
 
 func NewSendMailAction() action.ISendMailAction {
@@ -45,32 +47,39 @@ func (s *SendMailAction) Send(To string, CC string, From string, Title string, B
 
 func (s *SendMailAction) SendMail(To string, CC string, From string, Title string, Body string, BulkTo *[]string) error {
 	header := make(map[string]string)
-	header["From"] = From
+	header["From"] = "平和台ホテル送信専用<" + From + ">"
 	header["To"] = To
 	header["Subject"] = mime.QEncoding.Encode("UTF-8", Title)
 	header["MIME-Version"] = "1.0"
 	header["Content-Type"] = "text/plain; charset=\"utf-8\""
 	header["Content-Transfer-Encoding"] = "base64"
+
+	// BulkToがnilでない場合に一斉送信用のアドレスを処理
 	if BulkTo != nil {
 		var emails []string
-		for i, email := range *BulkTo {
-			emails[i] = fmt.Sprintf("\"%s\"", email)
+		for _, email := range *BulkTo {
+			emails = append(emails, fmt.Sprintf("\"%s\"", email))
 		}
 		joinedString := "[" + strings.Join(emails, ", ") + "]"
-		header["x-smtpapi"] = `{"to":` + joinedString + `}` // 一斉送信の場合
+		header["x-smtpapi"] = `{"to":` + joinedString + `}`
 	}
+
+	// メッセージヘッダーを組み立て
 	message := ""
 	for k, v := range header {
 		message += fmt.Sprintf("%s: %s\r\n", k, v)
 	}
 
-	for k, v := range header {
-		message += fmt.Sprintf("%s: %s\r\n", k, v)
-	}
+	// メッセージ本文を追加
 	message += "\r\n" + base64.StdEncoding.EncodeToString([]byte(Body))
 
-	err := smtp.SendMail(HOST+":"+PORT,
-		smtp.PlainAuth("", From, PASS, HOST),
+	// メール送信
+	if MAILHOST == "" || MAILPORT == "" || MAILUSER == "" || MAILPASS == "" {
+		logger.Fatalf("smtp error: %s", "環境変数が設定されていません")
+		return errors.New("環境変数が設定されていません")
+	}
+	err := smtp.SendMail(MAILHOST+":"+MAILPORT,
+		smtp.PlainAuth("", MAILUSER, MAILPASS, MAILHOST),
 		From, []string{To}, []byte(message))
 	if err != nil {
 		logger.Fatalf("smtp error: %s", err)

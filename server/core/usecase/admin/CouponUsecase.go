@@ -26,6 +26,7 @@ func NewAdminCouponUsecase(couponRepository repository.ICouponRepository, coupon
 	return &AdminCouponUsecase{
 		couponRepository:     couponRepository,
 		couponQuery:          couponQuery,
+		userCouponQuery:      userCouponQuery,
 		usercouponRepository: usercouponRepository,
 		storeQuery:           storeQuery,
 	}
@@ -51,9 +52,11 @@ func (u *AdminCouponUsecase) CreateDefaultCoupon() *errors.DomainError {
 
 func (u *AdminCouponUsecase) GetUsersCouponList(UserID uuid.UUID, pager *types.PageQuery) ([]*entity.UserAttachedCoupon, *types.PageResponse, *errors.DomainError) {
 	coupons, pageRes, err := u.userCouponQuery.GetAll(UserID, pager)
+
 	if err != nil {
 		return nil, nil, errors.NewDomainError(errors.QueryError, err.Error())
 	}
+
 	return coupons, pageRes, nil
 }
 

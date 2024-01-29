@@ -102,12 +102,12 @@ CREATE TABLE coupon (
 );
 
 CREATE TABLE coupon_notices (
-	coupon_id UUID REFERENCES coupon(id) PRIMARY KEY,
+	coupon_id UUID REFERENCES coupon(id) PRIMARY KEY DEFERRABLE INITIALLY DEFERRED, -- トランザクション外部キー評価遅延
 	notice TEXT NOT NULL
 );
 
 CREATE TABLE coupon_stores (
-	coupon_id UUID REFERENCES coupon(id) PRIMARY KEY,
+	coupon_id UUID REFERENCES coupon(id) PRIMARY KEY DEFERRABLE INITIALLY DEFERRED, -- トランザクション外部キー評価遅延
 	store_id UUID NOT NULL REFERENCES store(id)
 );
 
