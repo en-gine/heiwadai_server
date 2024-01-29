@@ -18,7 +18,6 @@ var _ action.IFileAction = &FileClient{}
 
 type FileClient struct {
 	client *storage_go.Client
-	bucket *storage_go.Bucket
 }
 
 var (
@@ -28,9 +27,6 @@ var (
 )
 
 func NewFileClient() *FileClient {
-	projectID := env.GetEnv(env.SupabaseProjectID)
-	authkey := env.GetEnv(env.SupabaseKey)
-
 	client := storage_go.NewClient("https://"+projectID+".supabase.co/storage/v1", authkey, nil)
 
 	return &FileClient{

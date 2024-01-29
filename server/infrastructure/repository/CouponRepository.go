@@ -43,7 +43,12 @@ func (pr *CouponRepository) Save(updateCoupon *entity.Coupon) error {
 		tx.Rollback()
 		return err
 	}
-	tx.Tx.QueryContext(ctx, "SET CONSTRAINTS ALL DEFERRED;") // トランザクション内で外部キー制約を無効化
+	_, err = tx.Tx.ExecContext(ctx, "SET CONSTRAINTS ALL DEFERRED;") // トランザクション内で外部キー制約を無効化
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
 	err = coupon.Upsert(ctx, tx.Tx, true, []string{"id"}, boil.Infer(), boil.Infer())
 	if err != nil {
 		tx.Rollback()
