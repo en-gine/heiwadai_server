@@ -99,7 +99,7 @@ func (ac *AdminCouponController) CreateCustomCoupon(ctx context.Context, req *co
 		uint(req.Msg.DiscountAmount),
 		req.Msg.ExpireAt.AsTime(),
 		req.Msg.IsCombinationable,
-		[]string{req.Msg.Notice},
+		req.Msg.Notices,
 		TargetStores,
 	)
 	if domaiErr != nil {
@@ -124,6 +124,16 @@ func (ac *AdminCouponController) GetCustomCouponByID(ctx context.Context, req *c
 	cpn := EntityToResCoupon(entity)
 
 	return connect.NewResponse(cpn), nil
+}
+
+func (ac *AdminCouponController) GetDefaultNotices(ctx context.Context, req *connect.Request[emptypb.Empty]) (*connect.Response[admin.DefaultNoticesResponse], error) {
+	notices := ac.couponUseCase.GetDefaultNotices()
+
+	return connect.NewResponse(
+		&admin.DefaultNoticesResponse{
+			Notices: notices,
+		},
+	), nil
 }
 
 func (ac *AdminCouponController) GetCustomCouponList(ctx context.Context, req *connect.Request[shared.Pager]) (*connect.Response[admin.CouponListResponse], error) {
@@ -178,7 +188,7 @@ func (ac *AdminCouponController) SaveCustomCoupon(ctx context.Context, req *conn
 			ID: storeId,
 		})
 	}
-	domaiErr := ac.couponUseCase.SaveCustomCoupon(couponID, req.Msg.Name, uint(req.Msg.DiscountAmount), req.Msg.ExpireAt.AsTime(), req.Msg.IsCombinationable, []string{req.Msg.Notice}, TargetStores)
+	domaiErr := ac.couponUseCase.SaveCustomCoupon(couponID, req.Msg.Name, uint(req.Msg.DiscountAmount), req.Msg.ExpireAt.AsTime(), req.Msg.IsCombinationable, req.Msg.Notices, TargetStores)
 	if domaiErr != nil {
 		return nil, controller.ErrorHandler(domaiErr)
 	}

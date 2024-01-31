@@ -49,7 +49,7 @@ func (pr *StoreRepository) Save(updateStore *entity.Store, stayableInfo *entity.
 	if err != nil {
 		return err
 	}
-	_, err = tran.Tx.ExecContext(ctx, "SET CONSTRAINTS ALL DEFERRED;") // トランザクション内で外部キー制約を無効化
+	// _, err = tran.Tx.ExecContext(ctx, "SET CONSTRAINTS ALL DEFERRED;") // トランザクション内で外部キー制約を無効化
 	if err != nil {
 		tran.Rollback()
 		return err

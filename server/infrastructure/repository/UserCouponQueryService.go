@@ -50,7 +50,7 @@ func (pq *UserCouponQueryService) GetByID(userID uuid.UUID, couponID uuid.UUID) 
 	if coupon == nil {
 		return nil, errors.New("該当のクーポンが見つかりません。")
 	}
-	entityCoupon := CouponModelToEntity(coupon, nil, nil)
+	entityCoupon := CouponModelToEntity(coupon, nil)
 	return entity.RegenUserAttachedCoupon(
 		userID,
 		entityCoupon,
@@ -76,7 +76,7 @@ func (pq *UserCouponQueryService) GetActiveAll(userID uuid.UUID) ([]*entity.User
 	var result []*entity.UserAttachedCoupon
 	for _, userCoupon := range userCoupons {
 		coupon := userCoupon.R.Coupon
-		entityCoupon := CouponModelToEntity(coupon, nil, nil)
+		entityCoupon := CouponModelToEntity(coupon, nil)
 		entityUserCoupon := entity.RegenUserAttachedCoupon(
 			userID,
 			entityCoupon,
@@ -117,7 +117,7 @@ func (pq *UserCouponQueryService) GetAll(userID uuid.UUID, pager *types.PageQuer
 
 	for _, userCoupon := range userCoupons {
 		coupon := userCoupon.R.Coupon
-		entityCoupon := CouponModelToEntity(coupon, nil, nil)
+		entityCoupon := CouponModelToEntity(coupon, nil)
 		entityUserCoupon := entity.RegenUserAttachedCoupon(
 			userID,
 			entityCoupon,

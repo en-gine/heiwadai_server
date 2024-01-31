@@ -31,8 +31,7 @@ func NewCouponQueryService() *CouponQueryService {
 func (pq *CouponQueryService) GetByID(id uuid.UUID) (*entity.Coupon, error) {
 	coupon, err := models.Coupons(
 		models.CouponWhere.ID.EQ(id.String()),
-		qm.Load(models.CouponRels.CouponNotice),
-		qm.Load(models.CouponRels.CouponStore),
+		qm.Load(models.CouponRels.Stores),
 	).One(context.Background(), pq.db)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -44,34 +43,14 @@ func (pq *CouponQueryService) GetByID(id uuid.UUID) (*entity.Coupon, error) {
 	if coupon == nil {
 		return nil, nil
 	}
-	stores, err := coupon.CouponStore(qm.Load(models.CouponStoreRels.Store)).All(context.Background(), pq.db)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, nil
-		}
-		logger.Error(err.Error())
-		return nil, nil
-	}
+	stores := coupon.R.Stores
+
 	var TargetStores []*entity.Store
 	for _, store := range stores {
-		TargetStores = append(TargetStores, StoreModelToEntity(store.R.Store, nil))
+		TargetStores = append(TargetStores, StoreModelToEntity(store, nil))
 	}
 
-	notices, err := coupon.CouponNotice().All(context.Background(), pq.db)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, nil
-		}
-		logger.Error(err.Error())
-		return nil, nil
-	}
-
-	var noticeResult []string
-	for _, notice := range notices {
-		noticeResult = append(noticeResult, notice.Notice)
-	}
-
-	return CouponModelToEntity(coupon, noticeResult, TargetStores), nil
+	return CouponModelToEntity(coupon, TargetStores), nil
 }
 
 func (pq *CouponQueryService) GetCouponListByType(couponType entity.CouponType, pager *types.PageQuery) ([]*entity.Coupon, *types.PageResponse, error) {
@@ -81,7 +60,7 @@ func (pq *CouponQueryService) GetCouponListByType(couponType entity.CouponType, 
 	}
 	var result []*entity.Coupon
 	for _, coupon := range coupons {
-		result = append(result, CouponModelToEntity(coupon, nil, nil))
+		result = append(result, CouponModelToEntity(coupon, nil))
 	}
 
 	count, err := models.Coupons(models.CouponWhere.CouponType.EQ(couponType.ToInt())).Count(context.Background(), pq.db)
@@ -95,7 +74,7 @@ func (pq *CouponQueryService) GetCouponListByType(couponType entity.CouponType, 
 }
 
 func (pq *CouponQueryService) GetCouponByType(couponType entity.CouponType) (*entity.Coupon, error) {
-	coupon, err := models.Coupons(models.CouponWhere.CouponType.EQ(couponType.ToInt())).One(context.Background(), pq.db)
+	coupon, err := models.Coupons(models.CouponWhere.CouponType.EQ(couponType.ToInt()), qm.Load(models.CouponRels.Stores)).One(context.Background(), pq.db)
 	if coupon == nil {
 		return nil, nil
 	}
@@ -108,41 +87,21 @@ func (pq *CouponQueryService) GetCouponByType(couponType entity.CouponType) (*en
 		return nil, nil
 	}
 
-	stores, err := coupon.CouponStore(qm.Load(models.CouponStoreRels.Store)).All(context.Background(), pq.db)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, nil
-		}
+	stores := coupon.R.Stores
+	if err != nil && err != sql.ErrNoRows {
 		logger.Error(err.Error())
-		return nil, nil
-	}
-
-	if stores != nil {
 		return nil, nil
 	}
 
 	var TargetStores []*entity.Store
 	for _, store := range stores {
-		TargetStores = append(TargetStores, StoreModelToEntity(store.R.Store, nil))
+		TargetStores = append(TargetStores, StoreModelToEntity(store, nil))
 	}
 
-	notices, err := coupon.CouponNotice().All(context.Background(), pq.db)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, nil
-		}
-		logger.Error(err.Error())
-		return nil, nil
-	}
-	var noticeResult []string
-	for _, notice := range notices {
-		noticeResult = append(noticeResult, notice.Notice)
-	}
-
-	return CouponModelToEntity(coupon, noticeResult, TargetStores), nil
+	return CouponModelToEntity(coupon, TargetStores), nil
 }
 
-func CouponModelToEntity(model *models.Coupon, notices []string, targetStore []*entity.Store) *entity.Coupon {
+func CouponModelToEntity(model *models.Coupon, targetStore []*entity.Store) *entity.Coupon {
 	return entity.RegenCoupon(
 		uuid.MustParse(model.ID),
 		model.Name,
@@ -150,7 +109,7 @@ func CouponModelToEntity(model *models.Coupon, notices []string, targetStore []*
 		uint(model.DiscountAmount),
 		model.ExpireAt,
 		model.IsCombinationable,
-		notices,
+		model.Notices,
 		targetStore,
 		model.CreateAt,
 		entity.CouponStatus(model.CouponStatus),

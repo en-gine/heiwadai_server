@@ -31,11 +31,13 @@ func (pr *CouponRepository) Save(updateCoupon *entity.Coupon) error {
 		Name:              updateCoupon.Name,
 		CouponType:        int(updateCoupon.CouponType),
 		DiscountAmount:    int(updateCoupon.DiscountAmount),
+		Notices:           updateCoupon.Notices,
 		ExpireAt:          updateCoupon.ExpireAt,
 		IsCombinationable: updateCoupon.IsCombinationable,
 		CreateAt:          updateCoupon.CreateAt,
 		CouponStatus:      int(updateCoupon.Status),
 	}
+
 	ctx := context.Background()
 	tx := NewTransaction()
 	err := tx.Begin(ctx)
@@ -43,7 +45,7 @@ func (pr *CouponRepository) Save(updateCoupon *entity.Coupon) error {
 		tx.Rollback()
 		return err
 	}
-	_, err = tx.Tx.ExecContext(ctx, "SET CONSTRAINTS ALL DEFERRED;") // トランザクション内で外部キー制約を無効化
+	// _, err = tx.Tx.ExecContext(ctx, "SET CONSTRAINTS ALL DEFERRED;") // トランザクション内で外部キー制約を無効化
 	if err != nil {
 		tx.Rollback()
 		return err
@@ -55,52 +57,17 @@ func (pr *CouponRepository) Save(updateCoupon *entity.Coupon) error {
 		return err
 	}
 
-	deleteNotices, err := models.FindCoupon(ctx, tx.Tx, updateCoupon.ID.String())
-	if err != nil && err != sql.ErrNoRows {
-		tx.Rollback()
-		return err
-	}
-	_, err = deleteNotices.Delete(ctx, tx.Tx)
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	for _, notice := range updateCoupon.Notices {
-		modelNotice := models.CouponNotice{
-			CouponID: updateCoupon.ID.String(),
-			Notice:   notice,
-		}
-		err = modelNotice.Insert(ctx, tx.Tx, boil.Infer())
-		if err != nil {
-			tx.Rollback()
-			return err
-		}
-	}
-
-	deleteStores, err := models.FindCoupon(ctx, tx.Tx, updateCoupon.ID.String())
-	if err != nil && err != sql.ErrNoRows {
-		tx.Rollback()
-		return err
-	}
-
-	_, err = deleteStores.Delete(ctx, tx.Tx)
-
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
-
+	var modelStores []*models.Store
 	for _, store := range updateCoupon.TargetStore {
-		modelStore := models.CouponStore{
-			CouponID: updateCoupon.ID.String(),
-			StoreID:  store.ID.String(),
+		modelStore := &models.Store{
+			ID: store.ID.String(),
 		}
-		err = modelStore.Insert(ctx, tx.Tx, boil.Infer())
-		if err != nil {
-			tx.Rollback()
-			return err
-		}
+		modelStores = append(modelStores, modelStore)
+	}
+	err = coupon.SetStores(ctx, tx.Tx, false, modelStores...)
+	if err != nil {
+		tx.Rollback()
+		return err
 	}
 
 	err = tx.Commit()

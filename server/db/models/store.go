@@ -147,13 +147,13 @@ var StoreRels = struct {
 	BelongToAdmins    string
 	BookPlans         string
 	Checkins          string
-	CouponStores      string
+	Coupons           string
 }{
 	StayableStoreInfo: "StayableStoreInfo",
 	BelongToAdmins:    "BelongToAdmins",
 	BookPlans:         "BookPlans",
 	Checkins:          "Checkins",
-	CouponStores:      "CouponStores",
+	Coupons:           "Coupons",
 }
 
 // storeR is where relationships are stored.
@@ -162,7 +162,7 @@ type storeR struct {
 	BelongToAdmins    AdminSlice         `boil:"BelongToAdmins" json:"BelongToAdmins" toml:"BelongToAdmins" yaml:"BelongToAdmins"`
 	BookPlans         BookPlanSlice      `boil:"BookPlans" json:"BookPlans" toml:"BookPlans" yaml:"BookPlans"`
 	Checkins          CheckinSlice       `boil:"Checkins" json:"Checkins" toml:"Checkins" yaml:"Checkins"`
-	CouponStores      CouponStoreSlice   `boil:"CouponStores" json:"CouponStores" toml:"CouponStores" yaml:"CouponStores"`
+	Coupons           CouponSlice        `boil:"Coupons" json:"Coupons" toml:"Coupons" yaml:"Coupons"`
 }
 
 // NewStruct creates a new relationship struct
@@ -198,11 +198,11 @@ func (r *storeR) GetCheckins() CheckinSlice {
 	return r.Checkins
 }
 
-func (r *storeR) GetCouponStores() CouponStoreSlice {
+func (r *storeR) GetCoupons() CouponSlice {
 	if r == nil {
 		return nil
 	}
-	return r.CouponStores
+	return r.Coupons
 }
 
 // storeL is where Load methods for each relationship are stored.
@@ -547,18 +547,19 @@ func (o *Store) Checkins(mods ...qm.QueryMod) checkinQuery {
 	return Checkins(queryMods...)
 }
 
-// CouponStores retrieves all the coupon_store's CouponStores with an executor.
-func (o *Store) CouponStores(mods ...qm.QueryMod) couponStoreQuery {
+// Coupons retrieves all the coupon's Coupons with an executor.
+func (o *Store) Coupons(mods ...qm.QueryMod) couponQuery {
 	var queryMods []qm.QueryMod
 	if len(mods) != 0 {
 		queryMods = append(queryMods, mods...)
 	}
 
 	queryMods = append(queryMods,
+		qm.InnerJoin("\"coupon_stores\" on \"coupon\".\"id\" = \"coupon_stores\".\"coupon_id\""),
 		qm.Where("\"coupon_stores\".\"store_id\"=?", o.ID),
 	)
 
-	return CouponStores(queryMods...)
+	return Coupons(queryMods...)
 }
 
 // LoadStayableStoreInfo allows an eager lookup of values, cached into the
@@ -1020,9 +1021,9 @@ func (storeL) LoadCheckins(ctx context.Context, e boil.ContextExecutor, singular
 	return nil
 }
 
-// LoadCouponStores allows an eager lookup of values, cached into the
+// LoadCoupons allows an eager lookup of values, cached into the
 // loaded structs of the objects. This is for a 1-M or N-M relationship.
-func (storeL) LoadCouponStores(ctx context.Context, e boil.ContextExecutor, singular bool, maybeStore interface{}, mods queries.Applicator) error {
+func (storeL) LoadCoupons(ctx context.Context, e boil.ContextExecutor, singular bool, maybeStore interface{}, mods queries.Applicator) error {
 	var slice []*Store
 	var object *Store
 
@@ -1076,8 +1077,10 @@ func (storeL) LoadCouponStores(ctx context.Context, e boil.ContextExecutor, sing
 	}
 
 	query := NewQuery(
-		qm.From(`coupon_stores`),
-		qm.WhereIn(`coupon_stores.store_id in ?`, args...),
+		qm.Select("\"coupon\".\"id\", \"coupon\".\"name\", \"coupon\".\"coupon_type\", \"coupon\".\"discount_amount\", \"coupon\".\"expire_at\", \"coupon\".\"is_combinationable\", \"coupon\".\"coupon_status\", \"coupon\".\"notices\", \"coupon\".\"create_at\", \"coupon\".\"update_at\", \"a\".\"store_id\""),
+		qm.From("\"coupon\""),
+		qm.InnerJoin("\"coupon_stores\" as \"a\" on \"coupon\".\"id\" = \"a\".\"coupon_id\""),
+		qm.WhereIn("\"a\".\"store_id\" in ?", args...),
 	)
 	if mods != nil {
 		mods.Apply(query)
@@ -1085,22 +1088,36 @@ func (storeL) LoadCouponStores(ctx context.Context, e boil.ContextExecutor, sing
 
 	results, err := query.QueryContext(ctx, e)
 	if err != nil {
-		return errors.Wrap(err, "failed to eager load coupon_stores")
+		return errors.Wrap(err, "failed to eager load coupon")
 	}
 
-	var resultSlice []*CouponStore
-	if err = queries.Bind(results, &resultSlice); err != nil {
-		return errors.Wrap(err, "failed to bind eager loaded slice coupon_stores")
+	var resultSlice []*Coupon
+
+	var localJoinCols []string
+	for results.Next() {
+		one := new(Coupon)
+		var localJoinCol string
+
+		err = results.Scan(&one.ID, &one.Name, &one.CouponType, &one.DiscountAmount, &one.ExpireAt, &one.IsCombinationable, &one.CouponStatus, &one.Notices, &one.CreateAt, &one.UpdateAt, &localJoinCol)
+		if err != nil {
+			return errors.Wrap(err, "failed to scan eager loaded results for coupon")
+		}
+		if err = results.Err(); err != nil {
+			return errors.Wrap(err, "failed to plebian-bind eager loaded slice coupon")
+		}
+
+		resultSlice = append(resultSlice, one)
+		localJoinCols = append(localJoinCols, localJoinCol)
 	}
 
 	if err = results.Close(); err != nil {
-		return errors.Wrap(err, "failed to close results in eager load on coupon_stores")
+		return errors.Wrap(err, "failed to close results in eager load on coupon")
 	}
 	if err = results.Err(); err != nil {
-		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for coupon_stores")
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for coupon")
 	}
 
-	if len(couponStoreAfterSelectHooks) != 0 {
+	if len(couponAfterSelectHooks) != 0 {
 		for _, obj := range resultSlice {
 			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
 				return err
@@ -1108,24 +1125,25 @@ func (storeL) LoadCouponStores(ctx context.Context, e boil.ContextExecutor, sing
 		}
 	}
 	if singular {
-		object.R.CouponStores = resultSlice
+		object.R.Coupons = resultSlice
 		for _, foreign := range resultSlice {
 			if foreign.R == nil {
-				foreign.R = &couponStoreR{}
+				foreign.R = &couponR{}
 			}
-			foreign.R.Store = object
+			foreign.R.Stores = append(foreign.R.Stores, object)
 		}
 		return nil
 	}
 
-	for _, foreign := range resultSlice {
+	for i, foreign := range resultSlice {
+		localJoinCol := localJoinCols[i]
 		for _, local := range slice {
-			if local.ID == foreign.StoreID {
-				local.R.CouponStores = append(local.R.CouponStores, foreign)
+			if local.ID == localJoinCol {
+				local.R.Coupons = append(local.R.Coupons, foreign)
 				if foreign.R == nil {
-					foreign.R = &couponStoreR{}
+					foreign.R = &couponR{}
 				}
-				foreign.R.Store = local
+				foreign.R.Stores = append(foreign.R.Stores, local)
 				break
 			}
 		}
@@ -1343,57 +1361,149 @@ func (o *Store) AddCheckins(ctx context.Context, exec boil.ContextExecutor, inse
 	return nil
 }
 
-// AddCouponStores adds the given related objects to the existing relationships
+// AddCoupons adds the given related objects to the existing relationships
 // of the store, optionally inserting them as new records.
-// Appends related to o.R.CouponStores.
-// Sets related.R.Store appropriately.
-func (o *Store) AddCouponStores(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*CouponStore) error {
+// Appends related to o.R.Coupons.
+// Sets related.R.Stores appropriately.
+func (o *Store) AddCoupons(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Coupon) error {
 	var err error
 	for _, rel := range related {
 		if insert {
-			rel.StoreID = o.ID
 			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
 				return errors.Wrap(err, "failed to insert into foreign table")
 			}
-		} else {
-			updateQuery := fmt.Sprintf(
-				"UPDATE \"coupon_stores\" SET %s WHERE %s",
-				strmangle.SetParamNames("\"", "\"", 1, []string{"store_id"}),
-				strmangle.WhereClause("\"", "\"", 2, couponStorePrimaryKeyColumns),
-			)
-			values := []interface{}{o.ID, rel.CouponID}
-
-			if boil.IsDebug(ctx) {
-				writer := boil.DebugWriterFrom(ctx)
-				fmt.Fprintln(writer, updateQuery)
-				fmt.Fprintln(writer, values)
-			}
-			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
-				return errors.Wrap(err, "failed to update foreign table")
-			}
-
-			rel.StoreID = o.ID
 		}
 	}
 
+	for _, rel := range related {
+		query := "insert into \"coupon_stores\" (\"store_id\", \"coupon_id\") values ($1, $2)"
+		values := []interface{}{o.ID, rel.ID}
+
+		if boil.IsDebug(ctx) {
+			writer := boil.DebugWriterFrom(ctx)
+			fmt.Fprintln(writer, query)
+			fmt.Fprintln(writer, values)
+		}
+		_, err = exec.ExecContext(ctx, query, values...)
+		if err != nil {
+			return errors.Wrap(err, "failed to insert into join table")
+		}
+	}
 	if o.R == nil {
 		o.R = &storeR{
-			CouponStores: related,
+			Coupons: related,
 		}
 	} else {
-		o.R.CouponStores = append(o.R.CouponStores, related...)
+		o.R.Coupons = append(o.R.Coupons, related...)
 	}
 
 	for _, rel := range related {
 		if rel.R == nil {
-			rel.R = &couponStoreR{
-				Store: o,
+			rel.R = &couponR{
+				Stores: StoreSlice{o},
 			}
 		} else {
-			rel.R.Store = o
+			rel.R.Stores = append(rel.R.Stores, o)
 		}
 	}
 	return nil
+}
+
+// SetCoupons removes all previously related items of the
+// store replacing them completely with the passed
+// in related items, optionally inserting them as new records.
+// Sets o.R.Stores's Coupons accordingly.
+// Replaces o.R.Coupons with related.
+// Sets related.R.Stores's Coupons accordingly.
+func (o *Store) SetCoupons(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Coupon) error {
+	query := "delete from \"coupon_stores\" where \"store_id\" = $1"
+	values := []interface{}{o.ID}
+	if boil.IsDebug(ctx) {
+		writer := boil.DebugWriterFrom(ctx)
+		fmt.Fprintln(writer, query)
+		fmt.Fprintln(writer, values)
+	}
+	_, err := exec.ExecContext(ctx, query, values...)
+	if err != nil {
+		return errors.Wrap(err, "failed to remove relationships before set")
+	}
+
+	removeCouponsFromStoresSlice(o, related)
+	if o.R != nil {
+		o.R.Coupons = nil
+	}
+
+	return o.AddCoupons(ctx, exec, insert, related...)
+}
+
+// RemoveCoupons relationships from objects passed in.
+// Removes related items from R.Coupons (uses pointer comparison, removal does not keep order)
+// Sets related.R.Stores.
+func (o *Store) RemoveCoupons(ctx context.Context, exec boil.ContextExecutor, related ...*Coupon) error {
+	if len(related) == 0 {
+		return nil
+	}
+
+	var err error
+	query := fmt.Sprintf(
+		"delete from \"coupon_stores\" where \"store_id\" = $1 and \"coupon_id\" in (%s)",
+		strmangle.Placeholders(dialect.UseIndexPlaceholders, len(related), 2, 1),
+	)
+	values := []interface{}{o.ID}
+	for _, rel := range related {
+		values = append(values, rel.ID)
+	}
+
+	if boil.IsDebug(ctx) {
+		writer := boil.DebugWriterFrom(ctx)
+		fmt.Fprintln(writer, query)
+		fmt.Fprintln(writer, values)
+	}
+	_, err = exec.ExecContext(ctx, query, values...)
+	if err != nil {
+		return errors.Wrap(err, "failed to remove relationships before set")
+	}
+	removeCouponsFromStoresSlice(o, related)
+	if o.R == nil {
+		return nil
+	}
+
+	for _, rel := range related {
+		for i, ri := range o.R.Coupons {
+			if rel != ri {
+				continue
+			}
+
+			ln := len(o.R.Coupons)
+			if ln > 1 && i < ln-1 {
+				o.R.Coupons[i] = o.R.Coupons[ln-1]
+			}
+			o.R.Coupons = o.R.Coupons[:ln-1]
+			break
+		}
+	}
+
+	return nil
+}
+
+func removeCouponsFromStoresSlice(o *Store, related []*Coupon) {
+	for _, rel := range related {
+		if rel.R == nil {
+			continue
+		}
+		for i, ri := range rel.R.Stores {
+			if o.ID != ri.ID {
+				continue
+			}
+
+			ln := len(rel.R.Stores)
+			if ln > 1 && i < ln-1 {
+				rel.R.Stores[i] = rel.R.Stores[ln-1]
+			}
+			rel.R.Stores = rel.R.Stores[:ln-1]
+			break
+		}
+	}
 }
 
 // Stores retrieves all the records using an executor.

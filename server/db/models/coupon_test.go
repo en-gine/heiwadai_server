@@ -494,249 +494,6 @@ func testCouponsInsertWhitelist(t *testing.T) {
 	}
 }
 
-func testCouponOneToOneCouponNoticeUsingCouponNotice(t *testing.T) {
-	ctx := context.Background()
-	tx := MustTx(boil.BeginTx(ctx, nil))
-	defer func() { _ = tx.Rollback() }()
-
-	var foreign CouponNotice
-	var local Coupon
-
-	seed := randomize.NewSeed()
-	if err := randomize.Struct(seed, &foreign, couponNoticeDBTypes, true, couponNoticeColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize CouponNotice struct: %s", err)
-	}
-	if err := randomize.Struct(seed, &local, couponDBTypes, true, couponColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Coupon struct: %s", err)
-	}
-
-	if err := local.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-
-	foreign.CouponID = local.ID
-	if err := foreign.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-
-	check, err := local.CouponNotice().One(ctx, tx)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if check.CouponID != foreign.CouponID {
-		t.Errorf("want: %v, got %v", foreign.CouponID, check.CouponID)
-	}
-
-	ranAfterSelectHook := false
-	AddCouponNoticeHook(boil.AfterSelectHook, func(ctx context.Context, e boil.ContextExecutor, o *CouponNotice) error {
-		ranAfterSelectHook = true
-		return nil
-	})
-
-	slice := CouponSlice{&local}
-	if err = local.L.LoadCouponNotice(ctx, tx, false, (*[]*Coupon)(&slice), nil); err != nil {
-		t.Fatal(err)
-	}
-	if local.R.CouponNotice == nil {
-		t.Error("struct should have been eager loaded")
-	}
-
-	local.R.CouponNotice = nil
-	if err = local.L.LoadCouponNotice(ctx, tx, true, &local, nil); err != nil {
-		t.Fatal(err)
-	}
-	if local.R.CouponNotice == nil {
-		t.Error("struct should have been eager loaded")
-	}
-
-	if !ranAfterSelectHook {
-		t.Error("failed to run AfterSelect hook for relationship")
-	}
-}
-
-func testCouponOneToOneCouponStoreUsingCouponStore(t *testing.T) {
-	ctx := context.Background()
-	tx := MustTx(boil.BeginTx(ctx, nil))
-	defer func() { _ = tx.Rollback() }()
-
-	var foreign CouponStore
-	var local Coupon
-
-	seed := randomize.NewSeed()
-	if err := randomize.Struct(seed, &foreign, couponStoreDBTypes, true, couponStoreColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize CouponStore struct: %s", err)
-	}
-	if err := randomize.Struct(seed, &local, couponDBTypes, true, couponColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Coupon struct: %s", err)
-	}
-
-	if err := local.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-
-	foreign.CouponID = local.ID
-	if err := foreign.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-
-	check, err := local.CouponStore().One(ctx, tx)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if check.CouponID != foreign.CouponID {
-		t.Errorf("want: %v, got %v", foreign.CouponID, check.CouponID)
-	}
-
-	ranAfterSelectHook := false
-	AddCouponStoreHook(boil.AfterSelectHook, func(ctx context.Context, e boil.ContextExecutor, o *CouponStore) error {
-		ranAfterSelectHook = true
-		return nil
-	})
-
-	slice := CouponSlice{&local}
-	if err = local.L.LoadCouponStore(ctx, tx, false, (*[]*Coupon)(&slice), nil); err != nil {
-		t.Fatal(err)
-	}
-	if local.R.CouponStore == nil {
-		t.Error("struct should have been eager loaded")
-	}
-
-	local.R.CouponStore = nil
-	if err = local.L.LoadCouponStore(ctx, tx, true, &local, nil); err != nil {
-		t.Fatal(err)
-	}
-	if local.R.CouponStore == nil {
-		t.Error("struct should have been eager loaded")
-	}
-
-	if !ranAfterSelectHook {
-		t.Error("failed to run AfterSelect hook for relationship")
-	}
-}
-
-func testCouponOneToOneSetOpCouponNoticeUsingCouponNotice(t *testing.T) {
-	var err error
-
-	ctx := context.Background()
-	tx := MustTx(boil.BeginTx(ctx, nil))
-	defer func() { _ = tx.Rollback() }()
-
-	var a Coupon
-	var b, c CouponNotice
-
-	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, &a, couponDBTypes, false, strmangle.SetComplement(couponPrimaryKeyColumns, couponColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
-	}
-	if err = randomize.Struct(seed, &b, couponNoticeDBTypes, false, strmangle.SetComplement(couponNoticePrimaryKeyColumns, couponNoticeColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
-	}
-	if err = randomize.Struct(seed, &c, couponNoticeDBTypes, false, strmangle.SetComplement(couponNoticePrimaryKeyColumns, couponNoticeColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
-	}
-
-	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-
-	for i, x := range []*CouponNotice{&b, &c} {
-		err = a.SetCouponNotice(ctx, tx, i != 0, x)
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		if a.R.CouponNotice != x {
-			t.Error("relationship struct not set to correct value")
-		}
-		if x.R.Coupon != &a {
-			t.Error("failed to append to foreign relationship struct")
-		}
-
-		if a.ID != x.CouponID {
-			t.Error("foreign key was wrong value", a.ID)
-		}
-
-		if exists, err := CouponNoticeExists(ctx, tx, x.CouponID); err != nil {
-			t.Fatal(err)
-		} else if !exists {
-			t.Error("want 'x' to exist")
-		}
-
-		if a.ID != x.CouponID {
-			t.Error("foreign key was wrong value", a.ID, x.CouponID)
-		}
-
-		if _, err = x.Delete(ctx, tx); err != nil {
-			t.Fatal("failed to delete x", err)
-		}
-	}
-}
-func testCouponOneToOneSetOpCouponStoreUsingCouponStore(t *testing.T) {
-	var err error
-
-	ctx := context.Background()
-	tx := MustTx(boil.BeginTx(ctx, nil))
-	defer func() { _ = tx.Rollback() }()
-
-	var a Coupon
-	var b, c CouponStore
-
-	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, &a, couponDBTypes, false, strmangle.SetComplement(couponPrimaryKeyColumns, couponColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
-	}
-	if err = randomize.Struct(seed, &b, couponStoreDBTypes, false, strmangle.SetComplement(couponStorePrimaryKeyColumns, couponStoreColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
-	}
-	if err = randomize.Struct(seed, &c, couponStoreDBTypes, false, strmangle.SetComplement(couponStorePrimaryKeyColumns, couponStoreColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
-	}
-
-	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-
-	for i, x := range []*CouponStore{&b, &c} {
-		err = a.SetCouponStore(ctx, tx, i != 0, x)
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		if a.R.CouponStore != x {
-			t.Error("relationship struct not set to correct value")
-		}
-		if x.R.Coupon != &a {
-			t.Error("failed to append to foreign relationship struct")
-		}
-
-		if a.ID != x.CouponID {
-			t.Error("foreign key was wrong value", a.ID)
-		}
-
-		if exists, err := CouponStoreExists(ctx, tx, x.CouponID); err != nil {
-			t.Fatal(err)
-		} else if !exists {
-			t.Error("want 'x' to exist")
-		}
-
-		if a.ID != x.CouponID {
-			t.Error("foreign key was wrong value", a.ID, x.CouponID)
-		}
-
-		if _, err = x.Delete(ctx, tx); err != nil {
-			t.Fatal("failed to delete x", err)
-		}
-	}
-}
-
 func testCouponToManyCouponAttachedUsers(t *testing.T) {
 	var err error
 	ctx := context.Background()
@@ -807,6 +564,90 @@ func testCouponToManyCouponAttachedUsers(t *testing.T) {
 		t.Fatal(err)
 	}
 	if got := len(a.R.CouponAttachedUsers); got != 2 {
+		t.Error("number of eager loaded records wrong, got:", got)
+	}
+
+	if t.Failed() {
+		t.Logf("%#v", check)
+	}
+}
+
+func testCouponToManyStores(t *testing.T) {
+	var err error
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+
+	var a Coupon
+	var b, c Store
+
+	seed := randomize.NewSeed()
+	if err = randomize.Struct(seed, &a, couponDBTypes, true, couponColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Coupon struct: %s", err)
+	}
+
+	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	if err = randomize.Struct(seed, &b, storeDBTypes, false, storeColumnsWithDefault...); err != nil {
+		t.Fatal(err)
+	}
+	if err = randomize.Struct(seed, &c, storeDBTypes, false, storeColumnsWithDefault...); err != nil {
+		t.Fatal(err)
+	}
+
+	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+	if err = c.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = tx.Exec("insert into \"coupon_stores\" (\"coupon_id\", \"store_id\") values ($1, $2)", a.ID, b.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = tx.Exec("insert into \"coupon_stores\" (\"coupon_id\", \"store_id\") values ($1, $2)", a.ID, c.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	check, err := a.Stores().All(ctx, tx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	bFound, cFound := false, false
+	for _, v := range check {
+		if v.ID == b.ID {
+			bFound = true
+		}
+		if v.ID == c.ID {
+			cFound = true
+		}
+	}
+
+	if !bFound {
+		t.Error("expected to find b")
+	}
+	if !cFound {
+		t.Error("expected to find c")
+	}
+
+	slice := CouponSlice{&a}
+	if err = a.L.LoadStores(ctx, tx, false, (*[]*Coupon)(&slice), nil); err != nil {
+		t.Fatal(err)
+	}
+	if got := len(a.R.Stores); got != 2 {
+		t.Error("number of eager loaded records wrong, got:", got)
+	}
+
+	a.R.Stores = nil
+	if err = a.L.LoadStores(ctx, tx, true, &a, nil); err != nil {
+		t.Fatal(err)
+	}
+	if got := len(a.R.Stores); got != 2 {
 		t.Error("number of eager loaded records wrong, got:", got)
 	}
 
@@ -890,6 +731,233 @@ func testCouponToManyAddOpCouponAttachedUsers(t *testing.T) {
 		}
 	}
 }
+func testCouponToManyAddOpStores(t *testing.T) {
+	var err error
+
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+
+	var a Coupon
+	var b, c, d, e Store
+
+	seed := randomize.NewSeed()
+	if err = randomize.Struct(seed, &a, couponDBTypes, false, strmangle.SetComplement(couponPrimaryKeyColumns, couponColumnsWithoutDefault)...); err != nil {
+		t.Fatal(err)
+	}
+	foreigners := []*Store{&b, &c, &d, &e}
+	for _, x := range foreigners {
+		if err = randomize.Struct(seed, x, storeDBTypes, false, strmangle.SetComplement(storePrimaryKeyColumns, storeColumnsWithoutDefault)...); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+	if err = c.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	foreignersSplitByInsertion := [][]*Store{
+		{&b, &c},
+		{&d, &e},
+	}
+
+	for i, x := range foreignersSplitByInsertion {
+		err = a.AddStores(ctx, tx, i != 0, x...)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		first := x[0]
+		second := x[1]
+
+		if first.R.Coupons[0] != &a {
+			t.Error("relationship was not added properly to the slice")
+		}
+		if second.R.Coupons[0] != &a {
+			t.Error("relationship was not added properly to the slice")
+		}
+
+		if a.R.Stores[i*2] != first {
+			t.Error("relationship struct slice not set to correct value")
+		}
+		if a.R.Stores[i*2+1] != second {
+			t.Error("relationship struct slice not set to correct value")
+		}
+
+		count, err := a.Stores().Count(ctx, tx)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if want := int64((i + 1) * 2); count != want {
+			t.Error("want", want, "got", count)
+		}
+	}
+}
+
+func testCouponToManySetOpStores(t *testing.T) {
+	var err error
+
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+
+	var a Coupon
+	var b, c, d, e Store
+
+	seed := randomize.NewSeed()
+	if err = randomize.Struct(seed, &a, couponDBTypes, false, strmangle.SetComplement(couponPrimaryKeyColumns, couponColumnsWithoutDefault)...); err != nil {
+		t.Fatal(err)
+	}
+	foreigners := []*Store{&b, &c, &d, &e}
+	for _, x := range foreigners {
+		if err = randomize.Struct(seed, x, storeDBTypes, false, strmangle.SetComplement(storePrimaryKeyColumns, storeColumnsWithoutDefault)...); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	if err = a.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+	if err = c.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	err = a.SetStores(ctx, tx, false, &b, &c)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	count, err := a.Stores().Count(ctx, tx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if count != 2 {
+		t.Error("count was wrong:", count)
+	}
+
+	err = a.SetStores(ctx, tx, true, &d, &e)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	count, err = a.Stores().Count(ctx, tx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if count != 2 {
+		t.Error("count was wrong:", count)
+	}
+
+	// The following checks cannot be implemented since we have no handle
+	// to these when we call Set(). Leaving them here as wishful thinking
+	// and to let people know there's dragons.
+	//
+	// if len(b.R.Coupons) != 0 {
+	// 	t.Error("relationship was not removed properly from the slice")
+	// }
+	// if len(c.R.Coupons) != 0 {
+	// 	t.Error("relationship was not removed properly from the slice")
+	// }
+	if d.R.Coupons[0] != &a {
+		t.Error("relationship was not added properly to the slice")
+	}
+	if e.R.Coupons[0] != &a {
+		t.Error("relationship was not added properly to the slice")
+	}
+
+	if a.R.Stores[0] != &d {
+		t.Error("relationship struct slice not set to correct value")
+	}
+	if a.R.Stores[1] != &e {
+		t.Error("relationship struct slice not set to correct value")
+	}
+}
+
+func testCouponToManyRemoveOpStores(t *testing.T) {
+	var err error
+
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+
+	var a Coupon
+	var b, c, d, e Store
+
+	seed := randomize.NewSeed()
+	if err = randomize.Struct(seed, &a, couponDBTypes, false, strmangle.SetComplement(couponPrimaryKeyColumns, couponColumnsWithoutDefault)...); err != nil {
+		t.Fatal(err)
+	}
+	foreigners := []*Store{&b, &c, &d, &e}
+	for _, x := range foreigners {
+		if err = randomize.Struct(seed, x, storeDBTypes, false, strmangle.SetComplement(storePrimaryKeyColumns, storeColumnsWithoutDefault)...); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	err = a.AddStores(ctx, tx, true, foreigners...)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	count, err := a.Stores().Count(ctx, tx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if count != 4 {
+		t.Error("count was wrong:", count)
+	}
+
+	err = a.RemoveStores(ctx, tx, foreigners[:2]...)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	count, err = a.Stores().Count(ctx, tx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if count != 2 {
+		t.Error("count was wrong:", count)
+	}
+
+	if len(b.R.Coupons) != 0 {
+		t.Error("relationship was not removed properly from the slice")
+	}
+	if len(c.R.Coupons) != 0 {
+		t.Error("relationship was not removed properly from the slice")
+	}
+	if d.R.Coupons[0] != &a {
+		t.Error("relationship was not added properly to the foreign struct")
+	}
+	if e.R.Coupons[0] != &a {
+		t.Error("relationship was not added properly to the foreign struct")
+	}
+
+	if len(a.R.Stores) != 2 {
+		t.Error("should have preserved two relationships")
+	}
+
+	// Removal doesn't do a stable deletion for performance so we have to flip the order
+	if a.R.Stores[1] != &d {
+		t.Error("relationship to d should have been preserved")
+	}
+	if a.R.Stores[0] != &e {
+		t.Error("relationship to e should have been preserved")
+	}
+}
 
 func testCouponsReload(t *testing.T) {
 	t.Parallel()
@@ -965,7 +1033,7 @@ func testCouponsSelect(t *testing.T) {
 }
 
 var (
-	couponDBTypes = map[string]string{`ID`: `uuid`, `Name`: `character varying`, `CouponType`: `integer`, `DiscountAmount`: `integer`, `ExpireAt`: `timestamp with time zone`, `IsCombinationable`: `boolean`, `CouponStatus`: `integer`, `CreateAt`: `timestamp with time zone`, `UpdateAt`: `timestamp with time zone`}
+	couponDBTypes = map[string]string{`ID`: `uuid`, `Name`: `character varying`, `CouponType`: `integer`, `DiscountAmount`: `integer`, `ExpireAt`: `timestamp with time zone`, `IsCombinationable`: `boolean`, `CouponStatus`: `integer`, `Notices`: `ARRAYtext`, `CreateAt`: `timestamp with time zone`, `UpdateAt`: `timestamp with time zone`}
 	_             = bytes.MinRead
 )
 

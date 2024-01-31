@@ -97,25 +97,25 @@ CREATE TABLE coupon (
     expire_at TIMESTAMPTZ NOT NULL,
     is_combinationable BOOLEAN NOT NULL,
     coupon_status int NOT NULL,
+    notices TEXT[] NULL default array[]::TEXT[],
     create_at TIMESTAMPTZ NOT NULL default now(),
     update_at TIMESTAMPTZ NOT NULL default now()
 );
 
-CREATE TABLE coupon_notices (
-	coupon_id UUID REFERENCES coupon(id) PRIMARY KEY DEFERRABLE INITIALLY DEFERRED, -- トランザクション外部キー評価遅延
-	notice TEXT NOT NULL
-);
 
 CREATE TABLE coupon_stores (
-	coupon_id UUID REFERENCES coupon(id) PRIMARY KEY DEFERRABLE INITIALLY DEFERRED, -- トランザクション外部キー評価遅延
-	store_id UUID NOT NULL REFERENCES store(id)
+	coupon_id UUID,
+	store_id UUID,
+    FOREIGN KEY (coupon_id) REFERENCES coupon(id) ON DELETE CASCADE,
+    FOREIGN KEY (store_id) REFERENCES store(id),
+    PRIMARY KEY(coupon_id, store_id)
 );
 
 CREATE TABLE coupon_attached_user (
 	coupon_id UUID,
     used_at TIMESTAMPTZ,
     user_id UUID,
-    FOREIGN KEY (coupon_id) REFERENCES coupon(id),
+    FOREIGN KEY (coupon_id) REFERENCES coupon(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES user_data (user_id),
     PRIMARY KEY(coupon_id, user_id)
 );

@@ -52,12 +52,15 @@ func (u *AdminCouponUsecase) CreateDefaultCoupon() *errors.DomainError {
 
 func (u *AdminCouponUsecase) GetUsersCouponList(UserID uuid.UUID, pager *types.PageQuery) ([]*entity.UserAttachedCoupon, *types.PageResponse, *errors.DomainError) {
 	coupons, pageRes, err := u.userCouponQuery.GetAll(UserID, pager)
-
 	if err != nil {
 		return nil, nil, errors.NewDomainError(errors.QueryError, err.Error())
 	}
 
 	return coupons, pageRes, nil
+}
+
+func (u *AdminCouponUsecase) GetDefaultNotices() []string {
+	return entity.DefaultNotices
 }
 
 func (u *AdminCouponUsecase) CreateCustomCoupon(

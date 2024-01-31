@@ -172,7 +172,17 @@ func (u *StoreUsecase) Update(
 			*BookingSystemID,
 		)
 	}
-	StampImageURL, err := u.fileUploader.Upload(&StampImageData, storeID.String())
+	var StampImageURL *string
+	if StampImageData != "" {
+		StampImageURL, err = u.fileUploader.Upload(&StampImageData, storeID.String())
+	} else {
+		StampImageURL = &existStore.StampImageURL
+	}
+
+	if StampImageURL == nil {
+		return nil, errors.NewDomainError(errors.InvalidParameter, "スタンプ画像は必須です。")
+	}
+
 	if err != nil {
 		return nil, errors.NewDomainError(errors.ActionError, err.Error())
 	}

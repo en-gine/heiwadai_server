@@ -850,14 +850,14 @@ func testStoreToManyCheckins(t *testing.T) {
 	}
 }
 
-func testStoreToManyCouponStores(t *testing.T) {
+func testStoreToManyCoupons(t *testing.T) {
 	var err error
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
 
 	var a Store
-	var b, c CouponStore
+	var b, c Coupon
 
 	seed := randomize.NewSeed()
 	if err = randomize.Struct(seed, &a, storeDBTypes, true, storeColumnsWithDefault...); err != nil {
@@ -868,15 +868,12 @@ func testStoreToManyCouponStores(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err = randomize.Struct(seed, &b, couponStoreDBTypes, false, couponStoreColumnsWithDefault...); err != nil {
+	if err = randomize.Struct(seed, &b, couponDBTypes, false, couponColumnsWithDefault...); err != nil {
 		t.Fatal(err)
 	}
-	if err = randomize.Struct(seed, &c, couponStoreDBTypes, false, couponStoreColumnsWithDefault...); err != nil {
+	if err = randomize.Struct(seed, &c, couponDBTypes, false, couponColumnsWithDefault...); err != nil {
 		t.Fatal(err)
 	}
-
-	b.StoreID = a.ID
-	c.StoreID = a.ID
 
 	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Fatal(err)
@@ -885,17 +882,26 @@ func testStoreToManyCouponStores(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	check, err := a.CouponStores().All(ctx, tx)
+	_, err = tx.Exec("insert into \"coupon_stores\" (\"store_id\", \"coupon_id\") values ($1, $2)", a.ID, b.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = tx.Exec("insert into \"coupon_stores\" (\"store_id\", \"coupon_id\") values ($1, $2)", a.ID, c.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	check, err := a.Coupons().All(ctx, tx)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	bFound, cFound := false, false
 	for _, v := range check {
-		if v.StoreID == b.StoreID {
+		if v.ID == b.ID {
 			bFound = true
 		}
-		if v.StoreID == c.StoreID {
+		if v.ID == c.ID {
 			cFound = true
 		}
 	}
@@ -908,18 +914,18 @@ func testStoreToManyCouponStores(t *testing.T) {
 	}
 
 	slice := StoreSlice{&a}
-	if err = a.L.LoadCouponStores(ctx, tx, false, (*[]*Store)(&slice), nil); err != nil {
+	if err = a.L.LoadCoupons(ctx, tx, false, (*[]*Store)(&slice), nil); err != nil {
 		t.Fatal(err)
 	}
-	if got := len(a.R.CouponStores); got != 2 {
+	if got := len(a.R.Coupons); got != 2 {
 		t.Error("number of eager loaded records wrong, got:", got)
 	}
 
-	a.R.CouponStores = nil
-	if err = a.L.LoadCouponStores(ctx, tx, true, &a, nil); err != nil {
+	a.R.Coupons = nil
+	if err = a.L.LoadCoupons(ctx, tx, true, &a, nil); err != nil {
 		t.Fatal(err)
 	}
-	if got := len(a.R.CouponStores); got != 2 {
+	if got := len(a.R.Coupons); got != 2 {
 		t.Error("number of eager loaded records wrong, got:", got)
 	}
 
@@ -1153,7 +1159,7 @@ func testStoreToManyAddOpCheckins(t *testing.T) {
 		}
 	}
 }
-func testStoreToManyAddOpCouponStores(t *testing.T) {
+func testStoreToManyAddOpCoupons(t *testing.T) {
 	var err error
 
 	ctx := context.Background()
@@ -1161,15 +1167,15 @@ func testStoreToManyAddOpCouponStores(t *testing.T) {
 	defer func() { _ = tx.Rollback() }()
 
 	var a Store
-	var b, c, d, e CouponStore
+	var b, c, d, e Coupon
 
 	seed := randomize.NewSeed()
 	if err = randomize.Struct(seed, &a, storeDBTypes, false, strmangle.SetComplement(storePrimaryKeyColumns, storeColumnsWithoutDefault)...); err != nil {
 		t.Fatal(err)
 	}
-	foreigners := []*CouponStore{&b, &c, &d, &e}
+	foreigners := []*Coupon{&b, &c, &d, &e}
 	for _, x := range foreigners {
-		if err = randomize.Struct(seed, x, couponStoreDBTypes, false, strmangle.SetComplement(couponStorePrimaryKeyColumns, couponStoreColumnsWithoutDefault)...); err != nil {
+		if err = randomize.Struct(seed, x, couponDBTypes, false, strmangle.SetComplement(couponPrimaryKeyColumns, couponColumnsWithoutDefault)...); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -1184,13 +1190,13 @@ func testStoreToManyAddOpCouponStores(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	foreignersSplitByInsertion := [][]*CouponStore{
+	foreignersSplitByInsertion := [][]*Coupon{
 		{&b, &c},
 		{&d, &e},
 	}
 
 	for i, x := range foreignersSplitByInsertion {
-		err = a.AddCouponStores(ctx, tx, i != 0, x...)
+		err = a.AddCoupons(ctx, tx, i != 0, x...)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -1198,34 +1204,186 @@ func testStoreToManyAddOpCouponStores(t *testing.T) {
 		first := x[0]
 		second := x[1]
 
-		if a.ID != first.StoreID {
-			t.Error("foreign key was wrong value", a.ID, first.StoreID)
+		if first.R.Stores[0] != &a {
+			t.Error("relationship was not added properly to the slice")
 		}
-		if a.ID != second.StoreID {
-			t.Error("foreign key was wrong value", a.ID, second.StoreID)
-		}
-
-		if first.R.Store != &a {
-			t.Error("relationship was not added properly to the foreign slice")
-		}
-		if second.R.Store != &a {
-			t.Error("relationship was not added properly to the foreign slice")
+		if second.R.Stores[0] != &a {
+			t.Error("relationship was not added properly to the slice")
 		}
 
-		if a.R.CouponStores[i*2] != first {
+		if a.R.Coupons[i*2] != first {
 			t.Error("relationship struct slice not set to correct value")
 		}
-		if a.R.CouponStores[i*2+1] != second {
+		if a.R.Coupons[i*2+1] != second {
 			t.Error("relationship struct slice not set to correct value")
 		}
 
-		count, err := a.CouponStores().Count(ctx, tx)
+		count, err := a.Coupons().Count(ctx, tx)
 		if err != nil {
 			t.Fatal(err)
 		}
 		if want := int64((i + 1) * 2); count != want {
 			t.Error("want", want, "got", count)
 		}
+	}
+}
+
+func testStoreToManySetOpCoupons(t *testing.T) {
+	var err error
+
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+
+	var a Store
+	var b, c, d, e Coupon
+
+	seed := randomize.NewSeed()
+	if err = randomize.Struct(seed, &a, storeDBTypes, false, strmangle.SetComplement(storePrimaryKeyColumns, storeColumnsWithoutDefault)...); err != nil {
+		t.Fatal(err)
+	}
+	foreigners := []*Coupon{&b, &c, &d, &e}
+	for _, x := range foreigners {
+		if err = randomize.Struct(seed, x, couponDBTypes, false, strmangle.SetComplement(couponPrimaryKeyColumns, couponColumnsWithoutDefault)...); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	if err = a.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+	if err = c.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	err = a.SetCoupons(ctx, tx, false, &b, &c)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	count, err := a.Coupons().Count(ctx, tx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if count != 2 {
+		t.Error("count was wrong:", count)
+	}
+
+	err = a.SetCoupons(ctx, tx, true, &d, &e)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	count, err = a.Coupons().Count(ctx, tx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if count != 2 {
+		t.Error("count was wrong:", count)
+	}
+
+	// The following checks cannot be implemented since we have no handle
+	// to these when we call Set(). Leaving them here as wishful thinking
+	// and to let people know there's dragons.
+	//
+	// if len(b.R.Stores) != 0 {
+	// 	t.Error("relationship was not removed properly from the slice")
+	// }
+	// if len(c.R.Stores) != 0 {
+	// 	t.Error("relationship was not removed properly from the slice")
+	// }
+	if d.R.Stores[0] != &a {
+		t.Error("relationship was not added properly to the slice")
+	}
+	if e.R.Stores[0] != &a {
+		t.Error("relationship was not added properly to the slice")
+	}
+
+	if a.R.Coupons[0] != &d {
+		t.Error("relationship struct slice not set to correct value")
+	}
+	if a.R.Coupons[1] != &e {
+		t.Error("relationship struct slice not set to correct value")
+	}
+}
+
+func testStoreToManyRemoveOpCoupons(t *testing.T) {
+	var err error
+
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+
+	var a Store
+	var b, c, d, e Coupon
+
+	seed := randomize.NewSeed()
+	if err = randomize.Struct(seed, &a, storeDBTypes, false, strmangle.SetComplement(storePrimaryKeyColumns, storeColumnsWithoutDefault)...); err != nil {
+		t.Fatal(err)
+	}
+	foreigners := []*Coupon{&b, &c, &d, &e}
+	for _, x := range foreigners {
+		if err = randomize.Struct(seed, x, couponDBTypes, false, strmangle.SetComplement(couponPrimaryKeyColumns, couponColumnsWithoutDefault)...); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	err = a.AddCoupons(ctx, tx, true, foreigners...)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	count, err := a.Coupons().Count(ctx, tx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if count != 4 {
+		t.Error("count was wrong:", count)
+	}
+
+	err = a.RemoveCoupons(ctx, tx, foreigners[:2]...)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	count, err = a.Coupons().Count(ctx, tx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if count != 2 {
+		t.Error("count was wrong:", count)
+	}
+
+	if len(b.R.Stores) != 0 {
+		t.Error("relationship was not removed properly from the slice")
+	}
+	if len(c.R.Stores) != 0 {
+		t.Error("relationship was not removed properly from the slice")
+	}
+	if d.R.Stores[0] != &a {
+		t.Error("relationship was not added properly to the foreign struct")
+	}
+	if e.R.Stores[0] != &a {
+		t.Error("relationship was not added properly to the foreign struct")
+	}
+
+	if len(a.R.Coupons) != 2 {
+		t.Error("should have preserved two relationships")
+	}
+
+	// Removal doesn't do a stable deletion for performance so we have to flip the order
+	if a.R.Coupons[1] != &d {
+		t.Error("relationship to d should have been preserved")
+	}
+	if a.R.Coupons[0] != &e {
+		t.Error("relationship to e should have been preserved")
 	}
 }
 

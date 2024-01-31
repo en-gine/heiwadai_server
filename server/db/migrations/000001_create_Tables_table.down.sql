@@ -3,9 +3,9 @@ DROP TABLE IF EXISTS user_option;
 
 DROP TABLE IF EXISTS checkin;
 
-DROP TABLE IF EXISTS coupon_notices;
+--DROP TABLE IF EXISTS coupon_notices;
 
-DROP TABLE IF EXISTS coupon_stores;
+-- DROP TABLE IF EXISTS coupon_stores;
 
 DROP TABLE IF EXISTS coupon_attached_user;
 
