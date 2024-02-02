@@ -44,6 +44,22 @@ func (ac *StoreController) GetByID(ctx context.Context, req *connect.Request[adm
 	return connect.NewResponse(resStore), nil
 }
 
+func (ac *StoreController) GetActiveAll(ctx context.Context, req *connect.Request[emptypb.Empty]) (*connect.Response[shared.Stores], error) {
+	stores, domaiErr := ac.storeUseCase.GetActiveList()
+
+	var resStores []*shared.Store
+	for _, store := range stores {
+		res := StoreToResponse(store)
+		resStores = append(resStores, res)
+	}
+	if domaiErr != nil {
+		return nil, controller.ErrorHandler(domaiErr)
+	}
+	return connect.NewResponse(&shared.Stores{
+		Stores: resStores,
+	}), nil
+}
+
 func (ac *StoreController) GetAll(ctx context.Context, req *connect.Request[emptypb.Empty]) (*connect.Response[shared.Stores], error) {
 	stores, domaiErr := ac.storeUseCase.GetList()
 

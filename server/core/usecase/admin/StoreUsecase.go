@@ -32,6 +32,14 @@ func (u *StoreUsecase) GetStoreByID(storeID uuid.UUID) (*entity.Store, *errors.D
 	return store, nil
 }
 
+func (u *StoreUsecase) GetActiveList() ([]*entity.Store, *errors.DomainError) {
+	stores, err := u.storeQuery.GetActiveAll()
+	if err != nil {
+		return nil, errors.NewDomainError(errors.QueryError, err.Error())
+	}
+	return stores, nil
+}
+
 func (u *StoreUsecase) GetList() ([]*entity.Store, *errors.DomainError) {
 	stores, err := u.storeQuery.GetAll()
 	if err != nil {
