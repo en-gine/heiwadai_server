@@ -64,7 +64,7 @@ func (ac *AdminCouponController) GetUserCouponList(ctx context.Context, req *con
 	}
 	var attachedCoupons []*shared.UserAttachedCoupon
 	for _, entity := range entities {
-		cpn := EntityToResCoupon(entity.Coupon)
+		cpn := EntityToCoupon(entity.Coupon)
 
 		atcCpn := &shared.UserAttachedCoupon{
 			UserID: userID.String(),
@@ -81,7 +81,7 @@ func (ac *AdminCouponController) GetUserCouponList(ctx context.Context, req *con
 	return connect.NewResponse(result), nil
 }
 
-func (ac *AdminCouponController) CreateCustomCoupon(ctx context.Context, req *connect.Request[admin.CreateCustomCouponRequest]) (*connect.Response[shared.Coupon], error) {
+func (ac *AdminCouponController) CreateCustomCoupon(ctx context.Context, req *connect.Request[admin.CreateCustomCouponRequest]) (*connect.Response[shared.CustomCoupon], error) {
 	var TargetStores []*entity.Store
 	for _, id := range req.Msg.TargetStoresID {
 		storeId, err := uuid.Parse(id)
@@ -106,12 +106,12 @@ func (ac *AdminCouponController) CreateCustomCoupon(ctx context.Context, req *co
 		return nil, controller.ErrorHandler(domaiErr)
 	}
 
-	cpn := EntityToResCoupon(entity)
+	cpn := EntityToCustomCoupon(entity)
 
 	return connect.NewResponse(cpn), nil
 }
 
-func (ac *AdminCouponController) GetCustomCouponByID(ctx context.Context, req *connect.Request[admin.CouponIDRequest]) (*connect.Response[shared.Coupon], error) {
+func (ac *AdminCouponController) GetCustomCouponByID(ctx context.Context, req *connect.Request[admin.CouponIDRequest]) (*connect.Response[shared.CustomCoupon], error) {
 	couponID, err := uuid.Parse(req.Msg.ID)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("UUIDが正しい形式ではありません。"))
@@ -121,7 +121,7 @@ func (ac *AdminCouponController) GetCustomCouponByID(ctx context.Context, req *c
 		return nil, controller.ErrorHandler(domaiErr)
 	}
 
-	cpn := EntityToResCoupon(entity)
+	cpn := EntityToCustomCoupon(entity)
 
 	return connect.NewResponse(cpn), nil
 }
@@ -144,9 +144,9 @@ func (ac *AdminCouponController) GetCustomCouponList(ctx context.Context, req *c
 		return nil, controller.ErrorHandler(domainErr)
 	}
 
-	var resCoupons []*shared.Coupon
+	var resCoupons []*shared.CustomCoupon
 	for _, coupon := range coupons {
-		cpn := EntityToResCoupon(coupon)
+		cpn := EntityToCustomCoupon(coupon)
 		resCoupons = append(resCoupons, cpn)
 	}
 	var resPage *shared.PageResponse
@@ -212,7 +212,21 @@ func (ac *AdminCouponController) AttachCustomCouponToAllUser(ctx context.Context
 	return connect.NewResponse(result), nil
 }
 
-func EntityToResCoupon(entity *entity.Coupon) *shared.Coupon {
+func EntityToCustomCoupon(entity *entity.Coupon) *shared.CustomCoupon {
+	return &shared.CustomCoupon{
+		ID:                entity.ID.String(),
+		Name:              entity.Name,
+		CouponType:        shared.CouponType(entity.CouponType.ToInt()),
+		DiscountAmount:    uint32(entity.DiscountAmount),
+		ExpireAt:          timestamppb.New(entity.ExpireAt),
+		Status:            shared.CouponStatus(entity.Status),
+		IsCombinationable: entity.IsCombinationable,
+		Notices:           entity.Notices,
+		CreateAt:          timestamppb.New(entity.CreateAt),
+	}
+}
+
+func EntityToCoupon(entity *entity.Coupon) *shared.Coupon {
 	return &shared.Coupon{
 		ID:                entity.ID.String(),
 		Name:              entity.Name,
@@ -220,6 +234,7 @@ func EntityToResCoupon(entity *entity.Coupon) *shared.Coupon {
 		DiscountAmount:    uint32(entity.DiscountAmount),
 		ExpireAt:          timestamppb.New(entity.ExpireAt),
 		IsCombinationable: entity.IsCombinationable,
+		Notices:           entity.Notices,
 		CreateAt:          timestamppb.New(entity.CreateAt),
 	}
 }

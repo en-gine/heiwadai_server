@@ -144,7 +144,6 @@ func (u *AdminCouponUsecase) GetCustomCouponByID(couponID uuid.UUID) (*entity.Co
 	if coupon.CouponType != entity.CouponCustom {
 		return nil, errors.NewDomainError(errors.QueryDataNotFoundError, "該当のクーポンIDが見つかりません。")
 	}
-
 	return coupon, nil
 }
 

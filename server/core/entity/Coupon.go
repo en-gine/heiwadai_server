@@ -94,6 +94,7 @@ func newCoupon(
 	return &Coupon{
 		ID:                ID,
 		Name:              Name,
+		CouponType:        CouponType,
 		DiscountAmount:    DiscountAmount,
 		ExpireAt:          ExpireAt,
 		IsCombinationable: IsCombinationable,
@@ -208,6 +209,7 @@ func RegenCoupon(
 	return &Coupon{
 		ID:                ID,
 		Name:              Name,
+		CouponType:        CouponType,
 		DiscountAmount:    DiscountAmount,
 		ExpireAt:          ExpireAt,
 		IsCombinationable: IsCombinationable,
