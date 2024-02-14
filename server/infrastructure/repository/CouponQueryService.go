@@ -115,5 +115,7 @@ func CouponModelToEntity(model *models.Coupon, targetStore []*entity.Store) *ent
 		targetStore,
 		model.CreateAt,
 		entity.CouponStatus(model.CouponStatus),
+		&model.IssueCount,
+		model.IssueAt.Ptr(),
 	)
 }

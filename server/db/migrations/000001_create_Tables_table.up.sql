@@ -98,6 +98,8 @@ CREATE TABLE coupon (
     is_combinationable BOOLEAN NOT NULL,
     coupon_status int NOT NULL,
     notices TEXT[] NULL default array[]::TEXT[],
+    issue_count INTEGER NOT NULL default 0,
+    issue_at TIMESTAMPTZ default null,
     create_at TIMESTAMPTZ NOT NULL default now(),
     update_at TIMESTAMPTZ NOT NULL default now()
 );

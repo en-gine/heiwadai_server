@@ -20,6 +20,8 @@ type Coupon struct {
 	TargetStore       []*Store  // 対象店舗
 	CreateAt          time.Time
 	Status            CouponStatus
+	IssueCount        *int
+	IssueAt           *time.Time
 }
 
 var DefaultNotices = []string{"クーポンは併用できません", "ランチではお使いになれません"}
@@ -53,21 +55,18 @@ type CouponStatus int
 
 const (
 	CouponDraft CouponStatus = iota
-	CouponSaved
+	CouponCreated
 	CouponIssued
-	CouponUsed
 )
 
 func (b CouponStatus) String() string {
 	switch b {
 	case CouponDraft:
 		return "Draft"
-	case CouponSaved:
-		return "Saved"
+	case CouponCreated:
+		return "Created"
 	case CouponIssued:
 		return "Issued"
-	case CouponUsed:
-		return "Used"
 	default:
 		return "Unknown"
 	}
@@ -181,7 +180,7 @@ func CreateCustomCoupon(
 		Notices,
 		TargetStore,
 		time.Now(),
-		CouponDraft,
+		CouponCreated,
 	)
 }
 
@@ -205,8 +204,28 @@ func SaveCustomCoupon(
 		Notices,
 		TargetStore,
 		CreateAt,
-		CouponSaved,
+		CouponCreated,
+		nil,
+		nil,
 	), nil
+}
+
+func CreateIssuedCoupon(coupon *Coupon, count *int) *Coupon {
+	issueAt := time.Now()
+	return RegenCoupon(
+		coupon.ID,
+		coupon.Name,
+		coupon.CouponType,
+		coupon.DiscountAmount,
+		coupon.ExpireAt,
+		coupon.IsCombinationable,
+		coupon.Notices,
+		coupon.TargetStore,
+		coupon.CreateAt,
+		CouponIssued,
+		count,
+		&issueAt,
+	)
 }
 
 func RegenCoupon(
@@ -220,6 +239,8 @@ func RegenCoupon(
 	TargetStore []*Store,
 	CreateAt time.Time,
 	Status CouponStatus,
+	IssueCount *int,
+	IssueAt *time.Time,
 ) *Coupon {
 	return &Coupon{
 		ID:                ID,
@@ -232,5 +253,7 @@ func RegenCoupon(
 		TargetStore:       TargetStore,
 		CreateAt:          CreateAt,
 		Status:            Status,
+		IssueCount:        IssueCount,
+		IssueAt:           IssueAt,
 	}
 }

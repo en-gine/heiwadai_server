@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/friendsofgo/errors"
+	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -34,6 +35,8 @@ type Coupon struct {
 	Notices           types.StringArray `boil:"notices" json:"notices,omitempty" toml:"notices" yaml:"notices,omitempty"`
 	CreateAt          time.Time         `boil:"create_at" json:"create_at" toml:"create_at" yaml:"create_at"`
 	UpdateAt          time.Time         `boil:"update_at" json:"update_at" toml:"update_at" yaml:"update_at"`
+	IssueCount        int               `boil:"issue_count" json:"issue_count" toml:"issue_count" yaml:"issue_count"`
+	IssueAt           null.Time         `boil:"issue_at" json:"issue_at,omitempty" toml:"issue_at" yaml:"issue_at,omitempty"`
 
 	R *couponR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L couponL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -50,6 +53,8 @@ var CouponColumns = struct {
 	Notices           string
 	CreateAt          string
 	UpdateAt          string
+	IssueCount        string
+	IssueAt           string
 }{
 	ID:                "id",
 	Name:              "name",
@@ -61,6 +66,8 @@ var CouponColumns = struct {
 	Notices:           "notices",
 	CreateAt:          "create_at",
 	UpdateAt:          "update_at",
+	IssueCount:        "issue_count",
+	IssueAt:           "issue_at",
 }
 
 var CouponTableColumns = struct {
@@ -74,6 +81,8 @@ var CouponTableColumns = struct {
 	Notices           string
 	CreateAt          string
 	UpdateAt          string
+	IssueCount        string
+	IssueAt           string
 }{
 	ID:                "coupon.id",
 	Name:              "coupon.name",
@@ -85,6 +94,8 @@ var CouponTableColumns = struct {
 	Notices:           "coupon.notices",
 	CreateAt:          "coupon.create_at",
 	UpdateAt:          "coupon.update_at",
+	IssueCount:        "coupon.issue_count",
+	IssueAt:           "coupon.issue_at",
 }
 
 // Generated where
@@ -115,6 +126,30 @@ func (w whereHelpertypes_StringArray) IsNotNull() qm.QueryMod {
 	return qmhelper.WhereIsNotNull(w.field)
 }
 
+type whereHelpernull_Time struct{ field string }
+
+func (w whereHelpernull_Time) EQ(x null.Time) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, false, x)
+}
+func (w whereHelpernull_Time) NEQ(x null.Time) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, true, x)
+}
+func (w whereHelpernull_Time) LT(x null.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelpernull_Time) LTE(x null.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelpernull_Time) GT(x null.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelpernull_Time) GTE(x null.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+
+func (w whereHelpernull_Time) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
+func (w whereHelpernull_Time) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
+
 var CouponWhere = struct {
 	ID                whereHelperstring
 	Name              whereHelperstring
@@ -126,6 +161,8 @@ var CouponWhere = struct {
 	Notices           whereHelpertypes_StringArray
 	CreateAt          whereHelpertime_Time
 	UpdateAt          whereHelpertime_Time
+	IssueCount        whereHelperint
+	IssueAt           whereHelpernull_Time
 }{
 	ID:                whereHelperstring{field: "\"coupon\".\"id\""},
 	Name:              whereHelperstring{field: "\"coupon\".\"name\""},
@@ -137,6 +174,8 @@ var CouponWhere = struct {
 	Notices:           whereHelpertypes_StringArray{field: "\"coupon\".\"notices\""},
 	CreateAt:          whereHelpertime_Time{field: "\"coupon\".\"create_at\""},
 	UpdateAt:          whereHelpertime_Time{field: "\"coupon\".\"update_at\""},
+	IssueCount:        whereHelperint{field: "\"coupon\".\"issue_count\""},
+	IssueAt:           whereHelpernull_Time{field: "\"coupon\".\"issue_at\""},
 }
 
 // CouponRels is where relationship names are stored.
@@ -177,9 +216,9 @@ func (r *couponR) GetStores() StoreSlice {
 type couponL struct{}
 
 var (
-	couponAllColumns            = []string{"id", "name", "coupon_type", "discount_amount", "expire_at", "is_combinationable", "coupon_status", "notices", "create_at", "update_at"}
+	couponAllColumns            = []string{"id", "name", "coupon_type", "discount_amount", "expire_at", "is_combinationable", "coupon_status", "notices", "create_at", "update_at", "issue_count", "issue_at"}
 	couponColumnsWithoutDefault = []string{"id", "name", "coupon_type", "discount_amount", "expire_at", "is_combinationable", "coupon_status"}
-	couponColumnsWithDefault    = []string{"notices", "create_at", "update_at"}
+	couponColumnsWithDefault    = []string{"notices", "create_at", "update_at", "issue_count", "issue_at"}
 	couponPrimaryKeyColumns     = []string{"id"}
 	couponGeneratedColumns      = []string{}
 )

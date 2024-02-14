@@ -114,8 +114,8 @@ func (u *AdminCouponUsecase) SaveCustomCoupon(
 	if coupon == nil {
 		return errors.NewDomainError(errors.QueryDataNotFoundError, "該当のクーポンIDが見つかりません。")
 	}
-	if coupon.Status != entity.CouponDraft {
-		return errors.NewDomainError(errors.UnPemitedOperation, "下書き状態のクーポンではありません。")
+	if coupon.Status != entity.CouponCreated {
+		return errors.NewDomainError(errors.UnPemitedOperation, "データ保存済の状態のクーポンではありません。")
 	}
 
 	coupon, domainErr := entity.SaveCustomCoupon(
@@ -172,7 +172,7 @@ func (u *AdminCouponUsecase) AttachCustomCouponToAllUser(couponID uuid.UUID) (*i
 	if coupon == nil {
 		return nil, errors.NewDomainError(errors.QueryDataNotFoundError, "該当のクーポンIDが見つかりません。")
 	}
-	if coupon.Status != entity.CouponSaved {
+	if coupon.Status != entity.CouponCreated {
 		return nil, errors.NewDomainError(errors.UnPemitedOperation, "保存済ステータスのクーポンではありません。")
 	}
 
@@ -182,6 +182,11 @@ func (u *AdminCouponUsecase) AttachCustomCouponToAllUser(couponID uuid.UUID) (*i
 	}
 	if count == 0 {
 		return nil, errors.NewDomainError(errors.ActionError, "クーポンの発行に失敗しました。")
+	}
+	issuedCoupon := entity.CreateIssuedCoupon(coupon, &count)
+	err = u.couponRepository.Save(issuedCoupon)
+	if err != nil {
+		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
 	}
 	return &count, nil
 }

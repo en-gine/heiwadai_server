@@ -1077,7 +1077,7 @@ func (storeL) LoadCoupons(ctx context.Context, e boil.ContextExecutor, singular 
 	}
 
 	query := NewQuery(
-		qm.Select("\"coupon\".\"id\", \"coupon\".\"name\", \"coupon\".\"coupon_type\", \"coupon\".\"discount_amount\", \"coupon\".\"expire_at\", \"coupon\".\"is_combinationable\", \"coupon\".\"coupon_status\", \"coupon\".\"notices\", \"coupon\".\"create_at\", \"coupon\".\"update_at\", \"a\".\"store_id\""),
+		qm.Select("\"coupon\".\"id\", \"coupon\".\"name\", \"coupon\".\"coupon_type\", \"coupon\".\"discount_amount\", \"coupon\".\"expire_at\", \"coupon\".\"is_combinationable\", \"coupon\".\"coupon_status\", \"coupon\".\"notices\", \"coupon\".\"create_at\", \"coupon\".\"update_at\", \"coupon\".\"issue_count\", \"coupon\".\"issue_at\", \"a\".\"store_id\""),
 		qm.From("\"coupon\""),
 		qm.InnerJoin("\"coupon_stores\" as \"a\" on \"coupon\".\"id\" = \"a\".\"coupon_id\""),
 		qm.WhereIn("\"a\".\"store_id\" in ?", args...),
@@ -1098,7 +1098,7 @@ func (storeL) LoadCoupons(ctx context.Context, e boil.ContextExecutor, singular 
 		one := new(Coupon)
 		var localJoinCol string
 
-		err = results.Scan(&one.ID, &one.Name, &one.CouponType, &one.DiscountAmount, &one.ExpireAt, &one.IsCombinationable, &one.CouponStatus, &one.Notices, &one.CreateAt, &one.UpdateAt, &localJoinCol)
+		err = results.Scan(&one.ID, &one.Name, &one.CouponType, &one.DiscountAmount, &one.ExpireAt, &one.IsCombinationable, &one.CouponStatus, &one.Notices, &one.CreateAt, &one.UpdateAt, &one.IssueCount, &one.IssueAt, &localJoinCol)
 		if err != nil {
 			return errors.Wrap(err, "failed to scan eager loaded results for coupon")
 		}
