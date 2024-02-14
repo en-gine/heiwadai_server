@@ -84,13 +84,13 @@ func (ac *AdminCouponController) GetUserCouponList(ctx context.Context, req *con
 func (ac *AdminCouponController) CreateCustomCoupon(ctx context.Context, req *connect.Request[admin.CreateCustomCouponRequest]) (*connect.Response[shared.CustomCoupon], error) {
 	var TargetStores []*entity.Store
 	for _, id := range req.Msg.TargetStoresID {
-		storeId, err := uuid.Parse(id)
+		storeID, err := uuid.Parse(id)
 		if err != nil {
 			return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("StoreのUUIDが正しい形式ではありません。"))
 		}
 
 		TargetStores = append(TargetStores, &entity.Store{
-			ID: storeId,
+			ID: storeID,
 		})
 	}
 
@@ -184,13 +184,13 @@ func (ac *AdminCouponController) SaveCustomCoupon(ctx context.Context, req *conn
 	}
 	var TargetStores []*entity.Store
 	for _, id := range req.Msg.TargetStoresID {
-		storeId, err := uuid.Parse(id)
+		storeID, err := uuid.Parse(id)
 		if err != nil {
 			return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("StoreのUUIDが正しい形式ではありません。"))
 		}
 
 		TargetStores = append(TargetStores, &entity.Store{
-			ID: storeId,
+			ID: storeID,
 		})
 	}
 	domaiErr := ac.couponUseCase.SaveCustomCoupon(couponID, req.Msg.Name, uint(req.Msg.DiscountAmount), req.Msg.ExpireAt.AsTime(), req.Msg.IsCombinationable, req.Msg.Notices, TargetStores)
@@ -224,6 +224,14 @@ func EntityToCustomCoupon(entity *entity.Coupon) *shared.CustomCoupon {
 			ID: store.ID.String(),
 		})
 	}
+	var issueCount *uint32
+	if entity.IssueCount == nil {
+		issueCount = nil
+	} else {
+		cnt := uint32(*entity.IssueCount)
+		issueCount = &cnt
+	}
+
 	return &shared.CustomCoupon{
 		ID:                entity.ID.String(),
 		Name:              entity.Name,
@@ -235,6 +243,8 @@ func EntityToCustomCoupon(entity *entity.Coupon) *shared.CustomCoupon {
 		IsCombinationable: entity.IsCombinationable,
 		Notices:           entity.Notices,
 		CreateAt:          timestamppb.New(entity.CreateAt),
+		IssueCount:        issueCount,
+		IssueAt:           timestamppb.New(*entity.IssueAt),
 	}
 }
 
