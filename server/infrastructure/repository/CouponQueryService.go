@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"fmt"
 
 	"server/core/entity"
 	queryservice "server/core/infra/queryService"
@@ -44,7 +45,8 @@ func (pq *CouponQueryService) GetByID(id uuid.UUID) (*entity.Coupon, error) {
 		return nil, nil
 	}
 	stores := coupon.R.Stores
-
+	fmt.Println("stores")
+	fmt.Println(stores)
 	var TargetStores []*entity.Store
 	for _, store := range stores {
 		TargetStores = append(TargetStores, StoreModelToEntity(store, nil))

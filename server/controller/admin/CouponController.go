@@ -131,7 +131,9 @@ func (ac *AdminCouponController) GetDefaultEmptyCoupon(ctx context.Context, req 
 	if err != nil {
 		return nil, controller.ErrorHandler(err)
 	}
+
 	cpn := EntityToCustomCoupon(coupon)
+
 	return connect.NewResponse(
 		&admin.DefaultCouponResponse{
 			Coupon: cpn,
@@ -216,10 +218,17 @@ func (ac *AdminCouponController) AttachCustomCouponToAllUser(ctx context.Context
 }
 
 func EntityToCustomCoupon(entity *entity.Coupon) *shared.CustomCoupon {
+	var stores []*shared.Store
+	for _, store := range entity.TargetStore {
+		stores = append(stores, &shared.Store{
+			ID: store.ID.String(),
+		})
+	}
 	return &shared.CustomCoupon{
 		ID:                entity.ID.String(),
 		Name:              entity.Name,
 		CouponType:        shared.CouponType(entity.CouponType.ToInt()),
+		TargetStore:       stores,
 		DiscountAmount:    uint32(entity.DiscountAmount),
 		ExpireAt:          timestamppb.New(entity.ExpireAt),
 		Status:            shared.CouponStatus(entity.Status),
@@ -230,11 +239,18 @@ func EntityToCustomCoupon(entity *entity.Coupon) *shared.CustomCoupon {
 }
 
 func EntityToCoupon(entity *entity.Coupon) *shared.Coupon {
+	var stores []*shared.Store
+	for _, store := range entity.TargetStore {
+		stores = append(stores, &shared.Store{
+			ID: store.ID.String(),
+		})
+	}
 	return &shared.Coupon{
 		ID:                entity.ID.String(),
 		Name:              entity.Name,
 		CouponType:        shared.CouponType(entity.CouponType.ToInt()),
 		DiscountAmount:    uint32(entity.DiscountAmount),
+		TargetStore:       stores,
 		ExpireAt:          timestamppb.New(entity.ExpireAt),
 		IsCombinationable: entity.IsCombinationable,
 		Notices:           entity.Notices,

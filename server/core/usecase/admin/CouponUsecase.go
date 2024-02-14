@@ -66,12 +66,8 @@ func (u *AdminCouponUsecase) DefaultEmptyCustomCoupon() (*entity.Coupon, *errors
 	}
 
 	stores := make([]*entity.Store, 0)
-	for _, store := range allStores {
-		stores = append(stores, store)
-	}
-
+	stores = append(stores, allStores...)
 	entity := entity.DefaultEmptyCustomCoupon(stores)
-
 	return entity, nil
 }
 

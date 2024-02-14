@@ -111,7 +111,7 @@ func DefaultEmptyCustomCoupon(allStores []*Store) *Coupon {
 		Name:              "",
 		CouponType:        CouponCustom,
 		DiscountAmount:    0,
-		ExpireAt:          time.Now().AddDate(0, 1, 0),
+		ExpireAt:          time.Now(),
 		IsCombinationable: true,
 		Notices:           DefaultNotices,
 		TargetStore:       allStores,
