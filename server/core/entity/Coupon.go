@@ -105,6 +105,21 @@ func newCoupon(
 	}, nil
 }
 
+func DefaultEmptyCustomCoupon(allStores []*Store) *Coupon {
+	return &Coupon{
+		ID:                uuid.Nil,
+		Name:              "",
+		CouponType:        CouponCustom,
+		DiscountAmount:    0,
+		ExpireAt:          time.Now().AddDate(0, 1, 0),
+		IsCombinationable: true,
+		Notices:           DefaultNotices,
+		TargetStore:       allStores,
+		CreateAt:          time.Now(),
+		Status:            CouponDraft,
+	}
+}
+
 func CreateStandardCoupon(
 	TargetStore []*Store,
 ) (*Coupon, *errors.DomainError) {

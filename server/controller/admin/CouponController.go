@@ -126,12 +126,15 @@ func (ac *AdminCouponController) GetCustomCouponByID(ctx context.Context, req *c
 	return connect.NewResponse(cpn), nil
 }
 
-func (ac *AdminCouponController) GetDefaultNotices(ctx context.Context, req *connect.Request[emptypb.Empty]) (*connect.Response[admin.DefaultNoticesResponse], error) {
-	notices := ac.couponUseCase.GetDefaultNotices()
-
+func (ac *AdminCouponController) GetDefaultEmptyCoupon(ctx context.Context, req *connect.Request[emptypb.Empty]) (*connect.Response[admin.DefaultCouponResponse], error) {
+	coupon, err := ac.couponUseCase.DefaultEmptyCustomCoupon()
+	if err != nil {
+		return nil, controller.ErrorHandler(err)
+	}
+	cpn := EntityToCustomCoupon(coupon)
 	return connect.NewResponse(
-		&admin.DefaultNoticesResponse{
-			Notices: notices,
+		&admin.DefaultCouponResponse{
+			Coupon: cpn,
 		},
 	), nil
 }

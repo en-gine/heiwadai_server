@@ -32,7 +32,7 @@ func NewAdminCouponUsecase(couponRepository repository.ICouponRepository, coupon
 	}
 }
 
-func (u *AdminCouponUsecase) CreateDefaultCoupon() *errors.DomainError {
+func (u *AdminCouponUsecase) CreateStandardCoupon() *errors.DomainError {
 	// Seederで叩く想定。デフォルトのクーポンをDB生成＆保持
 	store, err := u.storeQuery.GetActiveAll()
 	if err != nil {
@@ -59,8 +59,20 @@ func (u *AdminCouponUsecase) GetUsersCouponList(UserID uuid.UUID, pager *types.P
 	return coupons, pageRes, nil
 }
 
-func (u *AdminCouponUsecase) GetDefaultNotices() []string {
-	return entity.DefaultNotices
+func (u *AdminCouponUsecase) DefaultEmptyCustomCoupon() (*entity.Coupon, *errors.DomainError) {
+	allStores, err := u.storeQuery.GetActiveAll()
+	if err != nil {
+		return nil, errors.NewDomainError(errors.QueryError, err.Error())
+	}
+
+	stores := make([]*entity.Store, 0)
+	for _, store := range allStores {
+		stores = append(stores, store)
+	}
+
+	entity := entity.DefaultEmptyCustomCoupon(stores)
+
+	return entity, nil
 }
 
 func (u *AdminCouponUsecase) CreateCustomCoupon(
