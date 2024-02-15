@@ -3,6 +3,8 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"strings"
 	"time"
 
 	"server/core/entity"
@@ -133,7 +135,7 @@ func GetMailUserWhereMods(prefectures *[]entity.Prefecture) []qm.QueryMod {
 	// CountとAll両方で使えるようにクエリのみ返す
 	var preIds []int
 
-	if prefectures == nil {
+	if prefectures == nil || len(*prefectures) == 0 {
 		return []qm.QueryMod{models.UserDatumWhere.AcceptMail.EQ(true)}
 	} else {
 		for _, prefecture := range *prefectures {
@@ -143,12 +145,25 @@ func GetMailUserWhereMods(prefectures *[]entity.Prefecture) []qm.QueryMod {
 	}
 }
 
+func GetMailUserWhereSQL(prefectures *[]entity.Prefecture) string {
+	// CountとAll両方で使えるようにクエリのみ返す
+	var preIds []int
+	if prefectures == nil || len(*prefectures) == 0 {
+		return models.UserDatumColumns.AcceptMail + " = true"
+	} else {
+		for _, prefecture := range *prefectures {
+			preIds = append(preIds, prefecture.ToInt())
+		}
+		return models.UserDatumColumns.AcceptMail + " = true AND " + models.UserDatumColumns.Prefecture + " IN (" + strings.Trim(strings.Join(strings.Fields(fmt.Sprint(preIds)), ","), "[]") + ")"
+	}
+}
+
 func (pq *UserQueryService) GetList(query *types.UserQuery, pager *types.PageQuery) ([]*entity.UserWichLastCheckin, *types.PageResponse, error) {
 	userFilterMods := GetUserListFilterMods(query)
 	userListMods := []qm.QueryMod{
 		qm.Load(models.UserDatumRels.User),
 		qm.Load(models.UserDatumRels.UserCheckins,
-			qm.OrderBy(models.UserDatumTableColumns.CreateAt+" DESC"),
+			qm.OrderBy("create_at DESC"),
 			qm.Limit(1)),
 	}
 	userdata, err := models.UserData(

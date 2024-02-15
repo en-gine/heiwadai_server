@@ -92,7 +92,7 @@ func (u *UserCheckinUsecase) Checkin(authID uuid.UUID, QrHash uuid.UUID) (*entit
 	}
 	if unlimitQrStore != nil {
 		checkInStore = unlimitQrStore
-		isUnlimitQr = false
+		isUnlimitQr = true
 	}
 
 	lastCheckin, err := u.checkinQuery.GetMyLastStoreCheckin(authID, checkInStore.ID)
