@@ -49,11 +49,7 @@ func (pq *CheckinQueryService) GetMyActiveCheckin(userID uuid.UUID) ([]*entity.C
 }
 
 func (pq *CheckinQueryService) GetMyLastStoreCheckin(userID uuid.UUID, storeID uuid.UUID) (*entity.Checkin, error) {
-	checkin, err := models.Checkins(models.CheckinWhere.UserID.EQ(userID.String()), models.CheckinWhere.StoreID.EQ(storeID.String()), qm.Load(models.CheckinRels.User), qm.Load(models.CheckinRels.Store), qm.OrderBy(`checkin_at desc`)).One(context.Background(), pq.db)
-	if checkin == nil {
-		return nil, nil
-	}
-
+	checkin, err := models.Checkins(models.CheckinWhere.UserID.EQ(userID.String()), models.CheckinWhere.StoreID.EQ(storeID.String()), qm.Load(models.CheckinRels.User), qm.Load(models.CheckinRels.Store), qm.OrderBy(models.CheckinColumns.CheckInAt+" DESC")).One(context.Background(), pq.db)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
@@ -61,8 +57,9 @@ func (pq *CheckinQueryService) GetMyLastStoreCheckin(userID uuid.UUID, storeID u
 		logger.Error(err.Error())
 		return nil, nil
 	}
-
-	result := CheckinModelToEntity(checkin, nil, nil)
+	usr := UserModelToEntity(checkin.R.User, "")
+	store := StoreModelToEntity(checkin.R.Store, nil)
+	result := CheckinModelToEntity(checkin, usr, store)
 	return result, nil
 }
 
@@ -95,7 +92,7 @@ func (pq *CheckinQueryService) GetMyAllCheckin(userID uuid.UUID, pager *types.Pa
 }
 
 func (pq *CheckinQueryService) GetAllUserAllCheckin(pager *types.PageQuery) ([]*entity.Checkin, error) {
-	checkins, err := models.Checkins(qm.Load(models.CheckinRels.User), qm.Load(models.CheckinRels.Store), qm.Limit(pager.Limit()), qm.Offset(pager.Offset())).All(context.Background(), pq.db)
+	checkins, err := models.Checkins(qm.Load(models.CheckinRels.User), qm.Load(models.CheckinRels.Store), qm.Limit(pager.Limit()), qm.Offset(pager.Offset()), qm.OrderBy(models.CheckinColumns.CheckInAt+" DESC")).All(context.Background(), pq.db)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
@@ -103,6 +100,7 @@ func (pq *CheckinQueryService) GetAllUserAllCheckin(pager *types.PageQuery) ([]*
 		logger.Error(err.Error())
 		return nil, nil
 	}
+
 	if checkins == nil {
 		return nil, nil
 	}

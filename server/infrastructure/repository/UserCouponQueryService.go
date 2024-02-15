@@ -61,7 +61,10 @@ func (pq *UserCouponQueryService) GetByID(userID uuid.UUID, couponID uuid.UUID) 
 func (pq *UserCouponQueryService) GetActiveAll(userID uuid.UUID) ([]*entity.UserAttachedCoupon, error) {
 	userCoupons, err := models.CouponAttachedUsers(models.CouponAttachedUserWhere.UserID.EQ(userID.String()),
 		qm.Load(models.CouponAttachedUserRels.Coupon),
-		models.CouponAttachedUserWhere.UsedAt.IsNull()).All(context.Background(), pq.db)
+		models.CouponAttachedUserWhere.UsedAt.IsNull(),
+		// qm.OrderBy(models.CouponAttachedUserColumns.CreatedAt + " DESC"),
+		qm.OrderBy(models.CouponAttachedUserColumns.CouponID+" DESC"),
+	).All(context.Background(), pq.db)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
@@ -90,7 +93,9 @@ func (pq *UserCouponQueryService) GetActiveAll(userID uuid.UUID) ([]*entity.User
 func (pq *UserCouponQueryService) GetAll(userID uuid.UUID, pager *types.PageQuery) ([]*entity.UserAttachedCoupon, *types.PageResponse, error) {
 	userCoupons, err := models.CouponAttachedUsers(models.CouponAttachedUserWhere.UserID.EQ(userID.String()),
 		qm.Load(models.CouponAttachedUserRels.Coupon),
-		qm.Limit(pager.Limit()), qm.Offset(pager.Offset())).All(context.Background(), pq.db)
+		qm.Limit(pager.Limit()), qm.Offset(pager.Offset()),
+		qm.OrderBy(models.CouponAttachedUserColumns.CouponID+" DESC"),
+	).All(context.Background(), pq.db)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil, nil

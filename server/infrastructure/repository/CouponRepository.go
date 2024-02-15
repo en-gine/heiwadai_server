@@ -8,6 +8,7 @@ import (
 	"server/core/infra/repository"
 	"server/db/models"
 
+	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 )
 
@@ -26,6 +27,12 @@ func NewCouponRepository() *CouponRepository {
 }
 
 func (pr *CouponRepository) Save(updateCoupon *entity.Coupon) error {
+	var count int
+	if updateCoupon == nil {
+		count = 0
+	} else {
+		count = *updateCoupon.IssueCount
+	}
 	coupon := models.Coupon{
 		ID:                updateCoupon.ID.String(),
 		Name:              updateCoupon.Name,
@@ -36,6 +43,8 @@ func (pr *CouponRepository) Save(updateCoupon *entity.Coupon) error {
 		IsCombinationable: updateCoupon.IsCombinationable,
 		CreateAt:          updateCoupon.CreateAt,
 		CouponStatus:      int(updateCoupon.Status),
+		IssueCount:        count,
+		IssueAt:           null.TimeFromPtr(updateCoupon.IssueAt),
 	}
 
 	ctx := context.Background()

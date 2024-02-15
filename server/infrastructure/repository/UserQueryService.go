@@ -148,7 +148,7 @@ func (pq *UserQueryService) GetList(query *types.UserQuery, pager *types.PageQue
 	userListMods := []qm.QueryMod{
 		qm.Load(models.UserDatumRels.User),
 		qm.Load(models.UserDatumRels.UserCheckins,
-			qm.OrderBy(models.CheckinColumns.CheckInAt+" desc"),
+			qm.OrderBy(models.UserDatumTableColumns.CreateAt+" DESC"),
 			qm.Limit(1)),
 	}
 	userdata, err := models.UserData(

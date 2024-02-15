@@ -62,7 +62,7 @@ func (pq *MessageQueryService) GetMessagesAfter(ID *uuid.UUID) ([]*entity.Messag
 		lastCreateAt = &time.Time{}
 	}
 
-	msgs, err = models.Messages(models.MessageWhere.CreateAt.GT(*lastCreateAt)).All(context.Background(), pq.db)
+	msgs, err = models.Messages(models.MessageWhere.CreateAt.GT(*lastCreateAt), qm.OrderBy(models.MessageColumns.DisplayDate+" DESC")).All(context.Background(), pq.db)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil

@@ -63,7 +63,7 @@ func (pq *MailMagazineLogQueryService) GetUserLogList(userID uuid.UUID, pager ty
 }
 
 func (pq *MailMagazineLogQueryService) GetUnsentTargetMails(mailMagazineID uuid.UUID, pager types.PageQuery) (*[]string, error) {
-	mails, err := models.MailMagazineLogs(qm.Select(models.MailMagazineLogColumns.Email), models.MailMagazineLogWhere.MailMagazineID.EQ(mailMagazineID.String()), qm.Limit(pager.Limit()), qm.Offset(pager.Offset())).All(context.Background(), pq.db)
+	mails, err := models.MailMagazineLogs(qm.Select(models.MailMagazineLogColumns.Email), models.MailMagazineLogWhere.MailMagazineID.EQ(mailMagazineID.String()), qm.Limit(pager.Limit()), qm.Offset(pager.Offset()), qm.OrderBy(models.MailMagazineLogColumns.SentAt+" DESC")).All(context.Background(), pq.db)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil

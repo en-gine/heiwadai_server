@@ -48,6 +48,8 @@ func (u *UserCheckinController) GetAllRecent(ctx context.Context, req *connect.R
 				StoreID:         store.ID.String(),
 				StoreName:       store.Name,
 				StoreBranchName: *store.BranchName,
+				UserFirstName:   user.FirstName,
+				UserLastName:    user.LastName,
 				CheckinAt:       util.TimePtrToTimeStampPtr(&checkin.CheckInAt),
 			},
 		)

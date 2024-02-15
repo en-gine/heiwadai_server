@@ -44,7 +44,7 @@ func (pq *MailMagazineQueryService) GetByID(id uuid.UUID) (*entity.MailMagazine,
 }
 
 func (pq *MailMagazineQueryService) GetAll(pager *types.PageQuery) ([]*entity.MailMagazine, *types.PageResponse, error) {
-	mgzs, err := models.MailMagazines(qm.Limit(pager.Limit()), qm.Offset(pager.Offset())).All(context.Background(), pq.db)
+	mgzs, err := models.MailMagazines(qm.Limit(pager.Limit()), qm.Offset(pager.Offset()), qm.OrderBy(models.MailMagazineColumns.CreateAt+" DESC")).All(context.Background(), pq.db)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil, nil

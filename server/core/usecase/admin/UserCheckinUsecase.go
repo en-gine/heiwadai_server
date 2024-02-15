@@ -26,6 +26,9 @@ func NewUserCheckinUsecase(
 }
 
 func (u *UserCheckinUsecase) GetAllRecent(limit int) ([]*entity.Checkin, *errors.DomainError) {
+	if limit == 0 {
+		limit = 30
+	}
 	pager := types.NewPageQuery(
 		nil,
 		&limit,
@@ -34,7 +37,6 @@ func (u *UserCheckinUsecase) GetAllRecent(limit int) ([]*entity.Checkin, *errors
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())
 	}
-
 	return checkins, nil
 }
 

@@ -232,6 +232,13 @@ func EntityToCustomCoupon(entity *entity.Coupon) *shared.CustomCoupon {
 		issueCount = &cnt
 	}
 
+	var issueTime *timestamppb.Timestamp
+	if entity.IssueAt == nil {
+		issueTime = nil
+	} else {
+		issueTime = timestamppb.New(*entity.IssueAt)
+	}
+
 	return &shared.CustomCoupon{
 		ID:                entity.ID.String(),
 		Name:              entity.Name,
@@ -244,7 +251,7 @@ func EntityToCustomCoupon(entity *entity.Coupon) *shared.CustomCoupon {
 		Notices:           entity.Notices,
 		CreateAt:          timestamppb.New(entity.CreateAt),
 		IssueCount:        issueCount,
-		IssueAt:           timestamppb.New(*entity.IssueAt),
+		IssueAt:           issueTime,
 	}
 }
 

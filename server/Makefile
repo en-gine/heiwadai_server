@@ -75,11 +75,14 @@ seeder-admin:
 seeder-server:
 	cd /server/db/seeder && go run . -OnlyServer
 
-book:
+bookTest:
 	go run /server/test/bookingTest/.
 
-send:
+mailTest:
 	go run /server/test/mailTest/.
 
-upload:
+uploadTest:
 	go run /server/test/upload/.
+
+checkinTest:
+	go run /server/test/checkinTest/.

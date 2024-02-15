@@ -53,7 +53,7 @@ func (pq *CouponQueryService) GetByID(id uuid.UUID) (*entity.Coupon, error) {
 }
 
 func (pq *CouponQueryService) GetCouponListByType(couponType entity.CouponType, pager *types.PageQuery) ([]*entity.Coupon, *types.PageResponse, error) {
-	coupons, err := models.Coupons(models.CouponWhere.CouponType.EQ(couponType.ToInt()), qm.Limit(pager.Limit()), qm.Offset(pager.Offset())).All(context.Background(), pq.db)
+	coupons, err := models.Coupons(models.CouponWhere.CouponType.EQ(couponType.ToInt()), qm.Limit(pager.Limit()), qm.Offset(pager.Offset()), qm.OrderBy(models.CouponColumns.CreateAt+" DESC")).All(context.Background(), pq.db)
 	if err != nil {
 		return nil, nil, err
 	}

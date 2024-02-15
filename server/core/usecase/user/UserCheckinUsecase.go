@@ -2,6 +2,8 @@ package user
 
 import (
 	"context"
+	"fmt"
+	"reflect"
 	"time"
 
 	"server/core/entity"
@@ -69,37 +71,50 @@ func (u *UserCheckinUsecase) Checkin(authID uuid.UUID, QrHash uuid.UUID) (*entit
 		return nil, errors.NewDomainError(errors.QueryDataNotFoundError, "該当のユーザーが見つかりません。")
 	}
 
-	allStores, err := u.storeQuery.GetActiveAll()
+	qrStore, err := u.storeQuery.GetStoreByQrCode(QrHash)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())
 	}
+	unlimitQrStore, err := u.storeQuery.GetStoreByUnlimitQrCode(QrHash)
+	if err != nil {
+		return nil, errors.NewDomainError(errors.QueryError, err.Error())
+	}
+
+	if qrStore == nil && unlimitQrStore == nil {
+		return nil, errors.NewDomainError(errors.QueryDataNotFoundError, "該当のQRコードの店舗が見つかりません。")
+	}
+
 	var checkInStore *entity.Store
 	var isUnlimitQr bool
+	if qrStore != nil {
+		checkInStore = qrStore
+		isUnlimitQr = false
+	}
+	if unlimitQrStore != nil {
+		checkInStore = unlimitQrStore
+		isUnlimitQr = false
+	}
+
 	lastCheckin, err := u.checkinQuery.GetMyLastStoreCheckin(authID, checkInStore.ID)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())
 	}
+	isNil := lastCheckin == nil || reflect.ValueOf(lastCheckin).IsNil()
 
-	for _, store := range allStores {
-		// 通常のQRコードでは24時間以内にチェックインした店舗はチェックインできない
-		if store.QRCode == QrHash {
-			checkInStore = store
-			isUnlimitQr = false
-		}
-		// 無制限のQRコード
-		if store.UnLimitedQRCode == QrHash {
-			checkInStore = store
-			isUnlimitQr = true
-		}
+	fmt.Println(isNil)
+	var isSameStore bool = false
+	if !isNil {
+		fmt.Println(lastCheckin.Store.ID)
+		fmt.Println(checkInStore.ID)
+		isSameStore = lastCheckin.Store.ID == checkInStore.ID
 	}
 
-	if checkInStore == nil {
-		return nil, errors.NewDomainError(errors.QueryDataNotFoundError, "該当のQRコードの店舗が見つかりません。")
+	var isAfter24Hours bool = false
+	if isSameStore {
+		isAfter24Hours = lastCheckin.CheckInAt.Add(24 * time.Hour).After(time.Now())
 	}
 
-	isSameStore := lastCheckin != nil && lastCheckin.Store.ID == checkInStore.ID
-
-	if !isUnlimitQr && isSameStore && lastCheckin.CheckInAt.Add(24*time.Hour).After(time.Now()) {
+	if !isUnlimitQr && isSameStore && isAfter24Hours {
 		return nil, errors.NewDomainError(errors.UnPemitedOperation, "24時間以内にチェックインした店舗はチェックインできません。")
 	}
 	ctx := context.Background()

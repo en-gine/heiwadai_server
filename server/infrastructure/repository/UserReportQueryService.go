@@ -44,7 +44,7 @@ func (pq *UserReportQueryService) GetByID(id uuid.UUID) (*entity.UserReport, err
 }
 
 func (pq *UserReportQueryService) GetAll(pager *types.PageQuery) ([]*entity.UserReport, error) {
-	msgs, err := models.UserReports(qm.Limit(pager.Limit()), qm.Offset(pager.Offset())).All(context.Background(), pq.db)
+	msgs, err := models.UserReports(qm.Limit(pager.Limit()), qm.Offset(pager.Offset()), qm.OrderBy(models.UserReportColumns.CreateAt+" DESC")).All(context.Background(), pq.db)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil

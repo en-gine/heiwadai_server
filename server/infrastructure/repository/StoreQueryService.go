@@ -152,6 +152,38 @@ func (pq *StoreQueryService) GetStayableByBookingID(bookingID string) (*entity.S
 	return nil, errors.New("該当のStayableStoreがBookingIDから見つけることが出来ません。")
 }
 
+func (pq *StoreQueryService) GetStoreByQrCode(hash uuid.UUID) (*entity.Store, error) {
+	store, err := models.Stores(models.StoreWhere.QRCode.EQ(hash.String())).One(context.Background(), pq.db)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		logger.Error(err.Error())
+		return nil, nil
+	}
+	if store == nil {
+		return nil, nil
+	}
+
+	return StoreModelToEntity(store, nil), nil
+}
+
+func (pq *StoreQueryService) GetStoreByUnlimitQrCode(hash uuid.UUID) (*entity.Store, error) {
+	store, err := models.Stores(models.StoreWhere.UnLimitedQRCode.EQ(hash.String())).One(context.Background(), pq.db)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		logger.Error(err.Error())
+		return nil, nil
+	}
+	if store == nil {
+		return nil, nil
+	}
+
+	return StoreModelToEntity(store, nil), nil
+}
+
 func StoreModelToEntity(model *models.Store, info *models.StayableStoreInfo) *entity.Store {
 	var stayableInfo *entity.StayableStoreInfo
 	if info != nil {
