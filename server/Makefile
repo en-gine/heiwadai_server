@@ -89,3 +89,9 @@ uploadTest:
 
 checkinTest:
 	go run /server/test/checkinTest/.
+
+couponTest:
+	go run /server/test/couponTest/.
+
+postTest:
+	go run /server/test/postTest/.

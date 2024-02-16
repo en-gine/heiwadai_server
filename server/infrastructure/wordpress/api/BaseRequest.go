@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
 	"time"
@@ -18,10 +19,12 @@ func FetchJSONData[T any](APIURL string) (*T, error) {
 		return nil, err
 	}
 	defer res.Body.Close()
-
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		return nil, err
+	}
+	if res.StatusCode != 200 {
+		return nil, errors.New("Failed to fetch data : " + string(body))
 	}
 
 	var data T

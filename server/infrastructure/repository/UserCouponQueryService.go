@@ -75,7 +75,6 @@ func (pq *UserCouponQueryService) GetActiveAll(userID uuid.UUID) ([]*entity.User
 	if userCoupons == nil {
 		return nil, nil
 	}
-
 	var result []*entity.UserAttachedCoupon
 	for _, userCoupon := range userCoupons {
 		coupon := userCoupon.R.Coupon

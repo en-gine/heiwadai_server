@@ -1,26 +1,25 @@
 package wordpress
 
 import (
+	"time"
+
 	"server/core/entity"
 	queryservice "server/core/infra/queryService"
 	"server/infrastructure/logger"
 	"server/infrastructure/wordpress/api"
 	"server/infrastructure/wordpress/types"
-	"time"
 )
 
 var _ queryservice.IPostQueryService = &PostQueryService{}
 
-type PostQueryService struct {
-}
+type PostQueryService struct{}
 
 func NewPostQueryService() *PostQueryService {
-
 	return &PostQueryService{}
 }
 
 func (pq *PostQueryService) GetByID(id int) (*entity.Post, error) {
-	wppost, err := api.GetWPPost(uint(id))
+	wppost, err := api.GetWPPost(id)
 	if err != nil {
 		logger.Errorf("Error: %v\n", err)
 		return nil, err
