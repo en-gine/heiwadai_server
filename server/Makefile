@@ -95,3 +95,6 @@ couponTest:
 
 postTest:
 	go run /server/test/postTest/.
+
+messageTest:
+	go run /server/test/messageTest/.

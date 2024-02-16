@@ -78,7 +78,7 @@ func (pq *MessageQueryService) GetMessagesAfter(ID *uuid.UUID) ([]*entity.Messag
 }
 
 func (pq *MessageQueryService) GetAll(pager *types.PageQuery) ([]*entity.Message, *types.PageResponse, error) {
-	msgs, err := models.Messages(qm.Limit(pager.Limit()), qm.Offset(pager.Offset())).All(context.Background(), pq.db)
+	msgs, err := models.Messages(qm.Limit(pager.Limit()), qm.Offset(pager.Offset()), qm.OrderBy(models.MessageColumns.CreateAt+" DESC")).All(context.Background(), pq.db)
 	if err != nil {
 		return nil, nil, err
 	}
