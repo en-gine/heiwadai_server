@@ -24,9 +24,9 @@ func NewTransaction() *Transaction {
 	}
 }
 
-func (r *Transaction) Begin(ctx context.Context) error {
-	r.ctx = &ctx
-	tx, err := r.db.BeginTx(ctx, nil)
+func (r *Transaction) Begin(ctx *context.Context) error {
+	r.ctx = ctx
+	tx, err := r.db.BeginTx(*ctx, nil)
 	if err != nil {
 		logger.Errorf("begin transaction error: %v", err)
 		return err

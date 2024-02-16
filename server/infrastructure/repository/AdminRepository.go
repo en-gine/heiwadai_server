@@ -29,7 +29,7 @@ func NewAdminRepository() *AdminRepository {
 func (ur *AdminRepository) Insert(insertAdmin *entity.Admin) error {
 	tran := NewTransaction()
 	ctx := context.Background()
-	err := tran.Begin(ctx)
+	err := tran.Begin(&ctx)
 	if err != nil {
 		return err
 	}
@@ -67,7 +67,7 @@ func (ur *AdminRepository) Update(updateAdmin *entity.Admin) error {
 	tran := NewTransaction()
 	ctx := context.Background()
 
-	err := tran.Begin(ctx)
+	err := tran.Begin(&ctx)
 	if err != nil {
 		return err
 	}
@@ -96,7 +96,7 @@ func (ur *AdminRepository) Update(updateAdmin *entity.Admin) error {
 func (ur *AdminRepository) Delete(adminID uuid.UUID) error {
 	tran := NewTransaction()
 	ctx := context.Background()
-	err := tran.Begin(ctx)
+	err := tran.Begin(&ctx)
 	defer func() {
 		if err != nil {
 			tran.Rollback()

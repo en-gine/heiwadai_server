@@ -26,9 +26,9 @@ func NewCouponRepository() *CouponRepository {
 	}
 }
 
-func (pr *CouponRepository) Save(updateCoupon *entity.Coupon) error {
+func (pr *CouponRepository) Save(ctx context.Context, updateCoupon *entity.Coupon) error {
 	var count int
-	if updateCoupon == nil {
+	if updateCoupon == nil || updateCoupon.IssueCount == nil {
 		count = 0
 	} else {
 		count = *updateCoupon.IssueCount
@@ -47,9 +47,8 @@ func (pr *CouponRepository) Save(updateCoupon *entity.Coupon) error {
 		IssueAt:           null.TimeFromPtr(updateCoupon.IssueAt),
 	}
 
-	ctx := context.Background()
 	tx := NewTransaction()
-	err := tx.Begin(ctx)
+	err := tx.Begin(&ctx)
 	if err != nil {
 		tx.Rollback()
 		return err

@@ -62,6 +62,7 @@ func (u *UserAttachedCouponUsecase) UseMyCoupon(AuthUserID uuid.UUID, couponID u
 		AuthUserID,
 		coupon.Coupon,
 	)
+
 	err = u.usercouponRepository.Save(context.Background(), usedCoupon)
 	if err != nil {
 		return errors.NewDomainError(errors.RepositoryError, err.Error())

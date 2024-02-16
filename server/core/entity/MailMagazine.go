@@ -71,7 +71,7 @@ func CreateSavedMailMagazine(
 		SentCount:          0,
 		AuthorID:           AuthorID,
 		TargetPrefecture:   TargetPrefecture,
-		MailMagazineStatus: MailMagazineDraft,
+		MailMagazineStatus: MailMagazineSaved,
 		CreateAt:           time.Now(),
 	}
 }

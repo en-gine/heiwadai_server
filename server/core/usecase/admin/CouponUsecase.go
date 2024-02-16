@@ -1,6 +1,7 @@
 package admin
 
 import (
+	"context"
 	"time"
 
 	"server/core/entity"
@@ -18,10 +19,12 @@ type AdminCouponUsecase struct {
 	userCouponQuery      queryservice.IUserCouponQueryService
 	usercouponRepository repository.IUserCouponRepository
 	storeQuery           queryservice.IStoreQueryService
+	transaction          repository.ITransaction
 }
 
 func NewAdminCouponUsecase(couponRepository repository.ICouponRepository, couponQuery queryservice.ICouponQueryService,
 	userCouponQuery queryservice.IUserCouponQueryService, usercouponRepository repository.IUserCouponRepository, storeQuery queryservice.IStoreQueryService,
+	transaction repository.ITransaction,
 ) *AdminCouponUsecase {
 	return &AdminCouponUsecase{
 		couponRepository:     couponRepository,
@@ -29,6 +32,7 @@ func NewAdminCouponUsecase(couponRepository repository.ICouponRepository, coupon
 		userCouponQuery:      userCouponQuery,
 		usercouponRepository: usercouponRepository,
 		storeQuery:           storeQuery,
+		transaction:          transaction,
 	}
 }
 
@@ -43,7 +47,8 @@ func (u *AdminCouponUsecase) CreateStandardCoupon() *errors.DomainError {
 	if err != nil {
 		return domainErr
 	}
-	err = u.couponRepository.Save(standard)
+	ctx := context.Background()
+	err = u.couponRepository.Save(ctx, standard)
 	if err != nil {
 		return errors.NewDomainError(errors.RepositoryError, err.Error())
 	}
@@ -90,7 +95,8 @@ func (u *AdminCouponUsecase) CreateCustomCoupon(
 	if domainErr != nil {
 		return nil, domainErr
 	}
-	err := u.couponRepository.Save(customCoupon)
+	ctx := context.Background()
+	err := u.couponRepository.Save(ctx, customCoupon)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
 	}
@@ -132,8 +138,8 @@ func (u *AdminCouponUsecase) SaveCustomCoupon(
 	if domainErr != nil {
 		return domainErr
 	}
-
-	err = u.couponRepository.Save(coupon)
+	ctx := context.Background()
+	err = u.couponRepository.Save(ctx, coupon)
 
 	if err != nil {
 		return errors.NewDomainError(errors.RepositoryError, err.Error())
@@ -176,16 +182,25 @@ func (u *AdminCouponUsecase) AttachCustomCouponToAllUser(couponID uuid.UUID) (*i
 		return nil, errors.NewDomainError(errors.UnPemitedOperation, "保存済ステータスのクーポンではありません。")
 	}
 
-	count, err := u.usercouponRepository.IssueAll(coupon)
+	ctx := context.Background()
+	err = u.transaction.Begin(&ctx)
 	if err != nil {
+		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
+	}
+
+	count, err := u.usercouponRepository.IssueAll(ctx, coupon)
+	if err != nil {
+		u.transaction.Rollback()
 		return nil, errors.NewDomainError(errors.ActionError, err.Error())
 	}
 	if count == 0 {
+		u.transaction.Rollback()
 		return nil, errors.NewDomainError(errors.ActionError, "クーポンの発行に失敗しました。")
 	}
 	issuedCoupon := entity.CreateIssuedCoupon(coupon, &count)
-	err = u.couponRepository.Save(issuedCoupon)
+	err = u.couponRepository.Save(ctx, issuedCoupon)
 	if err != nil {
+		u.transaction.Rollback()
 		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
 	}
 	return &count, nil

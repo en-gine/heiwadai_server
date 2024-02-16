@@ -30,6 +30,7 @@ var (
 	sendMailAction            = action.NewSendMailAction()
 	fileUploaderAction        = action.NewFileClient()
 	userQuery                 = implements.NewUserQueryService()
+	transaction               = implements.NewTransaction()
 )
 
 func InitializeAuthUsecase() *usecase.AuthUsecase {
@@ -41,7 +42,7 @@ func InitializeAdminDataUsecase() *usecase.AdminDataUsecase {
 }
 
 func InitializeAdminCouponUsecase() *usecase.AdminCouponUsecase {
-	return usecase.NewAdminCouponUsecase(couponRepository, couponQuery, usercouponQuery, usercouponRepository, storeQuery)
+	return usecase.NewAdminCouponUsecase(couponRepository, couponQuery, usercouponQuery, usercouponRepository, storeQuery, transaction)
 }
 
 func InitializeUserDataUsecase() *usecase.UserDataUsecase {

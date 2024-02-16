@@ -45,7 +45,7 @@ func (pr *StoreRepository) Save(updateStore *entity.Store, stayableInfo *entity.
 
 	tran := NewTransaction()
 	ctx := context.Background()
-	err := tran.Begin(ctx)
+	err := tran.Begin(&ctx)
 	if err != nil {
 		return err
 	}
@@ -88,7 +88,7 @@ func (pr *StoreRepository) Save(updateStore *entity.Store, stayableInfo *entity.
 func (pr *StoreRepository) Delete(storeID uuid.UUID) error {
 	ctx := context.Background()
 	tran := NewTransaction()
-	err := tran.Begin(ctx)
+	err := tran.Begin(&ctx)
 	if err != nil {
 		return err
 	}
@@ -114,7 +114,7 @@ func (pr *StoreRepository) Delete(storeID uuid.UUID) error {
 func (pr *StoreRepository) RegenQR(storeID uuid.UUID) (*uuid.UUID, error) {
 	ctx := context.Background()
 	tran := NewTransaction()
-	err := tran.Begin(ctx)
+	err := tran.Begin(&ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -145,7 +145,7 @@ func (pr *StoreRepository) RegenQR(storeID uuid.UUID) (*uuid.UUID, error) {
 func (pr *StoreRepository) RegenUnlimitQR(storeID uuid.UUID) (*uuid.UUID, error) {
 	ctx := context.Background()
 	tran := NewTransaction()
-	err := tran.Begin(ctx)
+	err := tran.Begin(&ctx)
 	if err != nil {
 		return nil, err
 	}

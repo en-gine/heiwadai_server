@@ -8,6 +8,7 @@ import (
 	"server/core/infra/repository"
 	"server/db/models"
 
+	"github.com/google/uuid"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 )
 
@@ -36,4 +37,19 @@ func (pr *CheckinRepository) Save(ctx context.Context, updateCheckin *entity.Che
 	err := checkin.Upsert(ctx, pr.db, true, []string{"id"}, boil.Infer(), boil.Infer())
 
 	return err
+}
+
+func (pr *CheckinRepository) BulkArchive(ctx context.Context, userID uuid.UUID) error {
+	ckins, err := models.Checkins(models.CheckinWhere.UserID.EQ(userID.String())).All(ctx, pr.db)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil
+		}
+		return err
+	}
+	_, err = ckins.UpdateAll(ctx, pr.db, models.M{models.CheckinColumns.Archive: true})
+	if err != nil {
+		return err
+	}
+	return nil
 }

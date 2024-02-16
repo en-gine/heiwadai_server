@@ -30,7 +30,7 @@ func NewUserRepository() *UserRepository {
 func (ur *UserRepository) Save(updateUser *entity.User, updateUserOption *entity.UserOption) error {
 	tran := NewTransaction()
 	ctx := context.Background()
-	err := tran.Begin(ctx)
+	err := tran.Begin(&ctx)
 	if err != nil {
 		return err
 	}
@@ -86,7 +86,7 @@ func (ur *UserRepository) Save(updateUser *entity.User, updateUserOption *entity
 func (ur *UserRepository) Delete(userID uuid.UUID) error {
 	tran := NewTransaction()
 	ctx := context.Background()
-	err := tran.Begin(ctx)
+	err := tran.Begin(&ctx)
 	if err != nil {
 		return err
 	}

@@ -33,28 +33,16 @@ func (pr *UserCouponRepository) Save(ctx context.Context, userCoupon *entity.Use
 		CouponID: userCoupon.Coupon.ID.String(),
 		UsedAt:   null.TimeFromPtr(userCoupon.UsedAt),
 	}
-	tx := NewTransaction()
-	err := tx.Begin(ctx)
+
+	err := coupon.Upsert(ctx, pr.db, true, []string{"coupon_id", "user_id"}, boil.Infer(), boil.Infer())
 	if err != nil {
-		tx.Rollback()
 		return err
 	}
 
-	err = coupon.Upsert(ctx, tx.Tx, true, []string{"coupon_id", "user_id"}, boil.Infer(), boil.Infer())
-	if err != nil {
-		tx.Rollback()
-	}
-
-	err = tx.Commit()
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	return err
+	return nil
 }
 
-func (pr *UserCouponRepository) IssueAll(coupon *entity.Coupon) (int, error) {
+func (pr *UserCouponRepository) IssueAll(ctx context.Context, coupon *entity.Coupon) (int, error) {
 	queryMods := []qm.QueryMod{
 		qm.SQL("INSERT INTO " + models.TableNames.CouponAttachedUser +
 			" (" + models.CouponAttachedUserColumns.CouponID + ", " +
@@ -64,7 +52,7 @@ func (pr *UserCouponRepository) IssueAll(coupon *entity.Coupon) (int, error) {
 
 	res, err := models.NewQuery(
 		queryMods...,
-	).Exec(pr.db)
+	).ExecContext(ctx, pr.db)
 	if err != nil {
 		return 0, err
 	}

@@ -2,7 +2,6 @@ package user
 
 import (
 	"context"
-	"fmt"
 	"reflect"
 	"time"
 
@@ -101,11 +100,8 @@ func (u *UserCheckinUsecase) Checkin(authID uuid.UUID, QrHash uuid.UUID) (*entit
 	}
 	isNil := lastCheckin == nil || reflect.ValueOf(lastCheckin).IsNil()
 
-	fmt.Println(isNil)
 	var isSameStore bool = false
 	if !isNil {
-		fmt.Println(lastCheckin.Store.ID)
-		fmt.Println(checkInStore.ID)
 		isSameStore = lastCheckin.Store.ID == checkInStore.ID
 	}
 
@@ -118,7 +114,7 @@ func (u *UserCheckinUsecase) Checkin(authID uuid.UUID, QrHash uuid.UUID) (*entit
 		return nil, errors.NewDomainError(errors.UnPemitedOperation, "24時間以内にチェックインした店舗はチェックインできません。")
 	}
 	ctx := context.Background()
-	err = u.transaction.Begin(ctx)
+	err = u.transaction.Begin(&ctx)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
 	}
@@ -126,16 +122,34 @@ func (u *UserCheckinUsecase) Checkin(authID uuid.UUID, QrHash uuid.UUID) (*entit
 	newCheckin := entity.CreateCheckin(*checkInStore, *AuthUser)
 	myCheckins, err := u.checkinQuery.GetMyActiveCheckin(authID)
 	if err != nil {
+		u.transaction.Rollback()
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())
+	}
+	err = u.checkInRepository.Save(ctx, newCheckin)
+	if err != nil {
+		u.transaction.Rollback()
+		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
 	}
 
 	var userAttachedCoupon *entity.UserAttachedCoupon
-	if len(myCheckins) >= 5 {
-		standardCoupon, domainErr := u.couponQuery.GetCouponByType(entity.CouponStandard)
+	if len(myCheckins)+1 >= 5 {
+		allStores, err := u.storeQuery.GetActiveAll()
+		if err != nil {
+			u.transaction.Rollback()
+			return nil, errors.NewDomainError(errors.QueryError, err.Error())
+		}
+		standardCoupon, domainErr := entity.CreateStandardCoupon(allStores)
+		if err != nil {
+			u.transaction.Rollback()
+			return nil, domainErr
+		}
+
+		err = u.couponRepository.Save(ctx, standardCoupon)
 		if domainErr != nil {
 			u.transaction.Rollback()
 			return nil, errors.NewDomainError(errors.QueryError, err.Error())
 		}
+
 		userAttachedCoupon := entity.CreateUserAttachedCoupon(authID, standardCoupon)
 
 		err = u.usercouponRepository.Save(ctx, userAttachedCoupon)
@@ -143,13 +157,22 @@ func (u *UserCheckinUsecase) Checkin(authID uuid.UUID, QrHash uuid.UUID) (*entit
 			u.transaction.Rollback()
 			return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
 		}
+		var count int = 1
+		issuedCoupon := entity.CreateIssuedCoupon(standardCoupon, &count)
+		err = u.couponRepository.Save(ctx, issuedCoupon)
+
+		if err != nil {
+			u.transaction.Rollback()
+			return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
+		}
+
+		err = u.checkInRepository.BulkArchive(ctx, authID)
+		if err != nil {
+			u.transaction.Rollback()
+			return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
+		}
 	}
 
-	err = u.checkInRepository.Save(ctx, newCheckin)
-	if err != nil {
-		u.transaction.Rollback()
-		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
-	}
 	err = u.transaction.Commit()
 	if err != nil {
 		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())

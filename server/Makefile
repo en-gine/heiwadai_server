@@ -72,6 +72,9 @@ seeder-user:
 seeder-admin:
 	cd /server/db/seeder && go run . -AdminSeeder
 
+seeder-coupon:
+	cd /server/db/seeder && go run . -CouponSeeder
+
 seeder-server:
 	cd /server/db/seeder && go run . -OnlyServer
 
