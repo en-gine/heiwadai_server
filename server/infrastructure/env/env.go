@@ -60,8 +60,6 @@ const (
 	TestUserMail  EnvKey = "TEST_USER_MAIL"
 	TestUserPass  EnvKey = "TEST_USER_PASS"
 	TestAdminMail EnvKey = "TEST_ADMIN_MAIL"
-
-	AdminAppURL EnvKey = "ADMIN_APP_URL"
 )
 
 func InitEnv() {
@@ -104,8 +102,6 @@ func InitEnv() {
 			TestUserMail:  os.Getenv(string(TestUserMail)),
 			TestUserPass:  os.Getenv(string(TestUserPass)),
 			TestAdminMail: os.Getenv(string(TestAdminMail)),
-
-			AdminAppURL: os.Getenv(string(AdminAppURL)),
 		}
 	})
 	env := *Env

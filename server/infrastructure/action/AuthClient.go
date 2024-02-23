@@ -24,7 +24,6 @@ type AuthClient struct {
 func NewAuthClient() *AuthClient {
 	authURL := env.GetEnv(env.SupabaseUrl)
 	authKey := env.GetEnv(env.SupabaseKey)
-	adminAppURL := env.GetEnv(env.AdminAppURL)
 	if authURL == "" {
 		panic("SUPABASE_URL is not set")
 	}
@@ -34,9 +33,8 @@ func NewAuthClient() *AuthClient {
 	client := supa.CreateClient(authURL, authKey)
 
 	return &AuthClient{
-		client:      client,
-		apiKey:      authKey,
-		adminAppURL: &adminAppURL,
+		client: client,
+		apiKey: authKey,
 	}
 }
 

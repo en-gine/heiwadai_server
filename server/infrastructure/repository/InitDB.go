@@ -36,7 +36,7 @@ func InitDB() *sql.DB {
 
 		if err = Conn.Ping(); err != nil {
 			logger.Fatalf("PingError: %v", err)
-			panic("DB couldn't be Connected!")
+			logger.Warn("DB couldn't be Connected!")
 		}
 	})
 

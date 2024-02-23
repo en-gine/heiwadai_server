@@ -44,6 +44,9 @@ push:
 # deploy:
 # 	gcloud beta run deploy heiwadai-server --project heiwadai --region asia-northeast2 --platform managed --source .
 
+railway:
+	railway link ${RAILWAY_PROJECT_ID}
+	railway run -s heiwadai ls
 
 init-proto:
 	git submodule add git@github.com:en-gine/heiwadai_proto.git server/v1
