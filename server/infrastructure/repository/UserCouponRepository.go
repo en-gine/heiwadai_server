@@ -1,8 +1,8 @@
 package repository
 
 import (
-	"context"
 	"database/sql"
+	"strconv"
 
 	"server/core/entity"
 	"server/core/infra/repository"
@@ -27,14 +27,14 @@ func NewUserCouponRepository() *UserCouponRepository {
 	}
 }
 
-func (pr *UserCouponRepository) Save(ctx context.Context, userCoupon *entity.UserAttachedCoupon) error {
+func (pr *UserCouponRepository) Save(tx repository.ITransaction, userCoupon *entity.UserAttachedCoupon) error {
 	coupon := models.CouponAttachedUser{
 		UserID:   userCoupon.UserID.String(),
 		CouponID: userCoupon.Coupon.ID.String(),
 		UsedAt:   null.TimeFromPtr(userCoupon.UsedAt),
 	}
 
-	err := coupon.Upsert(ctx, pr.db, true, []string{"coupon_id", "user_id"}, boil.Infer(), boil.Infer())
+	err := coupon.Upsert(*tx.Context(), tx.Tran(), true, []string{"coupon_id", "user_id"}, boil.Infer(), boil.Infer())
 	if err != nil {
 		return err
 	}
@@ -42,17 +42,19 @@ func (pr *UserCouponRepository) Save(ctx context.Context, userCoupon *entity.Use
 	return nil
 }
 
-func (pr *UserCouponRepository) IssueAll(ctx context.Context, coupon *entity.Coupon) (int, error) {
-	queryMods := []qm.QueryMod{
-		qm.SQL("INSERT INTO " + models.TableNames.CouponAttachedUser +
-			" (" + models.CouponAttachedUserColumns.CouponID + ", " +
-			models.CouponAttachedUserColumns.UserID + ")" +
-			" SELECT '" + coupon.ID.String() + "', " + models.UserDatumColumns.UserID + " FROM " + models.TableNames.UserData),
+func (pr *UserCouponRepository) IssueAll(tx repository.ITransaction, coupon *entity.Coupon, birthMonth *int) (int, error) {
+	var sql string = "INSERT INTO " + models.TableNames.CouponAttachedUser +
+		" (" + models.CouponAttachedUserColumns.CouponID + ", " +
+		models.CouponAttachedUserColumns.UserID + ")" +
+		" SELECT '" + coupon.ID.String() + "', " + models.UserDatumColumns.UserID + " FROM " + models.TableNames.UserData
+
+	if birthMonth != nil {
+		sql = sql + " WHERE EXTRACT(MONTH FROM " + models.UserDatumColumns.BirthDate + ") = " + strconv.Itoa(*birthMonth)
 	}
 
 	res, err := models.NewQuery(
-		queryMods...,
-	).ExecContext(ctx, pr.db)
+		qm.SQL(sql),
+	).ExecContext(*tx.Context(), tx.Tran())
 	if err != nil {
 		return 0, err
 	}

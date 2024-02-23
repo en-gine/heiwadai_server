@@ -31,8 +31,17 @@ install-buf:
 	go install github.com/bufbuild/buf/cmd/buf@latest & \
   go install github.com/fullstorydev/grpcurl/cmd/grpcurl@latest & \
   go install google.golang.org/protobuf/cmd/protoc-gen-go@latest & \
-  go install github.com/bufbuild/connect-go/cmd/protoc-gen-connect-go@latest
+  go install github.com/bufbuild/connect-go/cmd/protoc-gen-connect-go@latest & \
+  go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2@latest & \
+	go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway@latest & \
+	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest & \
 	export PATH="$(go env GOBIN):${PATH}" && export PATH="$(go env GOPATH)/bin:${PATH}"
+
+install-node: #openapi-mergeを使うために
+	volta install node
+	npm install -g openapi-merge
+	npm install -g openapi-merge-cli
+	npm install -g api-spec-converter
 
 migrate-create: # ex: TABLE_NAME=users
 ifndef TABLE_NAME
@@ -60,8 +69,17 @@ install-sqlboiler:
 	go install github.com/volatiletech/sqlboiler/v4@latest
 	go install github.com/volatiletech/sqlboiler/v4/drivers/sqlboiler-psql@latest
 
+swagger-merge:
+	npx swagger-merge -v "1.0.0" -t "Heiwadai Api" -d "Heiwadai description" -p "./api/v1/" -o "./api/v1/merged-swagger.json" $(find ./api/v1/ -type f -name "*.json" | tr '\n' ' ')
+
+openapi-merge:
+	npx openapi-merge-cli --config ./openapi-merge.json
+
 sqlboiler:#sqlboilerでmodelを自動生成
 	sqlboiler psql --wipe
+
+grpcurl:
+	grpcurl -plaintext localhost:3000 list
 
 seeder-store:
 	cd /server/db/seeder && go run . -StoreSeeder
@@ -98,3 +116,6 @@ postTest:
 
 messageTest:
 	go run /server/test/messageTest/.
+
+birthCouponTest:
+	go run /server/test/birthCouponTest/.

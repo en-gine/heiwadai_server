@@ -30,7 +30,7 @@ func NewUserRepository() *UserRepository {
 func (ur *UserRepository) Save(updateUser *entity.User, updateUserOption *entity.UserOption) error {
 	tran := NewTransaction()
 	ctx := context.Background()
-	err := tran.Begin(&ctx)
+	err := tran.Begin(ctx)
 	if err != nil {
 		return err
 	}
@@ -49,7 +49,7 @@ func (ur *UserRepository) Save(updateUser *entity.User, updateUserOption *entity
 		Tel:           null.StringFromPtr(updateUser.Tel),
 		AcceptMail:    updateUser.AcceptMail,
 	}
-	err = user.Upsert(ctx, tran.Tx, true, []string{"user_id"}, boil.Infer(), boil.Infer())
+	err = user.Upsert(ctx, tran.Tran(), true, []string{"user_id"}, boil.Infer(), boil.Infer())
 	if err != nil {
 		tran.Rollback()
 		return err
@@ -68,7 +68,7 @@ func (ur *UserRepository) Save(updateUser *entity.User, updateUserOption *entity
 			IsBlackCustomer: false,
 		}
 	}
-	err = userOption.Upsert(ctx, tran.Tx, true, []string{"user_id"}, boil.Infer(), boil.Infer())
+	err = userOption.Upsert(ctx, tran.Tran(), true, []string{"user_id"}, boil.Infer(), boil.Infer())
 	if err != nil {
 		tran.Rollback()
 		return err
@@ -86,37 +86,37 @@ func (ur *UserRepository) Save(updateUser *entity.User, updateUserOption *entity
 func (ur *UserRepository) Delete(userID uuid.UUID) error {
 	tran := NewTransaction()
 	ctx := context.Background()
-	err := tran.Begin(&ctx)
+	err := tran.Begin(ctx)
 	if err != nil {
 		return err
 	}
-	deleteUserManager, err := models.FindUserManager(ctx, tran.Tx, userID.String())
+	deleteUserManager, err := models.FindUserManager(ctx, tran.Tran(), userID.String())
 	if err != nil {
 		tran.Rollback()
 		return err
 	}
-	_, err = deleteUserManager.Delete(ctx, tran.Tx)
+	_, err = deleteUserManager.Delete(ctx, tran.Tran())
 	if err != nil {
 		tran.Rollback()
 		return err
 	}
 
-	deleteUserData, err := models.FindUserDatum(ctx, tran.Tx, userID.String())
+	deleteUserData, err := models.FindUserDatum(ctx, tran.Tran(), userID.String())
 	if err != nil {
 		tran.Rollback()
 		return err
 	}
-	_, err = deleteUserData.Delete(ctx, tran.Tx)
+	_, err = deleteUserData.Delete(ctx, tran.Tran())
 	if err != nil {
 		tran.Rollback()
 		return err
 	}
-	deleteUserOption, err := models.FindUserOption(ctx, tran.Tx, userID.String())
+	deleteUserOption, err := models.FindUserOption(ctx, tran.Tran(), userID.String())
 	if err != nil {
 		tran.Rollback()
 		return err
 	}
-	_, err = deleteUserOption.Delete(ctx, tran.Tx)
+	_, err = deleteUserOption.Delete(ctx, tran.Tran())
 	if err != nil {
 		tran.Rollback()
 		return err

@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"context"
 	"database/sql"
 
 	"server/core/entity"
@@ -26,7 +25,7 @@ func NewCouponRepository() *CouponRepository {
 	}
 }
 
-func (pr *CouponRepository) Save(ctx context.Context, updateCoupon *entity.Coupon) error {
+func (pr *CouponRepository) Save(tx repository.ITransaction, updateCoupon *entity.Coupon) error {
 	var count int
 	if updateCoupon == nil || updateCoupon.IssueCount == nil {
 		count = 0
@@ -47,21 +46,8 @@ func (pr *CouponRepository) Save(ctx context.Context, updateCoupon *entity.Coupo
 		IssueAt:           null.TimeFromPtr(updateCoupon.IssueAt),
 	}
 
-	tx := NewTransaction()
-	err := tx.Begin(&ctx)
+	err := coupon.Upsert(*tx.Context(), tx.Tran(), true, []string{"id"}, boil.Infer(), boil.Infer())
 	if err != nil {
-		tx.Rollback()
-		return err
-	}
-	// _, err = tx.Tx.ExecContext(ctx, "SET CONSTRAINTS ALL DEFERRED;") // トランザクション内で外部キー制約を無効化
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	err = coupon.Upsert(ctx, tx.Tx, true, []string{"id"}, boil.Infer(), boil.Infer())
-	if err != nil {
-		tx.Rollback()
 		return err
 	}
 
@@ -72,15 +58,8 @@ func (pr *CouponRepository) Save(ctx context.Context, updateCoupon *entity.Coupo
 		}
 		modelStores = append(modelStores, modelStore)
 	}
-	err = coupon.SetStores(ctx, tx.Tx, false, modelStores...)
+	err = coupon.SetStores(*tx.Context(), tx.Tran(), false, modelStores...)
 	if err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	err = tx.Commit()
-	if err != nil {
-		tx.Rollback()
 		return err
 	}
 

@@ -29,7 +29,7 @@ func NewAdminRepository() *AdminRepository {
 func (ur *AdminRepository) Insert(insertAdmin *entity.Admin) error {
 	tran := NewTransaction()
 	ctx := context.Background()
-	err := tran.Begin(&ctx)
+	err := tran.Begin(ctx)
 	if err != nil {
 		return err
 	}
@@ -46,7 +46,7 @@ func (ur *AdminRepository) Insert(insertAdmin *entity.Admin) error {
 		BelongTo: insertAdmin.BelongStore.ID.String(),
 		IsActive: insertAdmin.IsActive,
 	}
-	err = admin.Insert(ctx, tran.Tx, boil.Infer())
+	err = admin.Insert(ctx, tran.Tran(), boil.Infer())
 	if err != nil {
 		return err
 	}
@@ -55,7 +55,7 @@ func (ur *AdminRepository) Insert(insertAdmin *entity.Admin) error {
 		IsAdmin: true,
 	}
 
-	_, err = userManager.Update(ctx, tran.Tx, boil.Whitelist(models.UserManagerColumns.IsAdmin))
+	_, err = userManager.Update(ctx, tran.Tran(), boil.Whitelist(models.UserManagerColumns.IsAdmin))
 	if err != nil {
 		return err
 	}
@@ -67,7 +67,7 @@ func (ur *AdminRepository) Update(updateAdmin *entity.Admin) error {
 	tran := NewTransaction()
 	ctx := context.Background()
 
-	err := tran.Begin(&ctx)
+	err := tran.Begin(ctx)
 	if err != nil {
 		return err
 	}
@@ -85,7 +85,7 @@ func (ur *AdminRepository) Update(updateAdmin *entity.Admin) error {
 		BelongTo: updateAdmin.BelongStore.ID.String(),
 		IsActive: updateAdmin.IsActive,
 	}
-	_, err = admin.Update(ctx, tran.Tx, boil.Infer())
+	_, err = admin.Update(ctx, tran.Tran(), boil.Infer())
 	if err != nil {
 		return err
 	}
@@ -96,7 +96,7 @@ func (ur *AdminRepository) Update(updateAdmin *entity.Admin) error {
 func (ur *AdminRepository) Delete(adminID uuid.UUID) error {
 	tran := NewTransaction()
 	ctx := context.Background()
-	err := tran.Begin(&ctx)
+	err := tran.Begin(ctx)
 	defer func() {
 		if err != nil {
 			tran.Rollback()
@@ -107,19 +107,19 @@ func (ur *AdminRepository) Delete(adminID uuid.UUID) error {
 	if err != nil {
 		return err
 	}
-	deleteAdminManager, err := models.FindUserManager(ctx, tran.Tx, adminID.String())
+	deleteAdminManager, err := models.FindUserManager(ctx, tran.Tran(), adminID.String())
 	if err != nil {
 		return err
 	}
-	_, err = deleteAdminManager.Delete(ctx, tran.Tx)
+	_, err = deleteAdminManager.Delete(ctx, tran.Tran())
 	if err != nil {
 		return err
 	}
-	deleteAdminData, err := models.FindAdmin(ctx, tran.Tx, adminID.String())
+	deleteAdminData, err := models.FindAdmin(ctx, tran.Tran(), adminID.String())
 	if err != nil {
 		return err
 	}
-	_, err = deleteAdminData.Delete(ctx, tran.Tx)
+	_, err = deleteAdminData.Delete(ctx, tran.Tran())
 	if err != nil {
 		return err
 	}

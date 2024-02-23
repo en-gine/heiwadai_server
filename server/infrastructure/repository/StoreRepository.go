@@ -45,16 +45,16 @@ func (pr *StoreRepository) Save(updateStore *entity.Store, stayableInfo *entity.
 
 	tran := NewTransaction()
 	ctx := context.Background()
-	err := tran.Begin(&ctx)
+	err := tran.Begin(ctx)
 	if err != nil {
 		return err
 	}
-	// _, err = tran.Tx.ExecContext(ctx, "SET CONSTRAINTS ALL DEFERRED;") // トランザクション内で外部キー制約を無効化
+	// _, err = tran.Tran().ExecContext(ctx, "SET CONSTRAINTS ALL DEFERRED;") // トランザクション内で外部キー制約を無効化
 	if err != nil {
 		tran.Rollback()
 		return err
 	}
-	err = store.Upsert(ctx, tran.Tx, true, []string{"id"}, boil.Infer(), boil.Infer())
+	err = store.Upsert(ctx, tran.Tran(), true, []string{"id"}, boil.Infer(), boil.Infer())
 	if err != nil {
 		tran.Rollback()
 		return err
@@ -70,7 +70,7 @@ func (pr *StoreRepository) Save(updateStore *entity.Store, stayableInfo *entity.
 			RestAPIURL:      stayableInfo.RestAPIURL,
 			BookingSystemID: stayableInfo.BookingSystemID,
 		}
-		err = StayableStoreInfo.Upsert(ctx, tran.Tx, true, []string{"store_id"}, boil.Infer(), boil.Infer())
+		err = StayableStoreInfo.Upsert(ctx, tran.Tran(), true, []string{"store_id"}, boil.Infer(), boil.Infer())
 		if err != nil {
 			tran.Rollback()
 			return err
@@ -88,16 +88,16 @@ func (pr *StoreRepository) Save(updateStore *entity.Store, stayableInfo *entity.
 func (pr *StoreRepository) Delete(storeID uuid.UUID) error {
 	ctx := context.Background()
 	tran := NewTransaction()
-	err := tran.Begin(&ctx)
+	err := tran.Begin(ctx)
 	if err != nil {
 		return err
 	}
 
-	deleteStore, err := models.FindStore(ctx, tran.Tx, storeID.String())
+	deleteStore, err := models.FindStore(ctx, tran.Tran(), storeID.String())
 	if err != nil {
 		return err
 	}
-	_, err = deleteStore.Delete(ctx, tran.Tx)
+	_, err = deleteStore.Delete(ctx, tran.Tran())
 	if err != nil {
 		tran.Rollback()
 		return err
@@ -114,12 +114,12 @@ func (pr *StoreRepository) Delete(storeID uuid.UUID) error {
 func (pr *StoreRepository) RegenQR(storeID uuid.UUID) (*uuid.UUID, error) {
 	ctx := context.Background()
 	tran := NewTransaction()
-	err := tran.Begin(&ctx)
+	err := tran.Begin(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	store, err := models.FindStore(ctx, tran.Tx, storeID.String())
+	store, err := models.FindStore(ctx, tran.Tran(), storeID.String())
 	if err != nil {
 		return nil, err
 	}
@@ -128,7 +128,7 @@ func (pr *StoreRepository) RegenQR(storeID uuid.UUID) (*uuid.UUID, error) {
 		return nil, err
 	}
 	store.QRCode = qrcode.String()
-	_, err = store.Update(ctx, tran.Tx, boil.Infer())
+	_, err = store.Update(ctx, tran.Tran(), boil.Infer())
 	if err != nil {
 		tran.Rollback()
 		return nil, err
@@ -145,12 +145,12 @@ func (pr *StoreRepository) RegenQR(storeID uuid.UUID) (*uuid.UUID, error) {
 func (pr *StoreRepository) RegenUnlimitQR(storeID uuid.UUID) (*uuid.UUID, error) {
 	ctx := context.Background()
 	tran := NewTransaction()
-	err := tran.Begin(&ctx)
+	err := tran.Begin(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	store, err := models.FindStore(ctx, tran.Tx, storeID.String())
+	store, err := models.FindStore(ctx, tran.Tran(), storeID.String())
 	if err != nil {
 		return nil, err
 	}
@@ -159,7 +159,7 @@ func (pr *StoreRepository) RegenUnlimitQR(storeID uuid.UUID) (*uuid.UUID, error)
 		return nil, err
 	}
 	store.UnLimitedQRCode = qrcode.String()
-	_, err = store.Update(ctx, tran.Tx, boil.Infer())
+	_, err = store.Update(ctx, tran.Tran(), boil.Infer())
 	if err != nil {
 		tran.Rollback()
 		return nil, err

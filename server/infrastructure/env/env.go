@@ -39,11 +39,10 @@ const (
 	SupabaseProjectID EnvKey = "SUPABASE_PROJECT_ID"
 	SupabaseBucket    EnvKey = "SUPABASE_BUCKET"
 
-	RabbitmqDefaultUser EnvKey = "RABBITMQ_DEFAULT_USER"
-	RabbitmqDefaultPass EnvKey = "RABBITMQ_DEFAULT_PASS"
-
-	// RedisHost EnvKey = "REDISHOST"
-	// RedisPort EnvKey = "REDISPORT"
+	RedisHost EnvKey = "REDISHOST"
+	RedisPort EnvKey = "REDISPORT"
+	RedisUser EnvKey = "REDISUSER"
+	RedisPass EnvKey = "REDISPASS"
 
 	MailHost EnvKey = "MAIL_HOST"
 	MailPort EnvKey = "MAIL_PORT"
@@ -63,18 +62,6 @@ const (
 	TestAdminMail EnvKey = "TEST_ADMIN_MAIL"
 
 	AdminAppURL EnvKey = "ADMIN_APP_URL"
-
-	FirebaseType                    EnvKey = "FIREBASE_type"
-	FirebaseProjectId               EnvKey = "FIREBASE_project_id"
-	FirebasePrivateKeyId            EnvKey = "FIREBASE_private_key_id"
-	FirebasePrivateKey              EnvKey = "FIREBASE_private_key"
-	FirebaseClientEmail             EnvKey = "FIREBASE_client_email"
-	FirebaseClientId                EnvKey = "FIREBASE_client_id"
-	FirebaseAuthUri                 EnvKey = "FIREBASE_auth_uri"
-	FirebaseTokenUri                EnvKey = "FIREBASE_token_uri"
-	FirebaseAuthProviderX509CertUrl EnvKey = "FIREBASE_auth_provider_x509_cert_url"
-	FirebaseClientX509CertUrl       EnvKey = "FIREBASE_client_x509_cert_url"
-	FirebaseUniverseDomain          EnvKey = "FIREBASE_universe_domain"
 )
 
 func InitEnv() {
@@ -96,11 +83,10 @@ func InitEnv() {
 			SupabaseProjectID: os.Getenv(string(SupabaseProjectID)),
 			SupabaseBucket:    os.Getenv(string(SupabaseBucket)),
 
-			RabbitmqDefaultUser: os.Getenv(string(RabbitmqDefaultUser)),
-			RabbitmqDefaultPass: os.Getenv(string(RabbitmqDefaultPass)),
-
-			// RedisHost: os.Getenv(string(RedisHost)),
-			// RedisPort: os.Getenv(string(RedisPort)),
+			RedisHost: os.Getenv(string(RedisHost)),
+			RedisPort: os.Getenv(string(RedisPort)),
+			RedisUser: os.Getenv(string(RedisUser)),
+			RedisPass: os.Getenv(string(RedisPass)),
 
 			MailHost: os.Getenv(string(MailHost)),
 			MailPort: os.Getenv(string(MailPort)),
@@ -120,18 +106,6 @@ func InitEnv() {
 			TestAdminMail: os.Getenv(string(TestAdminMail)),
 
 			AdminAppURL: os.Getenv(string(AdminAppURL)),
-
-			FirebaseType:                    os.Getenv(string(FirebaseType)),
-			FirebaseProjectId:               os.Getenv(string(FirebaseProjectId)),
-			FirebasePrivateKeyId:            os.Getenv(string(FirebasePrivateKeyId)),
-			FirebasePrivateKey:              os.Getenv(string(FirebasePrivateKey)),
-			FirebaseClientEmail:             os.Getenv(string(FirebaseClientEmail)),
-			FirebaseClientId:                os.Getenv(string(FirebaseClientId)),
-			FirebaseAuthUri:                 os.Getenv(string(FirebaseAuthUri)),
-			FirebaseTokenUri:                os.Getenv(string(FirebaseTokenUri)),
-			FirebaseAuthProviderX509CertUrl: os.Getenv(string(FirebaseAuthProviderX509CertUrl)),
-			FirebaseClientX509CertUrl:       os.Getenv(string(FirebaseClientX509CertUrl)),
-			FirebaseUniverseDomain:          os.Getenv(string(FirebaseUniverseDomain)),
 		}
 	})
 	env := *Env

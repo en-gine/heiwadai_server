@@ -14,12 +14,16 @@ import (
 type UserAttachedCouponUsecase struct {
 	usercouponRepository repository.IUserCouponRepository
 	usercouponQuery      queryservice.IUserCouponQueryService
+	transaction          repository.ITransaction
 }
 
-func NewUserAttachedCouponUsecase(usercouponRepository repository.IUserCouponRepository, usercouponQuery queryservice.IUserCouponQueryService) *UserAttachedCouponUsecase {
+func NewUserAttachedCouponUsecase(usercouponRepository repository.IUserCouponRepository, usercouponQuery queryservice.IUserCouponQueryService,
+	transaction repository.ITransaction,
+) *UserAttachedCouponUsecase {
 	return &UserAttachedCouponUsecase{
 		usercouponRepository: usercouponRepository,
 		usercouponQuery:      usercouponQuery,
+		transaction:          transaction,
 	}
 }
 
@@ -62,8 +66,19 @@ func (u *UserAttachedCouponUsecase) UseMyCoupon(AuthUserID uuid.UUID, couponID u
 		AuthUserID,
 		coupon.Coupon,
 	)
+	ctx := context.Background()
+	err = u.transaction.Begin(ctx)
+	if err != nil {
+		u.transaction.Rollback()
+		return errors.NewDomainError(errors.RepositoryError, err.Error())
+	}
 
-	err = u.usercouponRepository.Save(context.Background(), usedCoupon)
+	err = u.usercouponRepository.Save(u.transaction, usedCoupon)
+	if err != nil {
+		u.transaction.Rollback()
+		return errors.NewDomainError(errors.RepositoryError, err.Error())
+	}
+	err = u.transaction.Commit()
 	if err != nil {
 		return errors.NewDomainError(errors.RepositoryError, err.Error())
 	}

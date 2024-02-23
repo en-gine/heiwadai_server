@@ -12,16 +12,16 @@ services:
       - ./server:/server
     ports:
       - 3000:3000
-  # redis:
-  #   container_name: heiwadai-redis
-  #   image: redis:7.0.12
-  #   restart: unless-stopped
-  #   ports:
-  #     - ${REDISPORT}:${REDISPORT}
-  #   environment:
-  #     REDIS_ARGS: --save 5 30 --appendonly yes
-  #   volumes:
-  #     - ./docker/data/redis/data:/data:Z
+  redis:
+    container_name: heiwadai-redis
+    image: redis:7.0.12
+    restart: unless-stopped
+    ports:
+      - ${REDISPORT}:${REDISPORT}
+    environment:
+      REDIS_ARGS: --save 5 30 --appendonly yes
+    volumes:
+      - ./docker/data/redis/data:/data:Z
   # rabbitmq:
   #   # -management を付与したイメージの場合、15672ポートでManagement Plugin(Web UIのようなもの)が利用できるようになる
   #   image: rabbitmq:3.12.1-management

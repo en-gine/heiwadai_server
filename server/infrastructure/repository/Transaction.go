@@ -24,9 +24,9 @@ func NewTransaction() *Transaction {
 	}
 }
 
-func (r *Transaction) Begin(ctx *context.Context) error {
-	r.ctx = ctx
-	tx, err := r.db.BeginTx(*ctx, nil)
+func (r *Transaction) Begin(ctx context.Context) error {
+	r.ctx = &ctx
+	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
 		logger.Errorf("begin transaction error: %v", err)
 		return err
@@ -53,4 +53,12 @@ func (r *Transaction) Rollback() {
 
 func (r *Transaction) Exec(query string, args ...interface{}) (sql.Result, error) {
 	return r.Tx.ExecContext(*r.ctx, query, args...)
+}
+
+func (r *Transaction) Tran() *sql.Tx {
+	return r.Tx
+}
+
+func (r *Transaction) Context() *context.Context {
+	return r.ctx
 }

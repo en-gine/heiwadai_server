@@ -1,9 +1,14 @@
 package repository
 
-import "context"
+import (
+	"context"
+	"database/sql"
+)
 
 type ITransaction interface {
-	Begin(ctx *context.Context) error
+	Begin(ctx context.Context) error
 	Commit() error
 	Rollback()
+	Tran() *sql.Tx
+	Context() *context.Context
 }

@@ -7,11 +7,10 @@ import (
 	"net/http"
 	"time"
 
-	"server/infrastructure/cache"
-	"server/infrastructure/logger"
+	"server/infrastructure/redis"
 )
 
-var memory, _ = cache.NewMemoryRepository()
+var memory = redis.NewMemoryRepository()
 
 func FetchJSONData[T any](APIURL string) (*T, error) {
 	res, err := http.Get(APIURL)
@@ -57,11 +56,8 @@ func Request[T any](APIURL string, cacheKey string, cacheExpire time.Duration) (
 		if err != nil {
 			return nil, err
 		}
-		err = memory.Set(cacheKey, cacheData, cacheExpire)
-		if err != nil {
-			logger.Errorf("Failed to set cache : %s", err)
-			return nil, err
-		}
+		memory.Set(cacheKey, cacheData, cacheExpire)
+
 		return data, nil
 	}
 }

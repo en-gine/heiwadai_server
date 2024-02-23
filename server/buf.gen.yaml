@@ -10,7 +10,16 @@ plugins:
   - name: connect-go # protoc-gen-connect-go
     out: api
     opt: paths=source_relative
-  # - plugin: buf.build/protocolbuffers/dart:v20.0.1
+  # - plugin: grpc-gateway
   #   out: api
+  #   opt:
+  #     - paths=source_relative
+  #     - generate_unbound_methods=true
   # - name: openapiv2
-  #   out: v1
+  #   out: api
+  #   opt:
+  #     - generate_unbound_methods=true
+  #     - allow_merge=true
+  #     - enums_as_ints=true
+  #     - proto3_optional_nullable=true
+  #     - merge_file_name=api.swagger.json

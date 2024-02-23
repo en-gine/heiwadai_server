@@ -74,6 +74,7 @@ func InitializeUserCouponUsecase() *usecase.UserAttachedCouponUsecase {
 	return usecase.NewUserAttachedCouponUsecase(
 		usercouponRepository,
 		usercouponQuery,
+		transaction,
 	)
 }
 

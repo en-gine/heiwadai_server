@@ -139,18 +139,17 @@ func CreateStandardCoupon(
 }
 
 func CreateBirthdayCoupon(
-	DiscountAmount uint,
-	ExpireAt time.Time,
-	IsCombinationable bool,
 	TargetStore []*Store,
 ) (*Coupon, *errors.DomainError) {
+	// 	ExpireAtは当月の月末まで有効
+	ExpireAt := time.Now().AddDate(0, 1, -time.Now().Day()).AddDate(0, 0, -1)
 	return newCoupon(
 		uuid.New(),
 		"お誕生日",
 		CouponBirthday,
-		DiscountAmount,
+		500,
 		ExpireAt,
-		IsCombinationable,
+		false,
 		DefaultNotices,
 		TargetStore,
 		time.Now(),

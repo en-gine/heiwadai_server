@@ -48,7 +48,19 @@ func (u *AdminCouponUsecase) CreateStandardCoupon() *errors.DomainError {
 		return domainErr
 	}
 	ctx := context.Background()
-	err = u.couponRepository.Save(ctx, standard)
+	tx := u.transaction
+	err = tx.Begin(ctx)
+
+	if err != nil {
+		return errors.NewDomainError(errors.RepositoryError, err.Error())
+	}
+
+	err = u.couponRepository.Save(tx, standard)
+	if err != nil {
+		tx.Rollback()
+		return errors.NewDomainError(errors.RepositoryError, err.Error())
+	}
+	err = tx.Commit()
 	if err != nil {
 		return errors.NewDomainError(errors.RepositoryError, err.Error())
 	}
@@ -96,7 +108,17 @@ func (u *AdminCouponUsecase) CreateCustomCoupon(
 		return nil, domainErr
 	}
 	ctx := context.Background()
-	err := u.couponRepository.Save(ctx, customCoupon)
+	err := u.transaction.Begin(ctx)
+	if err != nil {
+		u.transaction.Rollback()
+		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
+	}
+	err = u.couponRepository.Save(u.transaction, customCoupon)
+	if err != nil {
+		u.transaction.Rollback()
+		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
+	}
+	err = u.transaction.Commit()
 	if err != nil {
 		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
 	}
@@ -139,11 +161,22 @@ func (u *AdminCouponUsecase) SaveCustomCoupon(
 		return domainErr
 	}
 	ctx := context.Background()
-	err = u.couponRepository.Save(ctx, coupon)
+	err = u.transaction.Begin(ctx)
+	if err != nil {
+		u.transaction.Rollback()
+		return errors.NewDomainError(errors.RepositoryError, err.Error())
+	}
 
+	err = u.couponRepository.Save(u.transaction, coupon)
+	if err != nil {
+		u.transaction.Rollback()
+		return errors.NewDomainError(errors.RepositoryError, err.Error())
+	}
+	err = u.transaction.Commit()
 	if err != nil {
 		return errors.NewDomainError(errors.RepositoryError, err.Error())
 	}
+
 	return nil
 }
 
@@ -183,12 +216,13 @@ func (u *AdminCouponUsecase) AttachCustomCouponToAllUser(couponID uuid.UUID) (*i
 	}
 
 	ctx := context.Background()
-	err = u.transaction.Begin(&ctx)
+	err = u.transaction.Begin(ctx)
 	if err != nil {
+		u.transaction.Rollback()
 		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
 	}
 
-	count, err := u.usercouponRepository.IssueAll(ctx, coupon)
+	count, err := u.usercouponRepository.IssueAll(u.transaction, coupon, nil)
 	if err != nil {
 		u.transaction.Rollback()
 		return nil, errors.NewDomainError(errors.ActionError, err.Error())
@@ -198,10 +232,59 @@ func (u *AdminCouponUsecase) AttachCustomCouponToAllUser(couponID uuid.UUID) (*i
 		return nil, errors.NewDomainError(errors.ActionError, "クーポンの発行に失敗しました。")
 	}
 	issuedCoupon := entity.CreateIssuedCoupon(coupon, &count)
-	err = u.couponRepository.Save(ctx, issuedCoupon)
+	err = u.couponRepository.Save(u.transaction, issuedCoupon)
 	if err != nil {
 		u.transaction.Rollback()
 		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
 	}
+	err = u.transaction.Commit()
+	if err != nil {
+		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
+	}
+
+	return &count, nil
+}
+
+func (u *AdminCouponUsecase) BulkAttachBirthdayCoupon(birthMonth int) (*int, *errors.DomainError) {
+	ctx := context.Background()
+	err := u.transaction.Begin(ctx)
+	if err != nil {
+		u.transaction.Rollback()
+		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
+	}
+	allStores, err := u.storeQuery.GetActiveAll()
+	if err != nil {
+		u.transaction.Rollback()
+		return nil, errors.NewDomainError(errors.QueryError, err.Error())
+	}
+	birthdayCoupon, domainErr := entity.CreateBirthdayCoupon(allStores)
+	if err != nil {
+		u.transaction.Rollback()
+		return nil, domainErr
+	}
+
+	err = u.couponRepository.Save(u.transaction, birthdayCoupon)
+	if domainErr != nil {
+		u.transaction.Rollback()
+		return nil, errors.NewDomainError(errors.QueryError, err.Error())
+	}
+
+	count, err := u.usercouponRepository.IssueAll(u.transaction, birthdayCoupon, &birthMonth)
+	if err != nil {
+		u.transaction.Rollback()
+		return nil, errors.NewDomainError(errors.ActionError, err.Error())
+	}
+
+	issuedCoupon := entity.CreateIssuedCoupon(birthdayCoupon, &count)
+	err = u.couponRepository.Save(u.transaction, issuedCoupon)
+	if err != nil {
+		u.transaction.Rollback()
+		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
+	}
+	err = u.transaction.Commit()
+	if err != nil {
+		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
+	}
+
 	return &count, nil
 }

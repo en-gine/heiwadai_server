@@ -24,9 +24,12 @@ var (
 )
 
 var (
-	UserIDKey keyType = "userID"
-	TokenKey  keyType = "token"
+	UserIDKey    keyType = "userID"
+	UserAuthType keyType = "authType"
+	TokenKey     keyType = "token"
 )
+
+// var cache = redis.NewMemoryRepository()
 
 type Authentificatable struct{}
 

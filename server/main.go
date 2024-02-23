@@ -5,8 +5,11 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"server/infrastructure/env"
+	"server/infrastructure/logger"
+	"server/infrastructure/redis"
 	adminRouter "server/router/admin"
 	userRouter "server/router/user"
 
@@ -20,17 +23,24 @@ func main() {
 	env.InitEnv() // 環境変数を読み込む
 
 	mux := http.NewServeMux()
+	os.Setenv("TZ", "Asia/Tokyo")
+
+	rdb := redis.NewMemoryRepository()             // redis接続
+	rdb.Set("key", []byte("test"), time.Second*10) // redisにデータを保存
+	data := rdb.Get("key")                         // redisからデータを取得
+	if data == nil || string(*data) != "test" {
+		logger.Warn("redisにはデータが保存されません。")
+	}
 
 	userRouter.NewUserServer(mux)
 	adminRouter.NewAdminServer(mux)
-	RegisterGRPCService(mux)
+	RegisterGRPCService(mux) // リフレクションを有効にする
 
 	msg := os.ExpandEnv("${ENV_MODE} mode run! port: ${PORT}")
 	fmt.Println(msg)
 	EchoMyIP()
 	port := env.GetEnv(env.ServerPort)
 	log.Fatal(http.ListenAndServe(":"+port, AllowCors().Handler(h2c.NewHandler(mux, &http2.Server{})))) // リフレクションを有効にする
-
 }
 
 func AllowCors() *cors.Cors {

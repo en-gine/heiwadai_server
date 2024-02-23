@@ -1,7 +1,6 @@
 package cache
 
 import (
-	"errors"
 	"time"
 
 	"server/core/infra/repository"
@@ -15,11 +14,11 @@ type MemoryRepository struct {
 	db *cache.Cache
 }
 
-func NewMemoryRepository() (*MemoryRepository, error) {
+func NewMemoryRepository() *MemoryRepository {
 	db := cache.New(60*time.Minute, 60*time.Minute)
 	return &MemoryRepository{
 		db: db,
-	}, nil
+	}
 }
 
 func (mr *MemoryRepository) Get(key string) *[]byte {
@@ -35,18 +34,8 @@ func (mr *MemoryRepository) Get(key string) *[]byte {
 	return &data
 }
 
-func (mr *MemoryRepository) Set(key string, value []byte, expire time.Duration) error {
-	if key == "" {
-		return errors.New("key cannot be empty")
-	}
-
-	if len(value) == 0 {
-		return errors.New("value cannot be nil or empty")
-	}
-
+func (mr *MemoryRepository) Set(key string, value []byte, expire time.Duration) {
 	mr.db.Set(key, value, expire)
-
-	return nil
 }
 
 func (mr *MemoryRepository) Delete(key string) {

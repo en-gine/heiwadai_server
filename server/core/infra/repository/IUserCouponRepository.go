@@ -1,12 +1,10 @@
 package repository
 
 import (
-	"context"
-
 	"server/core/entity"
 )
 
 type IUserCouponRepository interface {
-	Save(ctx context.Context, coupon *entity.UserAttachedCoupon) error
-	IssueAll(ctx context.Context, coupon *entity.Coupon) (int, error) // 発行数を返す
+	Save(tx ITransaction, coupon *entity.UserAttachedCoupon) error
+	IssueAll(tx ITransaction, coupon *entity.Coupon, birthMonth *int) (int, error) // 発行数を返す
 }

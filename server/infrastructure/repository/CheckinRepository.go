@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"context"
 	"database/sql"
 
 	"server/core/entity"
@@ -26,7 +25,7 @@ func NewCheckinRepository() *CheckinRepository {
 	}
 }
 
-func (pr *CheckinRepository) Save(ctx context.Context, updateCheckin *entity.Checkin) error {
+func (pr *CheckinRepository) Save(tx repository.ITransaction, updateCheckin *entity.Checkin) error {
 	checkin := models.Checkin{
 		ID:        updateCheckin.ID.String(),
 		StoreID:   updateCheckin.Store.ID.String(),
@@ -34,20 +33,22 @@ func (pr *CheckinRepository) Save(ctx context.Context, updateCheckin *entity.Che
 		CheckInAt: updateCheckin.CheckInAt,
 		Archive:   updateCheckin.Archive,
 	}
-	err := checkin.Upsert(ctx, pr.db, true, []string{"id"}, boil.Infer(), boil.Infer())
-
+	err := checkin.Upsert(*tx.Context(), tx.Tran(), true, []string{"id"}, boil.Infer(), boil.Infer())
+	if err != nil {
+		return err
+	}
 	return err
 }
 
-func (pr *CheckinRepository) BulkArchive(ctx context.Context, userID uuid.UUID) error {
-	ckins, err := models.Checkins(models.CheckinWhere.UserID.EQ(userID.String())).All(ctx, pr.db)
+func (pr *CheckinRepository) BulkArchive(tx repository.ITransaction, userID uuid.UUID) error {
+	ckins, err := models.Checkins(models.CheckinWhere.UserID.EQ(userID.String())).All(*tx.Context(), tx.Tran())
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil
 		}
 		return err
 	}
-	_, err = ckins.UpdateAll(ctx, pr.db, models.M{models.CheckinColumns.Archive: true})
+	_, err = ckins.UpdateAll(*tx.Context(), tx.Tran(), models.M{models.CheckinColumns.Archive: true})
 	if err != nil {
 		return err
 	}
