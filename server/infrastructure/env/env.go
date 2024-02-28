@@ -60,6 +60,17 @@ const (
 	TestUserMail  EnvKey = "TEST_USER_MAIL"
 	TestUserPass  EnvKey = "TEST_USER_PASS"
 	TestAdminMail EnvKey = "TEST_ADMIN_MAIL"
+
+	S3Bucket    EnvKey = "S3_BUCKET"
+	S3AccessKey EnvKey = "S3_ACCESS_KEY"
+	S3SecretKey EnvKey = "S3_SECRET_KEY"
+	S3Region    EnvKey = "S3_REGION"
+
+	AuthorizerClientID EnvKey = "AUTHORIZER_CLIENT_ID"
+	AuthorizerURL      EnvKey = "AUTHORIZER_URL"
+
+	CronAccessKey    EnvKey = "CRON_ACCESS_KEY"
+	CronAccessSecret EnvKey = "CRON_ACCESS_SECRET"
 )
 
 func InitEnv() {
@@ -102,6 +113,17 @@ func InitEnv() {
 			TestUserMail:  os.Getenv(string(TestUserMail)),
 			TestUserPass:  os.Getenv(string(TestUserPass)),
 			TestAdminMail: os.Getenv(string(TestAdminMail)),
+
+			S3Bucket:    os.Getenv(string(S3Bucket)),
+			S3AccessKey: os.Getenv(string(S3AccessKey)),
+			S3SecretKey: os.Getenv(string(S3SecretKey)),
+			S3Region:    os.Getenv(string(S3Region)),
+
+			AuthorizerClientID: os.Getenv(string(AuthorizerClientID)),
+			AuthorizerURL:      os.Getenv(string(AuthorizerURL)),
+
+			CronAccessKey:    os.Getenv(string(CronAccessKey)),
+			CronAccessSecret: os.Getenv(string(CronAccessSecret)),
 		}
 	})
 	env := *Env

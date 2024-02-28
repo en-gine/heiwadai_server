@@ -57,6 +57,7 @@ func AllowCors() *cors.Cors {
 		AllowedHeaders: []string{
 			"Accept-Encoding",
 			"Authorization",
+			"X-Cron-Key",
 			"Content-Type",
 			"Connect-Protocol-Version",
 			"Connect-Timeout-Ms",
