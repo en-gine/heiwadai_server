@@ -9,6 +9,8 @@ import (
 	queryservice "server/core/infra/queryService"
 	"server/core/infra/repository"
 	"server/core/infra/types"
+
+	"github.com/google/uuid"
 )
 
 type AuthUsecase struct {
@@ -63,7 +65,7 @@ func (u *AuthUsecase) Register(
 	}
 
 	userData := entity.CreateUser(
-		newID,
+		*newID,
 		FirstName,
 		LastName,
 		FirstNameKana,
@@ -90,12 +92,12 @@ func (u *AuthUsecase) Register(
 func (u *AuthUsecase) SignUp(
 	Mail string,
 	Password string,
-) error {
-	err := u.authAction.SignUp(Mail, Password, action.UserTypeUser)
+) (*uuid.UUID, error) {
+	userID, err := u.authAction.SignUp(Mail, Password, action.UserTypeUser)
 	if err != nil {
-		return errors.NewDomainError(errors.RepositoryError, err.Error())
+		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
 	}
-	return nil
+	return userID, nil
 }
 
 func (u *AuthUsecase) SignOut(
@@ -172,12 +174,12 @@ func (u *AuthUsecase) Refresh(
 	Token string,
 	RefreshToken string,
 ) (*types.Token, error) {
-	tkn, err := u.authAction.Refresh(Token, RefreshToken)
+	auth, err := u.authAction.Refresh(Token, RefreshToken)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
 	}
-	if tkn == nil {
+	if auth == nil {
 		return nil, errors.NewDomainError(errors.RepositoryError, "トークンの取得に失敗しました")
 	}
-	return tkn, nil
+	return auth.Token, nil
 }

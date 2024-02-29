@@ -27,7 +27,7 @@ func NewAnonAuthController(authUsecase *usecase.AuthUsecase) *AnonAuthController
 
 func (ac *AnonAuthController) SignUp(ctx context.Context, req *connect.Request[admin.AdminAuthRequest]) (*connect.Response[emptypb.Empty], error) {
 	msg := req.Msg
-	err := ac.authUseCase.SignUp(msg.Email, msg.Password)
+	_, err := ac.authUseCase.SignUp(msg.Email, msg.Password)
 	if err != nil {
 		logger.Error(err.Error())
 		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("サインアップに失敗しました。"))

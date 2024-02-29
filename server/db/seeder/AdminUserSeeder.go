@@ -9,6 +9,10 @@ import (
 	adminRouter "server/router/admin"
 )
 
+var email = env.GetEnv(env.TestAdminMail)
+
+// password = env.GetEnv(env.TestUserPass)
+
 func AdminSeeder() {
 	authUsecase := adminRouter.InitializeAuthUsecase()
 	storeUsecase := adminRouter.InitializeStoreUsecase()
@@ -18,7 +22,6 @@ func AdminSeeder() {
 	}
 	belongStoreID := stores[0].ID
 
-	email := env.GetEnv(env.TestAdminMail)
 	admin, err := authUsecase.Register(
 		"Tomohide",
 		belongStoreID,
@@ -33,6 +36,5 @@ func AdminSeeder() {
 	// start server
 	http.HandleFunc("/", Handler)
 	fmt.Println("Server started on :3000")
-
 	log.Fatal(http.ListenAndServe(":3000", nil))
 }

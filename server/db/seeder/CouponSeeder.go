@@ -11,7 +11,4 @@ func CouponSeeder() {
 	if err != nil {
 		panic(err)
 	}
-	if err != nil {
-		panic(err)
-	}
 }

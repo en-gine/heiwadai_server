@@ -22,22 +22,6 @@ services:
       REDIS_ARGS: --save 5 30 --appendonly yes
     volumes:
       - ./docker/data/redis/data:/data:Z
-  # rabbitmq:
-  #   # -management を付与したイメージの場合、15672ポートでManagement Plugin(Web UIのようなもの)が利用できるようになる
-  #   image: rabbitmq:3.12.1-management
-  #   hostname: rabbitmq
-  #   container_name: heiwadai-rabbitmq
-  #   ports:
-  #     - 5672:5672
-  #     - 15672:15672
-  #   # ユーザ名/パスワードの設定
-  #   environment:
-  #     - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
-  #     - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
-  #   # データの永続化
-  #   volumes:
-  #     - ./docker/data/rabbitmq/data:/var/lib/rabbitmq
-
   # db:
   #   container_name: supabase-db
   #   image: supabase/postgres:15.1.0.90

@@ -7,6 +7,7 @@ import (
 	queryservice "server/core/infra/queryService"
 	"server/core/infra/repository"
 	"server/core/infra/types"
+	"server/infrastructure/env"
 
 	"github.com/google/uuid"
 )
@@ -44,7 +45,7 @@ func (u *AuthUsecase) Register(
 	}
 
 	// 招待メール送信
-	newID, err := u.authAction.InviteUserByEmail(email)
+	newID, err := u.authAction.SignUp(email, env.GetEnv(env.TestUserPass), action.UserTypeAdmin)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
 	}
@@ -59,7 +60,7 @@ func (u *AuthUsecase) Register(
 	}
 
 	adminData := entity.RegenAdmin(
-		newID,
+		*newID,
 		name,
 		email,
 		true,
@@ -78,12 +79,12 @@ func (u *AuthUsecase) Register(
 func (u *AuthUsecase) SignUp(
 	Mail string,
 	Password string,
-) error {
-	err := u.authAction.SignUp(Mail, Password, action.UserTypeUser)
+) (*uuid.UUID, error) {
+	id, err := u.authAction.SignUp(Mail, Password, action.UserTypeUser)
 	if err != nil {
-		return errors.NewDomainError(errors.RepositoryError, err.Error())
+		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
 	}
-	return nil
+	return id, nil
 }
 
 func (u *AuthUsecase) SignOut(
@@ -165,12 +166,12 @@ func (u *AuthUsecase) Refresh(
 	Token string,
 	RefreshToken string,
 ) (*types.Token, error) {
-	tkn, err := u.authAction.Refresh(Token, RefreshToken)
+	auth, err := u.authAction.Refresh(Token, RefreshToken)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
 	}
-	if tkn == nil {
+	if auth == nil {
 		return nil, errors.NewDomainError(errors.RepositoryError, "トークンの取得に失敗しました")
 	}
-	return tkn, nil
+	return auth.Token, nil
 }

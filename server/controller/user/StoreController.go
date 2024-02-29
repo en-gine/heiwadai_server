@@ -39,9 +39,6 @@ func (ac *StoreController) GetByID(ctx context.Context, req *connect.Request[use
 	if domaiErr != nil {
 		return nil, controller.ErrorHandler(domaiErr)
 	}
-	if domaiErr != nil {
-		return nil, controller.ErrorHandler(domaiErr)
-	}
 
 	resposnse := StoreToResponse(store)
 

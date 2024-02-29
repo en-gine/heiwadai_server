@@ -140,13 +140,13 @@ func (u *UserCheckinUsecase) Checkin(authID uuid.UUID, QrHash uuid.UUID) (*entit
 			return nil, errors.NewDomainError(errors.QueryError, err.Error())
 		}
 		standardCoupon, domainErr := entity.CreateStandardCoupon(allStores)
-		if err != nil {
+		if domainErr != nil {
 			u.transaction.Rollback()
 			return nil, domainErr
 		}
 
 		err = u.couponRepository.Save(u.transaction, standardCoupon)
-		if domainErr != nil {
+		if err != nil {
 			u.transaction.Rollback()
 			return nil, errors.NewDomainError(errors.QueryError, err.Error())
 		}
@@ -161,7 +161,6 @@ func (u *UserCheckinUsecase) Checkin(authID uuid.UUID, QrHash uuid.UUID) (*entit
 		var count int = 1
 		issuedCoupon := entity.CreateIssuedCoupon(standardCoupon, &count)
 		err = u.couponRepository.Save(u.transaction, issuedCoupon)
-
 		if err != nil {
 			u.transaction.Rollback()
 			return nil, errors.NewDomainError(errors.RepositoryError, err.Error())

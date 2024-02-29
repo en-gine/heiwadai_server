@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+
 	"server/core/entity"
 	SendMailAction "server/infrastructure/action"
 	"server/infrastructure/env"
@@ -9,8 +10,10 @@ import (
 )
 
 func main() {
+	Send()
 	GetMailOKUser()
 }
+
 func Send() {
 	action := SendMailAction.NewSendMailAction()
 	To := env.GetEnv(env.TestAdminMail)
@@ -23,6 +26,7 @@ func Send() {
 		panic(err)
 	}
 }
+
 func GetMailOKUser() {
 	query := repository.NewUserQueryService()
 	prefectures := &[]entity.Prefecture{}
@@ -30,5 +34,5 @@ func GetMailOKUser() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(*count)
+	fmt.Println("メールOKユーザー: ", *count)
 }

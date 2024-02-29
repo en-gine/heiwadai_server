@@ -46,23 +46,27 @@ func (pq *MessageQueryService) GetByID(id uuid.UUID) (*entity.Message, error) {
 
 func (pq *MessageQueryService) GetMessagesAfter(ID *uuid.UUID) ([]*entity.Message, error) {
 	var msgs []*models.Message
+	var err error
+	var lastCreateAt *time.Time = nil
 
-	var lastCreateAt *time.Time
-	msg, err := models.FindMessage(context.Background(), pq.db, ID.String())
-	if err != nil {
-		if err == sql.ErrNoRows {
+	if ID != nil {
+		msg, err := models.FindMessage(context.Background(), pq.db, ID.String())
+		if err != nil {
+			if err == sql.ErrNoRows {
+				return nil, nil
+			}
+			logger.Error(err.Error())
 			return nil, nil
 		}
-		logger.Error(err.Error())
-		return nil, nil
+		if msg != nil {
+			lastCreateAt = &msg.CreateAt
+		}
 	}
-	if msg != nil {
-		lastCreateAt = &msg.CreateAt
+	if lastCreateAt == nil {
+		msgs, err = models.Messages(qm.OrderBy(models.MessageColumns.DisplayDate+" DESC")).All(context.Background(), pq.db)
 	} else {
-		lastCreateAt = &time.Time{}
+		msgs, err = models.Messages(models.MessageWhere.CreateAt.GT(*lastCreateAt), qm.OrderBy(models.MessageColumns.DisplayDate+" DESC")).All(context.Background(), pq.db)
 	}
-
-	msgs, err = models.Messages(models.MessageWhere.CreateAt.GT(*lastCreateAt), qm.OrderBy(models.MessageColumns.DisplayDate+" DESC")).All(context.Background(), pq.db)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil

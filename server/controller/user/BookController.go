@@ -98,7 +98,7 @@ func (ac *BookController) Reserve(ctx context.Context, req *connect.Request[user
 	}
 
 	var pref *entity.Prefecture = nil
-	if pref != nil {
+	if req.Msg.GuestData.Prefecture != nil {
 		tmp := entity.Prefecture(*req.Msg.GuestData.Prefecture)
 		pref = &tmp
 	}

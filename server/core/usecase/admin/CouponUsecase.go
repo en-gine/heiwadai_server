@@ -44,13 +44,12 @@ func (u *AdminCouponUsecase) CreateStandardCoupon() *errors.DomainError {
 	}
 
 	standard, domainErr := entity.CreateStandardCoupon(store)
-	if err != nil {
+	if domainErr != nil {
 		return domainErr
 	}
 	ctx := context.Background()
 	tx := u.transaction
 	err = tx.Begin(ctx)
-
 	if err != nil {
 		return errors.NewDomainError(errors.RepositoryError, err.Error())
 	}
@@ -258,13 +257,13 @@ func (u *AdminCouponUsecase) BulkAttachBirthdayCoupon(birthMonth int) (*int, *er
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())
 	}
 	birthdayCoupon, domainErr := entity.CreateBirthdayCoupon(allStores)
-	if err != nil {
+	if domainErr != nil {
 		u.transaction.Rollback()
 		return nil, domainErr
 	}
 
 	err = u.couponRepository.Save(u.transaction, birthdayCoupon)
-	if domainErr != nil {
+	if err != nil {
 		u.transaction.Rollback()
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())
 	}

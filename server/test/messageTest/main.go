@@ -5,8 +5,6 @@ import (
 
 	"server/infrastructure/logger"
 	"server/router/user"
-
-	"github.com/google/uuid"
 )
 
 func main() {
@@ -16,8 +14,8 @@ func main() {
 func Message() {
 	usecase := user.InitializeMessageUsecase()
 
-	msgID := uuid.MustParse("72d973f1-c42d-4490-aded-ba454884acf6")
-	messages, err := usecase.GetAfter(&msgID)
+	// msgID := uuid.MustParse("72d973f1-c42d-4490-aded-ba454884acf6")
+	messages, err := usecase.GetAfter(nil)
 	if err != nil {
 		logger.Error(err.Error())
 	}

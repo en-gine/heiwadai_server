@@ -16,9 +16,8 @@ import (
 var _ action.IAuthAction = &AuthClient{}
 
 type AuthClient struct {
-	client      *supa.Client
-	apiKey      string
-	adminAppURL *string
+	client *supa.Client
+	apiKey string
 }
 
 func NewAuthClient() *AuthClient {
@@ -38,9 +37,9 @@ func NewAuthClient() *AuthClient {
 	}
 }
 
-func (au *AuthClient) SignUp(email string, password string, userType action.UserType) error {
+func (au *AuthClient) SignUp(email string, password string, userType action.UserType) (*uuid.UUID, error) {
 	ctx := context.Background()
-	_, err := au.client.Auth.SignUp(ctx, supa.UserCredentials{
+	usr, err := au.client.Auth.SignUp(ctx, supa.UserCredentials{
 		Email:    email,
 		Password: password,
 		Data: map[string]interface{}{
@@ -49,14 +48,15 @@ func (au *AuthClient) SignUp(email string, password string, userType action.User
 	})
 	if err != nil {
 		logger.Errorf("Error SignUp: %v", err)
-		return errors.New("Error SignUp" + err.Error())
+		return nil, errors.New("Error SignUp" + err.Error())
 	}
-
-	return nil
+	userID := uuid.MustParse(usr.ID)
+	return &userID, nil
 }
 
 func (au *AuthClient) SignIn(email string, password string) (*types.Token, error) {
 	ctx := context.Background()
+
 	auth, err := au.client.Auth.SignIn(ctx, supa.UserCredentials{
 		Email:    email,
 		Password: password,
@@ -84,19 +84,24 @@ func (au *AuthClient) SignOut(token string) error {
 	return nil
 }
 
-func (au *AuthClient) Refresh(token string, refreshToken string) (*types.Token, error) {
+func (au *AuthClient) Refresh(token string, refreshToken string) (*action.UserAuth, error) {
 	ctx := context.Background()
 	data, err := au.client.Auth.RefreshUser(ctx, token, refreshToken)
 	if err != nil {
 		logger.Errorf("Error Refreshing Token: %v", err)
 		return nil, errors.New("Error Refreshing Token" + err.Error())
 	}
-
-	return &types.Token{
+	Token := &types.Token{
 		AccessToken:  data.AccessToken,
 		RefreshToken: &data.RefreshToken,
 		ExpiresIn:    &data.ExpiresIn,
-	}, err
+	}
+
+	return &action.UserAuth{
+		UserID:   uuid.MustParse(data.User.ID),
+		UserType: action.UserType(data.User.UserMetadata["user_type"].(string)),
+		Token:    Token,
+	}, nil
 }
 
 func (au *AuthClient) ResetPasswordMail(email string) error {
@@ -121,16 +126,16 @@ func (au *AuthClient) UpdatePassword(password string, token string) error {
 	return nil
 }
 
-func (au *AuthClient) InviteUserByEmail(email string) (uuid.UUID, error) {
+func (au *AuthClient) InviteUserByEmail(email string) (*uuid.UUID, error) {
 	ctx := context.Background()
 	user, err := au.client.Auth.InviteUserByEmail(ctx, email)
 	if err != nil {
 		logger.Errorf("Error InviteUserByEmail: %v", err)
-		return uuid.Nil, err
+		return nil, err
 	}
 
 	newUserID := uuid.MustParse(user.ID)
-	return newUserID, nil
+	return &newUserID, nil
 }
 
 func (au *AuthClient) UpdateEmail(email string, token string) error {
@@ -145,14 +150,16 @@ func (au *AuthClient) UpdateEmail(email string, token string) error {
 	return nil
 }
 
-func (au *AuthClient) GetUserID(token string) (*uuid.UUID, error) {
+func (au *AuthClient) GetUserID(token string) (*uuid.UUID, *action.UserType, error) {
 	ctx := context.Background()
+
 	user, err := au.client.Auth.User(ctx, token)
 	if err != nil {
 		logger.Errorf("Error GetUserID: %v", err)
-		return nil, err
+		return nil, nil, err
 	}
 	userID := uuid.MustParse(user.ID)
-
-	return &userID, nil
+	metadata := user.UserMetadata["user_type"].(string)
+	userType := action.UserType(metadata)
+	return &userID, &userType, nil
 }

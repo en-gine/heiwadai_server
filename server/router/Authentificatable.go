@@ -2,14 +2,17 @@ package router
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"server/core/infra/action"
 	queryservice "server/core/infra/queryService"
 	"server/infrastructure/env"
+	"server/infrastructure/redis"
 
 	"github.com/bufbuild/connect-go"
 )
@@ -29,7 +32,7 @@ var (
 	TokenKey     keyType = "token"
 )
 
-// var cache = redis.NewMemoryRepository()
+var cache = redis.NewMemoryRepository()
 
 type Authentificatable struct{}
 
@@ -49,42 +52,56 @@ func NewAuthentificatable(AuthClient action.IAuthAction, UserDataQuery queryserv
 				return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("トークンが見つかりません。"))
 			}
 
-			// リフレッシュトークン取得
-			refreshToken := req.Header().Get("X-Refresh-Token")
+			var authData *action.UserAuth
+			// キャッシュから取得
+			byteCache := cache.Get(bearerToken)
 
-			Token, err := AuthClient.Refresh(bearerToken, refreshToken)
-			if err != nil {
-				return nil, connect.NewError(connect.CodeInternal, errors.New("リフレッシュトークンの取得に問題が発生しました。"))
-			}
-
-			id, error := AuthClient.GetUserID(bearerToken)
-			if error != nil {
-				return nil, connect.NewError(connect.CodeInternal, errors.New("ユーザーの取得に問題が発生しました。"))
-			}
-			if id == nil {
-				return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("正しいトークンでは無いか有効期限が切れています。"))
-			}
-
-			if AuthType == AuthTypeAdmin {
-				_, err := AdminDataQuery.GetByID(*id)
+			if byteCache != nil {
+				err := json.Unmarshal(*byteCache, &authData)
 				if err != nil {
-					return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("管理者として登録されていません。"))
+					return nil, connect.NewError(connect.CodeInternal, errors.New("キャッシュの取得に問題が発生しました。"))
 				}
-			} else if AuthType == AuthTypeUser {
-				_, err := UserDataQuery.GetByID(*id)
+
+			} else { // 再取得API
+				var err error // err変数の宣言
+				// リフレッシュトークン取得
+				refreshToken := req.Header().Get("X-Refresh-Token")
+
+				authData, err = AuthClient.Refresh(bearerToken, refreshToken)
 				if err != nil {
-					return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("ユーザーとして登録されていません。"))
+					return nil, connect.NewError(connect.CodeInternal, errors.New("リフレッシュトークンの取得に問題が発生しました。"))
 				}
+
+				authJson, err := json.Marshal(authData)
+				if err != nil {
+					return nil, connect.NewError(connect.CodeInternal, errors.New("キャッシュの保存に問題が発生しました。"))
+				}
+
+				// キャッシュに保存
+				cache.Set(bearerToken, authJson, time.Duration(*authData.Token.ExpiresIn)*time.Second)
 			}
-			if Token != nil {
-				ctx = context.WithValue(ctx, TokenKey, Token.AccessToken)
+
+			userID := authData.UserID
+			token := authData.Token
+			userType := authData.UserType
+
+			if AuthType == AuthTypeAdmin && userType.String() != "admin" {
+				return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("管理者として登録されていません。"))
 			}
-			ctx = context.WithValue(ctx, UserIDKey, id.String())
+
+			if AuthType == AuthTypeUser && userType.String() != "user" {
+				return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("ユーザーとして登録されていません。"))
+			}
+
+			if token != nil {
+				ctx = context.WithValue(ctx, TokenKey, token.AccessToken)
+			}
+			ctx = context.WithValue(ctx, UserIDKey, userID.String())
 			if env.GetEnv(env.EnvMode) == "dev" {
 				fmt.Println("----------------reqest----------------")
 				fmt.Println(req)
 				fmt.Println("----------------userID--------------")
-				fmt.Println(id)
+				fmt.Println(userID)
 			}
 			res, err := next(ctx, req)
 			if err != nil {
@@ -96,10 +113,10 @@ func NewAuthentificatable(AuthClient action.IAuthAction, UserDataQuery queryserv
 				fmt.Println(res)
 			}
 
-			if Token != nil && res != nil {
-				res.Header().Set("AccessToken", Token.AccessToken)
-				res.Header().Set("RefreshToken", *Token.RefreshToken)
-				res.Header().Set("Expire", strconv.Itoa(*Token.ExpiresIn))
+			if token != nil && res != nil {
+				res.Header().Set("AccessToken", token.AccessToken)
+				res.Header().Set("RefreshToken", *token.RefreshToken)
+				res.Header().Set("Expire", strconv.Itoa(*token.ExpiresIn))
 			}
 			return res, nil
 		})

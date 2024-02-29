@@ -86,9 +86,7 @@ func (u *AdminDataUsecase) Delete(ID uuid.UUID) *errors.DomainError {
 	if err != nil {
 		return errors.NewDomainError(errors.QueryError, err.Error())
 	}
-	if admin == nil {
-		return errors.NewDomainError(errors.QueryDataNotFoundError, "該当のユーザーが見つかりません。")
-	}
+
 	return nil
 }
 

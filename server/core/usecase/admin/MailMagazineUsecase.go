@@ -231,7 +231,7 @@ func (u *MailMagazineUsecase) Send(mailMagazineID uuid.UUID) *errors.DomainError
 
 // 処理が失敗した時にメールマガジンのステータスをUnsentにして保存する処理
 func (u *MailMagazineUsecase) saveUncompleteMailMagazine(mgz *entity.MailMagazine, unsentCount int, sentCount int) {
-	uncompleteMgz := entity.CreateUnCompleteMailMagazine(mgz.ID, mgz.Title, mgz.TargetPrefecture, mgz.UnsentCount, mgz.SentCount, mgz.Content, mgz.AuthorID)
+	uncompleteMgz := entity.CreateUnCompleteMailMagazine(mgz.ID, mgz.Title, mgz.TargetPrefecture, unsentCount, sentCount, mgz.Content, mgz.AuthorID)
 	err := u.mailMagazineRepository.Save(uncompleteMgz)
 	if err != nil {
 		logger.Error(err.Error())
