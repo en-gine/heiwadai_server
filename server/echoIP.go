@@ -10,29 +10,29 @@ import (
 )
 
 // IPアドレスを取得する
-func EchoMyIP() {
+func CheckMyIP() string {
 	url := "http://checkip.dyndns.com/"
 	res, err := http.Get(url)
 	if err != nil {
 		fmt.Println(err)
-		return
+		return ""
 	}
 	defer res.Body.Close()
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		fmt.Println(err)
-		return
+		return ""
 	}
 
 	htmlData := string(body)
 	doc, err := html.Parse(strings.NewReader(htmlData))
 	if err != nil {
 		fmt.Println("Error parsing HTML:", err)
-		return
+		return ""
 	}
 
 	text := extractText(doc)
-	fmt.Println(text)
+	return text
 }
 
 func extractText(n *html.Node) string {

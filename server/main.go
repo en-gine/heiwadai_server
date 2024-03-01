@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"server/infrastructure/env"
-	"server/infrastructure/logger"
 	"server/infrastructure/redis"
+	"server/infrastructure/repository"
 	adminRouter "server/router/admin"
 	userRouter "server/router/user"
 
@@ -25,20 +25,16 @@ func main() {
 	mux := http.NewServeMux()
 	os.Setenv("TZ", "Asia/Tokyo")
 
-	rdb := redis.NewMemoryRepository()             // redis接続
-	rdb.Set("key", []byte("test"), time.Second*10) // redisにデータを保存
-	data := rdb.Get("key")                         // redisからデータを取得
-	if data == nil || string(*data) != "test" {
-		logger.Warn("redisにはデータが保存されません。")
-	}
-
 	userRouter.NewUserServer(mux)
 	adminRouter.NewAdminServer(mux)
+	mux.HandleFunc("/", Index)
 	RegisterGRPCService(mux) // リフレクションを有効にする
 
-	msg := os.ExpandEnv("${ENV_MODE} mode run! port: ${PORT}")
-	fmt.Println(msg)
-	EchoMyIP()
+	fmt.Println(os.ExpandEnv("${ENV_MODE} mode run! port: ${PORT}"))
+	fmt.Println(CheckMyIP())
+	fmt.Println(CheckRedisStatus())
+	fmt.Println(CheckDBStatus())
+
 	port := env.GetEnv(env.ServerPort)
 	log.Fatal(http.ListenAndServe(":"+port, AllowCors().Handler(h2c.NewHandler(mux, &http2.Server{})))) // リフレクションを有効にする
 }
@@ -108,4 +104,29 @@ func RegisterGRPCService(mux *http.ServeMux) *http.ServeMux {
 	mux.Handle(grpcreflect.NewHandlerV1(reflector))
 	mux.Handle(grpcreflect.NewHandlerV1Alpha(reflector))
 	return mux
+}
+
+func Index(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintln(w, "Heiwadai Server is running! :)")
+	fmt.Fprintln(w, CheckMyIP())
+	fmt.Fprintln(w, CheckRedisStatus())
+	fmt.Fprintln(w, CheckDBStatus())
+}
+
+func CheckRedisStatus() string {
+	rdb := redis.NewMemoryRepository()             // redis接続
+	rdb.Set("key", []byte("test"), time.Second*10) // redisにデータを保存
+	data := rdb.Get("key")                         // redisからデータを取得
+	if data == nil || string(*data) != "test" {
+		return "redis connection error :("
+	}
+	return "redis connection success!"
+}
+
+func CheckDBStatus() string {
+	db := repository.InitDB()
+	if db == nil {
+		return "DB connection error :("
+	}
+	return "DB connection success!"
 }
