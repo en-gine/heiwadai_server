@@ -9,6 +9,7 @@ import (
 	queryservice "server/core/infra/queryService"
 	"server/core/infra/repository"
 	"server/core/infra/types"
+	"server/infrastructure/logger"
 
 	"github.com/google/uuid"
 )
@@ -146,7 +147,10 @@ func (u *AuthUsecase) SignIn(
 
 	// ログイン履歴を保存敢えてエラーは無視
 	loginLog := entity.CreateUserLoginLog(existUser.ID, RemoteIP, UserAgent)
-	_ = u.userLoginLogRepository.Save(loginLog)
+	err = u.userLoginLogRepository.Save(loginLog)
+	if err != nil {
+		logger.Errorf("ログイン履歴の保存に失敗しました: %s", err.Error())
+	}
 
 	return token, nil
 }

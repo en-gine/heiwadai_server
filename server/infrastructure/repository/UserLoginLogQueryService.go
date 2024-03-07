@@ -34,7 +34,7 @@ func (pq *UserLoginLogQueryService) GetList(userID uuid.UUID, pager *types.PageQ
 	if err != nil {
 		return nil, nil, err
 	}
-	count, err := models.MailMagazines().Count(context.Background(), pq.db)
+	count, err := models.UserLoginLogs(models.UserLoginLogWhere.UserID.EQ(userID.String())).Count(context.Background(), pq.db)
 	if err != nil {
 		return nil, nil, err
 	}

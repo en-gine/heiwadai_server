@@ -33,7 +33,7 @@ func (pr *UserLoginLogRepository) Save(loginLog *entity.UserLoginLog) error {
 		UserAgent: loginLog.UserAgent,
 	}
 
-	err := loginlog.Upsert(context.Background(), pr.db, true, []string{"id"}, boil.Infer(), boil.Infer())
+	err := loginlog.Insert(context.Background(), pr.db, boil.Infer())
 	if err != nil {
 		return err
 	}

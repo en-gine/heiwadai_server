@@ -3,8 +3,6 @@ package router
 import (
 	"context"
 	"errors"
-	"fmt"
-	"strings"
 
 	"server/infrastructure/env"
 
@@ -29,15 +27,16 @@ func NewAuthCronHeader() connect.Option {
 			if cronKey != env.GetEnv(env.CronAccessKey) {
 				return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("認証情報が正しくありません。"))
 			}
-			allowIps := env.GetEnv(env.AdminClientIps)
 
-			ip := req.Peer().Addr
-			requestIP := strings.Split(ip, ":")[0]
+			// allowIps := env.GetEnv(env.AdminClientIps)
 
-			if !strings.Contains(allowIps, requestIP) {
-				fmt.Println("requestIP is blocked: ", requestIP)
-				return nil, connect.NewError(connect.CodePermissionDenied, errors.New("IP is invalid"))
-			}
+			// ip := req.Peer().Addr
+			// requestIP := strings.Split(ip, ":")[0]
+
+			// if !strings.Contains(allowIps, requestIP) {
+			// 	fmt.Println("requestIP is blocked: ", requestIP)
+			// 	return nil, connect.NewError(connect.CodePermissionDenied, errors.New("IP is invalid"))
+			// }
 
 			return next(ctx, req)
 

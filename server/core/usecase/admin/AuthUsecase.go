@@ -8,6 +8,7 @@ import (
 	"server/core/infra/repository"
 	"server/core/infra/types"
 	"server/infrastructure/env"
+	"server/infrastructure/logger"
 
 	"github.com/google/uuid"
 )
@@ -128,7 +129,10 @@ func (u *AuthUsecase) SignIn(
 
 	loginLog := entity.CreateUserLoginLog(existUser.ID, RemoteIP, UserAgent)
 	// ログイン履歴を保存敢えてエラーは無視
-	_ = u.userLoginLogRepository.Save(loginLog)
+	err = u.userLoginLogRepository.Save(loginLog)
+	if err != nil {
+		logger.Error(err.Error())
+	}
 
 	return token, nil
 }
