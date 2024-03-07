@@ -7,6 +7,10 @@ DROP TABLE IF EXISTS checkin;
 
 -- DROP TABLE IF EXISTS coupon_stores;
 
+DROP TABLE IF EXISTS cron_issue_log;
+
+DROP TABLE IF EXISTS user_login_log;
+
 DROP TABLE IF EXISTS coupon_attached_user;
 
 DROP TABLE IF EXISTS coupon;

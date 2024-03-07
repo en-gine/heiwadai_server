@@ -13,20 +13,26 @@ import (
 )
 
 type AuthUsecase struct {
-	adminRepository repository.IAdminRepository
-	adminQuery      queryservice.IAdminQueryService
-	storeQuery      queryservice.IStoreQueryService
-	authAction      action.IAuthAction
+	adminRepository        repository.IAdminRepository
+	adminQuery             queryservice.IAdminQueryService
+	storeQuery             queryservice.IStoreQueryService
+	userLoginLogRepository repository.IUserLoginLogRepository
+	authAction             action.IAuthAction
 }
 
-func NewAuthUsecase(adminRepository repository.IAdminRepository, adminQuery queryservice.IAdminQueryService,
-	storeQuery queryservice.IStoreQueryService, authAction action.IAuthAction,
+func NewAuthUsecase(
+	adminRepository repository.IAdminRepository,
+	adminQuery queryservice.IAdminQueryService,
+	storeQuery queryservice.IStoreQueryService,
+	userLoginLogRepository repository.IUserLoginLogRepository,
+	authAction action.IAuthAction,
 ) *AuthUsecase {
 	return &AuthUsecase{
-		adminRepository: adminRepository,
-		adminQuery:      adminQuery,
-		storeQuery:      storeQuery,
-		authAction:      authAction,
+		adminRepository:        adminRepository,
+		adminQuery:             adminQuery,
+		storeQuery:             storeQuery,
+		userLoginLogRepository: userLoginLogRepository,
+		authAction:             authAction,
 	}
 }
 
@@ -100,6 +106,8 @@ func (u *AuthUsecase) SignOut(
 func (u *AuthUsecase) SignIn(
 	Mail string,
 	Password string,
+	RemoteIP string,
+	UserAgent string,
 ) (*types.Token, *errors.DomainError) {
 	existUser, err := u.adminQuery.GetByMail(Mail)
 	if err != nil {
@@ -117,6 +125,11 @@ func (u *AuthUsecase) SignIn(
 	if err != nil {
 		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
 	}
+
+	loginLog := entity.CreateUserLoginLog(existUser.ID, RemoteIP, UserAgent)
+	// ログイン履歴を保存敢えてエラーは無視
+	_ = u.userLoginLogRepository.Save(loginLog)
+
 	return token, nil
 }
 

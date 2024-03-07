@@ -227,6 +227,26 @@ CREATE TABLE user_book (
     FOREIGN KEY (guest_data_id) REFERENCES book_guest_data(id) ON DELETE CASCADE,
     FOREIGN KEY (book_plan_id) REFERENCES book_plan(id) ON DELETE CASCADE
 );
+
+CREATE TABLE cron_issue_log (
+    id bigserial PRIMARY KEY,
+    cron_name VARCHAR NOT NULL,
+    issue_count INTEGER NOT NULL default 0,
+    issue_year INTEGER NOT NULL,
+    issue_month INTEGER NOT NULL,
+    create_at TIMESTAMPTZ NOT NULL default now()
+);
+
+CREATE TABLE user_login_log (
+    id bigserial PRIMARY KEY,
+    user_id UUID NOT NULL,
+    remote_ip VARCHAR NOT NULL,
+    user_agent VARCHAR NOT NULL,
+    login_at TIMESTAMPTZ NOT NULL default now(),
+    create_at TIMESTAMPTZ NOT NULL default now(),
+    FOREIGN KEY (user_id) REFERENCES user_data(user_id)
+);
+
 --- userが作成されるたびに、userテーブルにもidとemailをinsertする
 create or replace function public.handle_new_user() 
 returns trigger as $$

@@ -34,8 +34,9 @@ func main() {
 	fmt.Println(CheckMyIP())
 	fmt.Println(CheckRedisStatus())
 	fmt.Println(CheckDBStatus())
-
+	fmt.Println("サーバー時刻:", time.Now())
 	port := env.GetEnv(env.ServerPort)
+	// adminに対する各種IP制限はインターセプタの中で行っています。
 	log.Fatal(http.ListenAndServe(":"+port, AllowCors().Handler(h2c.NewHandler(mux, &http2.Server{})))) // リフレクションを有効にする
 }
 

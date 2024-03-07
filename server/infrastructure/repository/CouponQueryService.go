@@ -87,10 +87,6 @@ func (pq *CouponQueryService) GetCouponByType(couponType entity.CouponType) (*en
 	}
 
 	stores := coupon.R.Stores
-	if err != nil && err != sql.ErrNoRows {
-		logger.Error(err.Error())
-		return nil, nil
-	}
 
 	var TargetStores []*entity.Store
 	for _, store := range stores {

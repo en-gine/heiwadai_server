@@ -27,6 +27,8 @@ var (
 	userCheckinQuery          = implements.NewCheckinQueryService()
 	userDataRepository        = implements.NewUserRepository()
 	userDataQuery             = implements.NewUserQueryService()
+	userLoginLogRepository    = implements.NewUserLoginLogRepository()
+	userLoginLogQuery         = implements.NewUserLoginLogQueryService()
 	sendMailAction            = action.NewSendMailAction()
 	fileUploaderAction        = action.NewFileClient()
 	userQuery                 = implements.NewUserQueryService()
@@ -34,11 +36,11 @@ var (
 )
 
 func InitializeAuthUsecase() *usecase.AuthUsecase {
-	return usecase.NewAuthUsecase(adminRepository, adminQuery, storeQuery, authAction)
+	return usecase.NewAuthUsecase(adminRepository, adminQuery, storeQuery, userLoginLogRepository, authAction)
 }
 
 func InitializeAdminDataUsecase() *usecase.AdminDataUsecase {
-	return usecase.NewAdminDataUsecase(adminRepository, adminQuery, storeQuery)
+	return usecase.NewAdminDataUsecase(adminRepository, adminQuery, storeQuery, userLoginLogQuery)
 }
 
 func InitializeAdminCouponUsecase() *usecase.AdminCouponUsecase {
@@ -46,7 +48,7 @@ func InitializeAdminCouponUsecase() *usecase.AdminCouponUsecase {
 }
 
 func InitializeUserDataUsecase() *usecase.UserDataUsecase {
-	return usecase.NewUserDataUsecase(userDataRepository, userDataQuery)
+	return usecase.NewUserDataUsecase(userDataRepository, userDataQuery, userLoginLogQuery)
 }
 
 func InitializeMessageUsecase() *usecase.MessageUsecase {

@@ -46,6 +46,9 @@ const (
 	// AdminDataControllerDeleteProcedure is the fully-qualified name of the AdminDataController's
 	// Delete RPC.
 	AdminDataControllerDeleteProcedure = "/server.admin.AdminDataController/Delete"
+	// AdminDataControllerGetLoginLogListProcedure is the fully-qualified name of the
+	// AdminDataController's GetLoginLogList RPC.
+	AdminDataControllerGetLoginLogListProcedure = "/server.admin.AdminDataController/GetLoginLogList"
 )
 
 // AdminDataControllerClient is a client for the server.admin.AdminDataController service.
@@ -54,6 +57,7 @@ type AdminDataControllerClient interface {
 	Update(context.Context, *connect_go.Request[admin.AdminUpdateDataRequest]) (*connect_go.Response[admin.AdminDataResponse], error)
 	GetAll(context.Context, *connect_go.Request[admin.AdminListRequest]) (*connect_go.Response[admin.AdminListResponse], error)
 	Delete(context.Context, *connect_go.Request[admin.AdminDataRequest]) (*connect_go.Response[emptypb.Empty], error)
+	GetLoginLogList(context.Context, *connect_go.Request[admin.AdminLoginLogRequest]) (*connect_go.Response[admin.AdminLoginLogListResponse], error)
 }
 
 // NewAdminDataControllerClient constructs a client for the server.admin.AdminDataController
@@ -86,15 +90,21 @@ func NewAdminDataControllerClient(httpClient connect_go.HTTPClient, baseURL stri
 			baseURL+AdminDataControllerDeleteProcedure,
 			opts...,
 		),
+		getLoginLogList: connect_go.NewClient[admin.AdminLoginLogRequest, admin.AdminLoginLogListResponse](
+			httpClient,
+			baseURL+AdminDataControllerGetLoginLogListProcedure,
+			opts...,
+		),
 	}
 }
 
 // adminDataControllerClient implements AdminDataControllerClient.
 type adminDataControllerClient struct {
-	getByID *connect_go.Client[admin.AdminDataRequest, admin.AdminDataResponse]
-	update  *connect_go.Client[admin.AdminUpdateDataRequest, admin.AdminDataResponse]
-	getAll  *connect_go.Client[admin.AdminListRequest, admin.AdminListResponse]
-	delete  *connect_go.Client[admin.AdminDataRequest, emptypb.Empty]
+	getByID         *connect_go.Client[admin.AdminDataRequest, admin.AdminDataResponse]
+	update          *connect_go.Client[admin.AdminUpdateDataRequest, admin.AdminDataResponse]
+	getAll          *connect_go.Client[admin.AdminListRequest, admin.AdminListResponse]
+	delete          *connect_go.Client[admin.AdminDataRequest, emptypb.Empty]
+	getLoginLogList *connect_go.Client[admin.AdminLoginLogRequest, admin.AdminLoginLogListResponse]
 }
 
 // GetByID calls server.admin.AdminDataController.GetByID.
@@ -117,12 +127,18 @@ func (c *adminDataControllerClient) Delete(ctx context.Context, req *connect_go.
 	return c.delete.CallUnary(ctx, req)
 }
 
+// GetLoginLogList calls server.admin.AdminDataController.GetLoginLogList.
+func (c *adminDataControllerClient) GetLoginLogList(ctx context.Context, req *connect_go.Request[admin.AdminLoginLogRequest]) (*connect_go.Response[admin.AdminLoginLogListResponse], error) {
+	return c.getLoginLogList.CallUnary(ctx, req)
+}
+
 // AdminDataControllerHandler is an implementation of the server.admin.AdminDataController service.
 type AdminDataControllerHandler interface {
 	GetByID(context.Context, *connect_go.Request[admin.AdminDataRequest]) (*connect_go.Response[admin.AdminDataResponse], error)
 	Update(context.Context, *connect_go.Request[admin.AdminUpdateDataRequest]) (*connect_go.Response[admin.AdminDataResponse], error)
 	GetAll(context.Context, *connect_go.Request[admin.AdminListRequest]) (*connect_go.Response[admin.AdminListResponse], error)
 	Delete(context.Context, *connect_go.Request[admin.AdminDataRequest]) (*connect_go.Response[emptypb.Empty], error)
+	GetLoginLogList(context.Context, *connect_go.Request[admin.AdminLoginLogRequest]) (*connect_go.Response[admin.AdminLoginLogListResponse], error)
 }
 
 // NewAdminDataControllerHandler builds an HTTP handler from the service implementation. It returns
@@ -151,6 +167,11 @@ func NewAdminDataControllerHandler(svc AdminDataControllerHandler, opts ...conne
 		svc.Delete,
 		opts...,
 	)
+	adminDataControllerGetLoginLogListHandler := connect_go.NewUnaryHandler(
+		AdminDataControllerGetLoginLogListProcedure,
+		svc.GetLoginLogList,
+		opts...,
+	)
 	return "/server.admin.AdminDataController/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case AdminDataControllerGetByIDProcedure:
@@ -161,6 +182,8 @@ func NewAdminDataControllerHandler(svc AdminDataControllerHandler, opts ...conne
 			adminDataControllerGetAllHandler.ServeHTTP(w, r)
 		case AdminDataControllerDeleteProcedure:
 			adminDataControllerDeleteHandler.ServeHTTP(w, r)
+		case AdminDataControllerGetLoginLogListProcedure:
+			adminDataControllerGetLoginLogListHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -184,4 +207,8 @@ func (UnimplementedAdminDataControllerHandler) GetAll(context.Context, *connect_
 
 func (UnimplementedAdminDataControllerHandler) Delete(context.Context, *connect_go.Request[admin.AdminDataRequest]) (*connect_go.Response[emptypb.Empty], error) {
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.AdminDataController.Delete is not implemented"))
+}
+
+func (UnimplementedAdminDataControllerHandler) GetLoginLogList(context.Context, *connect_go.Request[admin.AdminLoginLogRequest]) (*connect_go.Response[admin.AdminLoginLogListResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.AdminDataController.GetLoginLogList is not implemented"))
 }

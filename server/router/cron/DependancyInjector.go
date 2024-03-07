@@ -7,14 +7,16 @@ import (
 )
 
 var (
-	couponRepository     = implements.NewCouponRepository()
-	couponQuery          = implements.NewCouponQueryService()
-	usercouponQuery      = implements.NewUserCouponQueryService()
-	usercouponRepository = implements.NewUserCouponRepository()
-	storeQuery           = implements.NewStoreQueryService()
-	transaction          = implements.NewTransaction()
+	couponRepository       = implements.NewCouponRepository()
+	couponQuery            = implements.NewCouponQueryService()
+	usercouponQuery        = implements.NewUserCouponQueryService()
+	usercouponRepository   = implements.NewUserCouponRepository()
+	storeQuery             = implements.NewStoreQueryService()
+	cronIssueLogQuery      = implements.NewCronIssueLogQueryService()
+	cronIssueLogRepository = implements.NewCronIssueLogRepository()
+	transaction            = implements.NewTransaction()
 )
 
 func InitializeCronCouponUsecase() *usecase.CronCouponUsecase {
-	return usecase.NewCronCouponUsecase(couponRepository, couponQuery, usercouponQuery, usercouponRepository, storeQuery, transaction)
+	return usecase.NewCronCouponUsecase(couponRepository, couponQuery, usercouponQuery, usercouponRepository, storeQuery, cronIssueLogRepository, cronIssueLogQuery, transaction)
 }

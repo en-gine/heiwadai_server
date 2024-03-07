@@ -14,12 +14,18 @@ import (
 )
 
 type AuthUsecase struct {
-	userRepository repository.IUserRepository
-	userQuery      queryservice.IUserQueryService
-	authAction     action.IAuthAction
+	userRepository         repository.IUserRepository
+	userQuery              queryservice.IUserQueryService
+	userLoginLogRepository repository.IUserLoginLogRepository
+	authAction             action.IAuthAction
 }
 
-func NewAuthUsecase(userRepository repository.IUserRepository, userQuery queryservice.IUserQueryService, authAction action.IAuthAction) *AuthUsecase {
+func NewAuthUsecase(
+	userRepository repository.IUserRepository,
+	userQuery queryservice.IUserQueryService,
+	userLoginLogRepository repository.IUserLoginLogRepository,
+	authAction action.IAuthAction,
+) *AuthUsecase {
 	return &AuthUsecase{
 		userRepository: userRepository,
 		userQuery:      userQuery,
@@ -113,6 +119,8 @@ func (u *AuthUsecase) SignOut(
 func (u *AuthUsecase) SignIn(
 	Mail string,
 	Password string,
+	RemoteIP string,
+	UserAgent string,
 ) (*types.Token, *errors.DomainError) {
 	existUser, err := u.userQuery.GetByMail(Mail)
 	if err != nil {
@@ -135,6 +143,11 @@ func (u *AuthUsecase) SignIn(
 	if err != nil {
 		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
 	}
+
+	// ログイン履歴を保存敢えてエラーは無視
+	loginLog := entity.CreateUserLoginLog(existUser.ID, RemoteIP, UserAgent)
+	_ = u.userLoginLogRepository.Save(loginLog)
+
 	return token, nil
 }
 

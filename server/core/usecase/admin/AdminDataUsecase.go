@@ -4,22 +4,27 @@ import (
 	"server/core/entity"
 	"server/core/errors"
 	queryservice "server/core/infra/queryService"
+	"server/core/infra/queryService/types"
 	"server/core/infra/repository"
 
 	"github.com/google/uuid"
 )
 
 type AdminDataUsecase struct {
-	adminRepository repository.IAdminRepository
-	adminQuery      queryservice.IAdminQueryService
-	storeQuery      queryservice.IStoreQueryService
+	adminRepository   repository.IAdminRepository
+	adminQuery        queryservice.IAdminQueryService
+	storeQuery        queryservice.IStoreQueryService
+	userLoginLogQuery queryservice.IUserLoginLogQueryService
 }
 
-func NewAdminDataUsecase(adminRepository repository.IAdminRepository, adminQuery queryservice.IAdminQueryService, storeQuery queryservice.IStoreQueryService) *AdminDataUsecase {
+func NewAdminDataUsecase(adminRepository repository.IAdminRepository, adminQuery queryservice.IAdminQueryService, storeQuery queryservice.IStoreQueryService,
+	userLoginLogQuery queryservice.IUserLoginLogQueryService,
+) *AdminDataUsecase {
 	return &AdminDataUsecase{
-		adminRepository: adminRepository,
-		adminQuery:      adminQuery,
-		storeQuery:      storeQuery,
+		adminRepository:   adminRepository,
+		adminQuery:        adminQuery,
+		storeQuery:        storeQuery,
+		userLoginLogQuery: userLoginLogQuery,
 	}
 }
 
@@ -99,4 +104,15 @@ func (u *AdminDataUsecase) GetAll() ([]*entity.Admin, *errors.DomainError) {
 		return nil, errors.NewDomainError(errors.QueryDataNotFoundError, "該当のユーザーが見つかりません。")
 	}
 	return admins, nil
+}
+
+func (u *AdminDataUsecase) GetUserLoginLogList(
+	userID uuid.UUID,
+	pager *types.PageQuery,
+) ([]*entity.UserLoginLog, *types.PageResponse, *errors.DomainError) {
+	log, pageRes, err := u.userLoginLogQuery.GetList(userID, pager)
+	if err != nil {
+		return nil, nil, errors.NewDomainError(errors.RepositoryError, err.Error())
+	}
+	return log, pageRes, nil
 }

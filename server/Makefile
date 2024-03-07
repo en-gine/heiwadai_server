@@ -17,6 +17,9 @@ lint:
 test-all:
 	go test -v ./test/...
 
+echo:
+	echo ${PSQL_PASS_ENCODED}
+
 install-devtools:
 	go install -v github.com/ramya-rao-a/go-outline@latest & \
 	go install -v github.com/rogpeppe/godef@latest & \

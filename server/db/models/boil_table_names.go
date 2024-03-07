@@ -11,6 +11,7 @@ var TableNames = struct {
 	Coupon             string
 	CouponAttachedUser string
 	CouponStores       string
+	CronIssueLog       string
 	MailMagazine       string
 	MailMagazineLog    string
 	Message            string
@@ -19,6 +20,7 @@ var TableNames = struct {
 	Store              string
 	UserBook           string
 	UserData           string
+	UserLoginLog       string
 	UserManager        string
 	UserOption         string
 	UserReport         string
@@ -30,6 +32,7 @@ var TableNames = struct {
 	Coupon:             "coupon",
 	CouponAttachedUser: "coupon_attached_user",
 	CouponStores:       "coupon_stores",
+	CronIssueLog:       "cron_issue_log",
 	MailMagazine:       "mail_magazine",
 	MailMagazineLog:    "mail_magazine_log",
 	Message:            "message",
@@ -38,6 +41,7 @@ var TableNames = struct {
 	Store:              "store",
 	UserBook:           "user_book",
 	UserData:           "user_data",
+	UserLoginLog:       "user_login_log",
 	UserManager:        "user_manager",
 	UserOption:         "user_option",
 	UserReport:         "user_report",

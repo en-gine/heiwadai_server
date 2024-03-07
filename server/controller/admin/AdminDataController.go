@@ -6,13 +6,16 @@ import (
 
 	adminv1 "server/api/v1/admin"
 	adminv1connect "server/api/v1/admin/adminconnect"
+	"server/api/v1/shared"
 	"server/controller"
 	"server/core/entity"
+	"server/core/infra/queryService/types"
 	usecase "server/core/usecase/admin"
 
 	connect "github.com/bufbuild/connect-go"
 	"github.com/google/uuid"
 	"google.golang.org/protobuf/types/known/emptypb"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type AdminDataController struct {
@@ -103,6 +106,54 @@ func (u *AdminDataController) Delete(ctx context.Context, req *connect.Request[a
 	}
 
 	return connect.NewResponse(&emptypb.Empty{}), nil
+}
+
+func (u *AdminDataController) GetLoginLogList(ctx context.Context, req *connect.Request[adminv1.AdminLoginLogRequest]) (*connect.Response[adminv1.AdminLoginLogListResponse], error) {
+	msg := req.Msg
+
+	userID, err := uuid.Parse(msg.UserID)
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, err)
+	}
+	perPage := int(*req.Msg.Pager.PerPage)
+	page := int(*req.Msg.Pager.CurrentPage)
+
+	pager := types.NewPageQuery(&perPage, &page)
+	logs, pageResponse, domaiErr := u.usecase.GetUserLoginLogList(userID, pager)
+	if domaiErr != nil {
+		return nil, controller.ErrorHandler(domaiErr)
+	}
+
+	var resLogs []*adminv1.AdminLoginLog
+	for _, log := range logs {
+		resLogs = append(resLogs, &adminv1.AdminLoginLog{
+			UserID:    log.UserID.String(),
+			LoginAt:   timestamppb.New(log.LoginAt),
+			IP:        log.RemoteID,
+			UserAgent: log.UserAgent,
+		})
+	}
+	var resPage *shared.PageResponse
+
+	if pageResponse != nil {
+		resPage = &shared.PageResponse{
+			TotalCount:  uint32(pageResponse.TotalCount),
+			CurrentPage: uint32(pageResponse.CurrentPage),
+			PerPage:     uint32(pageResponse.PerPage),
+			TotalPage:   uint32(pageResponse.TotalPage),
+		}
+	} else {
+		resPage = &shared.PageResponse{
+			TotalCount:  0,
+			CurrentPage: 0,
+			PerPage:     0,
+			TotalPage:   0,
+		}
+	}
+	return connect.NewResponse(&adminv1.AdminLoginLogListResponse{
+		LoginLogs:    resLogs,
+		PageResponse: resPage,
+	}), nil
 }
 
 func AdminEntityToResponse(entity *entity.Admin) *adminv1.AdminDataResponse {

@@ -72,13 +72,13 @@ func NewAuthentificatable(AuthClient action.IAuthAction, UserDataQuery queryserv
 					return nil, connect.NewError(connect.CodeInternal, errors.New("リフレッシュトークンの取得に問題が発生しました。"))
 				}
 
-				authJson, err := json.Marshal(authData)
+				authJSON, err := json.Marshal(authData)
 				if err != nil {
 					return nil, connect.NewError(connect.CodeInternal, errors.New("キャッシュの保存に問題が発生しました。"))
 				}
 
 				// キャッシュに保存
-				cache.Set(bearerToken, authJson, time.Duration(*authData.Token.ExpiresIn)*time.Second)
+				cache.Set(bearerToken, authJSON, time.Duration(*authData.Token.ExpiresIn)*time.Second)
 			}
 
 			userID := authData.UserID
@@ -116,7 +116,7 @@ func NewAuthentificatable(AuthClient action.IAuthAction, UserDataQuery queryserv
 			if token != nil && res != nil {
 				res.Header().Set("AccessToken", token.AccessToken)
 				res.Header().Set("RefreshToken", *token.RefreshToken)
-				res.Header().Set("Expire", strconv.Itoa(*token.ExpiresIn))
+				res.Header().Set("ExpiresIn", strconv.Itoa(*token.ExpiresIn))
 			}
 			return res, nil
 		})

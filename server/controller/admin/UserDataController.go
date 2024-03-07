@@ -20,6 +20,7 @@ import (
 	connect "github.com/bufbuild/connect-go"
 	"github.com/google/uuid"
 	"google.golang.org/protobuf/types/known/emptypb"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type UserDataController struct {
@@ -84,7 +85,7 @@ func (u *UserDataController) Update(ctx context.Context, req *connect.Request[ad
 	return res, nil
 }
 
-func (u *UserDataController) GetByID(ctx context.Context, req *connect.Request[adminv1.UserGetIDRequest]) (*connect.Response[adminv1.UserDataResponse], error) {
+func (u *UserDataController) GetByID(ctx context.Context, req *connect.Request[adminv1.UserIDRequest]) (*connect.Response[adminv1.UserDataResponse], error) {
 	msg := req.Msg
 	userID, err := uuid.Parse(msg.ID)
 	if err != nil {
@@ -186,4 +187,52 @@ func (u *UserDataController) GetList(ctx context.Context, req *connect.Request[a
 		PageResponse: resPage,
 	}
 	return connect.NewResponse(res), nil
+}
+
+func (u *UserDataController) GetLoginLogList(ctx context.Context, req *connect.Request[adminv1.UserLoginLogRequest]) (*connect.Response[adminv1.UserLoginLogListResponse], error) {
+	msg := req.Msg
+
+	userID, err := uuid.Parse(msg.UserID)
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, err)
+	}
+	perPage := int(*req.Msg.Pager.PerPage)
+	page := int(*req.Msg.Pager.CurrentPage)
+
+	pager := types.NewPageQuery(&perPage, &page)
+	logs, pageResponse, domaiErr := u.userUsecase.GetUserLoginLogList(userID, pager)
+	if domaiErr != nil {
+		return nil, controller.ErrorHandler(domaiErr)
+	}
+
+	var resLogs []*adminv1.UserLoginLog
+	for _, log := range logs {
+		resLogs = append(resLogs, &adminv1.UserLoginLog{
+			UserID:    log.UserID.String(),
+			LoginAt:   timestamppb.New(log.LoginAt),
+			IP:        log.RemoteID,
+			UserAgent: log.UserAgent,
+		})
+	}
+	var resPage *shared.PageResponse
+
+	if pageResponse != nil {
+		resPage = &shared.PageResponse{
+			TotalCount:  uint32(pageResponse.TotalCount),
+			CurrentPage: uint32(pageResponse.CurrentPage),
+			PerPage:     uint32(pageResponse.PerPage),
+			TotalPage:   uint32(pageResponse.TotalPage),
+		}
+	} else {
+		resPage = &shared.PageResponse{
+			TotalCount:  0,
+			CurrentPage: 0,
+			PerPage:     0,
+			TotalPage:   0,
+		}
+	}
+	return connect.NewResponse(&adminv1.UserLoginLogListResponse{
+		LoginLogs:    resLogs,
+		PageResponse: resPage,
+	}), nil
 }

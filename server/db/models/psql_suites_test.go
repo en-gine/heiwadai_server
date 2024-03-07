@@ -18,6 +18,8 @@ func TestUpsert(t *testing.T) {
 
 	t.Run("CouponAttachedUsers", testCouponAttachedUsersUpsert)
 
+	t.Run("CronIssueLogs", testCronIssueLogsUpsert)
+
 	t.Run("MailMagazines", testMailMagazinesUpsert)
 
 	t.Run("MailMagazineLogs", testMailMagazineLogsUpsert)
@@ -33,6 +35,8 @@ func TestUpsert(t *testing.T) {
 	t.Run("UserBooks", testUserBooksUpsert)
 
 	t.Run("UserData", testUserDataUpsert)
+
+	t.Run("UserLoginLogs", testUserLoginLogsUpsert)
 
 	t.Run("UserManagers", testUserManagersUpsert)
 

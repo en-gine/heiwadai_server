@@ -3,9 +3,10 @@ package router
 import (
 	"context"
 	"errors"
+	"fmt"
+	"strings"
 
 	"server/infrastructure/env"
-	"server/infrastructure/logger"
 
 	"github.com/bufbuild/connect-go"
 )
@@ -28,15 +29,18 @@ func NewAuthCronHeader() connect.Option {
 			if cronKey != env.GetEnv(env.CronAccessKey) {
 				return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("認証情報が正しくありません。"))
 			}
+			allowIps := env.GetEnv(env.AdminClientIps)
 
-			logger.Infof("cron request: %s", req)
-			res, err := next(ctx, req)
-			if err != nil {
-				return nil, err
+			ip := req.Peer().Addr
+			requestIP := strings.Split(ip, ":")[0]
+
+			if !strings.Contains(allowIps, requestIP) {
+				fmt.Println("requestIP is blocked: ", requestIP)
+				return nil, connect.NewError(connect.CodePermissionDenied, errors.New("IP is invalid"))
 			}
-			logger.Infof("cron response: %s", req)
 
-			return res, nil
+			return next(ctx, req)
+
 		})
 	}
 	return connect.WithInterceptors(connect.UnaryInterceptorFunc(interceptor))

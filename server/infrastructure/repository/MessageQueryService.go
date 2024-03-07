@@ -56,7 +56,7 @@ func (pq *MessageQueryService) GetMessagesAfter(ID *uuid.UUID) ([]*entity.Messag
 				return nil, nil
 			}
 			logger.Error(err.Error())
-			return nil, nil
+			return nil, err
 		}
 		if msg != nil {
 			lastCreateAt = &msg.CreateAt

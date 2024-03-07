@@ -25,6 +25,9 @@ const (
 const (
 	EnvMode EnvKey = "ENV_MODE"
 
+	AdminClientIps EnvKey = "ADMIN_CLIENT_IPs"
+	ClonClientIps  EnvKey = "CRON_CLIENT_IPs"
+
 	ServerPort EnvKey = "PORT"
 
 	PsqlDbname EnvKey = "PSQL_DBNAME"
@@ -71,6 +74,9 @@ func InitEnv() {
 			EnvMode: os.Getenv(string(EnvMode)),
 
 			ServerPort: os.Getenv(string(ServerPort)),
+
+			AdminClientIps: os.Getenv(string(AdminClientIps)),
+			ClonClientIps:  os.Getenv(string(ClonClientIps)),
 
 			PsqlDbname: os.Getenv(string(PsqlDbname)),
 			PsqlUser:   os.Getenv(string(PsqlUser)),

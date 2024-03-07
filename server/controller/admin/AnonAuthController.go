@@ -37,7 +37,9 @@ func (ac *AnonAuthController) SignUp(ctx context.Context, req *connect.Request[a
 
 func (ac *AnonAuthController) SignIn(ctx context.Context, req *connect.Request[admin.AdminAuthRequest]) (*connect.Response[admin.AnonAuthTokenResponse], error) {
 	msg := req.Msg
-	token, domainErr := ac.authUseCase.SignIn(msg.Email, msg.Password)
+	remoteAddr := req.Peer().Addr
+	userAgent := req.Header().Get("User-Agent")
+	token, domainErr := ac.authUseCase.SignIn(msg.Email, msg.Password, remoteAddr, userAgent)
 	if domainErr != nil {
 		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("サインインに失敗しました。"))
 	}

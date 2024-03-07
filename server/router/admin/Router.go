@@ -13,19 +13,20 @@ import (
 func NewAdminServer(mux *http.ServeMux) {
 	authClient := action.NewAuthClient()
 	requireAuth := router.NewAuthentificatable(authClient, userQuery, adminQuery, router.AuthTypeAdmin)
+	adminClientIPFilter := router.NewAdminClientIPFilter()
 
 	authUsecase := InitializeAuthUsecase()
 	anonAuthContoroller := admincontroller.NewAnonAuthController(authUsecase)
-	path, handler := adminv1connect.NewAnonAuthControllerHandler(anonAuthContoroller)
+	path, handler := adminv1connect.NewAnonAuthControllerHandler(anonAuthContoroller, adminClientIPFilter)
 	mux.Handle(path, handler)
 
 	authContoroller := admincontroller.NewAuthController(authUsecase)
-	path, handler = adminv1connect.NewAuthControllerHandler(authContoroller, requireAuth)
+	path, handler = adminv1connect.NewAuthControllerHandler(authContoroller, adminClientIPFilter, requireAuth)
 	mux.Handle(path, handler)
 
 	adminUsecase := InitializeAdminDataUsecase()
 	adminContoroller := admincontroller.NewAdminDataController(adminUsecase)
-	path, handler = adminv1connect.NewAdminDataControllerHandler(adminContoroller, requireAuth)
+	path, handler = adminv1connect.NewAdminDataControllerHandler(adminContoroller, adminClientIPFilter, requireAuth)
 	mux.Handle(path, handler)
 
 	couponUsecase := InitializeAdminCouponUsecase()
@@ -35,26 +36,26 @@ func NewAdminServer(mux *http.ServeMux) {
 
 	messageUsecase := InitializeMessageUsecase()
 	messageContoroller := admincontroller.NewMessageController(messageUsecase)
-	path, handler = adminv1connect.NewMessageControllerHandler(messageContoroller, requireAuth)
+	path, handler = adminv1connect.NewMessageControllerHandler(messageContoroller, adminClientIPFilter, requireAuth)
 	mux.Handle(path, handler)
 
 	mailmagazineUsecase := InitializeMailMagazineUsecase()
 	mailmagazineContoroller := admincontroller.NewMailMagazineController(mailmagazineUsecase)
-	path, handler = adminv1connect.NewMailMagazineControllerHandler(mailmagazineContoroller, requireAuth)
+	path, handler = adminv1connect.NewMailMagazineControllerHandler(mailmagazineContoroller, adminClientIPFilter, requireAuth)
 	mux.Handle(path, handler)
 
 	storeUsecase := InitializeStoreUsecase()
 	storeContoroller := admincontroller.NewStoreController(storeUsecase)
-	path, handler = adminv1connect.NewStoreControllerHandler(storeContoroller, requireAuth)
+	path, handler = adminv1connect.NewStoreControllerHandler(storeContoroller, adminClientIPFilter, requireAuth)
 	mux.Handle(path, handler)
 
 	checkinUsecase := InitializeUserCheckinUsecase()
 	checkinContoroller := admincontroller.NewUserCheckinController(checkinUsecase)
-	path, handler = adminv1connect.NewUserCheckinControllerHandler(checkinContoroller, requireAuth)
+	path, handler = adminv1connect.NewUserCheckinControllerHandler(checkinContoroller, adminClientIPFilter, requireAuth)
 	mux.Handle(path, handler)
 
 	userDataUsecase := InitializeUserDataUsecase()
 	userDataContoroller := admincontroller.NewUserDataController(userDataUsecase, checkinUsecase)
-	path, handler = adminv1connect.NewUserDataControllerHandler(userDataContoroller, requireAuth)
+	path, handler = adminv1connect.NewUserDataControllerHandler(userDataContoroller, adminClientIPFilter, requireAuth)
 	mux.Handle(path, handler)
 }

@@ -13,14 +13,20 @@ import (
 )
 
 type UserDataUsecase struct {
-	userRepository repository.IUserRepository
-	userQuery      queryservice.IUserQueryService
+	userRepository    repository.IUserRepository
+	userQuery         queryservice.IUserQueryService
+	userLoginLogQuery queryservice.IUserLoginLogQueryService
 }
 
-func NewUserDataUsecase(userRepository repository.IUserRepository, userQuery queryservice.IUserQueryService) *UserDataUsecase {
+func NewUserDataUsecase(
+	userRepository repository.IUserRepository,
+	userQuery queryservice.IUserQueryService,
+	userLoginLogQuery queryservice.IUserLoginLogQueryService,
+) *UserDataUsecase {
 	return &UserDataUsecase{
-		userRepository: userRepository,
-		userQuery:      userQuery,
+		userRepository:    userRepository,
+		userQuery:         userQuery,
+		userLoginLogQuery: userLoginLogQuery,
 	}
 }
 
@@ -133,4 +139,15 @@ func (u *UserDataUsecase) GetUserByID(ID uuid.UUID) (*entity.UserWithOption, *er
 		User:       user,
 		UserOption: option,
 	}, nil
+}
+
+func (u *UserDataUsecase) GetUserLoginLogList(
+	userID uuid.UUID,
+	pager *types.PageQuery,
+) ([]*entity.UserLoginLog, *types.PageResponse, *errors.DomainError) {
+	log, pageRes, err := u.userLoginLogQuery.GetList(userID, pager)
+	if err != nil {
+		return nil, nil, errors.NewDomainError(errors.RepositoryError, err.Error())
+	}
+	return log, pageRes, nil
 }
