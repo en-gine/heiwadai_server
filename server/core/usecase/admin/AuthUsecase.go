@@ -128,11 +128,13 @@ func (u *AuthUsecase) SignIn(
 	}
 
 	loginLog := entity.CreateUserLoginLog(existUser.ID, RemoteIP, UserAgent)
-	// ログイン履歴を保存敢えてエラーは無視
-	err = u.userLoginLogRepository.Save(loginLog)
-	if err != nil {
-		logger.Error(err.Error())
-	}
+	go func() {
+		// ログイン履歴を保存
+		err := u.userLoginLogRepository.Save(loginLog)
+		if err != nil {
+			logger.Error(err.Error())
+		}
+	}()
 
 	return token, nil
 }

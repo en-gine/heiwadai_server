@@ -79,17 +79,20 @@ var UserManagerWhere = struct {
 
 // UserManagerRels is where relationship names are stored.
 var UserManagerRels = struct {
-	AdminAdmin    string
-	UserUserDatum string
+	AdminAdmin        string
+	UserUserDatum     string
+	UserUserLoginLogs string
 }{
-	AdminAdmin:    "AdminAdmin",
-	UserUserDatum: "UserUserDatum",
+	AdminAdmin:        "AdminAdmin",
+	UserUserDatum:     "UserUserDatum",
+	UserUserLoginLogs: "UserUserLoginLogs",
 }
 
 // userManagerR is where relationships are stored.
 type userManagerR struct {
-	AdminAdmin    *Admin     `boil:"AdminAdmin" json:"AdminAdmin" toml:"AdminAdmin" yaml:"AdminAdmin"`
-	UserUserDatum *UserDatum `boil:"UserUserDatum" json:"UserUserDatum" toml:"UserUserDatum" yaml:"UserUserDatum"`
+	AdminAdmin        *Admin            `boil:"AdminAdmin" json:"AdminAdmin" toml:"AdminAdmin" yaml:"AdminAdmin"`
+	UserUserDatum     *UserDatum        `boil:"UserUserDatum" json:"UserUserDatum" toml:"UserUserDatum" yaml:"UserUserDatum"`
+	UserUserLoginLogs UserLoginLogSlice `boil:"UserUserLoginLogs" json:"UserUserLoginLogs" toml:"UserUserLoginLogs" yaml:"UserUserLoginLogs"`
 }
 
 // NewStruct creates a new relationship struct
@@ -109,6 +112,13 @@ func (r *userManagerR) GetUserUserDatum() *UserDatum {
 		return nil
 	}
 	return r.UserUserDatum
+}
+
+func (r *userManagerR) GetUserUserLoginLogs() UserLoginLogSlice {
+	if r == nil {
+		return nil
+	}
+	return r.UserUserLoginLogs
 }
 
 // userManagerL is where Load methods for each relationship are stored.
@@ -422,6 +432,20 @@ func (o *UserManager) UserUserDatum(mods ...qm.QueryMod) userDatumQuery {
 	return UserData(queryMods...)
 }
 
+// UserUserLoginLogs retrieves all the user_login_log's UserLoginLogs with an executor via user_id column.
+func (o *UserManager) UserUserLoginLogs(mods ...qm.QueryMod) userLoginLogQuery {
+	var queryMods []qm.QueryMod
+	if len(mods) != 0 {
+		queryMods = append(queryMods, mods...)
+	}
+
+	queryMods = append(queryMods,
+		qm.Where("\"user_login_log\".\"user_id\"=?", o.ID),
+	)
+
+	return UserLoginLogs(queryMods...)
+}
+
 // LoadAdminAdmin allows an eager lookup of values, cached into the
 // loaded structs of the objects. This is for a 1-1 relationship.
 func (userManagerL) LoadAdminAdmin(ctx context.Context, e boil.ContextExecutor, singular bool, maybeUserManager interface{}, mods queries.Applicator) error {
@@ -656,6 +680,120 @@ func (userManagerL) LoadUserUserDatum(ctx context.Context, e boil.ContextExecuto
 	return nil
 }
 
+// LoadUserUserLoginLogs allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-M or N-M relationship.
+func (userManagerL) LoadUserUserLoginLogs(ctx context.Context, e boil.ContextExecutor, singular bool, maybeUserManager interface{}, mods queries.Applicator) error {
+	var slice []*UserManager
+	var object *UserManager
+
+	if singular {
+		var ok bool
+		object, ok = maybeUserManager.(*UserManager)
+		if !ok {
+			object = new(UserManager)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeUserManager)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeUserManager))
+			}
+		}
+	} else {
+		s, ok := maybeUserManager.(*[]*UserManager)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeUserManager)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeUserManager))
+			}
+		}
+	}
+
+	args := make([]interface{}, 0, 1)
+	if singular {
+		if object.R == nil {
+			object.R = &userManagerR{}
+		}
+		args = append(args, object.ID)
+	} else {
+	Outer:
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &userManagerR{}
+			}
+
+			for _, a := range args {
+				if a == obj.ID {
+					continue Outer
+				}
+			}
+
+			args = append(args, obj.ID)
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	query := NewQuery(
+		qm.From(`user_login_log`),
+		qm.WhereIn(`user_login_log.user_id in ?`, args...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load user_login_log")
+	}
+
+	var resultSlice []*UserLoginLog
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice user_login_log")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results in eager load on user_login_log")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for user_login_log")
+	}
+
+	if len(userLoginLogAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+	if singular {
+		object.R.UserUserLoginLogs = resultSlice
+		for _, foreign := range resultSlice {
+			if foreign.R == nil {
+				foreign.R = &userLoginLogR{}
+			}
+			foreign.R.User = object
+		}
+		return nil
+	}
+
+	for _, foreign := range resultSlice {
+		for _, local := range slice {
+			if local.ID == foreign.UserID {
+				local.R.UserUserLoginLogs = append(local.R.UserUserLoginLogs, foreign)
+				if foreign.R == nil {
+					foreign.R = &userLoginLogR{}
+				}
+				foreign.R.User = local
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
 // SetAdminAdmin of the userManager to the related item.
 // Sets o.R.AdminAdmin to related.
 // Adds o to related.R.Admin.
@@ -752,6 +890,59 @@ func (o *UserManager) SetUserUserDatum(ctx context.Context, exec boil.ContextExe
 		}
 	} else {
 		related.R.User = o
+	}
+	return nil
+}
+
+// AddUserUserLoginLogs adds the given related objects to the existing relationships
+// of the user_manager, optionally inserting them as new records.
+// Appends related to o.R.UserUserLoginLogs.
+// Sets related.R.User appropriately.
+func (o *UserManager) AddUserUserLoginLogs(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*UserLoginLog) error {
+	var err error
+	for _, rel := range related {
+		if insert {
+			rel.UserID = o.ID
+			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
+				return errors.Wrap(err, "failed to insert into foreign table")
+			}
+		} else {
+			updateQuery := fmt.Sprintf(
+				"UPDATE \"user_login_log\" SET %s WHERE %s",
+				strmangle.SetParamNames("\"", "\"", 1, []string{"user_id"}),
+				strmangle.WhereClause("\"", "\"", 2, userLoginLogPrimaryKeyColumns),
+			)
+			values := []interface{}{o.ID, rel.ID}
+
+			if boil.IsDebug(ctx) {
+				writer := boil.DebugWriterFrom(ctx)
+				fmt.Fprintln(writer, updateQuery)
+				fmt.Fprintln(writer, values)
+			}
+			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+				return errors.Wrap(err, "failed to update foreign table")
+			}
+
+			rel.UserID = o.ID
+		}
+	}
+
+	if o.R == nil {
+		o.R = &userManagerR{
+			UserUserLoginLogs: related,
+		}
+	} else {
+		o.R.UserUserLoginLogs = append(o.R.UserUserLoginLogs, related...)
+	}
+
+	for _, rel := range related {
+		if rel.R == nil {
+			rel.R = &userLoginLogR{
+				User: o,
+			}
+		} else {
+			rel.R.User = o
+		}
 	}
 	return nil
 }

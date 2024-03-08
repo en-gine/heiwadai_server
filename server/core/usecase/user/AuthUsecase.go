@@ -147,10 +147,13 @@ func (u *AuthUsecase) SignIn(
 
 	// ログイン履歴を保存敢えてエラーは無視
 	loginLog := entity.CreateUserLoginLog(existUser.ID, RemoteIP, UserAgent)
-	err = u.userLoginLogRepository.Save(loginLog)
-	if err != nil {
-		logger.Errorf("ログイン履歴の保存に失敗しました: %s", err.Error())
-	}
+	go func() {
+		// ログイン履歴を保存
+		err := u.userLoginLogRepository.Save(loginLog)
+		if err != nil {
+			logger.Error(err.Error())
+		}
+	}()
 
 	return token, nil
 }

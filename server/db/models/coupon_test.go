@@ -1033,7 +1033,7 @@ func testCouponsSelect(t *testing.T) {
 }
 
 var (
-	couponDBTypes = map[string]string{`ID`: `uuid`, `Name`: `character varying`, `CouponType`: `integer`, `DiscountAmount`: `integer`, `ExpireAt`: `timestamp with time zone`, `IsCombinationable`: `boolean`, `CouponStatus`: `integer`, `Notices`: `ARRAYtext`, `CreateAt`: `timestamp with time zone`, `UpdateAt`: `timestamp with time zone`, `IssueCount`: `integer`, `IssueAt`: `timestamp with time zone`}
+	couponDBTypes = map[string]string{`ID`: `uuid`, `Name`: `character varying`, `CouponType`: `integer`, `DiscountAmount`: `integer`, `ExpireAt`: `date`, `IsCombinationable`: `boolean`, `CouponStatus`: `integer`, `Notices`: `ARRAYtext`, `CreateAt`: `timestamp with time zone`, `UpdateAt`: `timestamp with time zone`, `IssueCount`: `integer`, `IssueAt`: `timestamp with time zone`}
 	_             = bytes.MinRead
 )
 

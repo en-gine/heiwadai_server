@@ -156,7 +156,6 @@ var UserDatumRels = struct {
 	UserCouponAttachedUsers string
 	UserMailMagazineLogs    string
 	BookUserUserBooks       string
-	UserUserLoginLogs       string
 	UserUserReports         string
 }{
 	User:                    "User",
@@ -165,7 +164,6 @@ var UserDatumRels = struct {
 	UserCouponAttachedUsers: "UserCouponAttachedUsers",
 	UserMailMagazineLogs:    "UserMailMagazineLogs",
 	BookUserUserBooks:       "BookUserUserBooks",
-	UserUserLoginLogs:       "UserUserLoginLogs",
 	UserUserReports:         "UserUserReports",
 }
 
@@ -177,7 +175,6 @@ type userDatumR struct {
 	UserCouponAttachedUsers CouponAttachedUserSlice `boil:"UserCouponAttachedUsers" json:"UserCouponAttachedUsers" toml:"UserCouponAttachedUsers" yaml:"UserCouponAttachedUsers"`
 	UserMailMagazineLogs    MailMagazineLogSlice    `boil:"UserMailMagazineLogs" json:"UserMailMagazineLogs" toml:"UserMailMagazineLogs" yaml:"UserMailMagazineLogs"`
 	BookUserUserBooks       UserBookSlice           `boil:"BookUserUserBooks" json:"BookUserUserBooks" toml:"BookUserUserBooks" yaml:"BookUserUserBooks"`
-	UserUserLoginLogs       UserLoginLogSlice       `boil:"UserUserLoginLogs" json:"UserUserLoginLogs" toml:"UserUserLoginLogs" yaml:"UserUserLoginLogs"`
 	UserUserReports         UserReportSlice         `boil:"UserUserReports" json:"UserUserReports" toml:"UserUserReports" yaml:"UserUserReports"`
 }
 
@@ -226,13 +223,6 @@ func (r *userDatumR) GetBookUserUserBooks() UserBookSlice {
 		return nil
 	}
 	return r.BookUserUserBooks
-}
-
-func (r *userDatumR) GetUserUserLoginLogs() UserLoginLogSlice {
-	if r == nil {
-		return nil
-	}
-	return r.UserUserLoginLogs
 }
 
 func (r *userDatumR) GetUserUserReports() UserReportSlice {
@@ -607,20 +597,6 @@ func (o *UserDatum) BookUserUserBooks(mods ...qm.QueryMod) userBookQuery {
 	)
 
 	return UserBooks(queryMods...)
-}
-
-// UserUserLoginLogs retrieves all the user_login_log's UserLoginLogs with an executor via user_id column.
-func (o *UserDatum) UserUserLoginLogs(mods ...qm.QueryMod) userLoginLogQuery {
-	var queryMods []qm.QueryMod
-	if len(mods) != 0 {
-		queryMods = append(queryMods, mods...)
-	}
-
-	queryMods = append(queryMods,
-		qm.Where("\"user_login_log\".\"user_id\"=?", o.UserID),
-	)
-
-	return UserLoginLogs(queryMods...)
 }
 
 // UserUserReports retrieves all the user_report's UserReports with an executor via user_id column.
@@ -1330,120 +1306,6 @@ func (userDatumL) LoadBookUserUserBooks(ctx context.Context, e boil.ContextExecu
 	return nil
 }
 
-// LoadUserUserLoginLogs allows an eager lookup of values, cached into the
-// loaded structs of the objects. This is for a 1-M or N-M relationship.
-func (userDatumL) LoadUserUserLoginLogs(ctx context.Context, e boil.ContextExecutor, singular bool, maybeUserDatum interface{}, mods queries.Applicator) error {
-	var slice []*UserDatum
-	var object *UserDatum
-
-	if singular {
-		var ok bool
-		object, ok = maybeUserDatum.(*UserDatum)
-		if !ok {
-			object = new(UserDatum)
-			ok = queries.SetFromEmbeddedStruct(&object, &maybeUserDatum)
-			if !ok {
-				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeUserDatum))
-			}
-		}
-	} else {
-		s, ok := maybeUserDatum.(*[]*UserDatum)
-		if ok {
-			slice = *s
-		} else {
-			ok = queries.SetFromEmbeddedStruct(&slice, maybeUserDatum)
-			if !ok {
-				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeUserDatum))
-			}
-		}
-	}
-
-	args := make([]interface{}, 0, 1)
-	if singular {
-		if object.R == nil {
-			object.R = &userDatumR{}
-		}
-		args = append(args, object.UserID)
-	} else {
-	Outer:
-		for _, obj := range slice {
-			if obj.R == nil {
-				obj.R = &userDatumR{}
-			}
-
-			for _, a := range args {
-				if a == obj.UserID {
-					continue Outer
-				}
-			}
-
-			args = append(args, obj.UserID)
-		}
-	}
-
-	if len(args) == 0 {
-		return nil
-	}
-
-	query := NewQuery(
-		qm.From(`user_login_log`),
-		qm.WhereIn(`user_login_log.user_id in ?`, args...),
-	)
-	if mods != nil {
-		mods.Apply(query)
-	}
-
-	results, err := query.QueryContext(ctx, e)
-	if err != nil {
-		return errors.Wrap(err, "failed to eager load user_login_log")
-	}
-
-	var resultSlice []*UserLoginLog
-	if err = queries.Bind(results, &resultSlice); err != nil {
-		return errors.Wrap(err, "failed to bind eager loaded slice user_login_log")
-	}
-
-	if err = results.Close(); err != nil {
-		return errors.Wrap(err, "failed to close results in eager load on user_login_log")
-	}
-	if err = results.Err(); err != nil {
-		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for user_login_log")
-	}
-
-	if len(userLoginLogAfterSelectHooks) != 0 {
-		for _, obj := range resultSlice {
-			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
-				return err
-			}
-		}
-	}
-	if singular {
-		object.R.UserUserLoginLogs = resultSlice
-		for _, foreign := range resultSlice {
-			if foreign.R == nil {
-				foreign.R = &userLoginLogR{}
-			}
-			foreign.R.User = object
-		}
-		return nil
-	}
-
-	for _, foreign := range resultSlice {
-		for _, local := range slice {
-			if local.UserID == foreign.UserID {
-				local.R.UserUserLoginLogs = append(local.R.UserUserLoginLogs, foreign)
-				if foreign.R == nil {
-					foreign.R = &userLoginLogR{}
-				}
-				foreign.R.User = local
-				break
-			}
-		}
-	}
-
-	return nil
-}
-
 // LoadUserUserReports allows an eager lookup of values, cached into the
 // loaded structs of the objects. This is for a 1-M or N-M relationship.
 func (userDatumL) LoadUserUserReports(ctx context.Context, e boil.ContextExecutor, singular bool, maybeUserDatum interface{}, mods queries.Applicator) error {
@@ -1862,59 +1724,6 @@ func (o *UserDatum) AddBookUserUserBooks(ctx context.Context, exec boil.ContextE
 			}
 		} else {
 			rel.R.BookUser = o
-		}
-	}
-	return nil
-}
-
-// AddUserUserLoginLogs adds the given related objects to the existing relationships
-// of the user_datum, optionally inserting them as new records.
-// Appends related to o.R.UserUserLoginLogs.
-// Sets related.R.User appropriately.
-func (o *UserDatum) AddUserUserLoginLogs(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*UserLoginLog) error {
-	var err error
-	for _, rel := range related {
-		if insert {
-			rel.UserID = o.UserID
-			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
-				return errors.Wrap(err, "failed to insert into foreign table")
-			}
-		} else {
-			updateQuery := fmt.Sprintf(
-				"UPDATE \"user_login_log\" SET %s WHERE %s",
-				strmangle.SetParamNames("\"", "\"", 1, []string{"user_id"}),
-				strmangle.WhereClause("\"", "\"", 2, userLoginLogPrimaryKeyColumns),
-			)
-			values := []interface{}{o.UserID, rel.ID}
-
-			if boil.IsDebug(ctx) {
-				writer := boil.DebugWriterFrom(ctx)
-				fmt.Fprintln(writer, updateQuery)
-				fmt.Fprintln(writer, values)
-			}
-			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
-				return errors.Wrap(err, "failed to update foreign table")
-			}
-
-			rel.UserID = o.UserID
-		}
-	}
-
-	if o.R == nil {
-		o.R = &userDatumR{
-			UserUserLoginLogs: related,
-		}
-	} else {
-		o.R.UserUserLoginLogs = append(o.R.UserUserLoginLogs, related...)
-	}
-
-	for _, rel := range related {
-		if rel.R == nil {
-			rel.R = &userLoginLogR{
-				User: o,
-			}
-		} else {
-			rel.R.User = o
 		}
 	}
 	return nil

@@ -494,27 +494,27 @@ func testUserLoginLogsInsertWhitelist(t *testing.T) {
 	}
 }
 
-func testUserLoginLogToOneUserDatumUsingUser(t *testing.T) {
+func testUserLoginLogToOneUserManagerUsingUser(t *testing.T) {
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
 
 	var local UserLoginLog
-	var foreign UserDatum
+	var foreign UserManager
 
 	seed := randomize.NewSeed()
 	if err := randomize.Struct(seed, &local, userLoginLogDBTypes, false, userLoginLogColumnsWithDefault...); err != nil {
 		t.Errorf("Unable to randomize UserLoginLog struct: %s", err)
 	}
-	if err := randomize.Struct(seed, &foreign, userDatumDBTypes, false, userDatumColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize UserDatum struct: %s", err)
+	if err := randomize.Struct(seed, &foreign, userManagerDBTypes, false, userManagerColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize UserManager struct: %s", err)
 	}
 
 	if err := foreign.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Fatal(err)
 	}
 
-	local.UserID = foreign.UserID
+	local.UserID = foreign.ID
 	if err := local.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Fatal(err)
 	}
@@ -524,12 +524,12 @@ func testUserLoginLogToOneUserDatumUsingUser(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if check.UserID != foreign.UserID {
-		t.Errorf("want: %v, got %v", foreign.UserID, check.UserID)
+	if check.ID != foreign.ID {
+		t.Errorf("want: %v, got %v", foreign.ID, check.ID)
 	}
 
 	ranAfterSelectHook := false
-	AddUserDatumHook(boil.AfterSelectHook, func(ctx context.Context, e boil.ContextExecutor, o *UserDatum) error {
+	AddUserManagerHook(boil.AfterSelectHook, func(ctx context.Context, e boil.ContextExecutor, o *UserManager) error {
 		ranAfterSelectHook = true
 		return nil
 	})
@@ -555,7 +555,7 @@ func testUserLoginLogToOneUserDatumUsingUser(t *testing.T) {
 	}
 }
 
-func testUserLoginLogToOneSetOpUserDatumUsingUser(t *testing.T) {
+func testUserLoginLogToOneSetOpUserManagerUsingUser(t *testing.T) {
 	var err error
 
 	ctx := context.Background()
@@ -563,16 +563,16 @@ func testUserLoginLogToOneSetOpUserDatumUsingUser(t *testing.T) {
 	defer func() { _ = tx.Rollback() }()
 
 	var a UserLoginLog
-	var b, c UserDatum
+	var b, c UserManager
 
 	seed := randomize.NewSeed()
 	if err = randomize.Struct(seed, &a, userLoginLogDBTypes, false, strmangle.SetComplement(userLoginLogPrimaryKeyColumns, userLoginLogColumnsWithoutDefault)...); err != nil {
 		t.Fatal(err)
 	}
-	if err = randomize.Struct(seed, &b, userDatumDBTypes, false, strmangle.SetComplement(userDatumPrimaryKeyColumns, userDatumColumnsWithoutDefault)...); err != nil {
+	if err = randomize.Struct(seed, &b, userManagerDBTypes, false, strmangle.SetComplement(userManagerPrimaryKeyColumns, userManagerColumnsWithoutDefault)...); err != nil {
 		t.Fatal(err)
 	}
-	if err = randomize.Struct(seed, &c, userDatumDBTypes, false, strmangle.SetComplement(userDatumPrimaryKeyColumns, userDatumColumnsWithoutDefault)...); err != nil {
+	if err = randomize.Struct(seed, &c, userManagerDBTypes, false, strmangle.SetComplement(userManagerPrimaryKeyColumns, userManagerColumnsWithoutDefault)...); err != nil {
 		t.Fatal(err)
 	}
 
@@ -583,7 +583,7 @@ func testUserLoginLogToOneSetOpUserDatumUsingUser(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	for i, x := range []*UserDatum{&b, &c} {
+	for i, x := range []*UserManager{&b, &c} {
 		err = a.SetUser(ctx, tx, i != 0, x)
 		if err != nil {
 			t.Fatal(err)
@@ -596,7 +596,7 @@ func testUserLoginLogToOneSetOpUserDatumUsingUser(t *testing.T) {
 		if x.R.UserUserLoginLogs[0] != &a {
 			t.Error("failed to append to foreign relationship struct")
 		}
-		if a.UserID != x.UserID {
+		if a.UserID != x.ID {
 			t.Error("foreign key was wrong value", a.UserID)
 		}
 
@@ -607,8 +607,8 @@ func testUserLoginLogToOneSetOpUserDatumUsingUser(t *testing.T) {
 			t.Fatal("failed to reload", err)
 		}
 
-		if a.UserID != x.UserID {
-			t.Error("foreign key was wrong value", a.UserID, x.UserID)
+		if a.UserID != x.ID {
+			t.Error("foreign key was wrong value", a.UserID, x.ID)
 		}
 	}
 }
@@ -687,7 +687,7 @@ func testUserLoginLogsSelect(t *testing.T) {
 }
 
 var (
-	userLoginLogDBTypes = map[string]string{`ID`: `bigint`, `UserID`: `uuid`, `LoginAt`: `timestamp with time zone`, `RemoteIP`: `character varying`, `UserAgent`: `character varying`, `CreateAt`: `timestamp with time zone`}
+	userLoginLogDBTypes = map[string]string{`ID`: `bigint`, `UserID`: `uuid`, `RemoteIP`: `character varying`, `UserAgent`: `character varying`, `LoginAt`: `timestamp with time zone`, `CreateAt`: `timestamp with time zone`}
 	_                   = bytes.MinRead
 )
 

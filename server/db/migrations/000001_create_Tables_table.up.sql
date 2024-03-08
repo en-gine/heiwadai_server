@@ -94,7 +94,7 @@ CREATE TABLE coupon (
     name VARCHAR NOT NULL,
     coupon_type int NOT NULL,
     discount_amount INTEGER NOT NULL,
-    expire_at TIMESTAMPTZ NOT NULL,
+    expire_at DATE NOT NULL,
     is_combinationable BOOLEAN NOT NULL,
     coupon_status int NOT NULL,
     notices TEXT[] NULL default array[]::TEXT[],

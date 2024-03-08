@@ -313,7 +313,7 @@ func TestToOne(t *testing.T) {
 	t.Run("UserBookToUserDatumUsingBookUser", testUserBookToOneUserDatumUsingBookUser)
 	t.Run("UserBookToBookGuestDatumUsingGuestDatum", testUserBookToOneBookGuestDatumUsingGuestDatum)
 	t.Run("UserDatumToUserManagerUsingUser", testUserDatumToOneUserManagerUsingUser)
-	t.Run("UserLoginLogToUserDatumUsingUser", testUserLoginLogToOneUserDatumUsingUser)
+	t.Run("UserLoginLogToUserManagerUsingUser", testUserLoginLogToOneUserManagerUsingUser)
 	t.Run("UserOptionToUserDatumUsingUser", testUserOptionToOneUserDatumUsingUser)
 	t.Run("UserReportToUserDatumUsingUser", testUserReportToOneUserDatumUsingUser)
 }
@@ -345,8 +345,8 @@ func TestToMany(t *testing.T) {
 	t.Run("UserDatumToUserCouponAttachedUsers", testUserDatumToManyUserCouponAttachedUsers)
 	t.Run("UserDatumToUserMailMagazineLogs", testUserDatumToManyUserMailMagazineLogs)
 	t.Run("UserDatumToBookUserUserBooks", testUserDatumToManyBookUserUserBooks)
-	t.Run("UserDatumToUserUserLoginLogs", testUserDatumToManyUserUserLoginLogs)
 	t.Run("UserDatumToUserUserReports", testUserDatumToManyUserUserReports)
+	t.Run("UserManagerToUserUserLoginLogs", testUserManagerToManyUserUserLoginLogs)
 }
 
 // TestToOneSet tests cannot be run in parallel
@@ -368,7 +368,7 @@ func TestToOneSet(t *testing.T) {
 	t.Run("UserBookToUserDatumUsingBookUserUserBooks", testUserBookToOneSetOpUserDatumUsingBookUser)
 	t.Run("UserBookToBookGuestDatumUsingGuestDatumUserBooks", testUserBookToOneSetOpBookGuestDatumUsingGuestDatum)
 	t.Run("UserDatumToUserManagerUsingUserUserDatum", testUserDatumToOneSetOpUserManagerUsingUser)
-	t.Run("UserLoginLogToUserDatumUsingUserUserLoginLogs", testUserLoginLogToOneSetOpUserDatumUsingUser)
+	t.Run("UserLoginLogToUserManagerUsingUserUserLoginLogs", testUserLoginLogToOneSetOpUserManagerUsingUser)
 	t.Run("UserOptionToUserDatumUsingUserUserOption", testUserOptionToOneSetOpUserDatumUsingUser)
 	t.Run("UserReportToUserDatumUsingUserUserReports", testUserReportToOneSetOpUserDatumUsingUser)
 }
@@ -408,8 +408,8 @@ func TestToManyAdd(t *testing.T) {
 	t.Run("UserDatumToUserCouponAttachedUsers", testUserDatumToManyAddOpUserCouponAttachedUsers)
 	t.Run("UserDatumToUserMailMagazineLogs", testUserDatumToManyAddOpUserMailMagazineLogs)
 	t.Run("UserDatumToBookUserUserBooks", testUserDatumToManyAddOpBookUserUserBooks)
-	t.Run("UserDatumToUserUserLoginLogs", testUserDatumToManyAddOpUserUserLoginLogs)
 	t.Run("UserDatumToUserUserReports", testUserDatumToManyAddOpUserUserReports)
+	t.Run("UserManagerToUserUserLoginLogs", testUserManagerToManyAddOpUserUserLoginLogs)
 }
 
 // TestToManySet tests cannot be run in parallel

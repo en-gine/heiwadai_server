@@ -25,9 +25,9 @@ import (
 type UserLoginLog struct {
 	ID        int64     `boil:"id" json:"id" toml:"id" yaml:"id"`
 	UserID    string    `boil:"user_id" json:"user_id" toml:"user_id" yaml:"user_id"`
-	LoginAt   time.Time `boil:"login_at" json:"login_at" toml:"login_at" yaml:"login_at"`
 	RemoteIP  string    `boil:"remote_ip" json:"remote_ip" toml:"remote_ip" yaml:"remote_ip"`
 	UserAgent string    `boil:"user_agent" json:"user_agent" toml:"user_agent" yaml:"user_agent"`
+	LoginAt   time.Time `boil:"login_at" json:"login_at" toml:"login_at" yaml:"login_at"`
 	CreateAt  time.Time `boil:"create_at" json:"create_at" toml:"create_at" yaml:"create_at"`
 
 	R *userLoginLogR `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -37,32 +37,32 @@ type UserLoginLog struct {
 var UserLoginLogColumns = struct {
 	ID        string
 	UserID    string
-	LoginAt   string
 	RemoteIP  string
 	UserAgent string
+	LoginAt   string
 	CreateAt  string
 }{
 	ID:        "id",
 	UserID:    "user_id",
-	LoginAt:   "login_at",
 	RemoteIP:  "remote_ip",
 	UserAgent: "user_agent",
+	LoginAt:   "login_at",
 	CreateAt:  "create_at",
 }
 
 var UserLoginLogTableColumns = struct {
 	ID        string
 	UserID    string
-	LoginAt   string
 	RemoteIP  string
 	UserAgent string
+	LoginAt   string
 	CreateAt  string
 }{
 	ID:        "user_login_log.id",
 	UserID:    "user_login_log.user_id",
-	LoginAt:   "user_login_log.login_at",
 	RemoteIP:  "user_login_log.remote_ip",
 	UserAgent: "user_login_log.user_agent",
+	LoginAt:   "user_login_log.login_at",
 	CreateAt:  "user_login_log.create_at",
 }
 
@@ -71,16 +71,16 @@ var UserLoginLogTableColumns = struct {
 var UserLoginLogWhere = struct {
 	ID        whereHelperint64
 	UserID    whereHelperstring
-	LoginAt   whereHelpertime_Time
 	RemoteIP  whereHelperstring
 	UserAgent whereHelperstring
+	LoginAt   whereHelpertime_Time
 	CreateAt  whereHelpertime_Time
 }{
 	ID:        whereHelperint64{field: "\"user_login_log\".\"id\""},
 	UserID:    whereHelperstring{field: "\"user_login_log\".\"user_id\""},
-	LoginAt:   whereHelpertime_Time{field: "\"user_login_log\".\"login_at\""},
 	RemoteIP:  whereHelperstring{field: "\"user_login_log\".\"remote_ip\""},
 	UserAgent: whereHelperstring{field: "\"user_login_log\".\"user_agent\""},
+	LoginAt:   whereHelpertime_Time{field: "\"user_login_log\".\"login_at\""},
 	CreateAt:  whereHelpertime_Time{field: "\"user_login_log\".\"create_at\""},
 }
 
@@ -93,7 +93,7 @@ var UserLoginLogRels = struct {
 
 // userLoginLogR is where relationships are stored.
 type userLoginLogR struct {
-	User *UserDatum `boil:"User" json:"User" toml:"User" yaml:"User"`
+	User *UserManager `boil:"User" json:"User" toml:"User" yaml:"User"`
 }
 
 // NewStruct creates a new relationship struct
@@ -101,7 +101,7 @@ func (*userLoginLogR) NewStruct() *userLoginLogR {
 	return &userLoginLogR{}
 }
 
-func (r *userLoginLogR) GetUser() *UserDatum {
+func (r *userLoginLogR) GetUser() *UserManager {
 	if r == nil {
 		return nil
 	}
@@ -112,7 +112,7 @@ func (r *userLoginLogR) GetUser() *UserDatum {
 type userLoginLogL struct{}
 
 var (
-	userLoginLogAllColumns            = []string{"id", "user_id", "login_at", "remote_ip", "user_agent", "create_at"}
+	userLoginLogAllColumns            = []string{"id", "user_id", "remote_ip", "user_agent", "login_at", "create_at"}
 	userLoginLogColumnsWithoutDefault = []string{"user_id", "remote_ip", "user_agent"}
 	userLoginLogColumnsWithDefault    = []string{"id", "login_at", "create_at"}
 	userLoginLogPrimaryKeyColumns     = []string{"id"}
@@ -398,14 +398,14 @@ func (q userLoginLogQuery) Exists(ctx context.Context, exec boil.ContextExecutor
 }
 
 // User pointed to by the foreign key.
-func (o *UserLoginLog) User(mods ...qm.QueryMod) userDatumQuery {
+func (o *UserLoginLog) User(mods ...qm.QueryMod) userManagerQuery {
 	queryMods := []qm.QueryMod{
-		qm.Where("\"user_id\" = ?", o.UserID),
+		qm.Where("\"id\" = ?", o.UserID),
 	}
 
 	queryMods = append(queryMods, mods...)
 
-	return UserData(queryMods...)
+	return UserManagers(queryMods...)
 }
 
 // LoadUser allows an eager lookup of values, cached into the
@@ -466,8 +466,8 @@ func (userLoginLogL) LoadUser(ctx context.Context, e boil.ContextExecutor, singu
 	}
 
 	query := NewQuery(
-		qm.From(`user_data`),
-		qm.WhereIn(`user_data.user_id in ?`, args...),
+		qm.From(`user_manager`),
+		qm.WhereIn(`user_manager.id in ?`, args...),
 	)
 	if mods != nil {
 		mods.Apply(query)
@@ -475,22 +475,22 @@ func (userLoginLogL) LoadUser(ctx context.Context, e boil.ContextExecutor, singu
 
 	results, err := query.QueryContext(ctx, e)
 	if err != nil {
-		return errors.Wrap(err, "failed to eager load UserDatum")
+		return errors.Wrap(err, "failed to eager load UserManager")
 	}
 
-	var resultSlice []*UserDatum
+	var resultSlice []*UserManager
 	if err = queries.Bind(results, &resultSlice); err != nil {
-		return errors.Wrap(err, "failed to bind eager loaded slice UserDatum")
+		return errors.Wrap(err, "failed to bind eager loaded slice UserManager")
 	}
 
 	if err = results.Close(); err != nil {
-		return errors.Wrap(err, "failed to close results of eager load for user_data")
+		return errors.Wrap(err, "failed to close results of eager load for user_manager")
 	}
 	if err = results.Err(); err != nil {
-		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for user_data")
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for user_manager")
 	}
 
-	if len(userDatumAfterSelectHooks) != 0 {
+	if len(userManagerAfterSelectHooks) != 0 {
 		for _, obj := range resultSlice {
 			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
 				return err
@@ -506,7 +506,7 @@ func (userLoginLogL) LoadUser(ctx context.Context, e boil.ContextExecutor, singu
 		foreign := resultSlice[0]
 		object.R.User = foreign
 		if foreign.R == nil {
-			foreign.R = &userDatumR{}
+			foreign.R = &userManagerR{}
 		}
 		foreign.R.UserUserLoginLogs = append(foreign.R.UserUserLoginLogs, object)
 		return nil
@@ -514,10 +514,10 @@ func (userLoginLogL) LoadUser(ctx context.Context, e boil.ContextExecutor, singu
 
 	for _, local := range slice {
 		for _, foreign := range resultSlice {
-			if local.UserID == foreign.UserID {
+			if local.UserID == foreign.ID {
 				local.R.User = foreign
 				if foreign.R == nil {
-					foreign.R = &userDatumR{}
+					foreign.R = &userManagerR{}
 				}
 				foreign.R.UserUserLoginLogs = append(foreign.R.UserUserLoginLogs, local)
 				break
@@ -531,7 +531,7 @@ func (userLoginLogL) LoadUser(ctx context.Context, e boil.ContextExecutor, singu
 // SetUser of the userLoginLog to the related item.
 // Sets o.R.User to related.
 // Adds o to related.R.UserUserLoginLogs.
-func (o *UserLoginLog) SetUser(ctx context.Context, exec boil.ContextExecutor, insert bool, related *UserDatum) error {
+func (o *UserLoginLog) SetUser(ctx context.Context, exec boil.ContextExecutor, insert bool, related *UserManager) error {
 	var err error
 	if insert {
 		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
@@ -544,7 +544,7 @@ func (o *UserLoginLog) SetUser(ctx context.Context, exec boil.ContextExecutor, i
 		strmangle.SetParamNames("\"", "\"", 1, []string{"user_id"}),
 		strmangle.WhereClause("\"", "\"", 2, userLoginLogPrimaryKeyColumns),
 	)
-	values := []interface{}{related.UserID, o.ID}
+	values := []interface{}{related.ID, o.ID}
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -555,7 +555,7 @@ func (o *UserLoginLog) SetUser(ctx context.Context, exec boil.ContextExecutor, i
 		return errors.Wrap(err, "failed to update local table")
 	}
 
-	o.UserID = related.UserID
+	o.UserID = related.ID
 	if o.R == nil {
 		o.R = &userLoginLogR{
 			User: related,
@@ -565,7 +565,7 @@ func (o *UserLoginLog) SetUser(ctx context.Context, exec boil.ContextExecutor, i
 	}
 
 	if related.R == nil {
-		related.R = &userDatumR{
+		related.R = &userManagerR{
 			UserUserLoginLogs: UserLoginLogSlice{o},
 		}
 	} else {
