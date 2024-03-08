@@ -37,9 +37,9 @@ func (ac *AdminCouponController) GetUserCouponList(ctx context.Context, req *con
 		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("UUIDが正しい形式ではありません。"))
 	}
 	perPage := int(*req.Msg.Pager.PerPage)
-	page := int(*req.Msg.Pager.CurrentPage)
+	curPage := int(*req.Msg.Pager.CurrentPage)
 
-	pager := types.NewPageQuery(&perPage, &page)
+	pager := types.NewPageQuery(&curPage, &perPage)
 
 	entities, pageRes, domaiErr := ac.couponUseCase.GetUsersCouponList(userID, pager)
 	if domaiErr != nil {
@@ -65,11 +65,17 @@ func (ac *AdminCouponController) GetUserCouponList(ctx context.Context, req *con
 	var attachedCoupons []*shared.UserAttachedCoupon
 	for _, entity := range entities {
 		cpn := EntityToCoupon(entity.Coupon)
+		var useAt *timestamppb.Timestamp
 
+		if entity.UsedAt == nil {
+			useAt = nil
+		} else {
+			useAt = timestamppb.New(*entity.UsedAt)
+		}
 		atcCpn := &shared.UserAttachedCoupon{
 			UserID: userID.String(),
 			Coupon: cpn,
-			UsedAt: timestamppb.New(entity.ExpireAt),
+			UsedAt: useAt,
 		}
 		attachedCoupons = append(attachedCoupons, atcCpn)
 	}

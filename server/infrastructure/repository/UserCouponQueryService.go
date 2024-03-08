@@ -106,7 +106,7 @@ func (pq *UserCouponQueryService) GetAll(userID uuid.UUID, pager *types.PageQuer
 		return nil, nil, nil
 	}
 
-	count, err := models.UserData(models.CouponAttachedUserWhere.UserID.EQ(userID.String()),
+	count, err := models.CouponAttachedUsers(models.CouponAttachedUserWhere.UserID.EQ(userID.String()),
 		qm.Load(models.CouponAttachedUserRels.Coupon)).Count(context.Background(), pq.db)
 	if err != nil {
 		return nil, nil, err

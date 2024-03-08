@@ -28,27 +28,29 @@ func NewUserLoginLogQueryService() *UserLoginLogQueryService {
 }
 
 func (pq *UserLoginLogQueryService) GetList(userID uuid.UUID, pager *types.PageQuery) ([]*entity.UserLoginLog, *types.PageResponse, error) {
-	userLoginLogs := models.UserLoginLogs(models.UserLoginLogWhere.UserID.EQ(userID.String()), qm.OrderBy("login_at DESC"), qm.Limit(pager.Limit()), qm.Offset(pager.Offset()))
-
-	userLoginLogModels, err := userLoginLogs.All(context.Background(), pq.db)
+	logs, err := models.UserLoginLogs(models.UserLoginLogWhere.UserID.EQ(userID.String()),
+		qm.Limit(pager.Limit()), qm.Offset(pager.Offset())).All(context.Background(), pq.db)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil, nil
+		}
 		return nil, nil, err
-	}
-	count, err := models.UserLoginLogs(models.UserLoginLogWhere.UserID.EQ(userID.String())).Count(context.Background(), pq.db)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	var pageResponse *types.PageResponse = nil
-	if pager != nil {
-		pageResponse = types.NewPageResponse(pager, int(count))
 	}
 
 	var result []*entity.UserLoginLog
-	for _, userLoginLog := range userLoginLogModels {
-		result = append(result, UserLoginLogModelToEntity(userLoginLog))
+	for _, log := range logs {
+		result = append(result, UserLoginLogModelToEntity(log))
 	}
 
+	count, err := models.UserLoginLogs(
+		models.UserLoginLogWhere.UserID.EQ(userID.String()),
+	).Count(context.Background(), pq.db)
+
+	if err != nil {
+		return nil, nil, err
+	}
+
+	pageResponse := types.NewPageResponse(pager, int(count))
 	return result, pageResponse, nil
 }
 

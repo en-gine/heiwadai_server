@@ -116,9 +116,9 @@ func (u *AdminDataController) GetLoginLogList(ctx context.Context, req *connect.
 		return nil, connect.NewError(connect.CodeInvalidArgument, err)
 	}
 	perPage := int(*req.Msg.Pager.PerPage)
-	page := int(*req.Msg.Pager.CurrentPage)
+	curPage := int(*req.Msg.Pager.CurrentPage)
 
-	pager := types.NewPageQuery(&perPage, &page)
+	pager := types.NewPageQuery(&curPage, &perPage)
 	logs, pageResponse, domaiErr := u.usecase.GetUserLoginLogList(userID, pager)
 	if domaiErr != nil {
 		return nil, controller.ErrorHandler(domaiErr)
