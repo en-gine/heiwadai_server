@@ -13,10 +13,11 @@ import (
 func NewUserServer(mux *http.ServeMux) {
 	authClient := action.NewAuthClient()
 	requireAuth := router.NewAuthentificatable(authClient, userQuery, adminQuery, router.AuthTypeUser)
+	logger := router.NewLogger()
 
 	authUsecase := InitializeAuthUsecase()
 	anonAuthContoroller := usercontroller.NewAnonAuthController(authUsecase)
-	path, handler := userv1connect.NewAnonAuthControllerHandler(anonAuthContoroller)
+	path, handler := userv1connect.NewAnonAuthControllerHandler(anonAuthContoroller, logger)
 	mux.Handle(path, handler)
 
 	authContoroller := usercontroller.NewAuthController(authUsecase)
@@ -54,7 +55,7 @@ func NewUserServer(mux *http.ServeMux) {
 	mux.Handle(path, handler)
 
 	bookUsecase := InitializeBookUsecase()
-	bookContoroller := usercontroller.NewBookController(bookUsecase)
+	bookContoroller := usercontroller.NewBookController(bookUsecase, storeUsecase)
 	path, handler = userv1connect.NewBookControllerHandler(bookContoroller, requireAuth)
 	mux.Handle(path, handler)
 

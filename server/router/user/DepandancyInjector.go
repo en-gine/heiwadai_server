@@ -35,7 +35,6 @@ var (
 	bookAPIRepository      = bookingApiBook.NewBookRepository(storeQuery, bookQuery)
 	userReportRepository   = implements.NewUserReportRepository()
 	userLoginLogRepository = implements.NewUserLoginLogRepository()
-	userLoginLogQuery      = implements.NewUserLoginLogQueryService()
 	sendMailAction         = action.NewSendMailAction()
 )
 

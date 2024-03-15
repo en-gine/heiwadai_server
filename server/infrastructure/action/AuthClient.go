@@ -7,7 +7,6 @@ import (
 	"server/core/infra/action"
 	"server/core/infra/types"
 	"server/infrastructure/env"
-	"server/infrastructure/logger"
 
 	"github.com/google/uuid"
 	supa "github.com/nedpals/supabase-go"
@@ -47,7 +46,6 @@ func (au *AuthClient) SignUp(email string, password string, userType action.User
 		},
 	})
 	if err != nil {
-		logger.Errorf("Error SignUp: %v", err)
 		return nil, errors.New("Error SignUp" + err.Error())
 	}
 	userID := uuid.MustParse(usr.ID)
@@ -62,7 +60,6 @@ func (au *AuthClient) SignIn(email string, password string) (*types.Token, error
 		Password: password,
 	})
 	if err != nil {
-		logger.Errorf("Error SignIn: %v", err)
 		return nil, errors.New("Error SignIn" + err.Error())
 	}
 
@@ -77,7 +74,6 @@ func (au *AuthClient) SignOut(token string) error {
 	ctx := context.Background()
 	err := au.client.Auth.SignOut(ctx, token)
 	if err != nil {
-		logger.Errorf("Error SignIn: %v", err)
 		return errors.New("Error SignIn" + err.Error())
 	}
 
@@ -88,7 +84,6 @@ func (au *AuthClient) Refresh(token string, refreshToken string) (*action.UserAu
 	ctx := context.Background()
 	data, err := au.client.Auth.RefreshUser(ctx, token, refreshToken)
 	if err != nil {
-		logger.Errorf("Error Refreshing Token: %v", err)
 		return nil, errors.New("Error Refreshing Token" + err.Error())
 	}
 	Token := &types.Token{
@@ -96,10 +91,16 @@ func (au *AuthClient) Refresh(token string, refreshToken string) (*action.UserAu
 		RefreshToken: &data.RefreshToken,
 		ExpiresIn:    &data.ExpiresIn,
 	}
-
+	ut := data.User.UserMetadata["user_type"]
+	var userType string
+	if ut == "" || ut == nil {
+		userType = "user"
+	} else {
+		userType = ut.(string)
+	}
 	return &action.UserAuth{
 		UserID:   uuid.MustParse(data.User.ID),
-		UserType: action.UserType(data.User.UserMetadata["user_type"].(string)),
+		UserType: action.UserType(userType),
 		Token:    Token,
 	}, nil
 }
@@ -108,7 +109,6 @@ func (au *AuthClient) ResetPasswordMail(email string) error {
 	ctx := context.Background()
 	err := au.client.Auth.ResetPasswordForEmail(ctx, email)
 	if err != nil {
-		logger.Errorf("Error ResetPasswordMail: %v", err)
 		return err
 	}
 	return nil
@@ -120,7 +120,6 @@ func (au *AuthClient) UpdatePassword(password string, token string) error {
 		"password": password,
 	})
 	if err != nil {
-		logger.Errorf("Error UpdatePassword: %v", err)
 		return err
 	}
 	return nil
@@ -130,7 +129,6 @@ func (au *AuthClient) InviteUserByEmail(email string) (*uuid.UUID, error) {
 	ctx := context.Background()
 	user, err := au.client.Auth.InviteUserByEmail(ctx, email)
 	if err != nil {
-		logger.Errorf("Error InviteUserByEmail: %v", err)
 		return nil, err
 	}
 
@@ -144,7 +142,6 @@ func (au *AuthClient) UpdateEmail(email string, token string) error {
 		"email": email,
 	})
 	if err != nil {
-		logger.Errorf("Error UpdateEmail: %v", err)
 		return err
 	}
 	return nil
@@ -155,7 +152,6 @@ func (au *AuthClient) GetUserID(token string) (*uuid.UUID, *action.UserType, err
 
 	user, err := au.client.Auth.User(ctx, token)
 	if err != nil {
-		logger.Errorf("Error GetUserID: %v", err)
 		return nil, nil, err
 	}
 	userID := uuid.MustParse(user.ID)

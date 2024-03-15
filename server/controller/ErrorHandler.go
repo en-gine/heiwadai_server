@@ -15,6 +15,8 @@ func ErrorHandler(domainErr *errors.DomainError) *connect.Error {
 		return connect.NewError(connect.CodeInvalidArgument, domainErr)
 	case errors.UnPemitedOperation:
 		return connect.NewError(connect.CodePermissionDenied, domainErr)
+	case errors.AlreadyExist:
+		return connect.NewError(connect.CodeAlreadyExists, domainErr)
 	case errors.RepositoryError:
 		return connect.NewError(connect.CodeInternal, domainErr)
 	case errors.ActionError:

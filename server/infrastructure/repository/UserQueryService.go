@@ -69,7 +69,9 @@ func (pq *UserQueryService) GetOptionByID(id uuid.UUID) (*entity.UserOption, err
 }
 
 func (pq *UserQueryService) GetByMail(mail string) (*entity.User, error) {
-	usermanager, err := models.UserManagers(models.UserManagerWhere.Email.EQ(mail), qm.Load(models.UserManagerRels.UserUserDatum), models.UserManagerWhere.IsAdmin.EQ(false)).One(context.Background(), pq.db)
+	// usermanager, err := models.UserManagers(models.UserManagerWhere.Email.EQ(mail), qm.Load(models.UserManagerRels.UserUserDatum), models.UserManagerWhere.IsAdmin.EQ(false)).One(context.Background(), pq.db)
+	// 管理者も取得する
+	usermanager, err := models.UserManagers(models.UserManagerWhere.Email.EQ(mail), qm.Load(models.UserManagerRels.UserUserDatum)).One(context.Background(), pq.db)
 
 	if usermanager == nil {
 		return nil, nil
@@ -93,7 +95,6 @@ func (pq *UserQueryService) GetMailOKUser(prefectures *[]entity.Prefecture) ([]*
 	queryMods := GetMailUserWhereMods(prefectures)
 	queryMods = append(queryMods, qm.Load(models.UserDatumRels.User))
 	users, err = models.UserData(queryMods...).All(context.Background(), pq.db)
-
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
@@ -208,6 +209,23 @@ func (pq *UserQueryService) GetList(query *types.UserQuery, pager *types.PageQue
 	}
 
 	return result, pageResponse, nil
+}
+
+func (pq *UserQueryService) IsUnderRegister(email string) (bool, error) {
+	db := InitDB()
+	var confirmedAt *string
+	err := db.QueryRow("SELECT email_confirmed_at FROM auth.users WHERE email = $1", email).Scan(&confirmedAt)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return false, nil
+		}
+		logger.Error(err.Error())
+		return false, err
+	}
+	if confirmedAt == nil {
+		return false, nil
+	}
+	return true, nil
 }
 
 func GetUserListFilterMods(query *types.UserQuery) []qm.QueryMod {

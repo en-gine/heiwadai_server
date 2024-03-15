@@ -28,9 +28,10 @@ func NewAuthUsecase(
 	authAction action.IAuthAction,
 ) *AuthUsecase {
 	return &AuthUsecase{
-		userRepository: userRepository,
-		userQuery:      userQuery,
-		authAction:     authAction,
+		userRepository:         userRepository,
+		userQuery:              userQuery,
+		userLoginLogRepository: userLoginLogRepository,
+		authAction:             authAction,
 	}
 }
 
@@ -60,7 +61,7 @@ func (u *AuthUsecase) Register(
 	}
 
 	if existUser != nil {
-		return nil, errors.NewDomainError(errors.UnPemitedOperation, "既に登録されているメールアドレスです")
+		return nil, errors.NewDomainError(errors.AlreadyExist, "既に登録されているメールアドレスです")
 	}
 
 	prefecture := entity.Prefecture(PrefectureID)
@@ -202,4 +203,48 @@ func (u *AuthUsecase) Refresh(
 		return nil, errors.NewDomainError(errors.RepositoryError, "トークンの取得に失敗しました")
 	}
 	return auth.Token, nil
+}
+
+func (u *AuthUsecase) IsUnderRegister(
+	Mail string,
+) (bool, error) {
+	isExist, err := u.userQuery.IsUnderRegister(Mail)
+	if err != nil {
+		return false, errors.NewDomainError(errors.QueryError, err.Error())
+	}
+	return isExist, nil
+}
+
+func (u *AuthUsecase) ResendInviteMail(
+	Mail string,
+) error {
+	_, err := u.authAction.InviteUserByEmail(Mail)
+
+	return err
+}
+
+func (u *AuthUsecase) DeleteUnderRegisterUser(
+	Mail string,
+) *errors.DomainError {
+	isExist, err := u.userQuery.IsUnderRegister(Mail)
+	if err != nil {
+		return errors.NewDomainError(errors.QueryError, err.Error())
+	}
+	if !isExist {
+		return errors.NewDomainError(errors.QueryDataNotFoundError, "このアドレスで登録中のユーザーが存在しません")
+	}
+
+	user, err := u.userQuery.GetByMail(Mail)
+	if err != nil {
+		return errors.NewDomainError(errors.QueryError, err.Error())
+	}
+	if user == nil {
+		return errors.NewDomainError(errors.QueryDataNotFoundError, "このアドレスのユーザーが存在しません")
+	}
+
+	err = u.userRepository.Delete(user.ID)
+	if err != nil {
+		return errors.NewDomainError(errors.RepositoryError, err.Error())
+	}
+	return nil
 }

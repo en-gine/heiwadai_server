@@ -19,14 +19,16 @@ import (
 )
 
 type BookController struct {
-	bookUseCase usecase.BookUsecase
+	bookUseCase  usecase.BookUsecase
+	storeUseCase usecase.StoreUsecase
 }
 
 var _ userv1connect.BookControllerClient = &BookController{}
 
-func NewBookController(bookUsecase *usecase.BookUsecase) *BookController {
+func NewBookController(bookUsecase *usecase.BookUsecase, storeUseCase *usecase.StoreUsecase) *BookController {
 	return &BookController{
-		bookUseCase: *bookUsecase,
+		bookUseCase:  *bookUsecase,
+		storeUseCase: *storeUseCase,
 	}
 }
 
@@ -47,10 +49,21 @@ func (ac *BookController) GetMyBook(ctx context.Context, req *connect.Request[em
 	if domainErr != nil {
 		return nil, controller.ErrorHandler(domainErr)
 	}
+	stores, domainErr := ac.storeUseCase.GetAll()
+	if domainErr != nil {
+		return nil, controller.ErrorHandler(domainErr)
+	}
 
 	var resBooks []*user.BookResponse
 	for _, book := range books {
-		resBooks = append(resBooks, BookEntityToResponse(book))
+		var bookstore *entity.Store
+		for _, store := range stores {
+			if store.ID == book.BookPlan.StoreID {
+				bookstore = store
+				break
+			}
+		}
+		resBooks = append(resBooks, BookEntityToResponse(book, bookstore))
 	}
 
 	return connect.NewResponse(&user.BooksResponse{
@@ -69,8 +82,12 @@ func (ac *BookController) GetBookByID(ctx context.Context, req *connect.Request[
 	if domainErr != nil {
 		return nil, controller.ErrorHandler(domainErr)
 	}
+	store, domainErr := ac.storeUseCase.GetByID(book.BookPlan.StoreID)
+	if domainErr != nil {
+		return nil, controller.ErrorHandler(domainErr)
+	}
 
-	bookRes := BookEntityToResponse(book)
+	bookRes := BookEntityToResponse(book, store)
 	return connect.NewResponse(bookRes), nil
 }
 
@@ -157,7 +174,7 @@ func (ac *BookController) Reserve(ctx context.Context, req *connect.Request[user
 	return connect.NewResponse(&emptypb.Empty{}), nil
 }
 
-func BookEntityToResponse(entity *entity.Booking) *user.BookResponse {
+func BookEntityToResponse(entity *entity.Booking, bookstore *entity.Store) *user.BookResponse {
 	var pref *shared.Prefecture = nil
 	if entity.GuestData.Prefecture != nil {
 		tmp := entity.GuestData.Prefecture.ToInt()
@@ -187,19 +204,18 @@ func BookEntityToResponse(entity *entity.Booking) *user.BookResponse {
 			Tel:           entity.GuestData.Tel,
 			Mail:          entity.GuestData.Mail,
 		},
-		BookPlan: &user.Plan{
-			ID:       entity.BookPlan.ID,
-			Title:    entity.BookPlan.Title,
-			Price:    uint32(entity.BookPlan.Price),
-			ImageURL: entity.BookPlan.ImageURL,
-			RoomType: user.RoomType(entity.BookPlan.RoomType),
-			MealType: &user.MealType{
-				Morning: entity.BookPlan.MealType.Morning,
-				Dinner:  entity.BookPlan.MealType.Dinner,
-			},
-			SmokeType: user.SmokeType(entity.BookPlan.SmokeType),
-			OverView:  entity.BookPlan.OverView,
-			StoreID:   entity.BookPlan.StoreID.String(),
+		BookPlan: &user.BookPlan{
+			ID:              entity.BookPlan.ID,
+			Title:           entity.BookPlan.Title,
+			Price:           uint32(entity.BookPlan.Price),
+			ImageURL:        entity.BookPlan.ImageURL,
+			RoomTypeName:    entity.BookPlan.RoomType.String(),
+			MealTypeName:    entity.BookPlan.MealType.String(),
+			SmokeTypeName:   entity.BookPlan.SmokeType.String(),
+			OverView:        entity.BookPlan.OverView,
+			StoreID:         entity.BookPlan.StoreID.String(),
+			StoreName:       bookstore.Name,
+			StoreBranchName: bookstore.BranchName,
 		},
 	}
 }

@@ -3,13 +3,14 @@ package user
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"server/api/v1/user"
 	userv1connect "server/api/v1/user/userconnect"
 	"server/controller"
 	"server/controller/util"
 	usecase "server/core/usecase/user"
-	"server/infrastructure/logger"
+	"server/infrastructure/env"
 
 	connect "github.com/bufbuild/connect-go"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -57,7 +58,6 @@ func (ac *AnonAuthController) SignUp(ctx context.Context, req *connect.Request[u
 	msg := req.Msg
 	_, err := ac.authUseCase.SignUp(msg.Email, msg.Password)
 	if err != nil {
-		logger.Error(err.Error())
 		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("サインアップに失敗しました。"))
 	}
 	return connect.NewResponse(&emptypb.Empty{}), nil
@@ -66,7 +66,9 @@ func (ac *AnonAuthController) SignUp(ctx context.Context, req *connect.Request[u
 func (ac *AnonAuthController) SignIn(ctx context.Context, req *connect.Request[user.UserAuthRequest]) (*connect.Response[user.AnonTokenResponse], error) {
 	remoteAddr := req.Peer().Addr
 	userAgent := req.Header().Get("User-Agent")
-
+	if env.GetEnv(env.EnvMode) == "dev" {
+		fmt.Println(ctx, req)
+	}
 	msg := req.Msg
 	token, domainErr := ac.authUseCase.SignIn(msg.Email, msg.Password, remoteAddr, userAgent)
 	if domainErr != nil {
@@ -79,11 +81,40 @@ func (ac *AnonAuthController) SignIn(ctx context.Context, req *connect.Request[u
 	}), nil
 }
 
-func (ac *AnonAuthController) ResetPasswordMail(ctx context.Context, req *connect.Request[user.ResetPasswordRequest]) (*connect.Response[emptypb.Empty], error) {
+func (ac *AnonAuthController) ResetPasswordMail(ctx context.Context, req *connect.Request[user.UserMailRequest]) (*connect.Response[emptypb.Empty], error) {
 	msg := req.Msg
 	err := ac.authUseCase.ResetPasswordMail(msg.Email)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeUnavailable, errors.New("リセットメールの送信に失敗しました。"))
+	}
+	return connect.NewResponse(&emptypb.Empty{}), nil
+}
+
+func (ac *AnonAuthController) IsUnderRegister(ctx context.Context, req *connect.Request[user.UserMailRequest]) (*connect.Response[user.IsUnderRegisterResponse], error) {
+	msg := req.Msg
+	isYes, err := ac.authUseCase.IsUnderRegister(msg.Email)
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInternal, errors.New("ユーザーの登録状況の取得に失敗しました。"))
+	}
+	return connect.NewResponse(&user.IsUnderRegisterResponse{
+		IsUnderRegister: isYes,
+	}), nil
+}
+
+func (ac *AnonAuthController) ResendInviteMail(ctx context.Context, req *connect.Request[user.UserMailRequest]) (*connect.Response[emptypb.Empty], error) {
+	msg := req.Msg
+	err := ac.authUseCase.ResetPasswordMail(msg.Email)
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInternal, errors.New("招待メールの再送信に失敗しました。"))
+	}
+	return connect.NewResponse(&emptypb.Empty{}), nil
+}
+
+func (ac *AnonAuthController) DeleteUnderRegisterUser(ctx context.Context, req *connect.Request[user.UserMailRequest]) (*connect.Response[emptypb.Empty], error) {
+	msg := req.Msg
+	domainErr := ac.authUseCase.DeleteUnderRegisterUser(msg.Email)
+	if domainErr != nil {
+		return nil, controller.ErrorHandler(domainErr)
 	}
 	return connect.NewResponse(&emptypb.Empty{}), nil
 }

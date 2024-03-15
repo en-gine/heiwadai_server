@@ -35,7 +35,7 @@ func (pq *CheckinQueryService) GetMyActiveCheckin(userID uuid.UUID) ([]*entity.C
 			return nil, nil
 		}
 		logger.Error(err.Error())
-		return nil, nil
+		return nil, err
 	}
 	if checkins == nil {
 		return nil, nil
@@ -43,7 +43,8 @@ func (pq *CheckinQueryService) GetMyActiveCheckin(userID uuid.UUID) ([]*entity.C
 	var result []*entity.Checkin
 
 	for _, coupon := range checkins {
-		result = append(result, CheckinModelToEntity(coupon, nil, nil))
+		store := StoreModelToEntity(coupon.R.Store, nil)
+		result = append(result, CheckinModelToEntity(coupon, nil, store))
 	}
 	return result, nil
 }
