@@ -22,7 +22,7 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type SoreIDRequest struct {
+type StoreIDRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -30,8 +30,8 @@ type SoreIDRequest struct {
 	ID string `protobuf:"bytes,1,opt,name=ID,proto3" json:"ID,omitempty"`
 }
 
-func (x *SoreIDRequest) Reset() {
-	*x = SoreIDRequest{}
+func (x *StoreIDRequest) Reset() {
+	*x = StoreIDRequest{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_v1_user_Store_proto_msgTypes[0]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -39,13 +39,13 @@ func (x *SoreIDRequest) Reset() {
 	}
 }
 
-func (x *SoreIDRequest) String() string {
+func (x *StoreIDRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*SoreIDRequest) ProtoMessage() {}
+func (*StoreIDRequest) ProtoMessage() {}
 
-func (x *SoreIDRequest) ProtoReflect() protoreflect.Message {
+func (x *StoreIDRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_v1_user_Store_proto_msgTypes[0]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -57,12 +57,12 @@ func (x *SoreIDRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use SoreIDRequest.ProtoReflect.Descriptor instead.
-func (*SoreIDRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use StoreIDRequest.ProtoReflect.Descriptor instead.
+func (*StoreIDRequest) Descriptor() ([]byte, []int) {
 	return file_v1_user_Store_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *SoreIDRequest) GetID() string {
+func (x *StoreIDRequest) GetID() string {
 	if x != nil {
 		return x.ID
 	}
@@ -123,7 +123,7 @@ func file_v1_user_Store_proto_rawDescGZIP() []byte {
 
 var file_v1_user_Store_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
 var file_v1_user_Store_proto_goTypes = []interface{}{
-	(*SoreIDRequest)(nil),         // 0: server.user.SoreIDRequest
+	(*StoreIDRequest)(nil),         // 0: server.user.StoreIDRequest
 	(*emptypb.Empty)(nil),         // 1: google.protobuf.Empty
 	(*shared.Store)(nil),          // 2: server.shared.Store
 	(*shared.Stores)(nil),         // 3: server.shared.Stores
@@ -131,10 +131,10 @@ var file_v1_user_Store_proto_goTypes = []interface{}{
 	(*shared.StayableStore)(nil),  // 5: server.shared.StayableStore
 }
 var file_v1_user_Store_proto_depIdxs = []int32{
-	0, // 0: server.user.StoreController.GetByID:input_type -> server.user.SoreIDRequest
+	0, // 0: server.user.StoreController.GetByID:input_type -> server.user.StoreIDRequest
 	1, // 1: server.user.StoreController.GetAll:input_type -> google.protobuf.Empty
 	1, // 2: server.user.StoreController.GetStayables:input_type -> google.protobuf.Empty
-	0, // 3: server.user.StoreController.GetStayableByID:input_type -> server.user.SoreIDRequest
+	0, // 3: server.user.StoreController.GetStayableByID:input_type -> server.user.StoreIDRequest
 	2, // 4: server.user.StoreController.GetByID:output_type -> server.shared.Store
 	3, // 5: server.user.StoreController.GetAll:output_type -> server.shared.Stores
 	4, // 6: server.user.StoreController.GetStayables:output_type -> server.shared.StayableStores
@@ -153,7 +153,7 @@ func file_v1_user_Store_proto_init() {
 	}
 	if !protoimpl.UnsafeEnabled {
 		file_v1_user_Store_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*SoreIDRequest); i {
+			switch v := v.(*StoreIDRequest); i {
 			case 0:
 				return &v.state
 			case 1:

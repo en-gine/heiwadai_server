@@ -57,13 +57,13 @@ const (
 
 // StoreControllerClient is a client for the server.admin.StoreController service.
 type StoreControllerClient interface {
-	GetByID(context.Context, *connect_go.Request[admin.SoreIDRequest]) (*connect_go.Response[shared.Store], error)
+	GetByID(context.Context, *connect_go.Request[admin.StoreIDRequest]) (*connect_go.Response[shared.Store], error)
 	GetAll(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[shared.Stores], error)
 	GetActiveAll(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[shared.Stores], error)
 	Register(context.Context, *connect_go.Request[admin.StoreRegisterRequest]) (*connect_go.Response[shared.Store], error)
 	Update(context.Context, *connect_go.Request[admin.StoreUpdateRequest]) (*connect_go.Response[shared.Store], error)
-	RegenQRCode(context.Context, *connect_go.Request[admin.SoreIDRequest]) (*connect_go.Response[admin.QRResponse], error)
-	RegenUnlimitQRCode(context.Context, *connect_go.Request[admin.SoreIDRequest]) (*connect_go.Response[admin.UnlimitQRResponse], error)
+	RegenQRCode(context.Context, *connect_go.Request[admin.StoreIDRequest]) (*connect_go.Response[admin.QRResponse], error)
+	RegenUnlimitQRCode(context.Context, *connect_go.Request[admin.StoreIDRequest]) (*connect_go.Response[admin.UnlimitQRResponse], error)
 }
 
 // NewStoreControllerClient constructs a client for the server.admin.StoreController service. By
@@ -76,7 +76,7 @@ type StoreControllerClient interface {
 func NewStoreControllerClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) StoreControllerClient {
 	baseURL = strings.TrimRight(baseURL, "/")
 	return &storeControllerClient{
-		getByID: connect_go.NewClient[admin.SoreIDRequest, shared.Store](
+		getByID: connect_go.NewClient[admin.StoreIDRequest, shared.Store](
 			httpClient,
 			baseURL+StoreControllerGetByIDProcedure,
 			opts...,
@@ -101,12 +101,12 @@ func NewStoreControllerClient(httpClient connect_go.HTTPClient, baseURL string, 
 			baseURL+StoreControllerUpdateProcedure,
 			opts...,
 		),
-		regenQRCode: connect_go.NewClient[admin.SoreIDRequest, admin.QRResponse](
+		regenQRCode: connect_go.NewClient[admin.StoreIDRequest, admin.QRResponse](
 			httpClient,
 			baseURL+StoreControllerRegenQRCodeProcedure,
 			opts...,
 		),
-		regenUnlimitQRCode: connect_go.NewClient[admin.SoreIDRequest, admin.UnlimitQRResponse](
+		regenUnlimitQRCode: connect_go.NewClient[admin.StoreIDRequest, admin.UnlimitQRResponse](
 			httpClient,
 			baseURL+StoreControllerRegenUnlimitQRCodeProcedure,
 			opts...,
@@ -116,17 +116,17 @@ func NewStoreControllerClient(httpClient connect_go.HTTPClient, baseURL string, 
 
 // storeControllerClient implements StoreControllerClient.
 type storeControllerClient struct {
-	getByID            *connect_go.Client[admin.SoreIDRequest, shared.Store]
+	getByID            *connect_go.Client[admin.StoreIDRequest, shared.Store]
 	getAll             *connect_go.Client[emptypb.Empty, shared.Stores]
 	getActiveAll       *connect_go.Client[emptypb.Empty, shared.Stores]
 	register           *connect_go.Client[admin.StoreRegisterRequest, shared.Store]
 	update             *connect_go.Client[admin.StoreUpdateRequest, shared.Store]
-	regenQRCode        *connect_go.Client[admin.SoreIDRequest, admin.QRResponse]
-	regenUnlimitQRCode *connect_go.Client[admin.SoreIDRequest, admin.UnlimitQRResponse]
+	regenQRCode        *connect_go.Client[admin.StoreIDRequest, admin.QRResponse]
+	regenUnlimitQRCode *connect_go.Client[admin.StoreIDRequest, admin.UnlimitQRResponse]
 }
 
 // GetByID calls server.admin.StoreController.GetByID.
-func (c *storeControllerClient) GetByID(ctx context.Context, req *connect_go.Request[admin.SoreIDRequest]) (*connect_go.Response[shared.Store], error) {
+func (c *storeControllerClient) GetByID(ctx context.Context, req *connect_go.Request[admin.StoreIDRequest]) (*connect_go.Response[shared.Store], error) {
 	return c.getByID.CallUnary(ctx, req)
 }
 
@@ -151,24 +151,24 @@ func (c *storeControllerClient) Update(ctx context.Context, req *connect_go.Requ
 }
 
 // RegenQRCode calls server.admin.StoreController.RegenQRCode.
-func (c *storeControllerClient) RegenQRCode(ctx context.Context, req *connect_go.Request[admin.SoreIDRequest]) (*connect_go.Response[admin.QRResponse], error) {
+func (c *storeControllerClient) RegenQRCode(ctx context.Context, req *connect_go.Request[admin.StoreIDRequest]) (*connect_go.Response[admin.QRResponse], error) {
 	return c.regenQRCode.CallUnary(ctx, req)
 }
 
 // RegenUnlimitQRCode calls server.admin.StoreController.RegenUnlimitQRCode.
-func (c *storeControllerClient) RegenUnlimitQRCode(ctx context.Context, req *connect_go.Request[admin.SoreIDRequest]) (*connect_go.Response[admin.UnlimitQRResponse], error) {
+func (c *storeControllerClient) RegenUnlimitQRCode(ctx context.Context, req *connect_go.Request[admin.StoreIDRequest]) (*connect_go.Response[admin.UnlimitQRResponse], error) {
 	return c.regenUnlimitQRCode.CallUnary(ctx, req)
 }
 
 // StoreControllerHandler is an implementation of the server.admin.StoreController service.
 type StoreControllerHandler interface {
-	GetByID(context.Context, *connect_go.Request[admin.SoreIDRequest]) (*connect_go.Response[shared.Store], error)
+	GetByID(context.Context, *connect_go.Request[admin.StoreIDRequest]) (*connect_go.Response[shared.Store], error)
 	GetAll(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[shared.Stores], error)
 	GetActiveAll(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[shared.Stores], error)
 	Register(context.Context, *connect_go.Request[admin.StoreRegisterRequest]) (*connect_go.Response[shared.Store], error)
 	Update(context.Context, *connect_go.Request[admin.StoreUpdateRequest]) (*connect_go.Response[shared.Store], error)
-	RegenQRCode(context.Context, *connect_go.Request[admin.SoreIDRequest]) (*connect_go.Response[admin.QRResponse], error)
-	RegenUnlimitQRCode(context.Context, *connect_go.Request[admin.SoreIDRequest]) (*connect_go.Response[admin.UnlimitQRResponse], error)
+	RegenQRCode(context.Context, *connect_go.Request[admin.StoreIDRequest]) (*connect_go.Response[admin.QRResponse], error)
+	RegenUnlimitQRCode(context.Context, *connect_go.Request[admin.StoreIDRequest]) (*connect_go.Response[admin.UnlimitQRResponse], error)
 }
 
 // NewStoreControllerHandler builds an HTTP handler from the service implementation. It returns the
@@ -237,7 +237,7 @@ func NewStoreControllerHandler(svc StoreControllerHandler, opts ...connect_go.Ha
 // UnimplementedStoreControllerHandler returns CodeUnimplemented from all methods.
 type UnimplementedStoreControllerHandler struct{}
 
-func (UnimplementedStoreControllerHandler) GetByID(context.Context, *connect_go.Request[admin.SoreIDRequest]) (*connect_go.Response[shared.Store], error) {
+func (UnimplementedStoreControllerHandler) GetByID(context.Context, *connect_go.Request[admin.StoreIDRequest]) (*connect_go.Response[shared.Store], error) {
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.StoreController.GetByID is not implemented"))
 }
 
@@ -257,10 +257,10 @@ func (UnimplementedStoreControllerHandler) Update(context.Context, *connect_go.R
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.StoreController.Update is not implemented"))
 }
 
-func (UnimplementedStoreControllerHandler) RegenQRCode(context.Context, *connect_go.Request[admin.SoreIDRequest]) (*connect_go.Response[admin.QRResponse], error) {
+func (UnimplementedStoreControllerHandler) RegenQRCode(context.Context, *connect_go.Request[admin.StoreIDRequest]) (*connect_go.Response[admin.QRResponse], error) {
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.StoreController.RegenQRCode is not implemented"))
 }
 
-func (UnimplementedStoreControllerHandler) RegenUnlimitQRCode(context.Context, *connect_go.Request[admin.SoreIDRequest]) (*connect_go.Response[admin.UnlimitQRResponse], error) {
+func (UnimplementedStoreControllerHandler) RegenUnlimitQRCode(context.Context, *connect_go.Request[admin.StoreIDRequest]) (*connect_go.Response[admin.UnlimitQRResponse], error) {
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.StoreController.RegenUnlimitQRCode is not implemented"))
 }

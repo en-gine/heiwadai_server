@@ -45,7 +45,7 @@ func InitializeUserUsecase() *usecase.UserDataUsecase {
 }
 
 func InitializeAuthUsecase() *usecase.AuthUsecase {
-	return usecase.NewAuthUsecase(userRepo, userQueryService, userLoginLogRepository, authAction)
+	return usecase.NewAuthUsecase(userRepo, userQueryService, adminQuery, userLoginLogRepository, authAction)
 }
 
 func InitializeBannerUsecase() *usecase.BannerUsecase {

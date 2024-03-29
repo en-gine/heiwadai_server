@@ -36,7 +36,7 @@ var (
 )
 
 func InitializeAuthUsecase() *usecase.AuthUsecase {
-	return usecase.NewAuthUsecase(adminRepository, adminQuery, storeQuery, userLoginLogRepository, authAction)
+	return usecase.NewAuthUsecase(adminRepository, adminQuery, userQuery, storeQuery, userLoginLogRepository, authAction)
 }
 
 func InitializeAdminDataUsecase() *usecase.AdminDataUsecase {

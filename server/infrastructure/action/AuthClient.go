@@ -1,8 +1,13 @@
 package action
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
+	"fmt"
+	"net/http"
+	"net/url"
 
 	"server/core/infra/action"
 	"server/core/infra/types"
@@ -19,9 +24,12 @@ type AuthClient struct {
 	apiKey string
 }
 
+var (
+	authURL = env.GetEnv(env.SupabaseUrl)
+	authKey = env.GetEnv(env.SupabaseKey)
+)
+
 func NewAuthClient() *AuthClient {
-	authURL := env.GetEnv(env.SupabaseUrl)
-	authKey := env.GetEnv(env.SupabaseKey)
 	if authURL == "" {
 		panic("SUPABASE_URL is not set")
 	}
@@ -107,7 +115,8 @@ func (au *AuthClient) Refresh(token string, refreshToken string) (*action.UserAu
 
 func (au *AuthClient) ResetPasswordMail(email string) error {
 	ctx := context.Background()
-	err := au.client.Auth.ResetPasswordForEmail(ctx, email)
+	// client := supa.CreateClient(authURL + "", authKey)
+	err := au.resetPasswordForEmailWithRedirect(ctx, email, "app.heiwadai-hotel://reset_pass")
 	if err != nil {
 		return err
 	}
@@ -158,4 +167,57 @@ func (au *AuthClient) GetUserID(token string) (*uuid.UUID, *action.UserType, err
 	metadata := user.UserMetadata["user_type"].(string)
 	userType := action.UserType(metadata)
 	return &userID, &userType, nil
+}
+
+// ResetPasswordForEmail sends a password recovery link to the given e-mail address.
+func (au *AuthClient) resetPasswordForEmailWithRedirect(ctx context.Context, email string, redirectURL string) error {
+	reqBody, _ := json.Marshal(map[string]string{"email": email})
+	reqURL := fmt.Sprintf("%s/%s/recover?redirect_to=%s", au.client.BaseURL, supa.AuthEndpoint, url.QueryEscape(redirectURL))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, reqURL, bytes.NewBuffer(reqBody))
+	if err != nil {
+		return err
+	}
+
+	if err = au.sendRequest(req, nil); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (au *AuthClient) sendRequest(req *http.Request, v interface{}) error {
+	var errRes supa.ErrorResponse
+	hasCustomError, err := au.sendCustomRequest(req, v, &errRes)
+
+	if err != nil {
+		return err
+	} else if hasCustomError {
+		return &errRes
+	}
+
+	return nil
+}
+
+func (au *AuthClient) sendCustomRequest(req *http.Request, successValue interface{}, errorValue interface{}) (bool, error) {
+	req.Header.Set("apikey", au.apiKey)
+	res, err := au.client.HTTPClient.Do(req)
+	if err != nil {
+		return true, err
+	}
+
+	defer res.Body.Close()
+	statusOK := res.StatusCode >= http.StatusOK && res.StatusCode < 300
+	if !statusOK {
+		if err = json.NewDecoder(res.Body).Decode(&errorValue); err == nil {
+			return true, nil
+		}
+
+		return false, fmt.Errorf("unknown, status code: %d", res.StatusCode)
+	} else if res.StatusCode != http.StatusNoContent {
+		if err = json.NewDecoder(res.Body).Decode(&successValue); err != nil {
+			return false, err
+		}
+	}
+
+	return false, nil
 }

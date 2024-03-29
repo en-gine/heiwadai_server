@@ -112,6 +112,8 @@ func Index(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, CheckMyIP())
 	fmt.Fprintln(w, CheckRedisStatus())
 	fmt.Fprintln(w, CheckDBStatus())
+	fmt.Fprintln(w, "サーバー時刻:", time.Now())
+
 }
 
 func CheckRedisStatus() string {
@@ -128,6 +130,10 @@ func CheckDBStatus() string {
 	db := repository.InitDB()
 	if db == nil {
 		return "DB connection error :("
+	}
+	err := db.Ping()
+	if err != nil {
+		return "DB connection error :( \n" + err.Error()
 	}
 	return "DB connection success!"
 }

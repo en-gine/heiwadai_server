@@ -50,13 +50,13 @@ const (
 // StoreControllerClient is a client for the server.user.StoreController service.
 type StoreControllerClient interface {
 	// 店舗情報の詳細を取得
-	GetByID(context.Context, *connect_go.Request[user.SoreIDRequest]) (*connect_go.Response[shared.Store], error)
+	GetByID(context.Context, *connect_go.Request[user.StoreIDRequest]) (*connect_go.Response[shared.Store], error)
 	// 店舗情報の一覧を取得
 	GetAll(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[shared.Stores], error)
 	// ホテル（宿泊可能な店舗）の一覧を取得
 	GetStayables(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[shared.StayableStores], error)
 	// ホテル（宿泊可能な店舗）の詳細を取得
-	GetStayableByID(context.Context, *connect_go.Request[user.SoreIDRequest]) (*connect_go.Response[shared.StayableStore], error)
+	GetStayableByID(context.Context, *connect_go.Request[user.StoreIDRequest]) (*connect_go.Response[shared.StayableStore], error)
 }
 
 // NewStoreControllerClient constructs a client for the server.user.StoreController service. By
@@ -69,7 +69,7 @@ type StoreControllerClient interface {
 func NewStoreControllerClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) StoreControllerClient {
 	baseURL = strings.TrimRight(baseURL, "/")
 	return &storeControllerClient{
-		getByID: connect_go.NewClient[user.SoreIDRequest, shared.Store](
+		getByID: connect_go.NewClient[user.StoreIDRequest, shared.Store](
 			httpClient,
 			baseURL+StoreControllerGetByIDProcedure,
 			opts...,
@@ -84,7 +84,7 @@ func NewStoreControllerClient(httpClient connect_go.HTTPClient, baseURL string, 
 			baseURL+StoreControllerGetStayablesProcedure,
 			opts...,
 		),
-		getStayableByID: connect_go.NewClient[user.SoreIDRequest, shared.StayableStore](
+		getStayableByID: connect_go.NewClient[user.StoreIDRequest, shared.StayableStore](
 			httpClient,
 			baseURL+StoreControllerGetStayableByIDProcedure,
 			opts...,
@@ -94,14 +94,14 @@ func NewStoreControllerClient(httpClient connect_go.HTTPClient, baseURL string, 
 
 // storeControllerClient implements StoreControllerClient.
 type storeControllerClient struct {
-	getByID         *connect_go.Client[user.SoreIDRequest, shared.Store]
+	getByID         *connect_go.Client[user.StoreIDRequest, shared.Store]
 	getAll          *connect_go.Client[emptypb.Empty, shared.Stores]
 	getStayables    *connect_go.Client[emptypb.Empty, shared.StayableStores]
-	getStayableByID *connect_go.Client[user.SoreIDRequest, shared.StayableStore]
+	getStayableByID *connect_go.Client[user.StoreIDRequest, shared.StayableStore]
 }
 
 // GetByID calls server.user.StoreController.GetByID.
-func (c *storeControllerClient) GetByID(ctx context.Context, req *connect_go.Request[user.SoreIDRequest]) (*connect_go.Response[shared.Store], error) {
+func (c *storeControllerClient) GetByID(ctx context.Context, req *connect_go.Request[user.StoreIDRequest]) (*connect_go.Response[shared.Store], error) {
 	return c.getByID.CallUnary(ctx, req)
 }
 
@@ -116,20 +116,20 @@ func (c *storeControllerClient) GetStayables(ctx context.Context, req *connect_g
 }
 
 // GetStayableByID calls server.user.StoreController.GetStayableByID.
-func (c *storeControllerClient) GetStayableByID(ctx context.Context, req *connect_go.Request[user.SoreIDRequest]) (*connect_go.Response[shared.StayableStore], error) {
+func (c *storeControllerClient) GetStayableByID(ctx context.Context, req *connect_go.Request[user.StoreIDRequest]) (*connect_go.Response[shared.StayableStore], error) {
 	return c.getStayableByID.CallUnary(ctx, req)
 }
 
 // StoreControllerHandler is an implementation of the server.user.StoreController service.
 type StoreControllerHandler interface {
 	// 店舗情報の詳細を取得
-	GetByID(context.Context, *connect_go.Request[user.SoreIDRequest]) (*connect_go.Response[shared.Store], error)
+	GetByID(context.Context, *connect_go.Request[user.StoreIDRequest]) (*connect_go.Response[shared.Store], error)
 	// 店舗情報の一覧を取得
 	GetAll(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[shared.Stores], error)
 	// ホテル（宿泊可能な店舗）の一覧を取得
 	GetStayables(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[shared.StayableStores], error)
 	// ホテル（宿泊可能な店舗）の詳細を取得
-	GetStayableByID(context.Context, *connect_go.Request[user.SoreIDRequest]) (*connect_go.Response[shared.StayableStore], error)
+	GetStayableByID(context.Context, *connect_go.Request[user.StoreIDRequest]) (*connect_go.Response[shared.StayableStore], error)
 }
 
 // NewStoreControllerHandler builds an HTTP handler from the service implementation. It returns the
@@ -177,7 +177,7 @@ func NewStoreControllerHandler(svc StoreControllerHandler, opts ...connect_go.Ha
 // UnimplementedStoreControllerHandler returns CodeUnimplemented from all methods.
 type UnimplementedStoreControllerHandler struct{}
 
-func (UnimplementedStoreControllerHandler) GetByID(context.Context, *connect_go.Request[user.SoreIDRequest]) (*connect_go.Response[shared.Store], error) {
+func (UnimplementedStoreControllerHandler) GetByID(context.Context, *connect_go.Request[user.StoreIDRequest]) (*connect_go.Response[shared.Store], error) {
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.StoreController.GetByID is not implemented"))
 }
 
@@ -189,6 +189,6 @@ func (UnimplementedStoreControllerHandler) GetStayables(context.Context, *connec
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.StoreController.GetStayables is not implemented"))
 }
 
-func (UnimplementedStoreControllerHandler) GetStayableByID(context.Context, *connect_go.Request[user.SoreIDRequest]) (*connect_go.Response[shared.StayableStore], error) {
+func (UnimplementedStoreControllerHandler) GetStayableByID(context.Context, *connect_go.Request[user.StoreIDRequest]) (*connect_go.Response[shared.StayableStore], error) {
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.StoreController.GetStayableByID is not implemented"))
 }

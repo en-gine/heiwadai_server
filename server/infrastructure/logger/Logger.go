@@ -93,6 +93,10 @@ func Debug(message string) {
 	Log(LevelDebug, message)
 }
 
+func DebugPrint(object interface{}) {
+	fmt.Printf("(%%#v) %#v\n", object)
+}
+
 func Fatal(message string) {
 	Log(LevelFatal, message)
 }

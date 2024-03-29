@@ -103,7 +103,7 @@ func (ac *AnonAuthController) IsUnderRegister(ctx context.Context, req *connect.
 
 func (ac *AnonAuthController) ResendInviteMail(ctx context.Context, req *connect.Request[user.UserMailRequest]) (*connect.Response[emptypb.Empty], error) {
 	msg := req.Msg
-	err := ac.authUseCase.ResetPasswordMail(msg.Email)
+	err := ac.authUseCase.ResendInviteMail(msg.Email)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, errors.New("招待メールの再送信に失敗しました。"))
 	}

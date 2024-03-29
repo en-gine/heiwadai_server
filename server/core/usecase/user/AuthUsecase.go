@@ -17,6 +17,7 @@ import (
 type AuthUsecase struct {
 	userRepository         repository.IUserRepository
 	userQuery              queryservice.IUserQueryService
+	adminQuery             queryservice.IAdminQueryService
 	userLoginLogRepository repository.IUserLoginLogRepository
 	authAction             action.IAuthAction
 }
@@ -24,12 +25,14 @@ type AuthUsecase struct {
 func NewAuthUsecase(
 	userRepository repository.IUserRepository,
 	userQuery queryservice.IUserQueryService,
+	adminQuery queryservice.IAdminQueryService,
 	userLoginLogRepository repository.IUserLoginLogRepository,
 	authAction action.IAuthAction,
 ) *AuthUsecase {
 	return &AuthUsecase{
 		userRepository:         userRepository,
 		userQuery:              userQuery,
+		adminQuery:             adminQuery,
 		userLoginLogRepository: userLoginLogRepository,
 		authAction:             authAction,
 	}
@@ -62,6 +65,15 @@ func (u *AuthUsecase) Register(
 
 	if existUser != nil {
 		return nil, errors.NewDomainError(errors.AlreadyExist, "既に登録されているメールアドレスです")
+	}
+
+	existAdmin, err := u.adminQuery.GetByMail(Mail)
+	if err != nil {
+		return nil, errors.NewDomainError(errors.QueryDataNotFoundError, "管理者の検索に失敗しました")
+	}
+
+	if existAdmin != nil {
+		return nil, errors.NewDomainError(errors.AlreadyExist, "既に内部スタッフとして登録されているメールアドレスです")
 	}
 
 	prefecture := entity.Prefecture(PrefectureID)

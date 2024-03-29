@@ -28,7 +28,7 @@ func NewStoreController(storeUsecase *usecase.StoreUsecase) *StoreController {
 	}
 }
 
-func (ac *StoreController) GetByID(ctx context.Context, req *connect.Request[user.SoreIDRequest]) (*connect.Response[shared.Store], error) {
+func (ac *StoreController) GetByID(ctx context.Context, req *connect.Request[user.StoreIDRequest]) (*connect.Response[shared.Store], error) {
 	msg := req.Msg
 	storeID, err := uuid.Parse(msg.ID)
 	if err != nil {
@@ -61,7 +61,7 @@ func (ac *StoreController) GetAll(ctx context.Context, req *connect.Request[empt
 	}), nil
 }
 
-func (ac *StoreController) GetStayableByID(ctx context.Context, req *connect.Request[user.SoreIDRequest]) (*connect.Response[shared.StayableStore], error) {
+func (ac *StoreController) GetStayableByID(ctx context.Context, req *connect.Request[user.StoreIDRequest]) (*connect.Response[shared.StayableStore], error) {
 	msg := req.Msg
 	storeID, err := uuid.Parse(msg.ID)
 	if err != nil {

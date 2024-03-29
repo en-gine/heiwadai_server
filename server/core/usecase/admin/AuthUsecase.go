@@ -16,6 +16,7 @@ import (
 type AuthUsecase struct {
 	adminRepository        repository.IAdminRepository
 	adminQuery             queryservice.IAdminQueryService
+	userQuery              queryservice.IUserQueryService
 	storeQuery             queryservice.IStoreQueryService
 	userLoginLogRepository repository.IUserLoginLogRepository
 	authAction             action.IAuthAction
@@ -24,6 +25,7 @@ type AuthUsecase struct {
 func NewAuthUsecase(
 	adminRepository repository.IAdminRepository,
 	adminQuery queryservice.IAdminQueryService,
+	userQuery queryservice.IUserQueryService,
 	storeQuery queryservice.IStoreQueryService,
 	userLoginLogRepository repository.IUserLoginLogRepository,
 	authAction action.IAuthAction,
@@ -31,6 +33,7 @@ func NewAuthUsecase(
 	return &AuthUsecase{
 		adminRepository:        adminRepository,
 		adminQuery:             adminQuery,
+		userQuery:              userQuery,
 		storeQuery:             storeQuery,
 		userLoginLogRepository: userLoginLogRepository,
 		authAction:             authAction,
@@ -44,11 +47,20 @@ func (u *AuthUsecase) Register(
 ) (*entity.Admin, *errors.DomainError) {
 	existAdmin, err := u.adminQuery.GetByMail(email)
 	if err != nil {
-		return nil, errors.NewDomainError(errors.QueryDataNotFoundError, "ユーザーの検索に失敗しました")
+		return nil, errors.NewDomainError(errors.QueryDataNotFoundError, "管理者ユーザーの検索に失敗しました")
 	}
 
 	if existAdmin != nil {
 		return nil, errors.NewDomainError(errors.UnPemitedOperation, "既に登録されているメールアドレスです")
+	}
+
+	existUser, err := u.userQuery.GetByMail(email)
+	if err != nil {
+		return nil, errors.NewDomainError(errors.QueryDataNotFoundError, "ユーザーの検索に失敗しました")
+	}
+
+	if existUser != nil {
+		return nil, errors.NewDomainError(errors.UnPemitedOperation, "既にアプリユーザーとして登録されているメールアドレスです")
 	}
 
 	// 招待メール送信

@@ -69,14 +69,13 @@ func (pq *UserQueryService) GetOptionByID(id uuid.UUID) (*entity.UserOption, err
 }
 
 func (pq *UserQueryService) GetByMail(mail string) (*entity.User, error) {
-	// usermanager, err := models.UserManagers(models.UserManagerWhere.Email.EQ(mail), qm.Load(models.UserManagerRels.UserUserDatum), models.UserManagerWhere.IsAdmin.EQ(false)).One(context.Background(), pq.db)
+	usermanager, err := models.UserManagers(models.UserManagerWhere.Email.EQ(mail), qm.Load(models.UserManagerRels.UserUserDatum), models.UserManagerWhere.IsAdmin.EQ(false)).One(context.Background(), pq.db)
 	// 管理者も取得する
-	usermanager, err := models.UserManagers(models.UserManagerWhere.Email.EQ(mail), qm.Load(models.UserManagerRels.UserUserDatum)).One(context.Background(), pq.db)
+	// usermanager, err := models.UserManagers(models.UserManagerWhere.Email.EQ(mail), qm.Load(models.UserManagerRels.UserUserDatum)).One(context.Background(), pq.db)
 
 	if usermanager == nil {
 		return nil, nil
 	}
-
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
@@ -264,6 +263,7 @@ func GetUserListFilterMods(query *types.UserQuery) []qm.QueryMod {
 }
 
 func UserModelToEntity(model *models.UserDatum, email string) *entity.User {
+	logger.DebugPrint(model)
 	return entity.RegenUser(
 		uuid.MustParse(model.UserID),
 		model.FirstName,

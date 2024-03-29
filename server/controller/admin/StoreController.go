@@ -28,7 +28,7 @@ func NewStoreController(storeUsecase *usecase.StoreUsecase) *StoreController {
 	}
 }
 
-func (ac *StoreController) GetByID(ctx context.Context, req *connect.Request[admin.SoreIDRequest]) (*connect.Response[shared.Store], error) {
+func (ac *StoreController) GetByID(ctx context.Context, req *connect.Request[admin.StoreIDRequest]) (*connect.Response[shared.Store], error) {
 	msg := req.Msg
 	storeID, err := uuid.Parse(msg.ID)
 	if err != nil {
@@ -141,7 +141,7 @@ func (ac *StoreController) Update(ctx context.Context, req *connect.Request[admi
 	return connect.NewResponse(resStore), nil
 }
 
-func (ac *StoreController) RegenQRCode(ctx context.Context, req *connect.Request[admin.SoreIDRequest]) (*connect.Response[admin.QRResponse], error) {
+func (ac *StoreController) RegenQRCode(ctx context.Context, req *connect.Request[admin.StoreIDRequest]) (*connect.Response[admin.QRResponse], error) {
 	msg := req.Msg
 	storeID, err := uuid.Parse(msg.ID)
 	if err != nil {
@@ -156,7 +156,7 @@ func (ac *StoreController) RegenQRCode(ctx context.Context, req *connect.Request
 	}), nil
 }
 
-func (ac *StoreController) RegenUnlimitQRCode(ctx context.Context, req *connect.Request[admin.SoreIDRequest]) (*connect.Response[admin.UnlimitQRResponse], error) {
+func (ac *StoreController) RegenUnlimitQRCode(ctx context.Context, req *connect.Request[admin.StoreIDRequest]) (*connect.Response[admin.UnlimitQRResponse], error) {
 	msg := req.Msg
 	storeID, err := uuid.Parse(msg.ID)
 	if err != nil {

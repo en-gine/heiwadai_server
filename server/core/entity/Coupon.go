@@ -126,7 +126,7 @@ func CreateStandardCoupon(
 
 	return newCoupon(
 		uuid.New(),
-		"500円割引",
+		"500円", //割引クーポン
 		CouponStandard,
 		500,
 		expireAtOneYear,

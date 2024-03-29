@@ -51,7 +51,7 @@ func (u *MessageUsecase) Create(title string, content string, postDate time.Time
 	return Message, nil
 }
 
-func (u *MessageUsecase) Update(title *string, content *string, postDate *time.Time, autherId uuid.UUID, MessageID uuid.UUID) (*entity.Message, *errors.DomainError) {
+func (u *MessageUsecase) Update(title *string, content *string, postDate *time.Time, autherID uuid.UUID, MessageID uuid.UUID) (*entity.Message, *errors.DomainError) {
 	oldMessage, err := u.MessageQuery.GetByID(MessageID)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())
@@ -80,7 +80,7 @@ func (u *MessageUsecase) Update(title *string, content *string, postDate *time.T
 	} else {
 		updatePostDate = oldMessage.DisplayDate
 	}
-	updateMessage := entity.RegenMessage(MessageID, updateTitle, updateContent, updatePostDate, autherId, oldMessage.CreateAt)
+	updateMessage := entity.RegenMessage(MessageID, updateTitle, updateContent, updatePostDate, autherID, oldMessage.CreateAt)
 
 	err = u.MessageRepository.Save(updateMessage)
 	if err != nil {
