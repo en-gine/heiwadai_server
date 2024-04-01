@@ -11,12 +11,10 @@ import (
 
 func NewLogger() connect.Option {
 	interceptor := func(next connect.UnaryFunc) connect.UnaryFunc {
-
 		return connect.UnaryFunc(func(ctx context.Context, req connect.AnyRequest) (connect.AnyResponse, error) {
-
 			if env.GetEnv(env.EnvMode) == "dev" {
 				fmt.Println("----------------reqest----------------")
-				fmt.Println(req)
+				fmt.Println(req.Header())
 			}
 			res, err := next(ctx, req)
 			if err != nil {

@@ -19,6 +19,7 @@ require (
 	github.com/supabase-community/storage-go v0.7.0
 	github.com/volatiletech/null/v8 v8.1.2
 	github.com/volatiletech/randomize v0.0.1
+	github.com/volatiletech/sqlboiler v3.7.1+incompatible
 	github.com/volatiletech/sqlboiler/v4 v4.14.2
 	github.com/volatiletech/strmangle v0.0.4
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1

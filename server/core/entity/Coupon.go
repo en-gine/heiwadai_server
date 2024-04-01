@@ -126,7 +126,7 @@ func CreateStandardCoupon(
 
 	return newCoupon(
 		uuid.New(),
-		"500円", //割引クーポン
+		"500円", // 割引クーポン
 		CouponStandard,
 		500,
 		expireAtOneYear,
@@ -142,13 +142,17 @@ func CreateBirthdayCoupon(
 	TargetStore []*Store,
 ) (*Coupon, *errors.DomainError) {
 	// 	ExpireAtは当月の月末まで有効
-	ExpireAt := time.Now().AddDate(0, 1, -time.Now().Day()).AddDate(0, 0, -1)
+
+	now := time.Now()
+	currentYear, currentMonth, _ := now.Date()
+	firstDayOfNextMonth := time.Date(currentYear, currentMonth+1, 1, 0, 0, 0, 0, now.Location())
+	lastDayOfMonth := firstDayOfNextMonth.Add(-24 * time.Hour)
 	return newCoupon(
 		uuid.New(),
 		"お誕生日",
 		CouponBirthday,
 		500,
-		ExpireAt,
+		lastDayOfMonth,
 		false,
 		DefaultNotices,
 		TargetStore,

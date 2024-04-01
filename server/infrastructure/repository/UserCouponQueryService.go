@@ -12,6 +12,7 @@ import (
 	"server/infrastructure/logger"
 
 	"github.com/google/uuid"
+	"github.com/volatiletech/sqlboiler/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
@@ -59,9 +60,12 @@ func (pq *UserCouponQueryService) GetByID(userID uuid.UUID, couponID uuid.UUID) 
 }
 
 func (pq *UserCouponQueryService) GetActiveAll(userID uuid.UUID) ([]*entity.UserAttachedCoupon, error) {
-	userCoupons, err := models.CouponAttachedUsers(models.CouponAttachedUserWhere.UserID.EQ(userID.String()),
+	boil.DebugMode = true
+	userCoupons, err := models.CouponAttachedUsers(
+		models.CouponAttachedUserWhere.UserID.EQ(userID.String()),
 		qm.Load(models.CouponAttachedUserRels.Coupon),
 		models.CouponAttachedUserWhere.UsedAt.IsNull(),
+		// models.CouponWhere.ExpireAt.GTE(time.Now()),
 		// qm.OrderBy(models.CouponAttachedUserColumns.CreatedAt + " DESC"),
 		qm.OrderBy(models.CouponAttachedUserColumns.CouponID+" DESC"),
 	).All(context.Background(), pq.db)

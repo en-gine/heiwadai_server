@@ -22,10 +22,10 @@ func NewAuthCronHeader() connect.Option {
 			}
 
 			if cronSecret != env.GetEnv(env.CronAccessSecret) {
-				return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("認証情報が正しくありません。"))
+				return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("認証情報（シークレットキー）が正しくありません。"))
 			}
 			if cronKey != env.GetEnv(env.CronAccessKey) {
-				return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("認証情報が正しくありません。"))
+				return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("認証情報（キー情報）が正しくありません。"))
 			}
 
 			// allowIps := env.GetEnv(env.AdminClientIps)
@@ -39,7 +39,6 @@ func NewAuthCronHeader() connect.Option {
 			// }
 
 			return next(ctx, req)
-
 		})
 	}
 	return connect.WithInterceptors(connect.UnaryInterceptorFunc(interceptor))

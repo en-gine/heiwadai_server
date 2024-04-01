@@ -11,8 +11,10 @@ import (
 	_ "github.com/lib/pq"
 )
 
-var Conn *sql.DB
-var once sync.Once
+var (
+	Conn *sql.DB
+	once sync.Once
+)
 
 func InitDB() *sql.DB {
 	var err error
