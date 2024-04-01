@@ -11,6 +11,7 @@ import (
 	"server/infrastructure/redis"
 	"server/infrastructure/repository"
 	adminRouter "server/router/admin"
+	cronRouter "server/router/cron"
 	userRouter "server/router/user"
 
 	grpcreflect "github.com/bufbuild/connect-grpcreflect-go"
@@ -27,8 +28,9 @@ func main() {
 
 	userRouter.NewUserServer(mux)
 	adminRouter.NewAdminServer(mux)
-	mux.HandleFunc("/", Index)
+	cronRouter.NewCronServer(mux)
 	RegisterGRPCService(mux) // リフレクションを有効にする
+	mux.HandleFunc("/", Index)
 
 	fmt.Println(os.ExpandEnv("${ENV_MODE} mode run! port: ${PORT}"))
 	fmt.Println(CheckMyIP())
@@ -91,6 +93,7 @@ func RegisterGRPCService(mux *http.ServeMux) *http.ServeMux {
 		"server.user.StoreController",
 		"server.user.UserDataController",
 		"server.user.UserReportController",
+		"server.cron.CronCouponController",
 		"server.admin.AnonAuthController",
 		"server.admin.AuthController",
 		"server.admin.AdminDataController",
@@ -113,7 +116,6 @@ func Index(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, CheckRedisStatus())
 	fmt.Fprintln(w, CheckDBStatus())
 	fmt.Fprintln(w, "サーバー時刻:", time.Now())
-
 }
 
 func CheckRedisStatus() string {

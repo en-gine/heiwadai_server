@@ -9,7 +9,7 @@ import (
 	croncontroller "server/controller/cron"
 )
 
-func NewAdminServer(mux *http.ServeMux) {
+func NewCronServer(mux *http.ServeMux) {
 	requireAuthCronHeader := router.NewAuthCronHeader()
 	couponUsecase := InitializeCronCouponUsecase()
 	couponContoroller := croncontroller.NewCronCouponController(couponUsecase)
