@@ -6,20 +6,24 @@ import (
 	"server/core/entity"
 	"server/core/errors"
 	queryservice "server/core/infra/queryService"
+
+	"github.com/google/uuid"
 )
 
 type PlanUsecase struct {
-	planQuery queryservice.IPlanQueryService
+	planQuery  queryservice.IPlanQueryService
+	storeQuery queryservice.IStoreQueryService
 }
 
-func NewPlanUsecase(planQuery queryservice.IPlanQueryService) *PlanUsecase {
+func NewPlanUsecase(planQuery queryservice.IPlanQueryService, storeQuery queryservice.IStoreQueryService) *PlanUsecase {
 	return &PlanUsecase{
-		planQuery: planQuery,
+		planQuery:  planQuery,
+		storeQuery: storeQuery,
 	}
 }
 
 func (u *PlanUsecase) Search(
-	stayStore []entity.StayableStore,
+	stayStoreIds []uuid.UUID,
 	stayFrom time.Time,
 	stayTo time.Time,
 	adult int,
@@ -29,8 +33,30 @@ func (u *PlanUsecase) Search(
 	mealType entity.MealType,
 	roomTypes []entity.RoomType,
 ) (*[]entity.Plan, *errors.DomainError) {
+	var stayStores []*entity.StayableStore
+	var err error
+
+	if stayStoreIds == nil || len(stayStoreIds) == 0 {
+		stayStores, err = u.storeQuery.GetStayables()
+		if err != nil {
+			return nil, errors.NewDomainError(errors.QueryError, err.Error())
+		}
+	} else {
+		for _, storeId := range stayStoreIds {
+			stayStore, err := u.storeQuery.GetStayableByID(storeId)
+			if err != nil {
+				return nil, errors.NewDomainError(errors.QueryError, err.Error())
+			}
+			if stayStore == nil {
+				return nil, errors.NewDomainError(errors.InvalidParameter, "指定された宿泊施設が見つかりませんでした。")
+			}
+
+			stayStores = append(stayStores, stayStore)
+		}
+	}
+
 	plans, err := u.planQuery.Search(
-		stayStore,
+		stayStores,
 		stayFrom,
 		stayTo,
 		adult,

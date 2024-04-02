@@ -134,7 +134,7 @@ func (p *PlanQuery) GetCalendar(
 }
 
 func (p *PlanQuery) Search(
-	stores []entity.StayableStore,
+	stores []*entity.StayableStore,
 	stayFrom time.Time,
 	stayTo time.Time,
 	adult int,

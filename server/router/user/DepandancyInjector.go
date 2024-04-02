@@ -17,11 +17,11 @@ var (
 	userQuery              = implements.NewUserQueryService()
 	adminQuery             = implements.NewAdminQueryService()
 	storeRepository        = implements.NewStoreRepository()
+	storeQuery             = implements.NewStoreQueryService()
 	checkInRepository      = implements.NewCheckinRepository()
 	couponRepository       = implements.NewCouponRepository()
 	usercouponRepository   = implements.NewUserCouponRepository()
 	usercouponQuery        = implements.NewUserCouponQueryService()
-	storeQuery             = implements.NewStoreQueryService()
 	checkinQuery           = implements.NewCheckinQueryService()
 	couponQuery            = implements.NewCouponQueryService()
 	transaction            = implements.NewTransaction()
@@ -88,6 +88,7 @@ func InitializeStoreUsecase() *usecase.StoreUsecase {
 func InitializePlanUsecase() *usecase.PlanUsecase {
 	return usecase.NewPlanUsecase(
 		planQuery,
+		storeQuery,
 	)
 }
 

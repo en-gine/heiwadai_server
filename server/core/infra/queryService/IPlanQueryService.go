@@ -8,7 +8,7 @@ import (
 
 type IPlanQueryService interface {
 	Search(
-		stayStore []entity.StayableStore,
+		stayStore []*entity.StayableStore,
 		stayFrom time.Time,
 		stayTo time.Time,
 		adult int,

@@ -78,10 +78,6 @@ func Book() {
 		"駐車場利用します",
 		"20231106000000001",
 	)
-	if err != nil {
-		fmt.Print(err)
-		return
-	}
 
 	reserveID, err := p.Reserve(bookData)
 	if err != nil {

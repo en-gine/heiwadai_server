@@ -49,17 +49,17 @@ func (ac *BookController) GetMyBook(ctx context.Context, req *connect.Request[em
 	if domainErr != nil {
 		return nil, controller.ErrorHandler(domainErr)
 	}
-	stores, domainErr := ac.storeUseCase.GetAll()
+	stayStores, domainErr := ac.storeUseCase.GetStayables()
 	if domainErr != nil {
 		return nil, controller.ErrorHandler(domainErr)
 	}
 
 	var resBooks []*user.BookResponse
 	for _, book := range books {
-		var bookstore *entity.Store
-		for _, store := range stores {
-			if store.ID == book.BookPlan.StoreID {
-				bookstore = store
+		var bookstore *entity.StayableStore
+		for _, stayStore := range stayStores {
+			if stayStore.ID == book.BookPlan.StoreID {
+				bookstore = stayStore
 				break
 			}
 		}
@@ -82,12 +82,12 @@ func (ac *BookController) GetBookByID(ctx context.Context, req *connect.Request[
 	if domainErr != nil {
 		return nil, controller.ErrorHandler(domainErr)
 	}
-	store, domainErr := ac.storeUseCase.GetByID(book.BookPlan.StoreID)
+	stayStore, domainErr := ac.storeUseCase.GetStayableByID(book.BookPlan.StoreID)
 	if domainErr != nil {
 		return nil, controller.ErrorHandler(domainErr)
 	}
 
-	bookRes := BookEntityToResponse(book, store)
+	bookRes := BookEntityToResponse(book, stayStore)
 	return connect.NewResponse(bookRes), nil
 }
 
@@ -174,7 +174,7 @@ func (ac *BookController) Reserve(ctx context.Context, req *connect.Request[user
 	return connect.NewResponse(&emptypb.Empty{}), nil
 }
 
-func BookEntityToResponse(entity *entity.Booking, bookstore *entity.Store) *user.BookResponse {
+func BookEntityToResponse(entity *entity.Booking, bookstore *entity.StayableStore) *user.BookResponse {
 	var pref *shared.Prefecture = nil
 	if entity.GuestData.Prefecture != nil {
 		tmp := entity.GuestData.Prefecture.ToInt()
@@ -204,18 +204,22 @@ func BookEntityToResponse(entity *entity.Booking, bookstore *entity.Store) *user
 			Tel:           entity.GuestData.Tel,
 			Mail:          entity.GuestData.Mail,
 		},
-		BookPlan: &user.BookPlan{
-			ID:              entity.BookPlan.ID,
-			Title:           entity.BookPlan.Title,
-			Price:           uint32(entity.BookPlan.Price),
-			ImageURL:        entity.BookPlan.ImageURL,
-			RoomTypeName:    entity.BookPlan.RoomType.String(),
-			MealTypeName:    entity.BookPlan.MealType.String(),
-			SmokeTypeName:   entity.BookPlan.SmokeType.String(),
-			OverView:        entity.BookPlan.OverView,
-			StoreID:         entity.BookPlan.StoreID.String(),
-			StoreName:       bookstore.Name,
-			StoreBranchName: bookstore.BranchName,
-		},
+		Plan: PlanEntityToResponse(entity.BookPlan, bookstore),
+	}
+}
+
+func PlanEntityToResponse(plan *entity.Plan, planStore *entity.StayableStore) *user.DisplayPlan {
+	return &user.DisplayPlan{
+		ID:              plan.ID,
+		Title:           plan.Title,
+		Price:           uint32(plan.Price),
+		ImageURL:        plan.ImageURL,
+		RoomTypeName:    plan.RoomType.String(),
+		MealTypeName:    plan.MealType.String(),
+		SmokeTypeName:   plan.SmokeType.String(),
+		OverView:        plan.OverView,
+		StoreID:         plan.StoreID.String(),
+		StoreName:       planStore.Name,
+		StoreBranchName: planStore.BranchName,
 	}
 }

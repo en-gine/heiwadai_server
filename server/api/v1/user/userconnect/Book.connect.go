@@ -24,6 +24,8 @@ const _ = connect_go.IsAtLeastVersion0_1_0
 const (
 	// BookControllerName is the fully-qualified name of the BookController service.
 	BookControllerName = "server.user.BookController"
+	// PlanControllerName is the fully-qualified name of the PlanController service.
+	PlanControllerName = "server.user.PlanController"
 )
 
 // These constants are the fully-qualified names of the RPCs defined in this package. They're
@@ -44,6 +46,8 @@ const (
 	BookControllerCancelProcedure = "/server.user.BookController/Cancel"
 	// BookControllerReserveProcedure is the fully-qualified name of the BookController's Reserve RPC.
 	BookControllerReserveProcedure = "/server.user.BookController/Reserve"
+	// PlanControllerSearchProcedure is the fully-qualified name of the PlanController's Search RPC.
+	PlanControllerSearchProcedure = "/server.user.PlanController/Search"
 )
 
 // BookControllerClient is a client for the server.user.BookController service.
@@ -190,4 +194,70 @@ func (UnimplementedBookControllerHandler) Cancel(context.Context, *connect_go.Re
 
 func (UnimplementedBookControllerHandler) Reserve(context.Context, *connect_go.Request[user.ReserveRequest]) (*connect_go.Response[emptypb.Empty], error) {
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.BookController.Reserve is not implemented"))
+}
+
+// PlanControllerClient is a client for the server.user.PlanController service.
+type PlanControllerClient interface {
+	Search(context.Context, *connect_go.Request[user.PlanSearchRequest]) (*connect_go.Response[user.PlansResponse], error)
+}
+
+// NewPlanControllerClient constructs a client for the server.user.PlanController service. By
+// default, it uses the Connect protocol with the binary Protobuf Codec, asks for gzipped responses,
+// and sends uncompressed requests. To use the gRPC or gRPC-Web protocols, supply the
+// connect.WithGRPC() or connect.WithGRPCWeb() options.
+//
+// The URL supplied here should be the base URL for the Connect or gRPC server (for example,
+// http://api.acme.com or https://acme.com/grpc).
+func NewPlanControllerClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) PlanControllerClient {
+	baseURL = strings.TrimRight(baseURL, "/")
+	return &planControllerClient{
+		search: connect_go.NewClient[user.PlanSearchRequest, user.PlansResponse](
+			httpClient,
+			baseURL+PlanControllerSearchProcedure,
+			opts...,
+		),
+	}
+}
+
+// planControllerClient implements PlanControllerClient.
+type planControllerClient struct {
+	search *connect_go.Client[user.PlanSearchRequest, user.PlansResponse]
+}
+
+// Search calls server.user.PlanController.Search.
+func (c *planControllerClient) Search(ctx context.Context, req *connect_go.Request[user.PlanSearchRequest]) (*connect_go.Response[user.PlansResponse], error) {
+	return c.search.CallUnary(ctx, req)
+}
+
+// PlanControllerHandler is an implementation of the server.user.PlanController service.
+type PlanControllerHandler interface {
+	Search(context.Context, *connect_go.Request[user.PlanSearchRequest]) (*connect_go.Response[user.PlansResponse], error)
+}
+
+// NewPlanControllerHandler builds an HTTP handler from the service implementation. It returns the
+// path on which to mount the handler and the handler itself.
+//
+// By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
+// and JSON codecs. They also support gzip compression.
+func NewPlanControllerHandler(svc PlanControllerHandler, opts ...connect_go.HandlerOption) (string, http.Handler) {
+	planControllerSearchHandler := connect_go.NewUnaryHandler(
+		PlanControllerSearchProcedure,
+		svc.Search,
+		opts...,
+	)
+	return "/server.user.PlanController/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case PlanControllerSearchProcedure:
+			planControllerSearchHandler.ServeHTTP(w, r)
+		default:
+			http.NotFound(w, r)
+		}
+	})
+}
+
+// UnimplementedPlanControllerHandler returns CodeUnimplemented from all methods.
+type UnimplementedPlanControllerHandler struct{}
+
+func (UnimplementedPlanControllerHandler) Search(context.Context, *connect_go.Request[user.PlanSearchRequest]) (*connect_go.Response[user.PlansResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.PlanController.Search is not implemented"))
 }
