@@ -52,7 +52,16 @@ func (ac *PlanController) Search(ctx context.Context, req *connect.Request[user.
 	for _, roomType := range msg.RoomTypes {
 		roomTypes = append(roomTypes, entity.RoomType(roomType))
 	}
-
+	var morning bool
+	var dinner bool
+	for _, mealType := range req.Msg.MealTypes {
+		switch mealType {
+		case user.MealType_Morning:
+			morning = true
+		case user.MealType_Dinner:
+			dinner = true
+		}
+	}
 	plans, domainErr := ac.planUseCase.Search(
 		storeUUIDs,
 		msg.StayFrom.AsTime(),
@@ -62,8 +71,8 @@ func (ac *PlanController) Search(ctx context.Context, req *connect.Request[user.
 		int(msg.RoomCount),
 		smokeTypes,
 		entity.MealType{
-			Morning: msg.MealType.Morning,
-			Dinner:  msg.MealType.Dinner,
+			Morning: morning,
+			Dinner:  dinner,
 		},
 		roomTypes,
 	)

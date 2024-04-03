@@ -11,6 +11,7 @@ import (
 	"server/infrastructure/logger"
 
 	"github.com/google/uuid"
+	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
 var _ queryservice.IStoreQueryService = &StoreQueryService{}
@@ -53,7 +54,7 @@ func (pq *StoreQueryService) GetByID(id uuid.UUID) (*entity.Store, error) {
 }
 
 func (pq *StoreQueryService) GetActiveAll() ([]*entity.Store, error) {
-	stores, err := models.Stores(models.StoreWhere.IsActive.EQ(true)).All(context.Background(), pq.db)
+	stores, err := models.Stores(qm.Load(models.StoreRels.StayableStoreInfo), models.StoreWhere.IsActive.EQ(true)).All(context.Background(), pq.db)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
@@ -66,7 +67,7 @@ func (pq *StoreQueryService) GetActiveAll() ([]*entity.Store, error) {
 	}
 	var result []*entity.Store
 	for _, store := range stores {
-		result = append(result, StoreModelToEntity(store, nil))
+		result = append(result, StoreModelToEntity(store, store.R.StayableStoreInfo))
 	}
 	return result, nil
 }
@@ -117,7 +118,7 @@ func (pq *StoreQueryService) GetStayables() ([]*entity.StayableStore, error) {
 }
 
 func (pq *StoreQueryService) GetAll() ([]*entity.Store, error) {
-	stores, err := models.Stores().All(context.Background(), pq.db)
+	stores, err := models.Stores(qm.Load(models.StoreRels.StayableStoreInfo)).All(context.Background(), pq.db)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
@@ -130,7 +131,7 @@ func (pq *StoreQueryService) GetAll() ([]*entity.Store, error) {
 	}
 	var result []*entity.Store
 	for _, store := range stores {
-		result = append(result, StoreModelToEntity(store, nil))
+		result = append(result, StoreModelToEntity(store, store.R.StayableStoreInfo))
 	}
 	return result, nil
 }

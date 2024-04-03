@@ -36,7 +36,7 @@ func (u *PlanUsecase) Search(
 	var stayStores []*entity.StayableStore
 	var err error
 
-	if stayStoreIds == nil || len(stayStoreIds) == 0 {
+	if len(stayStoreIds) == 0 {
 		stayStores, err = u.storeQuery.GetStayables()
 		if err != nil {
 			return nil, errors.NewDomainError(errors.QueryError, err.Error())

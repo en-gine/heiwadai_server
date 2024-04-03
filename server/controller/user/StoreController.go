@@ -105,18 +105,19 @@ func (ac *StoreController) GetStayables(ctx context.Context, req *connect.Reques
 
 func StoreToResponse(store *entity.Store) *shared.Store {
 	return &shared.Store{
-		ID:              store.ID.String(),
-		Name:            store.Name,
-		BranchName:      store.BranchName,
-		ZipCode:         store.ZipCode,
-		Address:         store.Address,
-		Tel:             store.Tel,
-		SiteURL:         store.SiteURL,
-		StampImageURL:   store.StampImageURL,
-		Stayable:        store.Stayable,
-		IsActive:        store.IsActive,
-		QRCode:          store.QRCode.String(),
-		UnLimitedQRCode: store.UnLimitedQRCode.String(),
+		ID:                store.ID.String(),
+		Name:              store.Name,
+		BranchName:        store.BranchName,
+		ZipCode:           store.ZipCode,
+		Address:           store.Address,
+		Tel:               store.Tel,
+		SiteURL:           store.SiteURL,
+		StampImageURL:     store.StampImageURL,
+		Stayable:          store.Stayable,
+		IsActive:          store.IsActive,
+		QRCode:            store.QRCode.String(),
+		UnLimitedQRCode:   store.UnLimitedQRCode.String(),
+		StayableStoreInfo: StayableInfoToResponse(store.StayableStoreInfo),
 	}
 }
 

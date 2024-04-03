@@ -133,19 +133,27 @@ func (ac *BookController) Reserve(ctx context.Context, req *connect.Request[user
 		req.Msg.GuestData.Mail,
 	)
 
+	var morning bool
+	var dinner bool
+	for _, mealType := range req.Msg.RequestPlan.MealTypes {
+		switch mealType {
+		case user.MealType_Morning:
+			morning = true
+		case user.MealType_Dinner:
+			dinner = true
+		}
+	}
+
 	plan := entity.RegenPlan(
-		req.Msg.BookPlan.ID,
-		req.Msg.BookPlan.Title,
-		uint(req.Msg.BookPlan.Price),
-		req.Msg.BookPlan.ImageURL,
-		entity.RoomType(req.Msg.BookPlan.RoomType),
-		entity.MealType{
-			Morning: req.Msg.BookPlan.MealType.Morning,
-			Dinner:  req.Msg.BookPlan.MealType.Dinner,
-		},
-		entity.SmokeType(req.Msg.BookPlan.SmokeType),
-		req.Msg.BookPlan.OverView,
-		uuid.MustParse(req.Msg.BookPlan.StoreID),
+		req.Msg.RequestPlan.ID,
+		req.Msg.RequestPlan.Title,
+		uint(req.Msg.RequestPlan.Price),
+		req.Msg.RequestPlan.ImageURL,
+		entity.RoomType(req.Msg.RequestPlan.RoomType),
+		entity.MealType{Morning: morning, Dinner: dinner},
+		entity.SmokeType(req.Msg.RequestPlan.SmokeType),
+		req.Msg.RequestPlan.OverView,
+		uuid.MustParse(req.Msg.RequestPlan.StoreID),
 	)
 
 	var note string
