@@ -42,7 +42,7 @@ func (u *UserDataController) Update(ctx context.Context, req *connect.Request[ad
 	user := msg.User
 
 	entity, domainErr := u.userUsecase.Update(
-		uuid.MustParse(user.ID),
+		uuid.MustParse(msg.UserID),
 		user.FirstName,
 		user.LastName,
 		user.FirstNameKana,
