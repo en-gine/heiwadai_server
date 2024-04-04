@@ -80,3 +80,11 @@ func (u *UserDataUsecase) Update(
 
 	return updateData, nil
 }
+
+func (u *UserDataUsecase) GetUser(userID uuid.UUID) (*entity.User, *errors.DomainError) {
+	user, err := u.userQuery.GetByID(userID)
+	if err != nil {
+		return nil, errors.NewDomainError(errors.QueryError, err.Error())
+	}
+	return user, nil
+}

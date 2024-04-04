@@ -10,9 +10,9 @@ import (
 )
 
 func main() {
-	StampCard()
+	// StampCard()
 	// UnlimitCheckin()
-	// Checkin()
+	Checkin()
 }
 
 func Checkin() {

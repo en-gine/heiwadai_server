@@ -8,6 +8,7 @@ import (
 	context "context"
 	errors "errors"
 	connect_go "github.com/bufbuild/connect-go"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	http "net/http"
 	user "server/api/v1/user"
 	strings "strings"
@@ -36,12 +37,16 @@ const (
 	// UserDataControllerUpdateProcedure is the fully-qualified name of the UserDataController's Update
 	// RPC.
 	UserDataControllerUpdateProcedure = "/server.user.UserDataController/Update"
+	// UserDataControllerGetUserProcedure is the fully-qualified name of the UserDataController's
+	// GetUser RPC.
+	UserDataControllerGetUserProcedure = "/server.user.UserDataController/GetUser"
 )
 
 // UserDataControllerClient is a client for the server.user.UserDataController service.
 type UserDataControllerClient interface {
 	// ユーザー情報の更新
 	Update(context.Context, *connect_go.Request[user.UserUpdateDataRequest]) (*connect_go.Response[user.UserDataResponse], error)
+	GetUser(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[user.UserDataResponse], error)
 }
 
 // NewUserDataControllerClient constructs a client for the server.user.UserDataController service.
@@ -59,12 +64,18 @@ func NewUserDataControllerClient(httpClient connect_go.HTTPClient, baseURL strin
 			baseURL+UserDataControllerUpdateProcedure,
 			opts...,
 		),
+		getUser: connect_go.NewClient[emptypb.Empty, user.UserDataResponse](
+			httpClient,
+			baseURL+UserDataControllerGetUserProcedure,
+			opts...,
+		),
 	}
 }
 
 // userDataControllerClient implements UserDataControllerClient.
 type userDataControllerClient struct {
-	update *connect_go.Client[user.UserUpdateDataRequest, user.UserDataResponse]
+	update  *connect_go.Client[user.UserUpdateDataRequest, user.UserDataResponse]
+	getUser *connect_go.Client[emptypb.Empty, user.UserDataResponse]
 }
 
 // Update calls server.user.UserDataController.Update.
@@ -72,10 +83,16 @@ func (c *userDataControllerClient) Update(ctx context.Context, req *connect_go.R
 	return c.update.CallUnary(ctx, req)
 }
 
+// GetUser calls server.user.UserDataController.GetUser.
+func (c *userDataControllerClient) GetUser(ctx context.Context, req *connect_go.Request[emptypb.Empty]) (*connect_go.Response[user.UserDataResponse], error) {
+	return c.getUser.CallUnary(ctx, req)
+}
+
 // UserDataControllerHandler is an implementation of the server.user.UserDataController service.
 type UserDataControllerHandler interface {
 	// ユーザー情報の更新
 	Update(context.Context, *connect_go.Request[user.UserUpdateDataRequest]) (*connect_go.Response[user.UserDataResponse], error)
+	GetUser(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[user.UserDataResponse], error)
 }
 
 // NewUserDataControllerHandler builds an HTTP handler from the service implementation. It returns
@@ -89,10 +106,17 @@ func NewUserDataControllerHandler(svc UserDataControllerHandler, opts ...connect
 		svc.Update,
 		opts...,
 	)
+	userDataControllerGetUserHandler := connect_go.NewUnaryHandler(
+		UserDataControllerGetUserProcedure,
+		svc.GetUser,
+		opts...,
+	)
 	return "/server.user.UserDataController/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case UserDataControllerUpdateProcedure:
 			userDataControllerUpdateHandler.ServeHTTP(w, r)
+		case UserDataControllerGetUserProcedure:
+			userDataControllerGetUserHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -104,4 +128,8 @@ type UnimplementedUserDataControllerHandler struct{}
 
 func (UnimplementedUserDataControllerHandler) Update(context.Context, *connect_go.Request[user.UserUpdateDataRequest]) (*connect_go.Response[user.UserDataResponse], error) {
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.UserDataController.Update is not implemented"))
+}
+
+func (UnimplementedUserDataControllerHandler) GetUser(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[user.UserDataResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.UserDataController.GetUser is not implemented"))
 }

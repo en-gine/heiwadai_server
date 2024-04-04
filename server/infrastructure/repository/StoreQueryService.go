@@ -54,7 +54,7 @@ func (pq *StoreQueryService) GetByID(id uuid.UUID) (*entity.Store, error) {
 }
 
 func (pq *StoreQueryService) GetActiveAll() ([]*entity.Store, error) {
-	stores, err := models.Stores(qm.Load(models.StoreRels.StayableStoreInfo), models.StoreWhere.IsActive.EQ(true)).All(context.Background(), pq.db)
+	stores, err := models.Stores(qm.Load(models.StoreRels.StayableStoreInfo), models.StoreWhere.IsActive.EQ(true), qm.OrderBy(models.StoreColumns.CreateAt+" ASC")).All(context.Background(), pq.db)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil

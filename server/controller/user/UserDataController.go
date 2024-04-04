@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"errors"
 
 	shared "server/api/v1/shared"
 	"server/api/v1/user"
@@ -11,9 +12,11 @@ import (
 	"server/controller/util"
 	"server/core/entity"
 	usecase "server/core/usecase/user"
+	"server/router"
 
 	connect "github.com/bufbuild/connect-go"
 	"github.com/google/uuid"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type UserDataController struct {
@@ -47,6 +50,24 @@ func (u *UserDataController) Update(ctx context.Context, req *connect.Request[us
 		msg.Mail,
 		msg.AcceptMail,
 	)
+	if domainErr != nil {
+		return nil, controller.ErrorHandler(domainErr)
+	}
+
+	res := UserEntityToResponse(user)
+	return connect.NewResponse(res), nil
+}
+
+func (u *UserDataController) GetUser(ctx context.Context, req *connect.Request[emptypb.Empty]) (*connect.Response[userv1.UserDataResponse], error) {
+	if ctx.Value(router.UserIDKey) == nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("ユーザーIDが取得できませんでした。"))
+	}
+
+	userID, err := uuid.Parse(ctx.Value(router.UserIDKey).(string))
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("ユーザーIDが取得できませんでした。UUIDの形式が不正です。"))
+	}
+	user, domainErr := u.usecase.GetUser(userID)
 	if domainErr != nil {
 		return nil, controller.ErrorHandler(domainErr)
 	}
