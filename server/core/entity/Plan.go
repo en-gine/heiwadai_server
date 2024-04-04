@@ -128,6 +128,11 @@ func (s SmokeType) String() string {
 	}
 }
 
+var SmokeTypeAll = []SmokeType{
+	SmokeTypeNonSmoking,
+	SmokeTypeSmoking,
+}
+
 func IncludeSmokeType(smokeTypeArr []SmokeType, target SmokeType) bool {
 	for _, v := range smokeTypeArr {
 		if v == target {

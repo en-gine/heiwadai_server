@@ -39,9 +39,9 @@ func (p *PlanQuery) GetCalendar(
 	adult int,
 	child int,
 	roomCount int,
-	smokeTypes *[]entity.SmokeType,
-	mealType *entity.MealType,
-	roomType *entity.RoomType,
+	smokeTypes []entity.SmokeType,
+	mealType entity.MealType,
+	roomType entity.RoomType,
 	fromDate time.Time,
 	toDate time.Time,
 ) (*entity.PlanCalendar, error) {
@@ -111,7 +111,6 @@ func (p *PlanQuery) GetCalendar(
 	if res.Body.OTA_HotelAvailRS.Errors != nil {
 		errs := res.Body.OTA_HotelAvailRS.Errors
 		msg := errs.Error[0].ShortText
-		logger.Error(msg)
 		return nil, errors.New(msg)
 	}
 
@@ -140,17 +139,13 @@ func (p *PlanQuery) Search(
 	adult int,
 	child int,
 	roomCount int,
-	smokeTypes *[]entity.SmokeType,
-	mealType *entity.MealType,
-	roomTypes *[]entity.RoomType,
+	smokeTypes []entity.SmokeType,
+	mealType entity.MealType,
+	roomTypes []entity.RoomType,
 ) (*[]entity.Plan, error) {
 	bookingIDs := []string{}
 	for _, store := range stores {
 		bookingIDs = append(bookingIDs, store.BookingSystemID)
-	}
-
-	if roomTypes == nil || len(*roomTypes) == 0 {
-		roomTypes = &entity.RoomTypeAll
 	}
 
 	if env.GetEnv(env.TlbookingIsTest) == "true" {
@@ -162,9 +157,9 @@ func (p *PlanQuery) Search(
 		err   error
 	}
 
-	resultsCh := make(chan result, len(*roomTypes))
+	resultsCh := make(chan result, len(roomTypes))
 
-	for _, roomType := range *roomTypes {
+	for _, roomType := range roomTypes {
 		go func(rt entity.RoomType) {
 			reqBody := NewOTAHotelAvailRQ(
 				bookingIDs,
@@ -175,7 +170,7 @@ func (p *PlanQuery) Search(
 				roomCount,
 				smokeTypes,
 				mealType,
-				&rt,
+				rt,
 			)
 			request := NewEnvelopeRQ(TLBookingUser, TLBookingPass, reqBody)
 			res, err := util.Request[EnvelopeRQ, EnvelopeRS](TLBookingSearchURL, request)
@@ -203,7 +198,7 @@ func (p *PlanQuery) Search(
 	}
 
 	var allPlans []entity.Plan
-	for i := 0; i < len(*roomTypes); i++ {
+	for i := 0; i < len(roomTypes); i++ {
 		res := <-resultsCh
 		if res.err != nil {
 			return nil, res.err
@@ -312,9 +307,9 @@ func NewOTAHotelAvailRQ(
 	adult int,
 	child int,
 	roomCount int,
-	smokeTypes *[]entity.SmokeType,
-	mealType *entity.MealType,
-	roomType *entity.RoomType,
+	smokeTypes []entity.SmokeType,
+	mealType entity.MealType,
+	roomType entity.RoomType,
 ) *OTA_HotelAvailRQ {
 	// 日付
 	start := util.DateToYYYYMMDD(stayFrom)
@@ -372,11 +367,11 @@ func NewOTAHotelAvailRQ(
 }
 
 func NewRoomStayCandidate(
-	roomType *entity.RoomType,
+	roomType entity.RoomType,
 	adult int,
 	child *int,
 	roomCount int,
-	smokeTypes *[]entity.SmokeType,
+	smokeTypes []entity.SmokeType,
 	effectiveDate *time.Time,
 	expireDate *time.Time,
 ) *RoomStayCandidate {
@@ -384,11 +379,11 @@ func NewRoomStayCandidate(
 	var nonSmokingQuery *bool
 	if smokeTypes == nil {
 		nonSmokingQuery = nil
-	} else if entity.IncludeSmokeType(*smokeTypes, entity.SmokeTypeNonSmoking) {
+	} else if entity.IncludeSmokeType(smokeTypes, entity.SmokeTypeNonSmoking) {
 		nonSmokingQuery = util.BoolPtr(true)
-	} else if entity.IncludeSmokeType(*smokeTypes, entity.SmokeTypeSmoking) {
+	} else if entity.IncludeSmokeType(smokeTypes, entity.SmokeTypeSmoking) {
 		nonSmokingQuery = util.BoolPtr(false)
-	} else if entity.IncludeSmokeType(*smokeTypes, entity.SmokeTypeNonSmoking) && entity.IncludeSmokeType(*smokeTypes, entity.SmokeTypeSmoking) {
+	} else if entity.IncludeSmokeType(smokeTypes, entity.SmokeTypeNonSmoking) && entity.IncludeSmokeType(smokeTypes, entity.SmokeTypeSmoking) {
 		// 禁煙喫煙両方の場合は条件指定なし
 		nonSmokingQuery = nil
 	}
@@ -424,28 +419,18 @@ func NewRoomStayCandidate(
 	return candidate
 }
 
-func MealTypeToQuery(mealType *entity.MealType) *MealsIncluded {
+func MealTypeToQuery(mealType entity.MealType) *MealsIncluded {
 	var mealMorning *bool
 	var mealDinner *bool
-	if mealType != nil {
-		mealMorning = &mealType.Morning
-		mealDinner = &mealType.Dinner
-	} else {
-		mealMorning = nil
-		mealDinner = nil
-	}
 	return &MealsIncluded{
 		Breakfast: mealMorning,
 		Dinner:    mealDinner,
 	}
 }
 
-func RoomTypeToBedType(rt *entity.RoomType) *BedTypeCode {
+func RoomTypeToBedType(rt entity.RoomType) *BedTypeCode {
 	var code BedTypeCode
-	if rt == nil {
-		return nil
-	}
-	switch *rt {
+	switch rt {
 	case entity.RoomTypeSingle:
 		code = BedTypeSingle
 	case entity.RoomTypeSemiDouble:

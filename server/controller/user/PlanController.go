@@ -34,26 +34,40 @@ func (ac *PlanController) Search(ctx context.Context, req *connect.Request[user.
 	for _, storeId := range msg.StoreIDs {
 		storeUUID, err := uuid.Parse(storeId)
 		if err != nil {
-			return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("StoreIDが正しい形式ではありません。"))
+			return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("店舗IDが正しい形式ではありません。"))
 		}
 		storeUUIDs = append(storeUUIDs, storeUUID)
 	}
 
-	if msg.RoomCount == 0 {
-		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("RoomCountは1以上で指定してください。"))
+	if msg.RoomCount <= 0 {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("部屋数は1以上で指定してください。"))
 	}
 
-	var smokeTypes []entity.SmokeType
-	for _, smokeType := range msg.SmokeTypes {
-		smokeTypes = append(smokeTypes, entity.SmokeType(smokeType))
+	if msg.Adult <= 0 {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("大人の人数を指定してください。"))
 	}
 
-	var roomTypes []entity.RoomType
-	for _, roomType := range msg.RoomTypes {
-		roomTypes = append(roomTypes, entity.RoomType(roomType))
+	var smokeTypes *[]entity.SmokeType
+	if len(msg.SmokeTypes) > 0 {
+		var smokeTypeList []entity.SmokeType
+		for _, smokeType := range msg.SmokeTypes {
+			smokeTypeList = append(smokeTypeList, entity.SmokeType(smokeType))
+		}
+		smokeTypes = &smokeTypeList
 	}
+
+	var roomTypes *[]entity.RoomType
+	if len(msg.RoomTypes) > 0 {
+		var roomTypeList []entity.RoomType
+		for _, roomType := range msg.RoomTypes {
+			roomTypeList = append(roomTypeList, entity.RoomType(roomType))
+		}
+		roomTypes = &roomTypeList
+	}
+
 	var morning bool
 	var dinner bool
+	var mealType *entity.MealType
 	for _, mealType := range req.Msg.MealTypes {
 		switch mealType {
 		case user.MealType_Morning:
@@ -62,6 +76,14 @@ func (ac *PlanController) Search(ctx context.Context, req *connect.Request[user.
 			dinner = true
 		}
 	}
+
+	if morning || dinner {
+		mealType = &entity.MealType{
+			Morning: morning,
+			Dinner:  dinner,
+		}
+	}
+
 	plans, domainErr := ac.planUseCase.Search(
 		storeUUIDs,
 		msg.StayFrom.AsTime(),
@@ -70,10 +92,7 @@ func (ac *PlanController) Search(ctx context.Context, req *connect.Request[user.
 		int(msg.Child),
 		int(msg.RoomCount),
 		smokeTypes,
-		entity.MealType{
-			Morning: morning,
-			Dinner:  dinner,
-		},
+		mealType,
 		roomTypes,
 	)
 	if domainErr != nil {

@@ -14,8 +14,8 @@ type IPlanQueryService interface {
 		adult int,
 		child int,
 		roomCount int,
-		smokeTypes *[]entity.SmokeType,
-		mealType *entity.MealType,
-		roomTypes *[]entity.RoomType,
+		smokeTypes []entity.SmokeType,
+		mealType entity.MealType,
+		roomTypes []entity.RoomType,
 	) (*[]entity.Plan, error)
 }

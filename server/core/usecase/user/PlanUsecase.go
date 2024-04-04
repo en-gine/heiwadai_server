@@ -29,9 +29,9 @@ func (u *PlanUsecase) Search(
 	adult int,
 	child int,
 	roomCount int,
-	smokeTypes []entity.SmokeType,
-	mealType entity.MealType,
-	roomTypes []entity.RoomType,
+	smokeTypes *[]entity.SmokeType,
+	mealType *entity.MealType,
+	roomTypes *[]entity.RoomType,
 ) (*[]entity.Plan, *errors.DomainError) {
 	var stayStores []*entity.StayableStore
 	var err error
@@ -55,6 +55,21 @@ func (u *PlanUsecase) Search(
 		}
 	}
 
+	if roomTypes == nil || len(*roomTypes) == 0 {
+		roomTypes = &entity.RoomTypeAll
+	}
+
+	if smokeTypes == nil || len(*smokeTypes) == 0 {
+		smokeTypes = &entity.SmokeTypeAll
+	}
+
+	if mealType == nil {
+		mealType = &entity.MealType{
+			Morning: true,
+			Dinner:  true,
+		}
+	}
+
 	plans, err := u.planQuery.Search(
 		stayStores,
 		stayFrom,
@@ -62,9 +77,9 @@ func (u *PlanUsecase) Search(
 		adult,
 		child,
 		roomCount,
-		&smokeTypes,
-		&mealType,
-		&roomTypes,
+		*smokeTypes,
+		*mealType,
+		*roomTypes,
 	)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())

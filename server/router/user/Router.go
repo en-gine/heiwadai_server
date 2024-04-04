@@ -68,4 +68,9 @@ func NewUserServer(mux *http.ServeMux) {
 	userReportContoroller := usercontroller.NewUserReportController(userReportUsecase)
 	path, handler = userv1connect.NewUserReportControllerHandler(userReportContoroller, requireAuth)
 	mux.Handle(path, handler)
+
+	planUsecase := InitializePlanUsecase()
+	planContoroller := usercontroller.NewPlanController(planUsecase, storeUsecase)
+	path, handler = userv1connect.NewPlanControllerHandler(planContoroller, requireAuth)
+	mux.Handle(path, handler)
 }

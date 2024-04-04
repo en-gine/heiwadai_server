@@ -7,6 +7,8 @@ import (
 	"strings"
 	"time"
 
+	"server/infrastructure/env"
+
 	"gopkg.in/natefinch/lumberjack.v2"
 )
 
@@ -86,15 +88,22 @@ func Infof(format string, a ...interface{}) {
 }
 
 func Debugf(format string, a ...interface{}) {
-	Log(LevelDebug, fmt.Sprintf(format, a...))
+	if env.GetEnv(env.EnvMode) == "dev" {
+		Log(LevelDebug, fmt.Sprintf(format, a...))
+	}
 }
 
 func Debug(message string) {
-	Log(LevelDebug, message)
+	if env.GetEnv(env.EnvMode) == "dev" {
+		Log(LevelDebug, message)
+	}
 }
 
 func DebugPrint(object interface{}) {
-	fmt.Printf("(%%#v) %#v\n", object)
+	if env.GetEnv(env.EnvMode) == "dev" {
+		fmt.Print("============================\n")
+		fmt.Printf("(%%) %#v\n", object)
+	}
 }
 
 func Fatal(message string) {

@@ -106,9 +106,9 @@ func Search() {
 		1,
 		1,
 		1,
-		&smokes,
-		&meal,
-		&rooms,
+		smokes,
+		meal,
+		rooms,
 	)
 	if err != nil {
 		fmt.Print(err)
