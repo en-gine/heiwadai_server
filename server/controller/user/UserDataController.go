@@ -32,10 +32,19 @@ func NewUserDataController(userusecase *usecase.UserDataUsecase) *UserDataContro
 }
 
 func (u *UserDataController) Update(ctx context.Context, req *connect.Request[userv1.UserUpdateDataRequest]) (*connect.Response[userv1.UserDataResponse], error) {
+	if ctx.Value(router.UserIDKey) == nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("ユーザーIDが取得できませんでした。"))
+	}
+
+	userID, err := uuid.Parse(ctx.Value(router.UserIDKey).(string))
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("ユーザーIDが取得できませんでした。UUIDの形式が不正です。"))
+	}
+
 	msg := req.Msg
 
 	user, domainErr := u.usecase.Update(
-		uuid.MustParse(msg.ID),
+		userID,
 		msg.FirstName,
 		msg.LastName,
 		msg.FirstNameKana,
