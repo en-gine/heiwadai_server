@@ -46,5 +46,5 @@ func StampCard() {
 	if err != nil {
 		logger.Error(err.Error())
 	}
-	fmt.Println(card.Checkins[0])
+	fmt.Println(card.Stamps[0])
 }
