@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	userv1connect "server/api/v1/user/userconnect"
+	Iaction "server/core/infra/action"
 	"server/infrastructure/action"
 
 	usercontroller "server/controller/user"
@@ -11,7 +12,7 @@ import (
 )
 
 func NewUserServer(mux *http.ServeMux) {
-	authClient := action.NewAuthClient()
+	authClient := action.NewAuthClient(Iaction.UserTypeUser)
 	requireAuth := router.NewAuthentificatable(authClient, userQuery, adminQuery, router.AuthTypeUser)
 	logger := router.NewLogger()
 

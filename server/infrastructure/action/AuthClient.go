@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 
+	"server/core/entity"
 	"server/core/infra/action"
 	"server/core/infra/types"
 	"server/infrastructure/env"
@@ -20,37 +21,45 @@ import (
 var _ action.IAuthAction = &AuthClient{}
 
 type AuthClient struct {
-	client *supa.Client
-	apiKey string
+	client      *supa.Client
+	userType    action.UserType
+	redirectUrl string
 }
 
 var (
-	authURL = env.GetEnv(env.SupabaseUrl)
-	authKey = env.GetEnv(env.SupabaseKey)
+	authURL          = env.GetEnv(env.SupabaseUrl)
+	authKey          = env.GetEnv(env.SupabaseKey)
+	adminRedirectURL = env.GetEnv(env.AdminAuthRedirectURL)
+	userRedirectURL  = env.GetEnv(env.UserAuthRedirectURL)
 )
 
-func NewAuthClient() *AuthClient {
-	if authURL == "" {
-		panic("SUPABASE_URL is not set")
-	}
-	if authKey == "" {
-		panic("SUPABASE_KEY is not set")
-	}
+func NewAuthClient(userType action.UserType) *AuthClient {
+
 	client := supa.CreateClient(authURL, authKey)
 
+	var redirectURL string
+	switch userType {
+	case action.UserTypeAdmin:
+		redirectURL = adminRedirectURL
+	case action.UserTypeUser:
+	default:
+		redirectURL = userRedirectURL
+	}
+
 	return &AuthClient{
-		client: client,
-		apiKey: authKey,
+		client:      client,
+		userType:    userType,
+		redirectUrl: redirectURL,
 	}
 }
 
-func (au *AuthClient) SignUp(email string, password string, userType action.UserType) (*uuid.UUID, error) {
+func (au *AuthClient) SignUp(email string, password entity.Password) (*uuid.UUID, error) {
 	ctx := context.Background()
-	usr, err := au.client.Auth.SignUp(ctx, supa.UserCredentials{
+	usr, err := au.signUpWithRedirect(ctx, supa.UserCredentials{
 		Email:    email,
-		Password: password,
+		Password: password.String(),
 		Data: map[string]interface{}{
-			"user_type": userType.String(),
+			"user_type": au.userType.String(),
 		},
 	})
 	if err != nil {
@@ -60,12 +69,12 @@ func (au *AuthClient) SignUp(email string, password string, userType action.User
 	return &userID, nil
 }
 
-func (au *AuthClient) SignIn(email string, password string) (*types.Token, error) {
+func (au *AuthClient) SignIn(email string, password entity.Password) (*types.Token, error) {
 	ctx := context.Background()
 
 	auth, err := au.client.Auth.SignIn(ctx, supa.UserCredentials{
 		Email:    email,
-		Password: password,
+		Password: password.String(),
 	})
 	if err != nil {
 		return nil, errors.New("Error SignIn" + err.Error())
@@ -114,19 +123,20 @@ func (au *AuthClient) Refresh(token string, refreshToken string) (*action.UserAu
 }
 
 func (au *AuthClient) ResetPasswordMail(email string) error {
+	// リダイレクトあり
 	ctx := context.Background()
 	// client := supa.CreateClient(authURL + "", authKey)
-	err := au.resetPasswordForEmailWithRedirect(ctx, email, "app.heiwadai-hotel://reset_pass")
+	err := au.resetPasswordForEmailWithRedirect(ctx, email)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (au *AuthClient) UpdatePassword(password string, token string) error {
+func (au *AuthClient) UpdatePassword(password entity.Password, token string) error {
 	ctx := context.Background()
 	_, err := au.client.Auth.UpdateUser(ctx, token, map[string]interface{}{
-		"password": password,
+		"password": password.String(),
 	})
 	if err != nil {
 		return err
@@ -146,6 +156,8 @@ func (au *AuthClient) InviteUserByEmail(email string) (*uuid.UUID, error) {
 }
 
 func (au *AuthClient) UpdateEmail(email string, token string) error {
+	// リダイレクトあり
+
 	ctx := context.Background()
 	_, err := au.client.Auth.UpdateUser(ctx, token, map[string]interface{}{
 		"email": email,
@@ -169,10 +181,27 @@ func (au *AuthClient) GetUserID(token string) (*uuid.UUID, *action.UserType, err
 	return &userID, &userType, nil
 }
 
+func (au *AuthClient) signUpWithRedirect(ctx context.Context, credentials supa.UserCredentials) (*supa.User, error) {
+	reqBody, _ := json.Marshal(credentials)
+	reqURL := fmt.Sprintf("%s/%s/signup?redirect_to=%s", au.client.BaseURL, supa.AuthEndpoint, url.QueryEscape(au.redirectUrl))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, reqURL, bytes.NewBuffer(reqBody))
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+	res := supa.User{}
+	if err := au.sendRequest(req, &res); err != nil {
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 // ResetPasswordForEmail sends a password recovery link to the given e-mail address.
-func (au *AuthClient) resetPasswordForEmailWithRedirect(ctx context.Context, email string, redirectURL string) error {
+func (au *AuthClient) resetPasswordForEmailWithRedirect(ctx context.Context, email string) error {
 	reqBody, _ := json.Marshal(map[string]string{"email": email})
-	reqURL := fmt.Sprintf("%s/%s/recover?redirect_to=%s", au.client.BaseURL, supa.AuthEndpoint, url.QueryEscape(redirectURL))
+	reqURL := fmt.Sprintf("%s/%s/recover?redirect_to=%s", au.client.BaseURL, supa.AuthEndpoint, url.QueryEscape(au.redirectUrl))
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, reqURL, bytes.NewBuffer(reqBody))
 	if err != nil {
 		return err
@@ -183,6 +212,24 @@ func (au *AuthClient) resetPasswordForEmailWithRedirect(ctx context.Context, ema
 	}
 
 	return nil
+}
+
+func (au *AuthClient) inviteUserByEmail(ctx context.Context, email string) (*supa.User, error) {
+	reqBody, _ := json.Marshal(map[string]string{"email": email})
+	reqURL := fmt.Sprintf("%s/%s/invite?redirect_to=%s", au.client.BaseURL, supa.AuthEndpoint, url.QueryEscape(au.redirectUrl))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, reqURL, bytes.NewBuffer(reqBody))
+	if err != nil {
+		return nil, err
+	}
+
+	au.injectAuthorizationHeader(req, authKey)
+	req.Header.Set("Content-Type", "application/json")
+	res := supa.User{}
+	if err := au.sendRequest(req, &res); err != nil {
+		return nil, err
+	}
+
+	return &res, nil
 }
 
 func (au *AuthClient) sendRequest(req *http.Request, v interface{}) error {
@@ -198,8 +245,12 @@ func (au *AuthClient) sendRequest(req *http.Request, v interface{}) error {
 	return nil
 }
 
+func (au *AuthClient) injectAuthorizationHeader(req *http.Request, value string) {
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", value))
+}
+
 func (au *AuthClient) sendCustomRequest(req *http.Request, successValue interface{}, errorValue interface{}) (bool, error) {
-	req.Header.Set("apikey", au.apiKey)
+	req.Header.Set("apikey", authKey)
 	res, err := au.client.HTTPClient.Do(req)
 	if err != nil {
 		return true, err

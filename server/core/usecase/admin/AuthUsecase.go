@@ -64,7 +64,13 @@ func (u *AuthUsecase) Register(
 	}
 
 	// 招待メール送信
-	newID, err := u.authAction.SignUp(email, env.GetEnv(env.TestUserPass), action.UserTypeAdmin)
+	defaultPass := env.GetEnv(env.TestUserPass)
+	pass, domainErr := entity.NewPassword(defaultPass)
+	if domainErr != nil {
+		return nil, domainErr
+	}
+
+	newID, err := u.authAction.SignUp(email, *pass)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
 	}
@@ -99,7 +105,13 @@ func (u *AuthUsecase) SignUp(
 	Mail string,
 	Password string,
 ) (*uuid.UUID, error) {
-	id, err := u.authAction.SignUp(Mail, Password, action.UserTypeUser)
+
+	pass, domainErr := entity.NewPassword(Password)
+	if domainErr != nil {
+		return nil, domainErr
+	}
+
+	id, err := u.authAction.SignUp(Mail, *pass)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
 	}
@@ -134,7 +146,12 @@ func (u *AuthUsecase) SignIn(
 		return nil, errors.NewDomainError(errors.UnPemitedOperation, "このアドレスで登録されているユーザーは無効化されています")
 	}
 
-	token, err := u.authAction.SignIn(Mail, Password)
+	pass, domainErr := entity.NewPassword(Password)
+	if domainErr != nil {
+		return nil, domainErr
+	}
+
+	token, err := u.authAction.SignIn(Mail, *pass)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
 	}
@@ -175,7 +192,11 @@ func (u *AuthUsecase) UpdatePassword(
 	Password string,
 	Token string,
 ) error {
-	err := u.authAction.UpdatePassword(Password, Token)
+	pass, domainErr := entity.NewPassword(Password)
+	if domainErr != nil {
+		return domainErr
+	}
+	err := u.authAction.UpdatePassword(*pass, Token)
 	if err != nil {
 		return errors.NewDomainError(errors.RepositoryError, err.Error())
 	}

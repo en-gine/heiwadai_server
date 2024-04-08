@@ -26,6 +26,10 @@ var (
 	AuthTypeUser  AuthType = "user"
 )
 
+func (ut AuthType) String() string {
+	return string(ut)
+}
+
 var (
 	UserIDKey    keyType = "userID"
 	UserAuthType keyType = "authType"

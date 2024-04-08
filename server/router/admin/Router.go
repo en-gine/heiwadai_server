@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	adminv1connect "server/api/v1/admin/adminconnect"
+	Iaction "server/core/infra/action"
 	"server/infrastructure/action"
 	"server/router"
 
@@ -11,7 +12,7 @@ import (
 )
 
 func NewAdminServer(mux *http.ServeMux) {
-	authClient := action.NewAuthClient()
+	authClient := action.NewAuthClient(Iaction.UserTypeAdmin)
 	requireAuth := router.NewAuthentificatable(authClient, userQuery, adminQuery, router.AuthTypeAdmin)
 	// adminClientIPFilter := router.NewAdminClientIPFilter()
 

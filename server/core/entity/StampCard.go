@@ -39,7 +39,7 @@ func NewStampCard(
 			StoreName:       "",
 			StoreID:         nil,
 			CheckInAt:       nil,
-			StoreStampImage: fmt.Sprintf("https://chbqhfrawgjohpgennle.supabase.co/storage/v1/object/public/public/stamp_blank%d.png", i),
+			StoreStampImage: fmt.Sprintf("https://chbqhfrawgjohpgennle.supabase.co/storage/v1/object/public/public/stamp_blank%d.png", i+1),
 		}
 	}
 	// チェックインを格納
@@ -52,7 +52,6 @@ func NewStampCard(
 			CheckInAt:       &userCheckIns[i].CheckInAt,
 		}
 	}
-
 	return &StampCard{
 		Stamps: stamps,
 	}, nil

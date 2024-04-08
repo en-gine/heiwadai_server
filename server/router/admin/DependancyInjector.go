@@ -3,12 +3,13 @@ package admin
 import (
 	usecase "server/core/usecase/admin"
 
+	Iaction "server/core/infra/action"
 	"server/infrastructure/action"
 	implements "server/infrastructure/repository"
 )
 
 var (
-	authAction                = action.NewAuthClient()
+	authAction                = action.NewAuthClient(Iaction.UserTypeAdmin)
 	storeRepository           = implements.NewStoreRepository()
 	storeQuery                = implements.NewStoreQueryService()
 	adminRepository           = implements.NewAdminRepository()

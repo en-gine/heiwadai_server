@@ -113,7 +113,14 @@ func (u *AuthUsecase) SignUp(
 	Mail string,
 	Password string,
 ) (*uuid.UUID, error) {
-	userID, err := u.authAction.SignUp(Mail, Password, action.UserTypeUser)
+
+	pass, domainErr := entity.NewPassword(Password)
+
+	if domainErr != nil {
+		return nil, domainErr
+	}
+
+	userID, err := u.authAction.SignUp(Mail, *pass)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
 	}
@@ -153,7 +160,13 @@ func (u *AuthUsecase) SignIn(
 		return nil, errors.NewDomainError(errors.UnPemitedOperation, "このアドレスで登録されているユーザーは無効化されています")
 	}
 
-	token, err := u.authAction.SignIn(Mail, Password)
+	pass, domainErr := entity.NewPassword(Password)
+
+	if domainErr != nil {
+		return nil, domainErr
+	}
+
+	token, err := u.authAction.SignIn(Mail, *pass)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
 	}
@@ -185,7 +198,14 @@ func (u *AuthUsecase) UpdatePassword(
 	Password string,
 	Token string,
 ) error {
-	err := u.authAction.UpdatePassword(Password, Token)
+
+	pass, domainErr := entity.NewPassword(Password)
+
+	if domainErr != nil {
+		return domainErr
+	}
+
+	err := u.authAction.UpdatePassword(*pass, Token)
 	if err != nil {
 		return errors.NewDomainError(errors.RepositoryError, err.Error())
 	}

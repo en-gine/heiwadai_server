@@ -42,8 +42,8 @@ const (
 	SupabaseProjectID EnvKey = "SUPABASE_PROJECT_ID"
 	SupabaseBucket    EnvKey = "SUPABASE_BUCKET"
 
-	AdminPasswordRedirectURL EnvKey = "ADMIN_PASSWORD_REDIRECT_URL"
-	UserPasswordRedirectURL  EnvKey = "USER_PASSWORD_REDIRECT_URL"
+	AdminAuthRedirectURL EnvKey = "ADMIN_AUTH_REDIRECT_URL"
+	UserAuthRedirectURL  EnvKey = "USER_AUTH_REDIRECT_URL"
 
 	RedisHost EnvKey = "REDISHOST"
 	RedisPort EnvKey = "REDISPORT"
@@ -93,8 +93,8 @@ func InitEnv() {
 			SupabaseProjectID: os.Getenv(string(SupabaseProjectID)),
 			SupabaseBucket:    os.Getenv(string(SupabaseBucket)),
 
-			AdminPasswordRedirectURL: os.Getenv(string(AdminPasswordRedirectURL)),
-			UserPasswordRedirectURL:  os.Getenv(string(UserPasswordRedirectURL)),
+			AdminAuthRedirectURL: os.Getenv(string(AdminAuthRedirectURL)),
+			UserAuthRedirectURL:  os.Getenv(string(UserAuthRedirectURL)),
 
 			RedisHost: os.Getenv(string(RedisHost)),
 			RedisPort: os.Getenv(string(RedisPort)),

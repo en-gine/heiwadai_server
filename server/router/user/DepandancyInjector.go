@@ -3,7 +3,9 @@ package user
 import (
 	usecase "server/core/usecase/user"
 
+	Iaction "server/core/infra/action"
 	action "server/infrastructure/action"
+
 	bookingApiAvail "server/infrastructure/booking/avail"
 	bookingApiBook "server/infrastructure/booking/book"
 	implements "server/infrastructure/repository"
@@ -13,7 +15,7 @@ import (
 var (
 	userRepo               = implements.NewUserRepository()
 	userQueryService       = implements.NewUserQueryService()
-	authAction             = action.NewAuthClient()
+	authAction             = action.NewAuthClient(Iaction.UserTypeUser)
 	userQuery              = implements.NewUserQueryService()
 	adminQuery             = implements.NewAdminQueryService()
 	storeRepository        = implements.NewStoreRepository()
