@@ -31,8 +31,8 @@ func NewPlanController(bookUsecase *usecase.PlanUsecase, storeUseCase *usecase.S
 func (ac *PlanController) Search(ctx context.Context, req *connect.Request[user.PlanSearchRequest]) (*connect.Response[user.PlansResponse], error) {
 	msg := req.Msg
 	var storeUUIDs []uuid.UUID
-	for _, storeId := range msg.StoreIDs {
-		storeUUID, err := uuid.Parse(storeId)
+	for _, storeID := range msg.StoreIDs {
+		storeUUID, err := uuid.Parse(storeID)
 		if err != nil {
 			return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("店舗IDが正しい形式ではありません。"))
 		}

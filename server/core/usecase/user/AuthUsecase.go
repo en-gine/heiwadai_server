@@ -112,7 +112,7 @@ func (u *AuthUsecase) Register(
 func (u *AuthUsecase) SignUp(
 	Mail string,
 	Password string,
-) (*uuid.UUID, error) {
+) (*uuid.UUID, *errors.DomainError) {
 
 	pass, domainErr := entity.NewPassword(Password)
 
@@ -129,7 +129,7 @@ func (u *AuthUsecase) SignUp(
 
 func (u *AuthUsecase) SignOut(
 	token string,
-) error {
+) *errors.DomainError {
 	err := u.authAction.SignOut(token)
 	if err != nil {
 		return errors.NewDomainError(errors.RepositoryError, err.Error())
@@ -186,7 +186,7 @@ func (u *AuthUsecase) SignIn(
 
 func (u *AuthUsecase) ResetPasswordMail(
 	Mail string,
-) error {
+) *errors.DomainError {
 	err := u.authAction.ResetPasswordMail(Mail)
 	if err != nil {
 		return errors.NewDomainError(errors.RepositoryError, err.Error())
@@ -197,7 +197,7 @@ func (u *AuthUsecase) ResetPasswordMail(
 func (u *AuthUsecase) UpdatePassword(
 	Password string,
 	Token string,
-) error {
+) *errors.DomainError {
 
 	pass, domainErr := entity.NewPassword(Password)
 
@@ -215,7 +215,7 @@ func (u *AuthUsecase) UpdatePassword(
 func (u *AuthUsecase) UpdateEmail(
 	Mail string,
 	Token string,
-) error {
+) *errors.DomainError {
 	err := u.authAction.UpdateEmail(Mail, Token)
 	if err != nil {
 		return errors.NewDomainError(errors.RepositoryError, err.Error())
@@ -226,7 +226,7 @@ func (u *AuthUsecase) UpdateEmail(
 func (u *AuthUsecase) Refresh(
 	Token string,
 	RefreshToken string,
-) (*types.Token, error) {
+) (*types.Token, *errors.DomainError) {
 	auth, err := u.authAction.Refresh(Token, RefreshToken)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
@@ -239,7 +239,7 @@ func (u *AuthUsecase) Refresh(
 
 func (u *AuthUsecase) IsUnderRegister(
 	Mail string,
-) (bool, error) {
+) (bool, *errors.DomainError) {
 	isExist, err := u.userQuery.IsUnderRegister(Mail)
 	if err != nil {
 		return false, errors.NewDomainError(errors.QueryError, err.Error())
@@ -249,10 +249,10 @@ func (u *AuthUsecase) IsUnderRegister(
 
 func (u *AuthUsecase) ResendInviteMail(
 	Mail string,
-) error {
+) *errors.DomainError {
 	_, err := u.authAction.InviteUserByEmail(Mail)
 
-	return err
+	return errors.NewDomainError(errors.ActionError, err.Error())
 }
 
 func (u *AuthUsecase) DeleteUnderRegisterUser(

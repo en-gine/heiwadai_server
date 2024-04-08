@@ -56,9 +56,9 @@ func (ac *AnonAuthController) Register(ctx context.Context, req *connect.Request
 
 func (ac *AnonAuthController) SignUp(ctx context.Context, req *connect.Request[user.UserAuthRequest]) (*connect.Response[emptypb.Empty], error) {
 	msg := req.Msg
-	_, err := ac.authUseCase.SignUp(msg.Email, msg.Password)
-	if err != nil {
-		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("サインアップに失敗しました。"))
+	_, domainErr := ac.authUseCase.SignUp(msg.Email, msg.Password)
+	if domainErr != nil {
+		return nil, controller.ErrorHandler(domainErr)
 	}
 	return connect.NewResponse(&emptypb.Empty{}), nil
 }
@@ -72,7 +72,7 @@ func (ac *AnonAuthController) SignIn(ctx context.Context, req *connect.Request[u
 	msg := req.Msg
 	token, domainErr := ac.authUseCase.SignIn(msg.Email, msg.Password, remoteAddr, userAgent)
 	if domainErr != nil {
-		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("サインインに失敗しました。"))
+		return nil, controller.ErrorHandler(domainErr)
 	}
 	return connect.NewResponse(&user.AnonTokenResponse{
 		AccessToken:  token.AccessToken,
@@ -83,29 +83,40 @@ func (ac *AnonAuthController) SignIn(ctx context.Context, req *connect.Request[u
 
 func (ac *AnonAuthController) ResetPasswordMail(ctx context.Context, req *connect.Request[user.UserMailRequest]) (*connect.Response[emptypb.Empty], error) {
 	msg := req.Msg
-	err := ac.authUseCase.ResetPasswordMail(msg.Email)
-	if err != nil {
-		return nil, connect.NewError(connect.CodeUnavailable, errors.New("リセットメールの送信に失敗しました。"))
+	domainErr := ac.authUseCase.ResetPasswordMail(msg.Email)
+	if domainErr != nil {
+		return nil, controller.ErrorHandler(domainErr)
 	}
 	return connect.NewResponse(&emptypb.Empty{}), nil
 }
 
 func (ac *AnonAuthController) IsUnderRegister(ctx context.Context, req *connect.Request[user.UserMailRequest]) (*connect.Response[user.IsUnderRegisterResponse], error) {
 	msg := req.Msg
-	isYes, err := ac.authUseCase.IsUnderRegister(msg.Email)
-	if err != nil {
-		return nil, connect.NewError(connect.CodeInternal, errors.New("ユーザーの登録状況の取得に失敗しました。"))
+	isYes, domainErr := ac.authUseCase.IsUnderRegister(msg.Email)
+	if domainErr != nil {
+		return nil, controller.ErrorHandler(domainErr)
 	}
 	return connect.NewResponse(&user.IsUnderRegisterResponse{
 		IsUnderRegister: isYes,
 	}), nil
 }
 
+func (ac *AnonAuthController) SetNewPassword(ctx context.Context, req *connect.Request[user.SetNewPasswordRequest]) (*connect.Response[emptypb.Empty], error) {
+	msg := req.Msg
+
+	err := ac.authUseCase.UpdatePassword(msg.Password, msg.AccessToken)
+	if err != nil {
+		return nil, connect.NewError(connect.CodeUnavailable, errors.New("パスワードの変更に失敗しました。\nネットワークの問題や同じパスワードに変更した、などの理由が考えられます。"))
+	}
+
+	return connect.NewResponse(&emptypb.Empty{}), nil
+}
+
 func (ac *AnonAuthController) ResendInviteMail(ctx context.Context, req *connect.Request[user.UserMailRequest]) (*connect.Response[emptypb.Empty], error) {
 	msg := req.Msg
-	err := ac.authUseCase.ResendInviteMail(msg.Email)
-	if err != nil {
-		return nil, connect.NewError(connect.CodeInternal, errors.New("招待メールの再送信に失敗しました。"))
+	domainErr := ac.authUseCase.ResendInviteMail(msg.Email)
+	if domainErr != nil {
+		return nil, controller.ErrorHandler(domainErr)
 	}
 	return connect.NewResponse(&emptypb.Empty{}), nil
 }

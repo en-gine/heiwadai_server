@@ -29,7 +29,7 @@ func NewUserLoginLogQueryService() *UserLoginLogQueryService {
 
 func (pq *UserLoginLogQueryService) GetList(userID uuid.UUID, pager *types.PageQuery) ([]*entity.UserLoginLog, *types.PageResponse, error) {
 	logs, err := models.UserLoginLogs(models.UserLoginLogWhere.UserID.EQ(userID.String()),
-		qm.Limit(pager.Limit()), qm.Offset(pager.Offset())).All(context.Background(), pq.db)
+		qm.Limit(pager.Limit()), qm.Offset(pager.Offset()), qm.OrderBy(models.UserLoginLogColumns.CreateAt+" DESC")).All(context.Background(), pq.db)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil, nil

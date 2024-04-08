@@ -244,7 +244,7 @@ CREATE TABLE user_login_log (
     user_agent VARCHAR NOT NULL,
     login_at TIMESTAMPTZ NOT NULL default now(),
     create_at TIMESTAMPTZ NOT NULL default now(),
-    FOREIGN KEY (user_id) REFERENCES user_manager(id)
+    FOREIGN KEY (user_id) REFERENCES user_manager(id) ON DELETE CASCADE
 );
 
 --- userが作成されるたびに、userテーブルにもidとemailをinsertする

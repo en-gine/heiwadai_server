@@ -9,7 +9,6 @@ import (
 	"server/controller"
 	"server/controller/util"
 	usecase "server/core/usecase/user"
-	"server/infrastructure/logger"
 	"server/router"
 
 	connect "github.com/bufbuild/connect-go"
@@ -62,10 +61,9 @@ func (ac *AuthController) SignOut(ctx context.Context, req *connect.Request[empt
 	if token == "" {
 		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("ログインが必要です。"))
 	}
-	err := ac.authUseCase.SignOut(token)
-	if err != nil {
-		logger.Error(err.Error())
-		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("サインアウトに失敗しました。"))
+	domainErr := ac.authUseCase.SignOut(token)
+	if domainErr != nil {
+		return nil, controller.ErrorHandler(domainErr)
 	}
 	return connect.NewResponse(&emptypb.Empty{}), nil
 }
@@ -80,9 +78,9 @@ func (ac *AuthController) UpdatePassword(ctx context.Context, req *connect.Reque
 		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("ログインが必要です。"))
 	}
 
-	err := ac.authUseCase.UpdatePassword(msg.Password, token)
-	if err != nil {
-		return nil, connect.NewError(connect.CodeUnavailable, errors.New("パスワードの変更に失敗しました。\nネットワークの問題や同じパスワードに変更した、などの理由が考えられます。"))
+	domainErr := ac.authUseCase.UpdatePassword(msg.Password, token)
+	if domainErr != nil {
+		return nil, controller.ErrorHandler(domainErr)
 	}
 
 	return connect.NewResponse(&emptypb.Empty{}), nil
@@ -97,9 +95,9 @@ func (ac *AuthController) UpdateEmail(ctx context.Context, req *connect.Request[
 	if token == "" {
 		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("ログインが必要です。"))
 	}
-	err := ac.authUseCase.UpdateEmail(msg.Email, token)
-	if err != nil {
-		return nil, connect.NewError(connect.CodeUnavailable, errors.New("メールアドレスの変更に失敗しました。"))
+	domainErr := ac.authUseCase.UpdateEmail(msg.Email, token)
+	if domainErr != nil {
+		return nil, controller.ErrorHandler(domainErr)
 	}
 	return connect.NewResponse(&emptypb.Empty{}), nil
 }
@@ -110,9 +108,9 @@ func (ac *AuthController) Refresh(ctx context.Context, req *connect.Request[user
 	if token == "" {
 		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("ログインが必要です。"))
 	}
-	tkn, err := ac.authUseCase.Refresh(token, msg.RefreshToken)
-	if err != nil {
-		return nil, connect.NewError(connect.CodeUnavailable, errors.New("トークンの再取得に失敗しました。"))
+	tkn, domainErr := ac.authUseCase.Refresh(token, msg.RefreshToken)
+	if domainErr != nil {
+		return nil, controller.ErrorHandler(domainErr)
 	}
 	return connect.NewResponse(&user.UserAuthTokenResponse{
 		AccessToken:  tkn.AccessToken,

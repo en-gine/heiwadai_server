@@ -135,6 +135,7 @@ func (au *AuthClient) ResetPasswordMail(email string) error {
 
 func (au *AuthClient) UpdatePassword(password entity.Password, token string) error {
 	ctx := context.Background()
+
 	_, err := au.client.Auth.UpdateUser(ctx, token, map[string]interface{}{
 		"password": password.String(),
 	})

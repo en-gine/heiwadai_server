@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"fmt"
 
 	"server/core/entity"
 	"server/core/infra/repository"
@@ -107,23 +108,26 @@ func (ur *AdminRepository) Delete(adminID uuid.UUID) error {
 	if err != nil {
 		return err
 	}
-	deleteAdminManager, err := models.FindUserManager(ctx, tran.Tran(), adminID.String())
+	// deleteAdminManager, err := models.FindUserManager(ctx, tran.Tran(), adminID.String())
+	// if err != nil {
+	// 	return err
+	// }
+	// _, err = deleteAdminManager.Delete(ctx, tran.Tran())
+	// if err != nil {
+	// 	return err
+	// }
+	_, err = models.FindAdmin(ctx, tran.Tran(), adminID.String())
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil
+		}
 		return err
 	}
-	_, err = deleteAdminManager.Delete(ctx, tran.Tran())
-	if err != nil {
-		return err
-	}
-	deleteAdminData, err := models.FindAdmin(ctx, tran.Tran(), adminID.String())
-	if err != nil {
-		return err
-	}
-	_, err = deleteAdminData.Delete(ctx, tran.Tran())
-	if err != nil {
-		return err
-	}
-	_, err = tran.Exec("DELETE FROM auth.users WHERE id = ?", adminID.String())
+	// _, err = deleteAdminData.Delete(ctx, tran.Tran())
+	// if err != nil {
+	// 	return err
+	// }
+	_, err = tran.Exec(fmt.Sprintf("DELETE FROM auth.users WHERE id = '%s'", adminID.String()))
 	if err != nil {
 		return err
 	}

@@ -72,7 +72,7 @@ func Trace() string {
 }
 
 func Error(message string) {
-	Log(LevelWarn, message+"\nStacktrace:\n"+Trace())
+	Log(LevelError, message+"\nStacktrace:\n"+Trace())
 }
 
 func Errorf(format string, a ...interface{}) {
