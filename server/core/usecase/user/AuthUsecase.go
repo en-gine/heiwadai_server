@@ -113,7 +113,6 @@ func (u *AuthUsecase) SignUp(
 	Mail string,
 	Password string,
 ) (*uuid.UUID, *errors.DomainError) {
-
 	pass, domainErr := entity.NewPassword(Password)
 
 	if domainErr != nil {
@@ -198,7 +197,6 @@ func (u *AuthUsecase) UpdatePassword(
 	Password string,
 	Token string,
 ) *errors.DomainError {
-
 	pass, domainErr := entity.NewPassword(Password)
 
 	if domainErr != nil {
@@ -210,6 +208,16 @@ func (u *AuthUsecase) UpdatePassword(
 		return errors.NewDomainError(errors.RepositoryError, err.Error())
 	}
 	return nil
+}
+
+func (u *AuthUsecase) GetUserByToken(
+	Token string,
+) (*string, *errors.DomainError) {
+	info, err := u.authAction.GetUserInfo(Token)
+	if err != nil {
+		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
+	}
+	return &info.Mail, nil
 }
 
 func (u *AuthUsecase) UpdateEmail(

@@ -20,6 +20,12 @@ type UserAuth struct {
 	Token    *types.Token
 }
 
+type UserInfo struct {
+	UserID   uuid.UUID
+	UserType UserType
+	Mail     string
+}
+
 func (ut UserType) String() string {
 	return string(ut)
 }
@@ -29,7 +35,7 @@ type IAuthAction interface {
 	SignIn(email string, password entity.Password) (*types.Token, error)
 	SignOut(token string) error
 	Refresh(token string, refreshToken string) (*UserAuth, error)
-	// GetUserID(token string) (*uuid.UUID, *UserType, error)
+	GetUserInfo(token string) (*UserInfo, error)
 	ResetPasswordMail(email string) error
 	UpdatePassword(password entity.Password, token string) error
 	InviteUserByEmail(mail string) (*uuid.UUID, error)

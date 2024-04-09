@@ -2,7 +2,6 @@ package user
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"server/api/v1/user"
@@ -104,12 +103,23 @@ func (ac *AnonAuthController) IsUnderRegister(ctx context.Context, req *connect.
 func (ac *AnonAuthController) SetNewPassword(ctx context.Context, req *connect.Request[user.SetNewPasswordRequest]) (*connect.Response[emptypb.Empty], error) {
 	msg := req.Msg
 
-	err := ac.authUseCase.UpdatePassword(msg.Password, msg.AccessToken)
-	if err != nil {
-		return nil, connect.NewError(connect.CodeUnavailable, errors.New("パスワードの変更に失敗しました。\nネットワークの問題や同じパスワードに変更した、などの理由が考えられます。"))
+	domainErr := ac.authUseCase.UpdatePassword(msg.Password, msg.AccessToken)
+	if domainErr != nil {
+		return nil, controller.ErrorHandler(domainErr)
 	}
 
 	return connect.NewResponse(&emptypb.Empty{}), nil
+}
+
+func (ac *AnonAuthController) GetUserMailByToken(ctx context.Context, req *connect.Request[user.TokenRequest]) (*connect.Response[user.UserMailResponse], error) {
+	msg := req.Msg
+
+	mail, domainErr := ac.authUseCase.GetUserByToken(msg.AccessToken)
+	if domainErr != nil {
+		return nil, controller.ErrorHandler(domainErr)
+	}
+
+	return connect.NewResponse(&user.UserMailResponse{Email: *mail}), nil
 }
 
 func (ac *AnonAuthController) ResendInviteMail(ctx context.Context, req *connect.Request[user.UserMailRequest]) (*connect.Response[emptypb.Empty], error) {

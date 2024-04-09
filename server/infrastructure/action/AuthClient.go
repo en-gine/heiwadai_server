@@ -34,7 +34,6 @@ var (
 )
 
 func NewAuthClient(userType action.UserType) *AuthClient {
-
 	client := supa.CreateClient(authURL, authKey)
 
 	var redirectURL string
@@ -147,7 +146,7 @@ func (au *AuthClient) UpdatePassword(password entity.Password, token string) err
 
 func (au *AuthClient) InviteUserByEmail(email string) (*uuid.UUID, error) {
 	ctx := context.Background()
-	user, err := au.client.Auth.InviteUserByEmail(ctx, email)
+	user, err := au.inviteUserByEmailWithRedirect(ctx, email)
 	if err != nil {
 		return nil, err
 	}
@@ -169,17 +168,21 @@ func (au *AuthClient) UpdateEmail(email string, token string) error {
 	return nil
 }
 
-func (au *AuthClient) GetUserID(token string) (*uuid.UUID, *action.UserType, error) {
+func (au *AuthClient) GetUserInfo(token string) (*action.UserInfo, error) {
 	ctx := context.Background()
 
 	user, err := au.client.Auth.User(ctx, token)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	userID := uuid.MustParse(user.ID)
 	metadata := user.UserMetadata["user_type"].(string)
 	userType := action.UserType(metadata)
-	return &userID, &userType, nil
+	return &action.UserInfo{
+		UserID:   userID,
+		UserType: userType,
+		Mail:     user.Email,
+	}, nil
 }
 
 func (au *AuthClient) signUpWithRedirect(ctx context.Context, credentials supa.UserCredentials) (*supa.User, error) {
@@ -215,7 +218,7 @@ func (au *AuthClient) resetPasswordForEmailWithRedirect(ctx context.Context, ema
 	return nil
 }
 
-func (au *AuthClient) inviteUserByEmail(ctx context.Context, email string) (*supa.User, error) {
+func (au *AuthClient) inviteUserByEmailWithRedirect(ctx context.Context, email string) (*supa.User, error) {
 	reqBody, _ := json.Marshal(map[string]string{"email": email})
 	reqURL := fmt.Sprintf("%s/%s/invite?redirect_to=%s", au.client.BaseURL, supa.AuthEndpoint, url.QueryEscape(au.redirectUrl))
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, reqURL, bytes.NewBuffer(reqBody))
