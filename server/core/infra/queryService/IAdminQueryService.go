@@ -8,6 +8,6 @@ import (
 
 type IAdminQueryService interface {
 	GetByID(id uuid.UUID) (*entity.Admin, error)
-	GetByMail(mail string) (*entity.Admin, error)
+	GetByMail(mail entity.Mail) (*entity.Admin, error)
 	GetAll() ([]*entity.Admin, error)
 }

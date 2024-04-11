@@ -47,9 +47,10 @@ func (ac *CheckInController) GetStampCard(ctx context.Context, req *connect.Requ
 
 	for _, entity := range entity.Stamps {
 		var stamp *user.CheckinStamp
-		strChkID := entity.CheckinID.String()
-		strStoreID := entity.StoreID.String()
+
 		if entity.CheckinID != nil {
+			strChkID := entity.CheckinID.String()
+			strStoreID := entity.StoreID.String()
 			stamp = &user.CheckinStamp{
 				ID:              &strChkID,
 				StoreName:       entity.StoreName,

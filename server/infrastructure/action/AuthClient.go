@@ -8,11 +8,14 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"server/core/entity"
+	domainErr "server/core/errors"
 	"server/core/infra/action"
 	"server/core/infra/types"
 	"server/infrastructure/env"
+	"server/infrastructure/logger"
 
 	"github.com/google/uuid"
 	supa "github.com/nedpals/supabase-go"
@@ -23,7 +26,7 @@ var _ action.IAuthAction = &AuthClient{}
 type AuthClient struct {
 	client      *supa.Client
 	userType    action.UserType
-	redirectUrl string
+	redirectURL string
 }
 
 var (
@@ -41,6 +44,7 @@ func NewAuthClient(userType action.UserType) *AuthClient {
 	case action.UserTypeAdmin:
 		redirectURL = adminRedirectURL
 	case action.UserTypeUser:
+		redirectURL = userRedirectURL
 	default:
 		redirectURL = userRedirectURL
 	}
@@ -48,49 +52,52 @@ func NewAuthClient(userType action.UserType) *AuthClient {
 	return &AuthClient{
 		client:      client,
 		userType:    userType,
-		redirectUrl: redirectURL,
+		redirectURL: redirectURL,
 	}
 }
 
-func (au *AuthClient) SignUp(email string, password entity.Password) (*uuid.UUID, error) {
+func (au *AuthClient) SignUp(email entity.Mail, password entity.Password) (*uuid.UUID, error) {
 	ctx := context.Background()
 	usr, err := au.signUpWithRedirect(ctx, supa.UserCredentials{
-		Email:    email,
+		Email:    email.String(),
 		Password: password.String(),
 		Data: map[string]interface{}{
 			"user_type": au.userType.String(),
 		},
 	})
 	if err != nil {
-		return nil, errors.New("Error SignUp" + err.Error())
+		return nil, err
 	}
 	userID := uuid.MustParse(usr.ID)
 	return &userID, nil
 }
 
-func (au *AuthClient) SignIn(email string, password entity.Password) (*types.Token, error) {
+func (au *AuthClient) SignIn(email entity.Mail, password string) (*types.Token, *domainErr.DomainError, error) {
 	ctx := context.Background()
 
 	auth, err := au.client.Auth.SignIn(ctx, supa.UserCredentials{
-		Email:    email,
-		Password: password.String(),
+		Email:    email.String(),
+		Password: password,
 	})
 	if err != nil {
-		return nil, errors.New("Error SignIn" + err.Error())
+		if err.Error() == "invalid_grant: Invalid login credentials" {
+			return nil, domainErr.NewDomainError(domainErr.InvalidParameter, "メールアドレスまたはパスワードが間違っています"), nil
+		}
+		return nil, nil, err
 	}
 
 	return &types.Token{
 		AccessToken:  auth.AccessToken,
 		RefreshToken: &auth.RefreshToken,
 		ExpiresIn:    &auth.ExpiresIn,
-	}, nil
+	}, nil, nil
 }
 
 func (au *AuthClient) SignOut(token string) error {
 	ctx := context.Background()
 	err := au.client.Auth.SignOut(ctx, token)
 	if err != nil {
-		return errors.New("Error SignIn" + err.Error())
+		return err
 	}
 
 	return nil
@@ -100,7 +107,7 @@ func (au *AuthClient) Refresh(token string, refreshToken string) (*action.UserAu
 	ctx := context.Background()
 	data, err := au.client.Auth.RefreshUser(ctx, token, refreshToken)
 	if err != nil {
-		return nil, errors.New("Error Refreshing Token" + err.Error())
+		return nil, err
 	}
 	Token := &types.Token{
 		AccessToken:  data.AccessToken,
@@ -121,45 +128,74 @@ func (au *AuthClient) Refresh(token string, refreshToken string) (*action.UserAu
 	}, nil
 }
 
-func (au *AuthClient) ResetPasswordMail(email string) error {
+func (au *AuthClient) ResetPasswordMail(email entity.Mail) (*domainErr.DomainError, error) {
 	// リダイレクトあり
 	ctx := context.Background()
 	// client := supa.CreateClient(authURL + "", authKey)
-	err := au.resetPasswordForEmailWithRedirect(ctx, email)
+
+	err := au.resetPasswordForEmailWithRedirect(ctx, email.String())
 	if err != nil {
-		return err
+		if strings.Contains(err.Error(), "429") {
+			logger.DebugPrint(err)
+			return domainErr.NewDomainError(domainErr.UnPemitedOperation, "セキュリティ上の理由により1分以上の間隔をあけてください。"), nil
+		}
+		return nil, err
 	}
-	return nil
+	return nil, nil
 }
 
-func (au *AuthClient) UpdatePassword(password entity.Password, token string) error {
+func (au *AuthClient) UpdatePassword(password entity.Password, token string) (*domainErr.DomainError, error) {
 	ctx := context.Background()
 
-	_, err := au.client.Auth.UpdateUser(ctx, token, map[string]interface{}{
+	_, err := au.updateUser(ctx, token, map[string]interface{}{
 		"password": password.String(),
 	})
+
 	if err != nil {
-		return err
+		if strings.Contains(err.Error(), "422") {
+			logger.DebugPrint(err)
+			return domainErr.NewDomainError(domainErr.InvalidParameter, "同じパスワードには変更できません。"), nil
+		}
+		return nil, err
 	}
-	return nil
+	return nil, nil
 }
 
-func (au *AuthClient) InviteUserByEmail(email string) (*uuid.UUID, error) {
+func (au *AuthClient) InviteUserByEmail(email entity.Mail) (*uuid.UUID, *domainErr.DomainError, error) {
 	ctx := context.Background()
-	user, err := au.inviteUserByEmailWithRedirect(ctx, email)
+	user, err := au.inviteUserByEmailWithRedirect(ctx, email.String())
 	if err != nil {
-		return nil, err
+		if strings.Contains(err.Error(), "422") {
+			logger.DebugPrint(err)
+			return nil, domainErr.NewDomainError(domainErr.InvalidParameter, "このユーザーは既に招待されています。"), nil
+		}
+		return nil, nil, err
 	}
 
 	newUserID := uuid.MustParse(user.ID)
-	return &newUserID, nil
+	return &newUserID, nil, nil
 }
 
-func (au *AuthClient) UpdateEmail(email string, token string) error {
+func (au *AuthClient) ReInviteUserByEmail(email entity.Mail) (*domainErr.DomainError, error) {
+	ctx := context.Background()
+
+	_, err := au.reinviteUserByEmailWithRedirect(ctx, email.String())
+	if err != nil {
+		if strings.Contains(err.Error(), "429") {
+			logger.DebugPrint(err)
+			return domainErr.NewDomainError(domainErr.UnPemitedOperation, "セキュリティ上の理由により1分以上の間隔をあけてください。"), nil
+		}
+		return nil, err
+	}
+
+	return nil, nil
+}
+
+func (au *AuthClient) UpdateEmail(email entity.Mail, token string) error {
 	// リダイレクトあり
 
 	ctx := context.Background()
-	_, err := au.client.Auth.UpdateUser(ctx, token, map[string]interface{}{
+	_, err := au.updateUser(ctx, token, map[string]interface{}{
 		"email": email,
 	})
 	if err != nil {
@@ -185,9 +221,13 @@ func (au *AuthClient) GetUserInfo(token string) (*action.UserInfo, error) {
 	}, nil
 }
 
+type authError struct {
+	Message string `json:"message"`
+}
+
 func (au *AuthClient) signUpWithRedirect(ctx context.Context, credentials supa.UserCredentials) (*supa.User, error) {
 	reqBody, _ := json.Marshal(credentials)
-	reqURL := fmt.Sprintf("%s/%s/signup?redirect_to=%s", au.client.BaseURL, supa.AuthEndpoint, url.QueryEscape(au.redirectUrl))
+	reqURL := fmt.Sprintf("%s/%s/signup?redirect_to=%s", au.client.BaseURL, supa.AuthEndpoint, url.QueryEscape(au.redirectURL))
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, reqURL, bytes.NewBuffer(reqBody))
 	if err != nil {
 		return nil, err
@@ -205,7 +245,7 @@ func (au *AuthClient) signUpWithRedirect(ctx context.Context, credentials supa.U
 // ResetPasswordForEmail sends a password recovery link to the given e-mail address.
 func (au *AuthClient) resetPasswordForEmailWithRedirect(ctx context.Context, email string) error {
 	reqBody, _ := json.Marshal(map[string]string{"email": email})
-	reqURL := fmt.Sprintf("%s/%s/recover?redirect_to=%s", au.client.BaseURL, supa.AuthEndpoint, url.QueryEscape(au.redirectUrl))
+	reqURL := fmt.Sprintf("%s/%s/recover?redirect_to=%s", au.client.BaseURL, supa.AuthEndpoint, url.QueryEscape(au.redirectURL))
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, reqURL, bytes.NewBuffer(reqBody))
 	if err != nil {
 		return err
@@ -218,9 +258,51 @@ func (au *AuthClient) resetPasswordForEmailWithRedirect(ctx context.Context, ema
 	return nil
 }
 
+// UpdateUser updates the user information
+func (au *AuthClient) updateUser(ctx context.Context, userToken string, updateData map[string]interface{}) (*supa.User, error) {
+	reqBody, _ := json.Marshal(updateData)
+	reqURL := fmt.Sprintf("%s/%s/user", au.client.BaseURL, supa.AuthEndpoint)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPut, reqURL, bytes.NewBuffer(reqBody))
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+	au.injectAuthorizationHeader(req, userToken)
+
+	res := supa.User{}
+	errRes := authError{}
+	hasCustomError, err := au.sendCustomRequest(req, &res, &errRes)
+	if err != nil {
+		return nil, err
+	} else if hasCustomError {
+		return nil, errors.New(errRes.Message)
+	}
+
+	return &res, nil
+}
+
 func (au *AuthClient) inviteUserByEmailWithRedirect(ctx context.Context, email string) (*supa.User, error) {
 	reqBody, _ := json.Marshal(map[string]string{"email": email})
-	reqURL := fmt.Sprintf("%s/%s/invite?redirect_to=%s", au.client.BaseURL, supa.AuthEndpoint, url.QueryEscape(au.redirectUrl))
+	reqURL := fmt.Sprintf("%s/%s/invite?redirect_to=%s", au.client.BaseURL, supa.AuthEndpoint, url.QueryEscape(au.redirectURL))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, reqURL, bytes.NewBuffer(reqBody))
+	if err != nil {
+		return nil, err
+	}
+
+	au.injectAuthorizationHeader(req, authKey)
+	req.Header.Set("Content-Type", "application/json")
+	res := supa.User{}
+	if err := au.sendRequest(req, &res); err != nil {
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+func (au *AuthClient) reinviteUserByEmailWithRedirect(ctx context.Context, email string) (*supa.User, error) {
+	reqBody, _ := json.Marshal(map[string]string{"email": email, "type": "signup"})
+	reqURL := fmt.Sprintf("%s/%s/resend?redirect_to=%s", au.client.BaseURL, supa.AuthEndpoint, url.QueryEscape(au.redirectURL))
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, reqURL, bytes.NewBuffer(reqBody))
 	if err != nil {
 		return nil, err
@@ -263,7 +345,7 @@ func (au *AuthClient) sendCustomRequest(req *http.Request, successValue interfac
 	defer res.Body.Close()
 	statusOK := res.StatusCode >= http.StatusOK && res.StatusCode < 300
 	if !statusOK {
-		if err = json.NewDecoder(res.Body).Decode(&errorValue); err == nil {
+		if err = fmt.Errorf("%d:%s", res.StatusCode, json.NewDecoder(res.Body).Decode(&errorValue)); err == nil {
 			return true, nil
 		}
 

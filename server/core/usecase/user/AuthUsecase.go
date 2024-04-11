@@ -10,8 +10,6 @@ import (
 	"server/core/infra/repository"
 	"server/core/infra/types"
 	"server/infrastructure/logger"
-
-	"github.com/google/uuid"
 )
 
 type AuthUsecase struct {
@@ -54,11 +52,16 @@ func (u *AuthUsecase) Register(
 	AcceptMail bool, // メルマガ配信可
 	AcceptTerm bool, // 利用規約に同意
 ) (*entity.User, *errors.DomainError) {
+	ml, domainErr := entity.NewMail(Mail)
+	if domainErr != nil {
+		return nil, domainErr
+	}
+
 	if !AcceptTerm {
 		return nil, errors.NewDomainError(errors.UnPemitedOperation, "利用規約に同意してください")
 	}
 
-	existUser, err := u.userQuery.GetByMail(Mail)
+	existUser, err := u.userQuery.GetByMail(*ml)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryDataNotFoundError, "ユーザーの検索に失敗しました")
 	}
@@ -67,7 +70,7 @@ func (u *AuthUsecase) Register(
 		return nil, errors.NewDomainError(errors.AlreadyExist, "既に登録されているメールアドレスです")
 	}
 
-	existAdmin, err := u.adminQuery.GetByMail(Mail)
+	existAdmin, err := u.adminQuery.GetByMail(*ml)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryDataNotFoundError, "管理者の検索に失敗しました")
 	}
@@ -79,7 +82,11 @@ func (u *AuthUsecase) Register(
 	prefecture := entity.Prefecture(PrefectureID)
 
 	// 招待メール送信
-	newID, err := u.authAction.InviteUserByEmail(Mail)
+	defaultPassword, domainErr := entity.GenerateRandomPassword()
+	if domainErr != nil {
+		return nil, domainErr
+	}
+	newID, err := u.authAction.SignUp(*ml, *defaultPassword)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
 	}
@@ -110,20 +117,24 @@ func (u *AuthUsecase) Register(
 }
 
 func (u *AuthUsecase) SignUp(
-	Mail string,
 	Password string,
-) (*uuid.UUID, *errors.DomainError) {
+	Token string,
+) *errors.DomainError {
 	pass, domainErr := entity.NewPassword(Password)
 
 	if domainErr != nil {
-		return nil, domainErr
+		return domainErr
+	}
+	// 直接パスワードをUpdateすることで対応
+	domaiErr, err := u.authAction.UpdatePassword(*pass, Token)
+	if domaiErr != nil {
+		return domaiErr
 	}
 
-	userID, err := u.authAction.SignUp(Mail, *pass)
 	if err != nil {
-		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
+		return errors.NewDomainError(errors.RepositoryError, err.Error())
 	}
-	return userID, nil
+	return nil
 }
 
 func (u *AuthUsecase) SignOut(
@@ -142,7 +153,12 @@ func (u *AuthUsecase) SignIn(
 	RemoteIP string,
 	UserAgent string,
 ) (*types.Token, *errors.DomainError) {
-	existUser, err := u.userQuery.GetByMail(Mail)
+	ml, domainErr := entity.NewMail(Mail)
+	if domainErr != nil {
+		return nil, domainErr
+	}
+
+	existUser, err := u.userQuery.GetByMail(*ml)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())
 	}
@@ -159,13 +175,11 @@ func (u *AuthUsecase) SignIn(
 		return nil, errors.NewDomainError(errors.UnPemitedOperation, "このアドレスで登録されているユーザーは無効化されています")
 	}
 
-	pass, domainErr := entity.NewPassword(Password)
-
+	token, domainErr, err := u.authAction.SignIn(*ml, Password)
 	if domainErr != nil {
 		return nil, domainErr
 	}
 
-	token, err := u.authAction.SignIn(Mail, *pass)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
 	}
@@ -186,7 +200,22 @@ func (u *AuthUsecase) SignIn(
 func (u *AuthUsecase) ResetPasswordMail(
 	Mail string,
 ) *errors.DomainError {
-	err := u.authAction.ResetPasswordMail(Mail)
+	ml, domainErr := entity.NewMail(Mail)
+	if domainErr != nil {
+		return domainErr
+	}
+	existUser, err := u.userQuery.GetByMail(*ml)
+	if err != nil {
+		return errors.NewDomainError(errors.QueryError, err.Error())
+	}
+	if existUser == nil {
+		return errors.NewDomainError(errors.QueryDataNotFoundError, "このアドレスで登録されているユーザーが存在しません")
+	}
+
+	domainErr, err = u.authAction.ResetPasswordMail(*ml)
+	if domainErr != nil {
+		return domainErr
+	}
 	if err != nil {
 		return errors.NewDomainError(errors.RepositoryError, err.Error())
 	}
@@ -203,7 +232,10 @@ func (u *AuthUsecase) UpdatePassword(
 		return domainErr
 	}
 
-	err := u.authAction.UpdatePassword(*pass, Token)
+	domainErr, err := u.authAction.UpdatePassword(*pass, Token)
+	if domainErr != nil {
+		return domainErr
+	}
 	if err != nil {
 		return errors.NewDomainError(errors.RepositoryError, err.Error())
 	}
@@ -224,7 +256,11 @@ func (u *AuthUsecase) UpdateEmail(
 	Mail string,
 	Token string,
 ) *errors.DomainError {
-	err := u.authAction.UpdateEmail(Mail, Token)
+	ml, domainErr := entity.NewMail(Mail)
+	if domainErr != nil {
+		return domainErr
+	}
+	err := u.authAction.UpdateEmail(*ml, Token)
 	if err != nil {
 		return errors.NewDomainError(errors.RepositoryError, err.Error())
 	}
@@ -248,7 +284,11 @@ func (u *AuthUsecase) Refresh(
 func (u *AuthUsecase) IsUnderRegister(
 	Mail string,
 ) (bool, *errors.DomainError) {
-	isExist, err := u.userQuery.IsUnderRegister(Mail)
+	ml, domainErr := entity.NewMail(Mail)
+	if domainErr != nil {
+		return false, domainErr
+	}
+	isExist, err := u.userQuery.IsUnderRegister(*ml)
 	if err != nil {
 		return false, errors.NewDomainError(errors.QueryError, err.Error())
 	}
@@ -258,23 +298,40 @@ func (u *AuthUsecase) IsUnderRegister(
 func (u *AuthUsecase) ResendInviteMail(
 	Mail string,
 ) *errors.DomainError {
-	_, err := u.authAction.InviteUserByEmail(Mail)
+	ml, domainErr := entity.NewMail(Mail)
+	if domainErr != nil {
+		return domainErr
+	}
+	domainErr, err := u.authAction.ReInviteUserByEmail(*ml)
+	if domainErr != nil {
+		return domainErr
+	}
 
-	return errors.NewDomainError(errors.ActionError, err.Error())
+	if err != nil {
+		return errors.NewDomainError(errors.ActionError, err.Error())
+	}
+
+	return nil
 }
 
 func (u *AuthUsecase) DeleteUnderRegisterUser(
 	Mail string,
 ) *errors.DomainError {
-	isExist, err := u.userQuery.IsUnderRegister(Mail)
-	if err != nil {
-		return errors.NewDomainError(errors.QueryError, err.Error())
-	}
-	if !isExist {
-		return errors.NewDomainError(errors.QueryDataNotFoundError, "このアドレスで登録中のユーザーが存在しません")
+	ml, domainErr := entity.NewMail(Mail)
+	if domainErr != nil {
+		return domainErr
 	}
 
-	user, err := u.userQuery.GetByMail(Mail)
+	// 認証メールをクリックした後にConfirmは成功するのにアプリ側で処理が失敗することもあるので削除
+	// isExist, err := u.userQuery.IsUnderRegister(*ml)
+	// if err != nil {
+	// 	return errors.NewDomainError(errors.QueryError, err.Error())
+	// }
+	// if !isExist {
+	// 	return errors.NewDomainError(errors.QueryDataNotFoundError, "このアドレスで登録中のユーザーが存在しません")
+	// }
+
+	user, err := u.userQuery.GetByMail(*ml)
 	if err != nil {
 		return errors.NewDomainError(errors.QueryError, err.Error())
 	}
@@ -282,7 +339,7 @@ func (u *AuthUsecase) DeleteUnderRegisterUser(
 		return errors.NewDomainError(errors.QueryDataNotFoundError, "このアドレスのユーザーが存在しません")
 	}
 
-	err = u.userRepository.Delete(user.ID)
+	err = u.userRepository.DeleteUnderRegisterUser(user.ID)
 	if err != nil {
 		return errors.NewDomainError(errors.RepositoryError, err.Error())
 	}

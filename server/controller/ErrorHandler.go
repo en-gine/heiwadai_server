@@ -8,7 +8,6 @@ import (
 )
 
 func ErrorHandler(domainErr *errors.DomainError) *connect.Error {
-	logger.Error(domainErr.Error())
 
 	switch domainErr.ErrType {
 	case errors.InvalidParameter:
@@ -18,16 +17,25 @@ func ErrorHandler(domainErr *errors.DomainError) *connect.Error {
 	case errors.AlreadyExist:
 		return connect.NewError(connect.CodeAlreadyExists, domainErr)
 	case errors.RepositoryError:
+		logger.Error(domainErr.Error())
 		return connect.NewError(connect.CodeInternal, domainErr)
 	case errors.ActionError:
+		logger.Error(domainErr.Error())
 		return connect.NewError(connect.CodeInternal, domainErr)
 	case errors.QueryError:
+		logger.Error(domainErr.Error())
 		return connect.NewError(connect.CodeInternal, domainErr)
 	case errors.QueryDataNotFoundError:
+		logger.Error(domainErr.Error())
 		return connect.NewError(connect.CodeNotFound, domainErr)
 	case errors.ErrorUnknown:
+		logger.Error(domainErr.Error())
 		return connect.NewError(connect.CodeUnknown, domainErr)
+	case errors.InternalError:
+		logger.Error(domainErr.Error())
+		return connect.NewError(connect.CodeInternal, domainErr)
 	default:
+		logger.Error(domainErr.Error())
 		return connect.NewError(connect.CodeUnknown, domainErr)
 	}
 }

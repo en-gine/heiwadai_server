@@ -56,6 +56,12 @@ func (u *UserDataUsecase) Update(
 	InnerNoto string,
 	IsBlackCustomer bool,
 ) (*entity.UserWithOption, *errors.DomainError) {
+
+	ml, domainErr := entity.NewMail(Mail)
+	if domainErr != nil {
+		return nil, domainErr
+	}
+
 	existUser, err := u.userQuery.GetByID(ID)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())
@@ -64,7 +70,7 @@ func (u *UserDataUsecase) Update(
 		return nil, errors.NewDomainError(errors.QueryDataNotFoundError, "登録されているユーザーが存在しません")
 	}
 
-	existUser, err = u.userQuery.GetByMail(Mail)
+	existUser, err = u.userQuery.GetByMail(*ml)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())
 	}

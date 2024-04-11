@@ -10,9 +10,9 @@ import (
 type IUserQueryService interface {
 	GetByID(id uuid.UUID) (*entity.User, error)
 	GetOptionByID(id uuid.UUID) (*entity.UserOption, error)
-	GetByMail(mail string) (*entity.User, error)
+	GetByMail(mail entity.Mail) (*entity.User, error)
 	GetMailOKUser(filterPrefectures *[]entity.Prefecture) ([]*entity.User, error)
 	GetMailOKUserCount(filterPrefectures *[]entity.Prefecture) (*int, error)
 	GetList(query *types.UserQuery, pager *types.PageQuery) ([]*entity.UserWichLastCheckin, *types.PageResponse, error)
-	IsUnderRegister(mail string) (bool, error)
+	IsUnderRegister(mail entity.Mail) (bool, error)
 }

@@ -2,6 +2,7 @@ package action
 
 import (
 	"server/core/entity"
+	"server/core/errors"
 	"server/core/infra/types"
 
 	"github.com/google/uuid"
@@ -31,13 +32,14 @@ func (ut UserType) String() string {
 }
 
 type IAuthAction interface {
-	SignUp(email string, password entity.Password) (*uuid.UUID, error)
-	SignIn(email string, password entity.Password) (*types.Token, error)
+	SignUp(email entity.Mail, password entity.Password) (*uuid.UUID, error)
+	SignIn(email entity.Mail, password string) (*types.Token, *errors.DomainError, error)
 	SignOut(token string) error
 	Refresh(token string, refreshToken string) (*UserAuth, error)
 	GetUserInfo(token string) (*UserInfo, error)
-	ResetPasswordMail(email string) error
-	UpdatePassword(password entity.Password, token string) error
-	InviteUserByEmail(mail string) (*uuid.UUID, error)
-	UpdateEmail(email string, token string) error
+	ResetPasswordMail(email entity.Mail) (*errors.DomainError, error)
+	UpdatePassword(password entity.Password, token string) (*errors.DomainError, error)
+	InviteUserByEmail(email entity.Mail) (*uuid.UUID, *errors.DomainError, error)
+	ReInviteUserByEmail(email entity.Mail) (*errors.DomainError, error)
+	UpdateEmail(email entity.Mail, token string) error
 }

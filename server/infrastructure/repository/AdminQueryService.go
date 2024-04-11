@@ -43,9 +43,9 @@ func (pq *AdminQueryService) GetByID(id uuid.UUID) (*entity.Admin, error) {
 	return AdminModelToEntity(admin, store, admin.R.Admin.Email), nil
 }
 
-func (pq *AdminQueryService) GetByMail(mail string) (*entity.Admin, error) {
+func (pq *AdminQueryService) GetByMail(mail entity.Mail) (*entity.Admin, error) {
 	usermanager, err := models.UserManagers(
-		models.UserManagerWhere.Email.EQ(mail),
+		models.UserManagerWhere.Email.EQ(mail.String()),
 		qm.Load(models.UserManagerRels.AdminAdmin),
 		models.UserManagerWhere.IsAdmin.EQ(true)).One(context.Background(), pq.db)
 	if err != nil {

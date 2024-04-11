@@ -39,6 +39,12 @@ func (u *UserDataUsecase) Update(
 	Mail string,
 	AcceptMail bool, // メルマガ配信可
 ) (*entity.User, *errors.DomainError) {
+
+	ml, domainErr := entity.NewMail(Mail)
+	if domainErr != nil {
+		return nil, domainErr
+	}
+
 	existUser, err := u.userQuery.GetByID(ID)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())
@@ -47,7 +53,7 @@ func (u *UserDataUsecase) Update(
 		return nil, errors.NewDomainError(errors.QueryDataNotFoundError, "登録されているユーザーが存在しません")
 	}
 
-	existUser, err = u.userQuery.GetByMail(Mail)
+	existUser, err = u.userQuery.GetByMail(*ml)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())
 	}

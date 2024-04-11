@@ -53,9 +53,9 @@ func (ac *AnonAuthController) Register(ctx context.Context, req *connect.Request
 	return connect.NewResponse(&emptypb.Empty{}), nil
 }
 
-func (ac *AnonAuthController) SignUp(ctx context.Context, req *connect.Request[user.UserAuthRequest]) (*connect.Response[emptypb.Empty], error) {
+func (ac *AnonAuthController) SignUp(ctx context.Context, req *connect.Request[user.SignUpRequest]) (*connect.Response[emptypb.Empty], error) {
 	msg := req.Msg
-	_, domainErr := ac.authUseCase.SignUp(msg.Email, msg.Password)
+	domainErr := ac.authUseCase.UpdatePassword(msg.Password, msg.AccessToken)
 	if domainErr != nil {
 		return nil, controller.ErrorHandler(domainErr)
 	}

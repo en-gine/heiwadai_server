@@ -86,7 +86,7 @@ CREATE TABLE checkin (
     create_at TIMESTAMPTZ NOT NULL default now(),
     update_at TIMESTAMPTZ NOT NULL default now(),
     FOREIGN KEY (store_id) REFERENCES store (id),
-    FOREIGN KEY (user_id) REFERENCES user_data (user_id)
+    FOREIGN KEY (user_id) REFERENCES user_data (user_id) ON DELETE CASCADE
 );
 
 CREATE TABLE coupon (
@@ -118,7 +118,7 @@ CREATE TABLE coupon_attached_user (
     used_at TIMESTAMPTZ,
     user_id UUID,
     FOREIGN KEY (coupon_id) REFERENCES coupon(id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES user_data (user_id),
+    FOREIGN KEY (user_id) REFERENCES user_data (user_id) ON DELETE CASCADE,
     PRIMARY KEY(coupon_id, user_id)
 );
 
@@ -147,7 +147,7 @@ CREATE TABLE mail_magazine_log (
     create_at TIMESTAMPTZ NOT NULL default now(),
     update_at TIMESTAMPTZ NOT NULL default now(),
     FOREIGN KEY (mail_magazine_id) REFERENCES mail_magazine (id),
-    FOREIGN KEY (user_id) REFERENCES user_data (user_id)
+    FOREIGN KEY (user_id) REFERENCES user_data (user_id) ON DELETE CASCADE
 );
 
 

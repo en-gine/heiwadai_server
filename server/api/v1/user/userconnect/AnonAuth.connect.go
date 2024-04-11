@@ -68,14 +68,14 @@ type AnonAuthControllerClient interface {
 	// 初回ユーザー登録
 	Register(context.Context, *connect_go.Request[user.UserRegisterRequest]) (*connect_go.Response[emptypb.Empty], error)
 	// ユーザー登録後にメールアドレスの確認が完了し、パスワードを設定する
-	SignUp(context.Context, *connect_go.Request[user.UserAuthRequest]) (*connect_go.Response[emptypb.Empty], error)
+	SignUp(context.Context, *connect_go.Request[user.SignUpRequest]) (*connect_go.Response[emptypb.Empty], error)
 	// ログイン
 	SignIn(context.Context, *connect_go.Request[user.UserAuthRequest]) (*connect_go.Response[user.AnonTokenResponse], error)
 	// パスワードリセット用メール送信
 	ResetPasswordMail(context.Context, *connect_go.Request[user.UserMailRequest]) (*connect_go.Response[emptypb.Empty], error)
 	// パスワードリセット(メールリダイレクトからのトークンと共に設定)
 	SetNewPassword(context.Context, *connect_go.Request[user.SetNewPasswordRequest]) (*connect_go.Response[emptypb.Empty], error)
-	// トークンを元にユーザーメール取得
+	// トークンを元にユーザーメール取得（パスワード再設定の画面に使用）
 	GetUserMailByToken(context.Context, *connect_go.Request[user.TokenRequest]) (*connect_go.Response[user.UserMailResponse], error)
 	// メールアドレスによる再招待
 	IsUnderRegister(context.Context, *connect_go.Request[user.UserMailRequest]) (*connect_go.Response[user.IsUnderRegisterResponse], error)
@@ -100,7 +100,7 @@ func NewAnonAuthControllerClient(httpClient connect_go.HTTPClient, baseURL strin
 			baseURL+AnonAuthControllerRegisterProcedure,
 			opts...,
 		),
-		signUp: connect_go.NewClient[user.UserAuthRequest, emptypb.Empty](
+		signUp: connect_go.NewClient[user.SignUpRequest, emptypb.Empty](
 			httpClient,
 			baseURL+AnonAuthControllerSignUpProcedure,
 			opts...,
@@ -146,7 +146,7 @@ func NewAnonAuthControllerClient(httpClient connect_go.HTTPClient, baseURL strin
 // anonAuthControllerClient implements AnonAuthControllerClient.
 type anonAuthControllerClient struct {
 	register                *connect_go.Client[user.UserRegisterRequest, emptypb.Empty]
-	signUp                  *connect_go.Client[user.UserAuthRequest, emptypb.Empty]
+	signUp                  *connect_go.Client[user.SignUpRequest, emptypb.Empty]
 	signIn                  *connect_go.Client[user.UserAuthRequest, user.AnonTokenResponse]
 	resetPasswordMail       *connect_go.Client[user.UserMailRequest, emptypb.Empty]
 	setNewPassword          *connect_go.Client[user.SetNewPasswordRequest, emptypb.Empty]
@@ -162,7 +162,7 @@ func (c *anonAuthControllerClient) Register(ctx context.Context, req *connect_go
 }
 
 // SignUp calls server.user.AnonAuthController.SignUp.
-func (c *anonAuthControllerClient) SignUp(ctx context.Context, req *connect_go.Request[user.UserAuthRequest]) (*connect_go.Response[emptypb.Empty], error) {
+func (c *anonAuthControllerClient) SignUp(ctx context.Context, req *connect_go.Request[user.SignUpRequest]) (*connect_go.Response[emptypb.Empty], error) {
 	return c.signUp.CallUnary(ctx, req)
 }
 
@@ -206,14 +206,14 @@ type AnonAuthControllerHandler interface {
 	// 初回ユーザー登録
 	Register(context.Context, *connect_go.Request[user.UserRegisterRequest]) (*connect_go.Response[emptypb.Empty], error)
 	// ユーザー登録後にメールアドレスの確認が完了し、パスワードを設定する
-	SignUp(context.Context, *connect_go.Request[user.UserAuthRequest]) (*connect_go.Response[emptypb.Empty], error)
+	SignUp(context.Context, *connect_go.Request[user.SignUpRequest]) (*connect_go.Response[emptypb.Empty], error)
 	// ログイン
 	SignIn(context.Context, *connect_go.Request[user.UserAuthRequest]) (*connect_go.Response[user.AnonTokenResponse], error)
 	// パスワードリセット用メール送信
 	ResetPasswordMail(context.Context, *connect_go.Request[user.UserMailRequest]) (*connect_go.Response[emptypb.Empty], error)
 	// パスワードリセット(メールリダイレクトからのトークンと共に設定)
 	SetNewPassword(context.Context, *connect_go.Request[user.SetNewPasswordRequest]) (*connect_go.Response[emptypb.Empty], error)
-	// トークンを元にユーザーメール取得
+	// トークンを元にユーザーメール取得（パスワード再設定の画面に使用）
 	GetUserMailByToken(context.Context, *connect_go.Request[user.TokenRequest]) (*connect_go.Response[user.UserMailResponse], error)
 	// メールアドレスによる再招待
 	IsUnderRegister(context.Context, *connect_go.Request[user.UserMailRequest]) (*connect_go.Response[user.IsUnderRegisterResponse], error)
@@ -307,7 +307,7 @@ func (UnimplementedAnonAuthControllerHandler) Register(context.Context, *connect
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.AnonAuthController.Register is not implemented"))
 }
 
-func (UnimplementedAnonAuthControllerHandler) SignUp(context.Context, *connect_go.Request[user.UserAuthRequest]) (*connect_go.Response[emptypb.Empty], error) {
+func (UnimplementedAnonAuthControllerHandler) SignUp(context.Context, *connect_go.Request[user.SignUpRequest]) (*connect_go.Response[emptypb.Empty], error) {
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.AnonAuthController.SignUp is not implemented"))
 }
 

@@ -68,8 +68,8 @@ func (pq *UserQueryService) GetOptionByID(id uuid.UUID) (*entity.UserOption, err
 	}, nil
 }
 
-func (pq *UserQueryService) GetByMail(mail string) (*entity.User, error) {
-	usermanager, err := models.UserManagers(models.UserManagerWhere.Email.EQ(mail), qm.Load(models.UserManagerRels.UserUserDatum), models.UserManagerWhere.IsAdmin.EQ(false)).One(context.Background(), pq.db)
+func (pq *UserQueryService) GetByMail(mail entity.Mail) (*entity.User, error) {
+	usermanager, err := models.UserManagers(models.UserManagerWhere.Email.EQ(mail.String()), qm.Load(models.UserManagerRels.UserUserDatum), models.UserManagerWhere.IsAdmin.EQ(false)).One(context.Background(), pq.db)
 	// 管理者も取得する
 	// usermanager, err := models.UserManagers(models.UserManagerWhere.Email.EQ(mail), qm.Load(models.UserManagerRels.UserUserDatum)).One(context.Background(), pq.db)
 
@@ -210,10 +210,10 @@ func (pq *UserQueryService) GetList(query *types.UserQuery, pager *types.PageQue
 	return result, pageResponse, nil
 }
 
-func (pq *UserQueryService) IsUnderRegister(email string) (bool, error) {
+func (pq *UserQueryService) IsUnderRegister(email entity.Mail) (bool, error) {
 	db := InitDB()
 	var confirmedAt *string
-	err := db.QueryRow("SELECT email_confirmed_at FROM auth.users WHERE email = $1", email).Scan(&confirmedAt)
+	err := db.QueryRow("SELECT email_confirmed_at FROM auth.users WHERE email = $1", email.String()).Scan(&confirmedAt)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return false, nil
@@ -221,7 +221,7 @@ func (pq *UserQueryService) IsUnderRegister(email string) (bool, error) {
 		logger.Error(err.Error())
 		return false, err
 	}
-	if confirmedAt == nil {
+	if confirmedAt != nil {
 		return false, nil
 	}
 	return true, nil

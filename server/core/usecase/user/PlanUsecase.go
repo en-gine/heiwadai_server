@@ -42,8 +42,8 @@ func (u *PlanUsecase) Search(
 			return nil, errors.NewDomainError(errors.QueryError, err.Error())
 		}
 	} else {
-		for _, storeId := range stayStoreIds {
-			stayStore, err := u.storeQuery.GetStayableByID(storeId)
+		for _, storeID := range stayStoreIds {
+			stayStore, err := u.storeQuery.GetStayableByID(storeID)
 			if err != nil {
 				return nil, errors.NewDomainError(errors.QueryError, err.Error())
 			}

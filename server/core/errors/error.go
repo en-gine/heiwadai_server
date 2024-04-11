@@ -17,6 +17,7 @@ const (
 	ActionError
 	QueryError
 	QueryDataNotFoundError
+	InternalError
 	ErrorUnknown
 )
 
