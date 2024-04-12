@@ -122,3 +122,6 @@ messageTest:
 
 birthCouponTest:
 	go run /server/test/birthCouponTest/.
+
+passTest:
+	go run /server/test/passTest/.

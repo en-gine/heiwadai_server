@@ -1,11 +1,11 @@
 package entity
 
 import (
-	"crypto/rand"
-	"fmt"
-	"math/big"
+	"math/rand"
+	"strings"
 
 	"server/core/errors"
+	"server/infrastructure/logger"
 	validator "server/validator"
 )
 
@@ -28,38 +28,30 @@ func (p *Password) String() string {
 }
 
 func GenerateRandomPassword() (*Password, *errors.DomainError) {
-	const length = 8
-	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-	const minUpper = 1 // 最低限必要な大文字の数
+	var password strings.Builder
+	const (
+		minLength = 8
+		digits    = "0123456789"
+		lowers    = "abcdefghijklmnopqrstuvwxyz"
+		uppers    = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	)
 
-	var upperCount int
-	var result []byte
-	for i := 0; i < length; i++ {
-		charIndex, err := rand.Int(rand.Reader, big.NewInt(int64(len(charset))))
-		if err != nil {
-			return nil, errors.NewDomainError(errors.InternalError, err.Error())
-		}
-		char := charset[charIndex.Int64()]
-		if i >= length-minUpper-upperCount && upperCount < minUpper && char >= 'A' && char <= 'Z' {
-			// 必要な大文字の数を満たしていない場合、大文字を追加
-			result = append(result, char)
-			upperCount++
-		} else if char >= 'A' && char <= 'Z' {
-			// 大文字が選択された場合
-			result = append(result, char)
-			upperCount++
-		} else if i < length-minUpper-upperCount {
-			// それ以外の場合、通常の文字を追加
-			result = append(result, char)
-		} else {
-			// 大文字が必要な場合はループを繰り返す
-			i--
-		}
+	// 大文字、小文字、数字をそれぞれ1文字以上含める
+	password.WriteString(string(uppers[rand.Intn(len(uppers))]))
+	password.WriteString(string(lowers[rand.Intn(len(lowers))]))
+	password.WriteString(string(digits[rand.Intn(len(digits))]))
+
+	// 残りの文字をランダムに選択
+	remainingLength := minLength + rand.Intn(5) - 3
+	for i := 0; i < remainingLength; i++ {
+		charSet := uppers + lowers + digits
+		password.WriteString(string(charSet[rand.Intn(len(charSet))]))
 	}
-	pass, err := NewPassword(string(result))
-	fmt.Println(string(result))
-	if err != nil {
-		return nil, err
+
+	pass, domaiErr := NewPassword(password.String())
+	if domaiErr != nil {
+		return nil, domaiErr
 	}
+	logger.Debugf("Generated password: %s", pass.String())
 	return pass, nil
 }

@@ -58,13 +58,6 @@ func (ac *CheckInController) GetStampCard(ctx context.Context, req *connect.Requ
 				StoreStampImage: entity.StoreStampImage,
 				CheckInAt:       timestamppb.New(*entity.CheckInAt),
 			}
-		} else {
-			stamp = &user.CheckinStamp{
-				ID:              nil,
-				StoreName:       "",
-				StoreStampImage: entity.StoreStampImage,
-				CheckInAt:       nil,
-			}
 		}
 		stamps = append(stamps, stamp)
 	}
