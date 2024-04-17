@@ -144,13 +144,15 @@ func (ac *BookController) Reserve(ctx context.Context, req *connect.Request[user
 		}
 	}
 
-	plan := entity.Plan(
+	plan := entity.RegenPlan(
 		req.Msg.RequestPlan.ID,
 		req.Msg.RequestPlan.Title,
 		uint(req.Msg.RequestPlan.Price),
+		req.Msg.RequestPlan.ImageURL,
 		entity.RoomType(req.Msg.RequestPlan.RoomType),
 		entity.MealType{Morning: morning, Dinner: dinner},
 		entity.SmokeType(req.Msg.RequestPlan.SmokeType),
+		req.Msg.RequestPlan.OverView,
 		uuid.MustParse(req.Msg.RequestPlan.StoreID),
 	)
 

@@ -44,12 +44,12 @@ func (m MealType) String() string {
 type RoomType int
 
 const (
-	RoomTypeSingle RoomType = 1 + iota
+	RoomTypeUnknown RoomType = iota //予約システムが1からなので0がUnknownとする
+	RoomTypeSingle
 	RoomTypeSemiDouble
 	RoomTypeDouble
 	RoomTypeTwin
 	RoomTypeFourth
-	RoomTypeUnknown
 )
 
 var RoomTypeAll = []RoomType{
