@@ -46,7 +46,8 @@ func (u *UserReportUsecase) Send(title string, content string, userID uuid.UUID)
 		return errors.NewDomainError(errors.QueryError, err.Error())
 	}
 
-	err = u.sendMailAction.Send(user.Mail, "", userName+" 様", report.Title, report.Content)
+	mailContent := userName + " 様より下記の内容でお問い合わせがありました。\n\n" + report.Content
+	err = u.sendMailAction.Send(user.Mail, report.Title, mailContent)
 	if err != nil {
 		return errors.NewDomainError(errors.QueryError, err.Error())
 	}

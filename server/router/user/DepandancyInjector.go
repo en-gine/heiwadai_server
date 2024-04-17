@@ -106,6 +106,8 @@ func InitializeBookUsecase() *usecase.BookUsecase {
 		bookQuery,
 		bookRepository,
 		bookAPIRepository,
+		sendMailAction,
+		storeQuery,
 	)
 }
 

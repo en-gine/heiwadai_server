@@ -99,16 +99,17 @@ type BasicInformation struct {
 	CheckInDate                util.YYYYMMDD `xml:"CheckInDate"`
 	CheckInTime                string        `xml:"CheckInTime"`
 	Nights                     uint          `xml:"Nights"`
-	TotalRoomCount             uint          `xml:"TotalRoomCount"`      // 利用客室合計数
-	GrandTotalPaxCount         uint          `xml:"GrandTotalPaxCount"`  //	お客様総合計人数
-	TotalPaxMaleCount          uint          `xml:"TotalPaxMaleCount"`   //	お客様総合計男性人数
-	TotalPaxFemaleCount        uint          `xml:"TotalPaxFemaleCount"` //	お客様総合計女性人数（男女区別が無い場合は0）
-	TotalChildA70Count         uint          `xml:"TotalChildA70Count"`  //	お客様総合計子供A（70%）人数
-	MealCondition              MealCondition `xml:"MealCondition"`       // 食事条件
-	PackageType                string        `xml:"PackageType"`         // Package固定
-	PackagePlanCode            string        `xml:"PackagePlanCode"`     // 企画(パッケージ)コード
-	PackagePlanName            string        `xml:"PackagePlanName"`     // 企画(パッケージ)名
-	PackagePlanContent         string        `xml:"PackagePlanContent"`  // 企画(パッケージ)内容
+	TotalRoomCount             uint          `xml:"TotalRoomCount"`        // 利用客室合計数
+	GrandTotalPaxCount         uint          `xml:"GrandTotalPaxCount"`    //	お客様総合計人数
+	TotalPaxMaleCount          uint          `xml:"TotalPaxMaleCount"`     //	お客様総合計男性人数
+	TotalPaxFemaleCount        uint          `xml:"TotalPaxFemaleCount"`   //	お客様総合計女性人数（男女区別が無い場合は0）
+	TotalChildA70Count         uint          `xml:"TotalChildA70Count"`    //	お客様総合計子供A（70%）人数
+	MealCondition              MealCondition `xml:"MealCondition"`         // 食事条件
+	PackageType                string        `xml:"PackageType"`           // Package固定
+	PackagePlanCode            string        `xml:"PackagePlanCode"`       // 企画(パッケージ)コード
+	PackagePlanName            string        `xml:"PackagePlanName"`       // 企画(パッケージ)名
+	PackagePlanContent         string        `xml:"PackagePlanContent"`    // 企画(パッケージ)内容
+	SpecialServiceRequest      string        `xml:"SpecialServiceRequest"` // お客様からの要望
 }
 type MealCondition string
 

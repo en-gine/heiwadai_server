@@ -215,10 +215,14 @@ func (p *PlanQuery) AvailRSToPlans(res *EnvelopeRS) (*[]entity.Plan, error) {
 		hotelCode := roomStay.RPH
 		var stayable *entity.StayableStore
 		var err error
-		if env.GetEnv(env.TlbookingIsTest) != "true" {
-			stayable, err = p.storeQuery.GetStayableByBookingID(hotelCode)
+		if env.GetEnv(env.TlbookingIsTest) == "true" {
+			stayables, err := p.storeQuery.GetStayables()
+			if err != nil {
+				return nil, err
+			}
+			stayable = stayables[0]
 		} else {
-			stayable = &entity.StayableStore{}
+			stayable, err = p.storeQuery.GetStayableByBookingID(hotelCode)
 		}
 		if err != nil {
 			return nil, err
@@ -234,11 +238,16 @@ func (p *PlanQuery) AvailRSToPlans(res *EnvelopeRS) (*[]entity.Plan, error) {
 		// roomName := roomType.RoomDescription.Name
 		// roomText := roomType.RoomDescription.Text
 		// roomImageUrl := roomType.RoomDescription.URL
-		amount := roomStay.RoomRates.RoomRate[0].Total.AmountAfterTax
-		var planPrice uint64
-		planPrice, _ = strconv.ParseUint(amount, 10, 64)
 
-		for _, plan := range roomStay.RatePlans.RatePlan {
+		for index, plan := range roomStay.RatePlans.RatePlan {
+			amount := roomStay.RoomRates.RoomRate[index].Total.AmountAfterTax
+			var planPrice uint64
+			planPrice, _ = strconv.ParseUint(amount, 10, 64)
+			availStatus := AvailabilityStatus(roomStay.RoomRates.RoomRate[index].AvailabilityStatus)
+			if availStatus == AvailableClosedOut {
+				//　売り切れ
+				continue
+			}
 			planID := plan.RatePlanCode
 			planName := plan.RatePlanName
 

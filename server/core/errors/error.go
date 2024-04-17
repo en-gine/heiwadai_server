@@ -14,6 +14,7 @@ const (
 	UnPemitedOperation
 	AlreadyExist
 	RepositoryError
+	CancelButNeedFeedBack
 	ActionError
 	QueryError
 	QueryDataNotFoundError

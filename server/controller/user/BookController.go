@@ -144,15 +144,13 @@ func (ac *BookController) Reserve(ctx context.Context, req *connect.Request[user
 		}
 	}
 
-	plan := entity.RegenPlan(
+	plan := entity.Plan(
 		req.Msg.RequestPlan.ID,
 		req.Msg.RequestPlan.Title,
 		uint(req.Msg.RequestPlan.Price),
-		req.Msg.RequestPlan.ImageURL,
 		entity.RoomType(req.Msg.RequestPlan.RoomType),
 		entity.MealType{Morning: morning, Dinner: dinner},
 		entity.SmokeType(req.Msg.RequestPlan.SmokeType),
-		req.Msg.RequestPlan.OverView,
 		uuid.MustParse(req.Msg.RequestPlan.StoreID),
 	)
 
@@ -217,13 +215,24 @@ func BookEntityToResponse(entity *entity.Booking, bookstore *entity.StayableStor
 }
 
 func PlanEntityToResponse(plan *entity.Plan, planStore *entity.StayableStore) *user.DisplayPlan {
+	var mealTypes []user.MealType
+	if plan.MealType.Morning {
+		mealTypes = append(mealTypes, user.MealType_Morning)
+	}
+	if plan.MealType.Dinner {
+		mealTypes = append(mealTypes, user.MealType_Dinner)
+	}
+
 	return &user.DisplayPlan{
 		ID:              plan.ID,
 		Title:           plan.Title,
 		Price:           uint32(plan.Price),
 		ImageURL:        plan.ImageURL,
+		RoomType:        user.RoomType(plan.RoomType),
 		RoomTypeName:    plan.RoomType.String(),
+		MealTypes:       mealTypes,
 		MealTypeName:    plan.MealType.String(),
+		SmokeType:       user.SmokeType(plan.SmokeType),
 		SmokeTypeName:   plan.SmokeType.String(),
 		OverView:        plan.OverView,
 		StoreID:         plan.StoreID.String(),

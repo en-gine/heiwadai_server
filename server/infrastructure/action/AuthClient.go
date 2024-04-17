@@ -167,7 +167,7 @@ func (au *AuthClient) InviteUserByEmail(email entity.Mail) (*uuid.UUID, *domainE
 	if err != nil {
 		if strings.Contains(err.Error(), "422") {
 			logger.DebugPrint(err)
-			return nil, domainErr.NewDomainError(domainErr.InvalidParameter, "このユーザーは既に招待されています。"), nil
+			return nil, domainErr.NewDomainError(domainErr.CancelButNeedFeedBack, "このユーザーは既に招待されています。"), nil
 		}
 		return nil, nil, err
 	}

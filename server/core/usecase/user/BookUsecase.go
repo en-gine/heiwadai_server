@@ -1,10 +1,15 @@
 package user
 
 import (
+	"bytes"
+	"fmt"
+	"html/template"
+	"strconv"
 	"time"
 
 	"server/core/entity"
 	"server/core/errors"
+	"server/core/infra/action"
 	queryservice "server/core/infra/queryService"
 	"server/core/infra/repository"
 	"server/infrastructure/logger"
@@ -13,20 +18,26 @@ import (
 )
 
 type BookUsecase struct {
-	bookQuery queryservice.IBookQueryService
-	bookRepo  repository.IBookRepository
-	bookAPI   repository.IBookAPIRepository
+	bookQuery  queryservice.IBookQueryService
+	bookRepo   repository.IBookRepository
+	bookAPI    repository.IBookAPIRepository
+	mailAction action.ISendMailAction
+	storeQuery queryservice.IStoreQueryService
 }
 
 func NewBookUsecase(
 	bookQuery queryservice.IBookQueryService,
 	bookRepo repository.IBookRepository,
 	bookAPI repository.IBookAPIRepository,
+	mailAction action.ISendMailAction,
+	storeQuery queryservice.IStoreQueryService,
 ) *BookUsecase {
 	return &BookUsecase{
-		bookQuery: bookQuery,
-		bookRepo:  bookRepo,
-		bookAPI:   bookAPI,
+		bookQuery:  bookQuery,
+		bookRepo:   bookRepo,
+		bookAPI:    bookAPI,
+		mailAction: mailAction,
+		storeQuery: storeQuery,
 	}
 }
 
@@ -48,9 +59,12 @@ func (u *BookUsecase) Cancel(bookID uuid.UUID) *errors.DomainError {
 		return errors.NewDomainError(errors.QueryError, "該当の予約が存在しません。")
 	}
 
-	err = u.bookAPI.Cancel(book)
+	domainError, err := u.bookAPI.Cancel(book)
 	if err != nil {
 		return errors.NewDomainError(errors.RepositoryError, "キャンセル処理がAPIレベルで失敗しました。")
+	}
+	if domainError != nil {
+		return domainError
 	}
 
 	err = u.bookRepo.Delete(bookID)
@@ -86,7 +100,22 @@ func (u *BookUsecase) Reserve(
 	BookUserID uuid.UUID,
 	Note string,
 ) *errors.DomainError {
-	newBook := entity.CreateBooking(
+	store, err := u.storeQuery.GetStayableByID(BookPlan.StoreID)
+	if err != nil {
+		return errors.NewDomainError(errors.QueryError, err.Error())
+	}
+	if store == nil {
+		return errors.NewDomainError(errors.QueryError, "宿泊施設の情報が取得できませんでした。")
+	}
+
+	tlnumber, err := u.bookQuery.GenerateTLBookingNumber()
+	if err != nil {
+		return errors.NewDomainError(errors.QueryError, err.Error())
+	}
+	if tlnumber == nil || *tlnumber == "" {
+		return errors.NewDomainError(errors.QueryError, "TLBookingNumberの生成に失敗しました。")
+	}
+	newBook, domainErr := entity.CreateBooking(
 		stayFrom,
 		stayTo,
 		adult,
@@ -98,22 +127,125 @@ func (u *BookUsecase) Reserve(
 		BookPlan,
 		BookUserID,
 		Note,
-		"",
+		*tlnumber,
 	)
-	TLBookingNumber, err := u.bookAPI.Reserve(newBook)
+	if domainErr != nil {
+		return domainErr
+	}
+	_, domainError, err := u.bookAPI.Reserve(newBook)
 	if err != nil {
 		return errors.NewDomainError(errors.RepositoryError, err.Error())
 	}
-
-	if TLBookingNumber == nil || *TLBookingNumber != "" {
-		return errors.NewDomainError(errors.RepositoryError, "TLBookingNumberが存在しません。処理を中止します。")
+	if domainError != nil {
+		return domainError
 	}
 
-	newBook.TlBookingNumber = *TLBookingNumber
+	newBook.TlBookingNumber = *tlnumber
 
 	err = u.bookRepo.Save(newBook)
 	if err != nil {
-		return errors.NewDomainError(errors.RepositoryError, err.Error())
+		logger.Error("予約情報の保存に失敗しました。" + err.Error())
+		return errors.NewDomainError(errors.CancelButNeedFeedBack, "予約は完了しましたが、情報の保存に失敗しました。")
+	}
+
+	// 予約完了メールの内容を取得
+	content, err := reserveMailContent(newBook, store)
+	if err != nil {
+		return errors.NewDomainError(errors.CancelButNeedFeedBack, "予約は完了しましたが、お客様へのメール作成に失敗しました。")
+	}
+
+	// 予約完了メール送信
+	err = u.mailAction.Send(GuestData.Mail, "【"+store.Name+*store.BranchName+"】宿泊予約完了のお知らせ", *content)
+	if err != nil {
+		return errors.NewDomainError(errors.CancelButNeedFeedBack, "予約は完了しましたが、お客様へのメール送信に失敗しました。")
 	}
 	return nil
+}
+
+func reserveMailContent(
+	bookinfo *entity.Booking,
+	store *entity.StayableStore,
+) (*string, error) {
+	contentTemplate := `
+{{.GuestName}} 様
+
+この度は、当ホテルをご予約いただき、誠にありがとうございます。
+以下の内容でご予約が完了しましたので、お知らせいたします。
+
+予約番号: {{.ReservationNumber}}
+チェックイン日: {{.CheckInDate}}
+チェックアウト日: {{.CheckOutDate}}
+チェックイン時間：{{.CheckInTime}}
+宿泊プラン: {{.ReservationPlan}}
+宿泊人数: {{.NumberOfGuests}}名様
+部屋数：{{.RoomCount}}部屋
+部屋タイプ：{{.RoomType}}
+食事タイプ：{{.MealType}}
+禁煙喫煙：{{.SmokingType}}
+
+合計金額: {{.TotalAmount}}円
+
+
+【ご注意事項】
+※チェックイン時間
+変更がある場合は、必ず宿泊ホテルまでご連絡ください。
+
+※駐車場について
+駐車場は完全予約制です。
+宿泊ホテルまで事前にご連絡下さい。
+ご連絡がない場合はご利用いただけない場合がございます。
+
+※乳幼児について
+乳幼児の添い寝には別途料金を頂戴しております。
+事前に施設までご連絡ください。
+
+ご不明な点がございましたら、お気軽にお問い合わせください。
+当日は、お客様のお越しを心よりお待ちしております。
+
+敬具
+
+{{.HotelName}}
+{{.HotelAddress}}
+{{.HotelPhone}}
+{{.HotelURL}}
+`
+
+	// メールのデータを定義（実際のデータはアプリケーションから取得）
+	data := map[string]string{
+		"GuestName":         bookinfo.GuestData.LastName + bookinfo.GuestData.FirstName,
+		"ReservationNumber": bookinfo.TlBookingNumber,
+		"CheckInDate":       bookinfo.StayFrom.Format("2006年1月2日"),
+		"CheckOutDate":      bookinfo.StayTo.Format("2006年1月2日"),
+		"CheckInTime":       bookinfo.CheckInTime.String(),
+		"ReservationPlan":   bookinfo.BookPlan.Title,
+		"NumberOfGuests":    "大人: " + strconv.FormatUint(uint64(bookinfo.Adult), 10) + "名様／子ども：" + strconv.FormatUint(uint64(bookinfo.Child), 10),
+		"RoomCount":         strconv.FormatUint(uint64(bookinfo.RoomCount), 10),
+		"RoomType":          bookinfo.BookPlan.RoomType.String(),
+		"MealType":          bookinfo.BookPlan.MealType.String(),
+		"SmokingType":       bookinfo.BookPlan.SmokeType.String(),
+		"TotalAmount":       strconv.FormatUint(uint64(bookinfo.TotalCost), 10),
+		"HotelName":         store.Name + *store.BranchName,
+		"HotelAddress":      store.Address,
+		"HotelPhone":        store.Tel,
+		"HotelURL":          store.SiteURL,
+	}
+
+	// テンプレートを解析
+	tmpl, err := template.New("email").Parse(contentTemplate)
+	if err != nil {
+		fmt.Println("テンプレートの解析に失敗しました:", err)
+		return nil, err
+	}
+
+	// テンプレートに値を埋め込む
+	var content bytes.Buffer
+	err = tmpl.Execute(&content, data)
+	if err != nil {
+		fmt.Println("テンプレートへの値の埋め込みに失敗しました:", err)
+		return nil, err
+	}
+
+	// メールの本文を取得
+	contentStr := content.String()
+	return &contentStr, nil
 }

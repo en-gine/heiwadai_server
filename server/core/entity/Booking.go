@@ -132,7 +132,10 @@ func CreateBooking(
 	BookUserID uuid.UUID,
 	Note string,
 	TlBookingNumber string,
-) *Booking {
+) (*Booking, *errors.DomainError) {
+	if TlBookingNumber == "" {
+		return nil, errors.NewDomainError(errors.InvalidParameter, "TlBookingNumberが空です。")
+	}
 	return &Booking{
 		ID:              uuid.New(),
 		StayFrom:        stayFrom,
@@ -147,5 +150,5 @@ func CreateBooking(
 		BookUserID:      BookUserID,
 		Note:            Note,
 		TlBookingNumber: TlBookingNumber,
-	}
+	}, nil
 }

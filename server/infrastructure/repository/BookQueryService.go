@@ -78,7 +78,7 @@ func (pq *BookQueryService) GetMyBooking(userID uuid.UUID) ([]*entity.Booking, e
 	return entities, nil
 }
 
-func (pq *BookQueryService) GetBookRequestDataID() (*string, error) {
+func (pq *BookQueryService) GenerateTLBookingNumber() (*string, error) {
 	var reqID string
 	// Use a raw query
 

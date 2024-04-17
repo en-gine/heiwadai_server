@@ -202,7 +202,7 @@ func (u *MailMagazineUsecase) Send(mailMagazineID uuid.UUID) *errors.DomainError
 			return errors.NewDomainError(errors.QueryError, err.Error())
 		}
 		// 送信処理
-		err = u.mailSendAction.SendAll(unsentMails, "no-reply@heiwadai-hotel.app", mgz.Title, mgz.Content)
+		err = u.mailSendAction.SendAll(unsentMails, mgz.Title, mgz.Content)
 		if err != nil {
 			u.saveUncompleteMailMagazine(mgz, atFirstUnsent-prevSend, prevSend)
 			return errors.NewDomainError(errors.RepositoryError, err.Error())

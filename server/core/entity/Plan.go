@@ -44,7 +44,7 @@ func (m MealType) String() string {
 type RoomType int
 
 const (
-	RoomTypeSingle RoomType = iota
+	RoomTypeSingle RoomType = 1 + iota
 	RoomTypeSemiDouble
 	RoomTypeDouble
 	RoomTypeTwin
@@ -162,6 +162,26 @@ func RegenPlan(
 		MealType:  MealType,
 		SmokeType: SmokeType,
 		OverView:  OverView,
+		StoreID:   StoreID,
+	}
+}
+
+func RegenRequestPlan(
+	ID string,
+	Title string,
+	Price uint,
+	RoomType RoomType,
+	MealType MealType,
+	SmokeType SmokeType,
+	StoreID uuid.UUID,
+) *Plan {
+	return &Plan{
+		ID:        ID,
+		Title:     Title,
+		Price:     Price,
+		RoomType:  RoomType,
+		MealType:  MealType,
+		SmokeType: SmokeType,
 		StoreID:   StoreID,
 	}
 }

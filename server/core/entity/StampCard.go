@@ -19,13 +19,13 @@ type Stamp struct {
 }
 
 type StampCard struct {
-	Stamps [MaxStampCount]Stamp
+	Stamps []Stamp
 }
 
 func NewStampCard(
 	userCheckIns []*Checkin,
 ) (*StampCard, *errors.DomainError) {
-	stamps := [MaxStampCount]Stamp{}
+	var stamps []Stamp
 
 	if len(userCheckIns) > MaxStampCount {
 		return nil, errors.NewDomainError(errors.InvalidParameter, "チェックイン数が上限を超えています。")

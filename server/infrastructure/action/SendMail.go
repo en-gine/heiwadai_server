@@ -20,6 +20,7 @@ var (
 	MAILPORT = env.GetEnv(env.MailPort)
 	MAILPASS = env.GetEnv(env.MailPass)
 	MAILUSER = env.GetEnv(env.MailUser)
+	MAILFROM = env.GetEnv(env.MailFrom)
 )
 
 func NewSendMailAction() action.ISendMailAction {
@@ -28,26 +29,26 @@ func NewSendMailAction() action.ISendMailAction {
 
 type SendMailAction struct{}
 
-func (s *SendMailAction) SendAll(mails *[]string, From string, Title string, Body string) error {
+func (s *SendMailAction) SendAll(mails *[]string, Title string, Body string) error {
 	To := "no-reply@heiwadai-hotel.app" // 一斉送信の場合ダミー
-	err := s.SendMail(To, "", From, Title, Body, mails)
+	err := s.SendMail(To, Title, Body, mails)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (s *SendMailAction) Send(To string, CC string, From string, Title string, Body string) error {
-	err := s.SendMail(To, CC, From, Title, Body, nil)
+func (s *SendMailAction) Send(To string, Title string, Body string) error {
+	err := s.SendMail(To, Title, Body, nil)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (s *SendMailAction) SendMail(To string, CC string, From string, Title string, Body string, BulkTo *[]string) error {
+func (s *SendMailAction) SendMail(To string, Title string, Body string, BulkTo *[]string) error {
 	header := make(map[string]string)
-	header["From"] = "平和台ホテル送信専用<" + From + ">"
+	header["From"] = "平和台ホテル送信専用<" + MAILFROM + ">"
 	header["To"] = To
 	header["Subject"] = mime.QEncoding.Encode("UTF-8", Title)
 	header["MIME-Version"] = "1.0"
@@ -80,7 +81,7 @@ func (s *SendMailAction) SendMail(To string, CC string, From string, Title strin
 	}
 	err := smtp.SendMail(MAILHOST+":"+MAILPORT,
 		smtp.PlainAuth("", MAILUSER, MAILPASS, MAILHOST),
-		From, []string{To}, []byte(message))
+		MAILFROM, []string{To}, []byte(message))
 	if err != nil {
 		logger.Fatalf("smtp error: %s", err)
 		return err

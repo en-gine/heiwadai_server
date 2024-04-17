@@ -2,6 +2,7 @@ package repository
 
 import (
 	"server/core/entity"
+	"server/core/errors"
 
 	"github.com/google/uuid"
 )
@@ -11,6 +12,6 @@ type IBookRepository interface {
 	Delete(id uuid.UUID) error
 }
 type IBookAPIRepository interface {
-	Reserve(bookData *entity.Booking) (*string, error)
-	Cancel(bookData *entity.Booking) error
+	Reserve(bookData *entity.Booking) (*string, *errors.DomainError, error)
+	Cancel(bookData *entity.Booking) (*errors.DomainError, error)
 }
