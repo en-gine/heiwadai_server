@@ -923,7 +923,7 @@ func testUserBooksSelect(t *testing.T) {
 }
 
 var (
-	userBookDBTypes = map[string]string{`ID`: `uuid`, `TLBookingNumber`: `character varying`, `StayFrom`: `timestamp without time zone`, `StayTo`: `timestamp without time zone`, `Adult`: `integer`, `Child`: `integer`, `RoomCount`: `integer`, `CheckInTime`: `character varying`, `TotalCost`: `integer`, `GuestDataID`: `uuid`, `BookPlanID`: `uuid`, `BookUserID`: `uuid`, `Note`: `text`, `CreateAt`: `timestamp with time zone`, `UpdateAt`: `timestamp with time zone`}
+	userBookDBTypes = map[string]string{`ID`: `uuid`, `TLBookingNumber`: `character varying`, `StayFrom`: `timestamp without time zone`, `StayTo`: `timestamp without time zone`, `Adult`: `integer`, `Child`: `integer`, `RoomCount`: `integer`, `CheckInTime`: `character varying`, `TotalCost`: `integer`, `GuestDataID`: `uuid`, `BookPlanID`: `uuid`, `BookUserID`: `uuid`, `Note`: `text`, `CreateAt`: `timestamp with time zone`, `UpdateAt`: `timestamp with time zone`, `TLBookdataID`: `character varying`}
 	_               = bytes.MinRead
 )
 

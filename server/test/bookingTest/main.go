@@ -76,7 +76,8 @@ func Book() {
 		plan,
 		uuid.New(),
 		"駐車場利用します",
-		"20231106000000001",
+		"123456789",
+		nil,
 	)
 	if domainErr != nil {
 		fmt.Print(err)

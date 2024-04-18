@@ -59,7 +59,8 @@ func (pq *BookRepository) Save(entity *entity.Booking) error {
 
 	book := models.UserBook{
 		ID:              entity.ID.String(),
-		TLBookingNumber: entity.TlBookingNumber,
+		TLBookdataID:    entity.TlDataID,
+		TLBookingNumber: *entity.TlBookingNumber,
 		StayFrom:        entity.StayFrom,
 		StayTo:          entity.StayTo,
 		Adult:           int(entity.Adult),

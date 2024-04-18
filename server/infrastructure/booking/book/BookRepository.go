@@ -32,14 +32,18 @@ func NewBookRepository(storeQuery queryservice.IStoreQueryService, bookQuery que
 	}
 }
 
-func (p BookRepository) Cancel(bookData *entity.Booking) (*domainErr.DomainError, error) {
+func (p BookRepository) Cancel(bookData *entity.Booking, newDataID string) (*domainErr.DomainError, error) {
 	store, err := p.storeQuery.GetStayableByID(bookData.BookPlan.StoreID)
 	if err != nil {
 		logger.Error(err.Error())
 		return nil, err
 	}
 
-	reqBody := NewCancelRQ(bookData, store)
+	if bookData.TlBookingNumber == nil {
+		return domainErr.NewDomainError(domainErr.CancelButNeedFeedBack, "予約番号が存在しません"), nil
+	}
+
+	reqBody := NewCancelRQ(bookData, store, newDataID)
 	res, err := util.Request[EnvelopeRQ[CancelBody], EnvelopeRS[CancelBodyRS]](CancelURL, reqBody)
 	if err != nil {
 		logger.Error(err.Error())
@@ -66,7 +70,8 @@ func (p *BookRepository) Reserve(
 	}
 
 	reqBody := NewBookingRQ(
-		bookData, store,
+		bookData,
+		store,
 	)
 
 	res, err := util.Request[EnvelopeRQ[Body], EnvelopeRS[BodyRS]](BookURL, reqBody)
@@ -85,7 +90,6 @@ func (p *BookRepository) Reserve(
 	return TlBookingNumber, nil, nil
 }
 
-// bookID : CCYYMMDD+9桁連番（0埋め、データ毎に+1）
 func NewBookingRQ(bookData *entity.Booking, store *entity.StayableStore) *EnvelopeRQ[Body] {
 	plan := bookData.BookPlan
 	guest := bookData.GuestData
@@ -138,7 +142,7 @@ func NewBookingRQ(bookData *entity.Booking, store *entity.StayableStore) *Envelo
 						TransactionType: TransactionType{
 							DataFrom:           "FromTravelAgency",
 							DataClassification: "NewBookReport",
-							DataID:             bookData.TlBookingNumber,
+							DataID:             bookData.TlDataID,
 						},
 						AccommodationInformation: AccommodationInformation{ // 宿泊施設情報
 							AccommodationName: store.Name + *store.BranchName,
@@ -150,7 +154,7 @@ func NewBookingRQ(bookData *entity.Booking, store *entity.StayableStore) *Envelo
 							SalesOfficeCode:        "10000000",
 						},
 						BasicInformation: BasicInformation{
-							TravelAgencyBookingNumber:  bookData.TlBookingNumber,
+							TravelAgencyBookingNumber:  bookData.TlDataID,
 							TravelAgencyBookingDate:    time.Now().Format("2006-01-02"),
 							TravelAgencyBookingTime:    time.Now().Format("15:04:05"),
 							GuestOrGroupNameSingleByte: guestNameKana,
@@ -204,7 +208,13 @@ func NewBookingRQ(bookData *entity.Booking, store *entity.StayableStore) *Envelo
 	}
 }
 
-func NewCancelRQ(bookData *entity.Booking, store *entity.StayableStore) *EnvelopeRQ[CancelBody] {
+func NewCancelRQ(bookData *entity.Booking, store *entity.StayableStore, dataID string) *EnvelopeRQ[CancelBody] {
+	var BookingSystemID string
+	if env.GetEnv(env.TlbookingIsTest) == "true" {
+		BookingSystemID = "E69502"
+	} else {
+		BookingSystemID = store.BookingSystemID
+	}
 	return &EnvelopeRQ[CancelBody]{
 		SoapEnv: "http://schemas.xmlsoap.org/soap/envelope/",
 		Naif:    "http://naifc3000.naifc30.nai.lincoln.seanuts.co.jp/",
@@ -218,9 +228,9 @@ func NewCancelRQ(bookData *entity.Booking, store *entity.StayableStore) *Envelop
 						SystemDate:  time.Now().Format("2006-01-02T15:04:05"),
 					},
 					BookingInfo: BookingInfo{
-						TllHotelCode:     store.BookingSystemID,
-						TllBookingNumber: bookData.TlBookingNumber,
-						DataID:           bookData.TlBookingNumber,
+						TllHotelCode:     BookingSystemID,
+						TllBookingNumber: *bookData.TlBookingNumber,
+						DataID:           dataID,
 					},
 				},
 			},

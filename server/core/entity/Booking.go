@@ -22,7 +22,8 @@ type Booking struct {
 	BookPlan        *Plan
 	BookUserID      uuid.UUID
 	Note            string
-	TlBookingNumber string // TLBooking番号
+	TlDataID        string  // TLDataID(予約番号)
+	TlBookingNumber *string // TLBooking番号
 }
 
 type GuestData struct {
@@ -131,11 +132,9 @@ func CreateBooking(
 	BookPlan *Plan,
 	BookUserID uuid.UUID,
 	Note string,
-	TlBookingNumber string,
+	TlDataID string,
+	TlBookingNumber *string,
 ) (*Booking, *errors.DomainError) {
-	if TlBookingNumber == "" {
-		return nil, errors.NewDomainError(errors.InvalidParameter, "TlBookingNumberが空です。")
-	}
 	return &Booking{
 		ID:              uuid.New(),
 		StayFrom:        stayFrom,
@@ -149,6 +148,7 @@ func CreateBooking(
 		BookPlan:        BookPlan,
 		BookUserID:      BookUserID,
 		Note:            Note,
+		TlDataID:        TlDataID,
 		TlBookingNumber: TlBookingNumber,
 	}, nil
 }

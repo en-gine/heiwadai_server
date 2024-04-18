@@ -210,6 +210,7 @@ CREATE TABLE book_plan (
 CREATE TABLE user_book (
     id UUID PRIMARY KEY,
     tl_booking_number VARCHAR(255) NOT NULL,
+    tl_bookdata_id VARCHAR(255) NOT NULL, -- DataID
     stay_from TIMESTAMP NOT NULL,
     stay_to TIMESTAMP NOT NULL,
     adult INTEGER NOT NULL CHECK (adult >= 0),

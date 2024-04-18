@@ -5,7 +5,6 @@ type CancelBody struct {
 }
 
 type DeleteBookingWithCP struct {
-	XMLNs                      string                     `xml:"xmlns:naif,attr"`
 	DeleteBookingWithCPRequest DeleteBookingWithCPRequest `xml:"deleteBookingWithCPRequest"`
 }
 

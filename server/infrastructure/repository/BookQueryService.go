@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"time"
 
 	"server/core/entity"
 	queryservice "server/core/infra/queryService"
@@ -50,11 +51,14 @@ func (pq *BookQueryService) GetByID(bookID uuid.UUID) (*entity.Booking, error) {
 	return entity, nil
 }
 
-func (pq *BookQueryService) GetMyBooking(userID uuid.UUID) ([]*entity.Booking, error) {
+func (pq *BookQueryService) GetMyBooking(userID uuid.UUID, stayFromAfterAt time.Time) ([]*entity.Booking, error) {
 	books, err := models.UserBooks(
 		models.UserBookWhere.BookUserID.EQ(userID.String()),
 		qm.Load(models.UserBookRels.GuestDatum),
-		qm.Load(models.UserBookRels.BookPlan)).All(context.Background(), pq.db)
+		qm.Load(models.UserBookRels.BookPlan),
+		models.UserBookWhere.StayFrom.GT(stayFromAfterAt),
+		qm.OrderBy(models.UserBookColumns.StayFrom+" ASC"),
+	).All(context.Background(), pq.db)
 	var entities []*entity.Booking
 	for _, book := range books {
 		guest := book.R.GuestDatum
@@ -78,7 +82,7 @@ func (pq *BookQueryService) GetMyBooking(userID uuid.UUID) ([]*entity.Booking, e
 	return entities, nil
 }
 
-func (pq *BookQueryService) GenerateTLBookingNumber() (*string, error) {
+func (pq *BookQueryService) GenerateBookDataID() (*string, error) {
 	var reqID string
 	// Use a raw query
 
@@ -130,7 +134,7 @@ func BookModelToEntity(book *models.UserBook, guest *models.BookGuestDatum, plan
 
 	planEntity := &entity.Plan{
 		ID:        plan.ID,
-		Title:     plan.ID,
+		Title:     plan.Title,
 		Price:     uint(plan.Price),
 		ImageURL:  plan.ImageURL,
 		RoomType:  entity.RoomType(plan.RoomType),
@@ -142,7 +146,8 @@ func BookModelToEntity(book *models.UserBook, guest *models.BookGuestDatum, plan
 
 	return &entity.Booking{
 		ID:              uuid.MustParse(book.ID),
-		TlBookingNumber: book.TLBookingNumber,
+		TlDataID:        book.TLBookdataID,
+		TlBookingNumber: &book.TLBookingNumber,
 		StayFrom:        book.StayFrom,
 		StayTo:          book.StayTo,
 		Adult:           uint(book.Adult),

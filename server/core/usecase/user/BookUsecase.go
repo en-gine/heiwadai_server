@@ -42,7 +42,7 @@ func NewBookUsecase(
 }
 
 func (u *BookUsecase) GetMyBook(userID uuid.UUID) ([]*entity.Booking, *errors.DomainError) {
-	books, err := u.bookQuery.GetMyBooking(userID)
+	books, err := u.bookQuery.GetMyBooking(userID, time.Now())
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())
 	}
@@ -56,12 +56,20 @@ func (u *BookUsecase) Cancel(bookID uuid.UUID) *errors.DomainError {
 	}
 
 	if book == nil {
-		return errors.NewDomainError(errors.QueryError, "該当の予約が存在しません。")
+		return errors.NewDomainError(errors.QueryDataNotFoundError, "該当の予約が存在しません。")
+	}
+	// bookID : CCYYMMDD+9桁連番（0埋め、データ毎に+1）
+	TlDataID, err := u.bookQuery.GenerateBookDataID()
+	if err != nil {
+		return errors.NewDomainError(errors.QueryError, err.Error())
+	}
+	if TlDataID == nil || *TlDataID == "" {
+		return errors.NewDomainError(errors.QueryError, "予約番号の生成に失敗しました。")
 	}
 
-	domainError, err := u.bookAPI.Cancel(book)
+	domainError, err := u.bookAPI.Cancel(book, *TlDataID)
 	if err != nil {
-		return errors.NewDomainError(errors.RepositoryError, "キャンセル処理がAPIレベルで失敗しました。")
+		return errors.NewDomainError(errors.CancelButNeedFeedBack, "キャンセル処理がAPIレベルで失敗しました。")
 	}
 	if domainError != nil {
 		return domainError
@@ -70,7 +78,7 @@ func (u *BookUsecase) Cancel(bookID uuid.UUID) *errors.DomainError {
 	err = u.bookRepo.Delete(bookID)
 	if err != nil {
 		logger.Errorf("キャンセル処理がDBレベルで失敗しました。%s", bookID.String())
-		return errors.NewDomainError(errors.QueryError, "キャンセル処理がDBレベルで失敗しました。")
+		return errors.NewDomainError(errors.CancelButNeedFeedBack, "キャンセル処理は成功しましたが、DBの削除に失敗しました。")
 	}
 	return nil
 }
@@ -100,21 +108,24 @@ func (u *BookUsecase) Reserve(
 	BookUserID uuid.UUID,
 	Note string,
 ) *errors.DomainError {
+
 	store, err := u.storeQuery.GetStayableByID(BookPlan.StoreID)
 	if err != nil {
 		return errors.NewDomainError(errors.QueryError, err.Error())
 	}
 	if store == nil {
-		return errors.NewDomainError(errors.QueryError, "宿泊施設の情報が取得できませんでした。")
+		return errors.NewDomainError(errors.QueryDataNotFoundError, "宿泊施設の情報が取得できませんでした。")
 	}
 
-	tlnumber, err := u.bookQuery.GenerateTLBookingNumber()
+	// bookID : CCYYMMDD+9桁連番（0埋め、データ毎に+1）
+	TlDataID, err := u.bookQuery.GenerateBookDataID()
 	if err != nil {
 		return errors.NewDomainError(errors.QueryError, err.Error())
 	}
-	if tlnumber == nil || *tlnumber == "" {
-		return errors.NewDomainError(errors.QueryError, "TLBookingNumberの生成に失敗しました。")
+	if TlDataID == nil || *TlDataID == "" {
+		return errors.NewDomainError(errors.QueryError, "予約番号の生成に失敗しました。")
 	}
+
 	newBook, domainErr := entity.CreateBooking(
 		stayFrom,
 		stayTo,
@@ -127,12 +138,13 @@ func (u *BookUsecase) Reserve(
 		BookPlan,
 		BookUserID,
 		Note,
-		*tlnumber,
-	)
+		*TlDataID,
+		nil)
 	if domainErr != nil {
 		return domainErr
 	}
-	_, domainError, err := u.bookAPI.Reserve(newBook)
+
+	tlnumber, domainError, err := u.bookAPI.Reserve(newBook)
 	if err != nil {
 		return errors.NewDomainError(errors.RepositoryError, err.Error())
 	}
@@ -140,7 +152,11 @@ func (u *BookUsecase) Reserve(
 		return domainError
 	}
 
-	newBook.TlBookingNumber = *tlnumber
+	if tlnumber == nil || *tlnumber == "" {
+		return errors.NewDomainError(errors.CancelButNeedFeedBack, "予約は完了しましたが、予約番号が取得できずDB保存に失敗しました。")
+	}
+
+	newBook.TlBookingNumber = tlnumber
 
 	err = u.bookRepo.Save(newBook)
 	if err != nil {
@@ -185,6 +201,8 @@ func reserveMailContent(
 
 合計金額: {{.TotalAmount}}円
 
+ご要望: {{.note}}
+
 
 【ご注意事項】
 ※チェックイン時間
@@ -211,19 +229,26 @@ func reserveMailContent(
 `
 
 	// メールのデータを定義（実際のデータはアプリケーションから取得）
+	var people string
+	if bookinfo.Child > 0 {
+		people = "大人: " + strconv.FormatUint(uint64(bookinfo.Adult), 10) + "名様／子ども：" + strconv.FormatUint(uint64(bookinfo.Child), 10)
+	} else {
+		people = "大人: " + strconv.FormatUint(uint64(bookinfo.Adult), 10) + "名様"
+	}
 	data := map[string]string{
 		"GuestName":         bookinfo.GuestData.LastName + bookinfo.GuestData.FirstName,
-		"ReservationNumber": bookinfo.TlBookingNumber,
+		"ReservationNumber": bookinfo.TlDataID,
 		"CheckInDate":       bookinfo.StayFrom.Format("2006年1月2日"),
 		"CheckOutDate":      bookinfo.StayTo.Format("2006年1月2日"),
 		"CheckInTime":       bookinfo.CheckInTime.String(),
 		"ReservationPlan":   bookinfo.BookPlan.Title,
-		"NumberOfGuests":    "大人: " + strconv.FormatUint(uint64(bookinfo.Adult), 10) + "名様／子ども：" + strconv.FormatUint(uint64(bookinfo.Child), 10),
+		"NumberOfGuests":    people,
 		"RoomCount":         strconv.FormatUint(uint64(bookinfo.RoomCount), 10),
 		"RoomType":          bookinfo.BookPlan.RoomType.String(),
 		"MealType":          bookinfo.BookPlan.MealType.String(),
 		"SmokingType":       bookinfo.BookPlan.SmokeType.String(),
 		"TotalAmount":       strconv.FormatUint(uint64(bookinfo.TotalCost), 10),
+		"Note":              bookinfo.Note,
 		"HotelName":         store.Name + *store.BranchName,
 		"HotelAddress":      store.Address,
 		"HotelPhone":        store.Tel,

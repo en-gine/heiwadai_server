@@ -13,5 +13,5 @@ type IBookRepository interface {
 }
 type IBookAPIRepository interface {
 	Reserve(bookData *entity.Booking) (*string, *errors.DomainError, error)
-	Cancel(bookData *entity.Booking) (*errors.DomainError, error)
+	Cancel(bookData *entity.Booking, newDataID string) (*errors.DomainError, error)
 }
