@@ -222,6 +222,7 @@ CREATE TABLE user_book (
     book_plan_id UUID NOT NULL,
     book_user_id UUID NOT NULL,
     note TEXT,
+    delate_at TIMESTAMPTZ,
     create_at TIMESTAMPTZ NOT NULL default now(),
     update_at TIMESTAMPTZ NOT NULL default now(),
     FOREIGN KEY (book_user_id) REFERENCES user_data(user_id),

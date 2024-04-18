@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"time"
 
 	"server/core/entity"
 	repository "server/core/infra/repository"
@@ -110,6 +111,18 @@ func (pq *BookRepository) Delete(bookID uuid.UUID) error {
 		return err
 	}
 	_, err = book.Delete(context.Background(), pq.db)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+func (pq *BookRepository) SoftDelete(bookID uuid.UUID) error {
+	book, err := models.FindUserBook(context.Background(), pq.db, bookID.String())
+	if err != nil {
+		return err
+	}
+	book.DelateAt = null.TimeFrom(time.Now())
+	_, err = book.Update(context.Background(), pq.db, boil.Whitelist(models.UserBookColumns.DelateAt))
 	if err != nil {
 		return err
 	}

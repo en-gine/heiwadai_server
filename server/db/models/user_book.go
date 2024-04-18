@@ -40,6 +40,7 @@ type UserBook struct {
 	CreateAt        time.Time   `boil:"create_at" json:"create_at" toml:"create_at" yaml:"create_at"`
 	UpdateAt        time.Time   `boil:"update_at" json:"update_at" toml:"update_at" yaml:"update_at"`
 	TLBookdataID    string      `boil:"tl_bookdata_id" json:"tl_bookdata_id" toml:"tl_bookdata_id" yaml:"tl_bookdata_id"`
+	DelateAt        null.Time   `boil:"delate_at" json:"delate_at,omitempty" toml:"delate_at" yaml:"delate_at,omitempty"`
 
 	R *userBookR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L userBookL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -62,6 +63,7 @@ var UserBookColumns = struct {
 	CreateAt        string
 	UpdateAt        string
 	TLBookdataID    string
+	DelateAt        string
 }{
 	ID:              "id",
 	TLBookingNumber: "tl_booking_number",
@@ -79,6 +81,7 @@ var UserBookColumns = struct {
 	CreateAt:        "create_at",
 	UpdateAt:        "update_at",
 	TLBookdataID:    "tl_bookdata_id",
+	DelateAt:        "delate_at",
 }
 
 var UserBookTableColumns = struct {
@@ -98,6 +101,7 @@ var UserBookTableColumns = struct {
 	CreateAt        string
 	UpdateAt        string
 	TLBookdataID    string
+	DelateAt        string
 }{
 	ID:              "user_book.id",
 	TLBookingNumber: "user_book.tl_booking_number",
@@ -115,6 +119,7 @@ var UserBookTableColumns = struct {
 	CreateAt:        "user_book.create_at",
 	UpdateAt:        "user_book.update_at",
 	TLBookdataID:    "user_book.tl_bookdata_id",
+	DelateAt:        "user_book.delate_at",
 }
 
 // Generated where
@@ -136,6 +141,7 @@ var UserBookWhere = struct {
 	CreateAt        whereHelpertime_Time
 	UpdateAt        whereHelpertime_Time
 	TLBookdataID    whereHelperstring
+	DelateAt        whereHelpernull_Time
 }{
 	ID:              whereHelperstring{field: "\"user_book\".\"id\""},
 	TLBookingNumber: whereHelperstring{field: "\"user_book\".\"tl_booking_number\""},
@@ -153,6 +159,7 @@ var UserBookWhere = struct {
 	CreateAt:        whereHelpertime_Time{field: "\"user_book\".\"create_at\""},
 	UpdateAt:        whereHelpertime_Time{field: "\"user_book\".\"update_at\""},
 	TLBookdataID:    whereHelperstring{field: "\"user_book\".\"tl_bookdata_id\""},
+	DelateAt:        whereHelpernull_Time{field: "\"user_book\".\"delate_at\""},
 }
 
 // UserBookRels is where relationship names are stored.
@@ -203,9 +210,9 @@ func (r *userBookR) GetGuestDatum() *BookGuestDatum {
 type userBookL struct{}
 
 var (
-	userBookAllColumns            = []string{"id", "tl_booking_number", "stay_from", "stay_to", "adult", "child", "room_count", "check_in_time", "total_cost", "guest_data_id", "book_plan_id", "book_user_id", "note", "create_at", "update_at", "tl_bookdata_id"}
+	userBookAllColumns            = []string{"id", "tl_booking_number", "stay_from", "stay_to", "adult", "child", "room_count", "check_in_time", "total_cost", "guest_data_id", "book_plan_id", "book_user_id", "note", "create_at", "update_at", "tl_bookdata_id", "delate_at"}
 	userBookColumnsWithoutDefault = []string{"id", "tl_booking_number", "stay_from", "stay_to", "adult", "child", "room_count", "check_in_time", "total_cost", "guest_data_id", "book_plan_id", "book_user_id"}
-	userBookColumnsWithDefault    = []string{"note", "create_at", "update_at", "tl_bookdata_id"}
+	userBookColumnsWithDefault    = []string{"note", "create_at", "update_at", "tl_bookdata_id", "delate_at"}
 	userBookPrimaryKeyColumns     = []string{"id"}
 	userBookGeneratedColumns      = []string{}
 )

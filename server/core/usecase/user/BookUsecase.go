@@ -59,15 +59,15 @@ func (u *BookUsecase) Cancel(bookID uuid.UUID) *errors.DomainError {
 		return errors.NewDomainError(errors.QueryDataNotFoundError, "該当の予約が存在しません。")
 	}
 	// bookID : CCYYMMDD+9桁連番（0埋め、データ毎に+1）
-	TlDataID, err := u.bookQuery.GenerateBookDataID()
+	NewTlDataID, err := u.bookQuery.GenerateBookDataID()
 	if err != nil {
 		return errors.NewDomainError(errors.QueryError, err.Error())
 	}
-	if TlDataID == nil || *TlDataID == "" {
+	if NewTlDataID == nil || *NewTlDataID == "" {
 		return errors.NewDomainError(errors.QueryError, "予約番号の生成に失敗しました。")
 	}
 
-	domainError, err := u.bookAPI.Cancel(book, *TlDataID)
+	domainError, err := u.bookAPI.Cancel(book, *NewTlDataID)
 	if err != nil {
 		return errors.NewDomainError(errors.CancelButNeedFeedBack, "キャンセル処理がAPIレベルで失敗しました。")
 	}
@@ -75,7 +75,7 @@ func (u *BookUsecase) Cancel(bookID uuid.UUID) *errors.DomainError {
 		return domainError
 	}
 
-	err = u.bookRepo.Delete(bookID)
+	err = u.bookRepo.SoftDelete(bookID)
 	if err != nil {
 		logger.Errorf("キャンセル処理がDBレベルで失敗しました。%s", bookID.String())
 		return errors.NewDomainError(errors.CancelButNeedFeedBack, "キャンセル処理は成功しましたが、DBの削除に失敗しました。")
@@ -201,7 +201,7 @@ func reserveMailContent(
 
 合計金額: {{.TotalAmount}}円
 
-ご要望: {{.note}}
+お客様備考: {{.Note}}
 
 
 【ご注意事項】

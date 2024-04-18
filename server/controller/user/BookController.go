@@ -199,6 +199,7 @@ func BookEntityToResponse(entity *entity.Booking, bookstore *entity.StayableStor
 		RoomCount:   uint32(entity.RoomCount),
 		CheckInTime: entity.CheckInTime.String(),
 		TotalCost:   uint32(entity.TotalCost),
+		Note:        entity.Note,
 		GuestData: &user.GuestData{
 			FirstName:     entity.GuestData.FirstName,
 			LastName:      entity.GuestData.LastName,

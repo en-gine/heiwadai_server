@@ -56,7 +56,8 @@ func (pq *BookQueryService) GetMyBooking(userID uuid.UUID, stayFromAfterAt time.
 		models.UserBookWhere.BookUserID.EQ(userID.String()),
 		qm.Load(models.UserBookRels.GuestDatum),
 		qm.Load(models.UserBookRels.BookPlan),
-		models.UserBookWhere.StayFrom.GT(stayFromAfterAt),
+		models.UserBookWhere.StayFrom.GTE(stayFromAfterAt),
+		models.UserBookWhere.DelateAt.IsNull(),
 		qm.OrderBy(models.UserBookColumns.StayFrom+" ASC"),
 	).All(context.Background(), pq.db)
 	var entities []*entity.Booking
