@@ -12,6 +12,7 @@ import (
 	"server/core/infra/action"
 	queryservice "server/core/infra/queryService"
 	"server/infrastructure/env"
+	"server/infrastructure/logger"
 	"server/infrastructure/redis"
 
 	"github.com/bufbuild/connect-go"
@@ -103,9 +104,7 @@ func NewAuthentificatable(AuthClient action.IAuthAction, UserDataQuery queryserv
 			ctx = context.WithValue(ctx, UserIDKey, userID.String())
 			if env.GetEnv(env.EnvMode) == "dev" {
 				fmt.Println("----------------reqest----------------")
-				fmt.Println(req)
-				fmt.Println("----------------userID--------------")
-				fmt.Println(userID)
+				logger.DebugPrint(req)
 			}
 			res, err := next(ctx, req)
 			if err != nil {
@@ -114,7 +113,7 @@ func NewAuthentificatable(AuthClient action.IAuthAction, UserDataQuery queryserv
 			}
 			if env.GetEnv(env.EnvMode) == "dev" {
 				fmt.Println("----------------response--------------")
-				fmt.Println(res)
+				logger.DebugPrint(res)
 			}
 
 			if token != nil && res != nil {

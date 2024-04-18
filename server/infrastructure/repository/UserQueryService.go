@@ -263,7 +263,6 @@ func GetUserListFilterMods(query *types.UserQuery) []qm.QueryMod {
 }
 
 func UserModelToEntity(model *models.UserDatum, email string) *entity.User {
-	logger.DebugPrint(model)
 	return entity.RegenUser(
 		uuid.MustParse(model.UserID),
 		model.FirstName,

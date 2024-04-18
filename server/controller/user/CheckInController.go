@@ -88,6 +88,10 @@ func (ac *CheckInController) Checkin(ctx context.Context, req *connect.Request[u
 		return nil, controller.ErrorHandler(domaiErr)
 	}
 
+	if mayCoupon == nil { //クーポン発行なし
+		return connect.NewResponse(&user.CheckinResponse{}), nil
+	}
+
 	var TargetStores []*shared.Store
 	for _, store := range mayCoupon.Coupon.TargetStore {
 		TargetStores = append(TargetStores, &shared.Store{
