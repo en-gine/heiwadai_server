@@ -1,0 +1,25 @@
+# fly.toml app configuration file generated for heiwadai-server on 2024-04-21T14:05:49+09:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'heiwadai-server'
+primary_region = 'nrt'
+
+[build]
+  dockerfile = '/docker/Dockerfile/server/Dockerfile.prod'
+
+[env]
+  ENV_MODE = 'prod'
+  PORT = '3000'
+
+[http_service]
+  internal_port = 3000
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ['app']
+
+[[vm]]
+  size = 'performance-1x'

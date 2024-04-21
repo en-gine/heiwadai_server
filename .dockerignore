@@ -1,0 +1,22 @@
+# flyctl launch added from .gitignore
+**/*.bkp
+**/*.dtmp
+**/.env
+**/.env.prod
+docker/data
+docker/volumes/db/data
+**/node_modules
+server/keys
+server/log
+server/tmp
+
+# flyctl launch added from .idea/.gitignore
+# Default ignored files
+.idea/shelf
+.idea/workspace.xml
+# Editor-based HTTP Client requests
+.idea/httpRequests
+# Datasource local storage ignored files
+.idea/dataSources
+.idea/dataSources.local.xml
+fly.toml
