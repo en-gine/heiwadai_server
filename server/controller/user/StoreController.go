@@ -122,6 +122,9 @@ func StoreToResponse(store *entity.Store) *shared.Store {
 }
 
 func StayableInfoToResponse(info *entity.StayableStoreInfo) *shared.StayableStoreInfo {
+	if info == nil {
+		return &shared.StayableStoreInfo{}
+	}
 	return &shared.StayableStoreInfo{
 		Parking:         info.Parking,
 		Latitude:        info.Latitude,
