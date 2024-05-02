@@ -248,7 +248,10 @@ func (u *AuthUsecase) Refresh(
 	Token string,
 	RefreshToken string,
 ) (*types.Token, *errors.DomainError) {
-	auth, err := u.authAction.Refresh(Token, RefreshToken)
+	auth, domainErr, err := u.authAction.Refresh(Token, RefreshToken)
+	if domainErr != nil {
+		return nil, domainErr
+	}
 	if err != nil {
 		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
 	}

@@ -103,11 +103,15 @@ func (au *AuthClient) SignOut(token string) error {
 	return nil
 }
 
-func (au *AuthClient) Refresh(token string, refreshToken string) (*action.UserAuth, error) {
+func (au *AuthClient) Refresh(token string, refreshToken string) (*action.UserAuth, *domainErr.DomainError, error) {
 	ctx := context.Background()
 	data, err := au.client.Auth.RefreshUser(ctx, token, refreshToken)
 	if err != nil {
-		return nil, err
+		if strings.Contains(err.Error(), "invalid_grant") {
+			logger.DebugPrint(err)
+			return nil, domainErr.NewDomainError(domainErr.InvalidParameter, "リフレッシュトークンの有効期限が切れました。"), nil
+		}
+		return nil, nil, err
 	}
 	Token := &types.Token{
 		AccessToken:  data.AccessToken,
@@ -125,7 +129,7 @@ func (au *AuthClient) Refresh(token string, refreshToken string) (*action.UserAu
 		UserID:   uuid.MustParse(data.User.ID),
 		UserType: action.UserType(userType),
 		Token:    Token,
-	}, nil
+	}, nil, nil
 }
 
 func (au *AuthClient) ResetPasswordMail(email entity.Mail) (*domainErr.DomainError, error) {

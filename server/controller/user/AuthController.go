@@ -108,6 +108,10 @@ func (ac *AuthController) Refresh(ctx context.Context, req *connect.Request[user
 	if token == "" {
 		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("ログインが必要です。"))
 	}
+	if msg.RefreshToken == "" {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("リフレッシュトークンが必要です。"))
+	}
+
 	tkn, domainErr := ac.authUseCase.Refresh(token, msg.RefreshToken)
 	if domainErr != nil {
 		return nil, controller.ErrorHandler(domainErr)

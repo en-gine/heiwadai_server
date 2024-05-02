@@ -35,7 +35,7 @@ type IAuthAction interface {
 	SignUp(email entity.Mail, password entity.Password) (*uuid.UUID, error)
 	SignIn(email entity.Mail, password string) (*types.Token, *errors.DomainError, error)
 	SignOut(token string) error
-	Refresh(token string, refreshToken string) (*UserAuth, error)
+	Refresh(token string, refreshToken string) (*UserAuth, *errors.DomainError, error)
 	GetUserInfo(token string) (*UserInfo, error)
 	ResetPasswordMail(email entity.Mail) (*errors.DomainError, error)
 	UpdatePassword(password entity.Password, token string) (*errors.DomainError, error)

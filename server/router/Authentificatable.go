@@ -72,7 +72,11 @@ func NewAuthentificatable(AuthClient action.IAuthAction, UserDataQuery queryserv
 				// リフレッシュトークン取得
 				refreshToken := req.Header().Get("X-Refresh-Token")
 
-				authData, err = AuthClient.Refresh(bearerToken, refreshToken)
+				authData, domainErr, err := AuthClient.Refresh(bearerToken, refreshToken)
+				if domainErr != nil {
+					return nil, domainErr
+				}
+
 				if err != nil {
 					return nil, connect.NewError(connect.CodeInternal, errors.New("リフレッシュトークンの取得に問題が発生しました。"))
 				}
