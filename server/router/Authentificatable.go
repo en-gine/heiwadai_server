@@ -86,10 +86,17 @@ func NewAuthentificatable(AuthClient action.IAuthAction, UserDataQuery queryserv
 					return nil, connect.NewError(connect.CodeInternal, errors.New("キャッシュの保存に問題が発生しました。"))
 				}
 
+				if authData == nil {
+					return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("認証情報が取得できませんでした。"))
+				}
+
 				// キャッシュに保存
 				cache.Set(bearerToken, authJSON, time.Duration(*authData.Token.ExpiresIn)*time.Second)
 			}
 
+			if authData == nil {
+				return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("認証情報が取得できませんでした。"))
+			}
 			userID := authData.UserID
 			token := authData.Token
 			userType := authData.UserType
