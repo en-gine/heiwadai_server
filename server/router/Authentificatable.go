@@ -5,15 +5,15 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"strconv"
-	"strings"
-	"time"
-
+	domainErrors "server/core/errors"
 	"server/core/infra/action"
 	queryservice "server/core/infra/queryService"
 	"server/infrastructure/env"
 	"server/infrastructure/logger"
 	"server/infrastructure/redis"
+	"strconv"
+	"strings"
+	"time"
 
 	"github.com/bufbuild/connect-go"
 )
@@ -72,7 +72,8 @@ func NewAuthentificatable(AuthClient action.IAuthAction, UserDataQuery queryserv
 				// リフレッシュトークン取得
 				refreshToken := req.Header().Get("X-Refresh-Token")
 
-				authData, domainErr, err := AuthClient.Refresh(bearerToken, refreshToken)
+				var domainErr *domainErrors.DomainError
+				authData, domainErr, err = AuthClient.Refresh(bearerToken, refreshToken)
 				if domainErr != nil {
 					return nil, domainErr
 				}
@@ -94,9 +95,6 @@ func NewAuthentificatable(AuthClient action.IAuthAction, UserDataQuery queryserv
 				cache.Set(bearerToken, authJSON, time.Duration(*authData.Token.ExpiresIn)*time.Second)
 			}
 
-			if authData == nil {
-				return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("認証情報が取得できませんでした。"))
-			}
 			userID := authData.UserID
 			token := authData.Token
 			userType := authData.UserType
