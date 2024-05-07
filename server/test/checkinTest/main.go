@@ -20,10 +20,11 @@ func Checkin() {
 
 	userID, _ := uuid.Parse("6db2a0bb-844e-4344-bcf8-79d760aacbf6")
 	limitQr, _ := uuid.Parse("9d5308bc-b202-44d9-b064-e48470008e4a")
-	coupon, err := usecase.Checkin(userID, limitQr)
+	stampCard, coupon, err := usecase.Checkin(userID, limitQr)
 	if err != nil {
 		logger.Error(err.Error())
 	}
+	println(stampCard)
 	println(coupon)
 }
 
@@ -32,10 +33,11 @@ func UnlimitCheckin() {
 
 	userID, _ := uuid.Parse("6db2a0bb-844e-4344-bcf8-79d760aacbf6")
 	unlimitQr, _ := uuid.Parse("9d5308bc-b202-44d9-b064-e48470008e4a")
-	coupon, err := usecase.Checkin(userID, unlimitQr)
+	stampCard, coupon, err := usecase.Checkin(userID, unlimitQr)
 	if err != nil {
 		logger.Error(err.Error())
 	}
+	println(stampCard)
 	println(coupon)
 }
 

@@ -8,6 +8,7 @@ import (
 	"server/api/v1/user"
 	userv1connect "server/api/v1/user/userconnect"
 	"server/controller"
+	"server/core/entity"
 	usecase "server/core/usecase/user"
 	"server/router"
 
@@ -43,28 +44,8 @@ func (ac *CheckInController) GetStampCard(ctx context.Context, req *connect.Requ
 	if domaiErr != nil {
 		return nil, controller.ErrorHandler(domaiErr)
 	}
-	stamps := []*user.CheckinStamp{}
 
-	for _, entity := range entity.Stamps {
-		var stamp *user.CheckinStamp
-
-		if entity.CheckinID != nil {
-			strChkID := entity.CheckinID.String()
-			strStoreID := entity.StoreID.String()
-			stamp = &user.CheckinStamp{
-				ID:              &strChkID,
-				StoreName:       entity.StoreName,
-				StoreID:         &strStoreID,
-				StoreStampImage: entity.StoreStampImage,
-				CheckInAt:       timestamppb.New(*entity.CheckInAt),
-			}
-		}
-		stamps = append(stamps, stamp)
-	}
-
-	response := &user.StampCardResponse{
-		Stamps: stamps,
-	}
+	response := entityToCheckinResponse(entity)
 
 	return connect.NewResponse(response), nil
 }
@@ -83,13 +64,16 @@ func (ac *CheckInController) Checkin(ctx context.Context, req *connect.Request[u
 		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("QRコードの値が正しくありません。"))
 	}
 
-	mayCoupon, domaiErr := ac.checkInUseCase.Checkin(userID, qrHash)
+	StampCard, mayCoupon, domaiErr := ac.checkInUseCase.Checkin(userID, qrHash)
 	if domaiErr != nil {
 		return nil, controller.ErrorHandler(domaiErr)
 	}
 
 	if mayCoupon == nil { //クーポン発行なし
-		return connect.NewResponse(&user.CheckinResponse{}), nil
+		return connect.NewResponse(&user.CheckinResponse{
+			MayCoupon: nil,
+			StampCard: entityToCheckinResponse(StampCard),
+		}), nil
 	}
 
 	var TargetStores []*shared.Store
@@ -113,7 +97,33 @@ func (ac *CheckInController) Checkin(ctx context.Context, req *connect.Request[u
 
 	response := &user.CheckinResponse{
 		MayCoupon: coupon,
+		StampCard: entityToCheckinResponse(StampCard),
 	}
 
 	return connect.NewResponse(response), nil
+}
+
+func entityToCheckinResponse(entity *entity.StampCard) *user.StampCardResponse {
+	stamps := []*user.CheckinStamp{}
+
+	for _, entity := range entity.Stamps {
+		var stamp *user.CheckinStamp
+
+		if entity.CheckinID != nil {
+			strChkID := entity.CheckinID.String()
+			strStoreID := entity.StoreID.String()
+			stamp = &user.CheckinStamp{
+				ID:              &strChkID,
+				StoreName:       entity.StoreName,
+				StoreID:         &strStoreID,
+				StoreStampImage: entity.StoreStampImage,
+				CheckInAt:       timestamppb.New(*entity.CheckInAt),
+			}
+		}
+		stamps = append(stamps, stamp)
+	}
+
+	return &user.StampCardResponse{
+		Stamps: stamps,
+	}
 }

@@ -60,27 +60,27 @@ func (u *UserCheckinUsecase) GetStampCard(authID uuid.UUID) (*entity.StampCard, 
 	return entity.NewStampCard(userCheckins)
 }
 
-func (u *UserCheckinUsecase) Checkin(authID uuid.UUID, QrHash uuid.UUID) (*entity.UserAttachedCoupon, *errors.DomainError) {
+func (u *UserCheckinUsecase) Checkin(authID uuid.UUID, QrHash uuid.UUID) (*entity.StampCard, *entity.UserAttachedCoupon, *errors.DomainError) {
 	// チェックインによってクーポンが付与された場合クーポンを返す
 	AuthUser, err := u.userQuery.GetByID(authID)
 	if err != nil {
-		return nil, errors.NewDomainError(errors.QueryError, err.Error())
+		return nil, nil, errors.NewDomainError(errors.QueryError, err.Error())
 	}
 	if AuthUser == nil {
-		return nil, errors.NewDomainError(errors.QueryDataNotFoundError, "該当のユーザーが見つかりません。")
+		return nil, nil, errors.NewDomainError(errors.QueryDataNotFoundError, "該当のユーザーが見つかりません。")
 	}
 
 	qrStore, err := u.storeQuery.GetStoreByQrCode(QrHash)
 	if err != nil {
-		return nil, errors.NewDomainError(errors.QueryError, err.Error())
+		return nil, nil, errors.NewDomainError(errors.QueryError, err.Error())
 	}
 	unlimitQrStore, err := u.storeQuery.GetStoreByUnlimitQrCode(QrHash)
 	if err != nil {
-		return nil, errors.NewDomainError(errors.QueryError, err.Error())
+		return nil, nil, errors.NewDomainError(errors.QueryError, err.Error())
 	}
 
 	if qrStore == nil && unlimitQrStore == nil {
-		return nil, errors.NewDomainError(errors.QueryDataNotFoundError, "該当のQRコードの店舗が見つかりません。")
+		return nil, nil, errors.NewDomainError(errors.QueryDataNotFoundError, "該当のQRコードの店舗が見つかりません。")
 	}
 
 	var checkInStore *entity.Store
@@ -96,7 +96,7 @@ func (u *UserCheckinUsecase) Checkin(authID uuid.UUID, QrHash uuid.UUID) (*entit
 
 	lastCheckin, err := u.checkinQuery.GetMyLastStoreCheckin(authID, checkInStore.ID)
 	if err != nil {
-		return nil, errors.NewDomainError(errors.QueryError, err.Error())
+		return nil, nil, errors.NewDomainError(errors.QueryError, err.Error())
 	}
 	isNil := lastCheckin == nil || reflect.ValueOf(lastCheckin).IsNil()
 
@@ -111,25 +111,25 @@ func (u *UserCheckinUsecase) Checkin(authID uuid.UUID, QrHash uuid.UUID) (*entit
 	}
 
 	if !isUnlimitQr && isSameStore && isAfter24Hours {
-		return nil, errors.NewDomainError(errors.UnPemitedOperation, "24時間以内にチェックインした店舗はチェックインできません。")
+		return nil, nil, errors.NewDomainError(errors.UnPemitedOperation, "24時間以内にチェックインした店舗はチェックインできません。")
 	}
 	ctx := context.Background()
 	err = u.transaction.Begin(ctx)
 	if err != nil {
 		u.transaction.Rollback()
-		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
+		return nil, nil, errors.NewDomainError(errors.RepositoryError, err.Error())
 	}
 
 	newCheckin := entity.CreateCheckin(*checkInStore, *AuthUser)
 	myCheckins, err := u.checkinQuery.GetMyActiveCheckin(authID)
 	if err != nil {
 		u.transaction.Rollback()
-		return nil, errors.NewDomainError(errors.QueryError, err.Error())
+		return nil, nil, errors.NewDomainError(errors.QueryError, err.Error())
 	}
 	err = u.checkInRepository.Save(u.transaction, newCheckin)
 	if err != nil {
 		u.transaction.Rollback()
-		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
+		return nil, nil, errors.NewDomainError(errors.RepositoryError, err.Error())
 	}
 
 	var userAttachedCoupon *entity.UserAttachedCoupon
@@ -137,18 +137,18 @@ func (u *UserCheckinUsecase) Checkin(authID uuid.UUID, QrHash uuid.UUID) (*entit
 		allStores, err := u.storeQuery.GetActiveAll()
 		if err != nil {
 			u.transaction.Rollback()
-			return nil, errors.NewDomainError(errors.QueryError, err.Error())
+			return nil, nil, errors.NewDomainError(errors.QueryError, err.Error())
 		}
 		standardCoupon, domainErr := entity.CreateStandardCoupon(allStores)
 		if domainErr != nil {
 			u.transaction.Rollback()
-			return nil, domainErr
+			return nil, nil, domainErr
 		}
 
 		err = u.couponRepository.Save(u.transaction, standardCoupon)
 		if err != nil {
 			u.transaction.Rollback()
-			return nil, errors.NewDomainError(errors.QueryError, err.Error())
+			return nil, nil, errors.NewDomainError(errors.QueryError, err.Error())
 		}
 
 		userAttachedCoupon := entity.CreateUserAttachedCoupon(authID, standardCoupon)
@@ -156,27 +156,32 @@ func (u *UserCheckinUsecase) Checkin(authID uuid.UUID, QrHash uuid.UUID) (*entit
 		err = u.usercouponRepository.Save(u.transaction, userAttachedCoupon)
 		if err != nil {
 			u.transaction.Rollback()
-			return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
+			return nil, nil, errors.NewDomainError(errors.RepositoryError, err.Error())
 		}
 		var count int = 1
 		issuedCoupon := entity.CreateIssuedCoupon(standardCoupon, &count)
 		err = u.couponRepository.Save(u.transaction, issuedCoupon)
 		if err != nil {
 			u.transaction.Rollback()
-			return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
+			return nil, nil, errors.NewDomainError(errors.RepositoryError, err.Error())
 		}
 
 		err = u.checkInRepository.BulkArchive(u.transaction, authID)
 		if err != nil {
 			u.transaction.Rollback()
-			return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
+			return nil, nil, errors.NewDomainError(errors.RepositoryError, err.Error())
 		}
 	}
 
 	err = u.transaction.Commit()
 	if err != nil {
-		return nil, errors.NewDomainError(errors.RepositoryError, err.Error())
+		return nil, nil, errors.NewDomainError(errors.RepositoryError, err.Error())
 	}
 
-	return userAttachedCoupon, nil
+	NewStampCard, domainErr := u.GetStampCard(authID)
+	if domainErr != nil {
+		return nil, nil, domainErr
+	}
+
+	return NewStampCard, userAttachedCoupon, nil
 }
