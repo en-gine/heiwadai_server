@@ -24,7 +24,6 @@ type UserCouponQueryService struct {
 
 func NewUserCouponQueryService() *UserCouponQueryService {
 	db := InitDB()
-
 	return &UserCouponQueryService{
 		db: db,
 	}
@@ -60,11 +59,13 @@ func (pq *UserCouponQueryService) GetByID(userID uuid.UUID, couponID uuid.UUID) 
 }
 
 func (pq *UserCouponQueryService) GetActiveAll(userID uuid.UUID) ([]*entity.UserAttachedCoupon, error) {
+
 	userCoupons, err := models.CouponAttachedUsers(
 		models.CouponAttachedUserWhere.UserID.EQ(userID.String()),
-		qm.Load(models.CouponAttachedUserRels.Coupon),
 		models.CouponAttachedUserWhere.UsedAt.IsNull(),
-		models.CouponWhere.ExpireAt.GT(time.Now().AddDate(0, 0, -1)),
+		qm.Load(models.CouponAttachedUserRels.Coupon), // リレーションをロード
+		qm.InnerJoin(models.TableNames.Coupon+" ON "+models.TableNames.CouponAttachedUser+"."+models.CouponAttachedUserColumns.CouponID+" = "+models.TableNames.Coupon+".id"),
+		models.CouponWhere.ExpireAt.GT(time.Now().AddDate(0, 0, -1)), // 親テーブルの条件を指定
 		qm.OrderBy(models.CouponAttachedUserColumns.CouponID+" DESC"),
 	).All(context.Background(), pq.db)
 	if err != nil {
@@ -82,15 +83,19 @@ func (pq *UserCouponQueryService) GetActiveAll(userID uuid.UUID) ([]*entity.User
 }
 
 func (pq *UserCouponQueryService) GetExpires(userID uuid.UUID, limit int) ([]*entity.UserAttachedCoupon, error) {
+	ctx := context.Background()
 	pager := types.NewPageQuery(nil, &limit)
 	userCoupons, err := models.CouponAttachedUsers(
 		models.CouponAttachedUserWhere.UserID.EQ(userID.String()),
-		qm.Load(models.CouponAttachedUserRels.Coupon),
 		models.CouponAttachedUserWhere.UsedAt.IsNull(),
-		models.CouponWhere.ExpireAt.LT(time.Now()),
-		qm.Limit(pager.Limit()), qm.Offset(pager.Offset()),
+		qm.Load(models.CouponAttachedUserRels.Coupon), // リレーションをロード
+		qm.InnerJoin(models.TableNames.Coupon+" ON "+models.TableNames.CouponAttachedUser+"."+models.CouponAttachedUserColumns.CouponID+" = "+models.TableNames.Coupon+".id"),
+		models.CouponWhere.ExpireAt.LT(time.Now()), // 親テーブルの条件を指定
+		qm.Limit(pager.Limit()),
+		qm.Offset(pager.Offset()),
 		qm.OrderBy(models.CouponAttachedUserColumns.CouponID+" DESC"),
-	).All(context.Background(), pq.db)
+	).All(ctx, pq.db)
+
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil

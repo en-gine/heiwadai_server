@@ -38,9 +38,17 @@ func InitDB() *sql.DB {
 
 		if err = Conn.Ping(); err != nil {
 			logger.Fatalf("PingError: %v", err)
+
 			logger.Warn("DB couldn't be Connected!")
 		}
 	})
 
 	return Conn
 }
+
+// func SetDebugSQL(ctx *context.Context) *context.Context {
+// 	boil.SetDB(Conn)
+// 	sqlBoilerDebugCtx := boil.WithDebug(*ctx, env.GetEnv(env.EnvMode) == "dev")
+// 	sqlBoilerLoggerDebugCtx := boil.WithDebugWriter(sqlBoilerDebugCtx, os.Stderr)
+// 	return &sqlBoilerLoggerDebugCtx
+// }
