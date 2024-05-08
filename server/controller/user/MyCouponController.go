@@ -8,6 +8,7 @@ import (
 	"server/api/v1/user"
 	userv1connect "server/api/v1/user/userconnect"
 	"server/controller"
+	"server/core/entity"
 	usecase "server/core/usecase/user"
 	"server/router"
 
@@ -87,22 +88,7 @@ func (ac *MyCouponController) GetList(ctx context.Context, req *connect.Request[
 		return nil, controller.ErrorHandler(domaiErr)
 	}
 
-	var response []*shared.Coupon
-	for _, coupon := range entities {
-		response = append(response, &shared.Coupon{
-			ID:                coupon.ID.String(),
-			Name:              coupon.Coupon.Name,
-			CouponType:        shared.CouponType(coupon.Coupon.CouponType.ToInt()),
-			DiscountAmount:    uint32(coupon.Coupon.DiscountAmount),
-			ExpireAt:          timestamppb.New(coupon.Coupon.ExpireAt),
-			IsCombinationable: coupon.Coupon.IsCombinationable,
-			CreateAt:          timestamppb.New(coupon.Coupon.CreateAt),
-		})
-	}
-
-	resposnse := &user.MyCouponsResponse{
-		Coupons: response,
-	}
+	resposnse := UserAttachedCouponToResponse(entities)
 
 	return connect.NewResponse(resposnse), nil
 }
@@ -127,4 +113,64 @@ func (ac *MyCouponController) Use(ctx context.Context, req *connect.Request[user
 		return nil, controller.ErrorHandler(domaiErr)
 	}
 	return connect.NewResponse(&emptypb.Empty{}), nil
+}
+
+func (ac *MyCouponController) GetExpiredList(ctx context.Context, req *connect.Request[emptypb.Empty]) (*connect.Response[user.MyCouponsResponse], error) {
+	if ctx.Value(router.UserIDKey) == nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("ユーザーIDが取得できませんでした。"))
+	}
+
+	userID, err := uuid.Parse(ctx.Value(router.UserIDKey).(string))
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("ユーザーIDが取得できませんでした。UUIDの形式が不正です。"))
+	}
+
+	entities, domaiErr := ac.couponUseCase.GetMyExpireList(userID)
+	if domaiErr != nil {
+		return nil, controller.ErrorHandler(domaiErr)
+	}
+
+	resposnse := UserAttachedCouponToResponse(entities)
+
+	return connect.NewResponse(resposnse), nil
+}
+
+func (ac *MyCouponController) GetUsedList(ctx context.Context, req *connect.Request[emptypb.Empty]) (*connect.Response[user.MyCouponsResponse], error) {
+	if ctx.Value(router.UserIDKey) == nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("ユーザーIDが取得できませんでした。"))
+	}
+
+	userID, err := uuid.Parse(ctx.Value(router.UserIDKey).(string))
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("ユーザーIDが取得できませんでした。UUIDの形式が不正です。"))
+	}
+
+	entities, domaiErr := ac.couponUseCase.GetMyUsedList(userID)
+	if domaiErr != nil {
+		return nil, controller.ErrorHandler(domaiErr)
+	}
+
+	resposnse := UserAttachedCouponToResponse(entities)
+
+	return connect.NewResponse(resposnse), nil
+
+}
+
+func UserAttachedCouponToResponse(entities []*entity.UserAttachedCoupon) *user.MyCouponsResponse {
+	var response []*shared.Coupon
+	for _, coupon := range entities {
+		response = append(response, &shared.Coupon{
+			ID:                coupon.ID.String(),
+			Name:              coupon.Coupon.Name,
+			CouponType:        shared.CouponType(coupon.Coupon.CouponType.ToInt()),
+			DiscountAmount:    uint32(coupon.Coupon.DiscountAmount),
+			ExpireAt:          timestamppb.New(coupon.Coupon.ExpireAt),
+			IsCombinationable: coupon.Coupon.IsCombinationable,
+			CreateAt:          timestamppb.New(coupon.Coupon.CreateAt),
+		})
+	}
+
+	return &user.MyCouponsResponse{
+		Coupons: response,
+	}
 }

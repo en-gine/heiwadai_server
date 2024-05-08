@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"time"
 
 	"server/core/entity"
 	queryservice "server/core/infra/queryService"
@@ -12,7 +13,6 @@ import (
 	"server/infrastructure/logger"
 
 	"github.com/google/uuid"
-	"github.com/volatiletech/sqlboiler/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
@@ -60,13 +60,11 @@ func (pq *UserCouponQueryService) GetByID(userID uuid.UUID, couponID uuid.UUID) 
 }
 
 func (pq *UserCouponQueryService) GetActiveAll(userID uuid.UUID) ([]*entity.UserAttachedCoupon, error) {
-	boil.DebugMode = true
 	userCoupons, err := models.CouponAttachedUsers(
 		models.CouponAttachedUserWhere.UserID.EQ(userID.String()),
 		qm.Load(models.CouponAttachedUserRels.Coupon),
 		models.CouponAttachedUserWhere.UsedAt.IsNull(),
-		// models.CouponWhere.ExpireAt.GTE(time.Now()),
-		// qm.OrderBy(models.CouponAttachedUserColumns.CreatedAt + " DESC"),
+		models.CouponWhere.ExpireAt.GT(time.Now().AddDate(0, 0, -1)),
 		qm.OrderBy(models.CouponAttachedUserColumns.CouponID+" DESC"),
 	).All(context.Background(), pq.db)
 	if err != nil {
@@ -79,17 +77,54 @@ func (pq *UserCouponQueryService) GetActiveAll(userID uuid.UUID) ([]*entity.User
 	if userCoupons == nil {
 		return nil, nil
 	}
-	var result []*entity.UserAttachedCoupon
-	for _, userCoupon := range userCoupons {
-		coupon := userCoupon.R.Coupon
-		entityCoupon := CouponModelToEntity(coupon, nil)
-		entityUserCoupon := entity.RegenUserAttachedCoupon(
-			userID,
-			entityCoupon,
-			userCoupon.UsedAt.Ptr(),
-		)
-		result = append(result, entityUserCoupon)
+	var result = ModelToUserAttachedCoupon(userID, &userCoupons)
+	return result, nil
+}
+
+func (pq *UserCouponQueryService) GetExpires(userID uuid.UUID, limit int) ([]*entity.UserAttachedCoupon, error) {
+	pager := types.NewPageQuery(nil, &limit)
+	userCoupons, err := models.CouponAttachedUsers(
+		models.CouponAttachedUserWhere.UserID.EQ(userID.String()),
+		qm.Load(models.CouponAttachedUserRels.Coupon),
+		models.CouponAttachedUserWhere.UsedAt.IsNull(),
+		models.CouponWhere.ExpireAt.LT(time.Now()),
+		qm.Limit(pager.Limit()), qm.Offset(pager.Offset()),
+		qm.OrderBy(models.CouponAttachedUserColumns.CouponID+" DESC"),
+	).All(context.Background(), pq.db)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		logger.Error(err.Error())
+		return nil, nil
 	}
+	if userCoupons == nil {
+		return nil, nil
+	}
+	var result = ModelToUserAttachedCoupon(userID, &userCoupons)
+	return result, nil
+}
+
+func (pq *UserCouponQueryService) GetUseds(userID uuid.UUID, limit int) ([]*entity.UserAttachedCoupon, error) {
+	pager := types.NewPageQuery(nil, &limit)
+	userCoupons, err := models.CouponAttachedUsers(
+		models.CouponAttachedUserWhere.UserID.EQ(userID.String()),
+		qm.Load(models.CouponAttachedUserRels.Coupon),
+		models.CouponAttachedUserWhere.UsedAt.IsNotNull(),
+		qm.Limit(pager.Limit()), qm.Offset(pager.Offset()),
+		qm.OrderBy(models.CouponAttachedUserColumns.CouponID+" DESC"),
+	).All(context.Background(), pq.db)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		logger.Error(err.Error())
+		return nil, nil
+	}
+	if userCoupons == nil {
+		return nil, nil
+	}
+	var result = ModelToUserAttachedCoupon(userID, &userCoupons)
 	return result, nil
 }
 
@@ -121,9 +156,14 @@ func (pq *UserCouponQueryService) GetAll(userID uuid.UUID, pager *types.PageQuer
 		pageResponse = types.NewPageResponse(pager, int(count))
 	}
 
+	var result = ModelToUserAttachedCoupon(userID, &userCoupons)
+	return result, pageResponse, err
+}
+
+func ModelToUserAttachedCoupon(userID uuid.UUID, userCoupons *models.CouponAttachedUserSlice) []*entity.UserAttachedCoupon {
 	var result []*entity.UserAttachedCoupon
 
-	for _, userCoupon := range userCoupons {
+	for _, userCoupon := range *userCoupons {
 		coupon := userCoupon.R.Coupon
 		entityCoupon := CouponModelToEntity(coupon, nil)
 		entityUserCoupon := entity.RegenUserAttachedCoupon(
@@ -133,5 +173,5 @@ func (pq *UserCouponQueryService) GetAll(userID uuid.UUID, pager *types.PageQuer
 		)
 		result = append(result, entityUserCoupon)
 	}
-	return result, pageResponse, err
+	return result
 }

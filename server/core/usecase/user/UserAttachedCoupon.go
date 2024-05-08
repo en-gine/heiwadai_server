@@ -43,6 +43,22 @@ func (u *UserAttachedCouponUsecase) GetMyList(AuthUserID uuid.UUID) ([]*entity.U
 	return usercoupons, nil
 }
 
+func (u *UserAttachedCouponUsecase) GetMyExpireList(AuthUserID uuid.UUID) ([]*entity.UserAttachedCoupon, *errors.DomainError) {
+	usercoupons, err := u.usercouponQuery.GetExpires(AuthUserID, 10)
+	if err != nil {
+		return nil, errors.NewDomainError(errors.QueryError, err.Error())
+	}
+	return usercoupons, nil
+}
+
+func (u *UserAttachedCouponUsecase) GetMyUsedList(AuthUserID uuid.UUID) ([]*entity.UserAttachedCoupon, *errors.DomainError) {
+	usercoupons, err := u.usercouponQuery.GetUseds(AuthUserID, 10)
+	if err != nil {
+		return nil, errors.NewDomainError(errors.QueryError, err.Error())
+	}
+	return usercoupons, nil
+}
+
 func (u *UserAttachedCouponUsecase) UseMyCoupon(AuthUserID uuid.UUID, couponID uuid.UUID) *errors.DomainError {
 	coupon, err := u.usercouponQuery.GetByID(AuthUserID, couponID)
 	if err != nil {
