@@ -80,6 +80,22 @@ func (u *BookUsecase) Cancel(bookID uuid.UUID) *errors.DomainError {
 		logger.Errorf("キャンセル処理がDBレベルで失敗しました。%s", bookID.String())
 		return errors.NewDomainError(errors.CancelButNeedFeedBack, "キャンセル処理は成功しましたが、DBの削除に失敗しました。")
 	}
+
+	store, err := u.storeQuery.GetStayableByID(book.BookPlan.StoreID)
+	if err != nil {
+		return errors.NewDomainError(errors.QueryError, err.Error())
+	}
+	// 予約キャンセル完了メールの内容を取得
+	content, err := cancelMailContent(book, store)
+	if err != nil {
+		return errors.NewDomainError(errors.CancelButNeedFeedBack, "予約はキャンセルしましたが、お客様へのメール作成に失敗しました。")
+	}
+
+	// 予約完了メール送信
+	err = u.mailAction.Send(book.GuestData.Mail, "【"+store.Name+*store.BranchName+"】予約をキャンセルしました", *content)
+	if err != nil {
+		return errors.NewDomainError(errors.CancelButNeedFeedBack, "予約はキャンセルしましたが、お客様へのメール送信に失敗しました。")
+	}
 	return nil
 }
 
@@ -173,7 +189,7 @@ func (u *BookUsecase) Reserve(
 	// 予約完了メール送信
 	err = u.mailAction.Send(GuestData.Mail, "【"+store.Name+*store.BranchName+"】宿泊予約完了のお知らせ", *content)
 	if err != nil {
-		return errors.NewDomainError(errors.CancelButNeedFeedBack, "予約は完了しましたが、お客様へのメール送信に失敗しました。")
+		return errors.NewDomainError(errors.CancelButNeedFeedBack, "予約は完了しましたが、お客様へのメール送信に失敗しました。: "+err.Error())
 	}
 	return nil
 }
@@ -259,7 +275,80 @@ func reserveMailContent(
 	}
 
 	// テンプレートを解析
-	tmpl, err := template.New("email").Parse(contentTemplate)
+	contentStr, err := analyzeTemplate(contentTemplate, data)
+	if err != nil {
+		return nil, err
+	}
+
+	return contentStr, nil
+}
+
+func cancelMailContent(
+	bookinfo *entity.Booking,
+	store *entity.StayableStore,
+) (*string, error) {
+	contentTemplate := `
+{{.GuestName}} 様
+
+この度は、当ホテルのご利用ご検討いただき、誠にありがとうございます。
+以下の内容でご予約のキャンセルを完了しましたので、お知らせいたします。
+またのご利用を心よりお待ちしております。
+
+予約番号: {{.ReservationNumber}}
+チェックイン日: {{.CheckInDate}}
+チェックアウト日: {{.CheckOutDate}}
+宿泊プラン: {{.ReservationPlan}}
+宿泊人数: {{.NumberOfGuests}}名様
+部屋数：{{.RoomCount}}部屋
+部屋タイプ：{{.RoomType}}
+
+
+ご不明な点がございましたら、お気軽にお問い合わせください。
+お客様のまたお越しをお待ちしております。
+
+敬具
+
+{{.HotelName}}
+{{.HotelAddress}}
+{{.HotelPhone}}
+{{.HotelURL}}
+`
+
+	// メールのデータを定義（実際のデータはアプリケーションから取得）
+	var people string
+	if bookinfo.Child > 0 {
+		people = "大人: " + strconv.FormatUint(uint64(bookinfo.Adult), 10) + "名様／子ども：" + strconv.FormatUint(uint64(bookinfo.Child), 10)
+	} else {
+		people = "大人: " + strconv.FormatUint(uint64(bookinfo.Adult), 10) + "名様"
+	}
+	data := map[string]string{
+		"GuestName":         bookinfo.GuestData.LastName + bookinfo.GuestData.FirstName,
+		"ReservationNumber": bookinfo.TlDataID,
+		"CheckInDate":       bookinfo.StayFrom.Format("2006年1月2日"),
+		"CheckOutDate":      bookinfo.StayTo.Format("2006年1月2日"),
+		"ReservationPlan":   bookinfo.BookPlan.Title,
+		"NumberOfGuests":    people,
+		"RoomCount":         strconv.FormatUint(uint64(bookinfo.RoomCount), 10),
+		"RoomType":          bookinfo.BookPlan.RoomType.String(),
+		"HotelName":         store.Name + *store.BranchName,
+		"HotelAddress":      store.Address,
+		"HotelPhone":        store.Tel,
+		"HotelURL":          store.SiteURL,
+	}
+
+	// テンプレートを解析
+	contentStr, err := analyzeTemplate(contentTemplate, data)
+	if err != nil {
+		return nil, err
+	}
+
+	return contentStr, nil
+}
+
+func analyzeTemplate(templateContent string, dataMap map[string]string) (*string, error) {
+
+	// テンプレートを解析
+	tmpl, err := template.New("email").Parse(templateContent)
 	if err != nil {
 		fmt.Println("テンプレートの解析に失敗しました:", err)
 		return nil, err
@@ -267,13 +356,11 @@ func reserveMailContent(
 
 	// テンプレートに値を埋め込む
 	var content bytes.Buffer
-	err = tmpl.Execute(&content, data)
+	err = tmpl.Execute(&content, dataMap)
 	if err != nil {
 		fmt.Println("テンプレートへの値の埋め込みに失敗しました:", err)
 		return nil, err
 	}
-
-	// メールの本文を取得
-	contentStr := content.String()
-	return &contentStr, nil
+	str := content.String()
+	return &str, nil
 }

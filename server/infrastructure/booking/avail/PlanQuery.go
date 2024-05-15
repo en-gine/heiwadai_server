@@ -69,11 +69,13 @@ func (p *PlanQuery) GetCalendar(
 	)
 
 	nightFormat := fmt.Sprintf("P%dN", night)
+	reqType := AvailReqTypeNonRoom // プランのみ検索
 	reqBody := &OTA_HotelAvailRQ{
 		Version:        "1.0",
 		PrimaryLangID:  "jpn",
 		AvailRatesOnly: util.BoolPtr(true),
 		AvailRequestSegments: AvailRequestSegments{
+			AvailReqType: &reqType,
 			AvailRequestSegment: AvailRequestSegment{
 				HotelSearchCriteria: HotelSearchCriteria{
 					Criterion: Criterion{
@@ -114,7 +116,7 @@ func (p *PlanQuery) GetCalendar(
 		return nil, errors.New(msg)
 	}
 
-	plans, err := p.AvailRSToPlans(res)
+	plans, err := p.AvailRSToPlans(res, roomCount, adult, child, night)
 	if err != nil {
 		logger.Error(err.Error())
 		return nil, err
@@ -186,8 +188,8 @@ func (p *PlanQuery) Search(
 				resultsCh <- result{nil, errors.New(msg)}
 				return
 			}
-
-			plans, err := p.AvailRSToPlans(res)
+			nights := stayTo.Sub(stayFrom).Hours() / 24
+			plans, err := p.AvailRSToPlans(res, roomCount, adult, child, int(nights))
 			if err != nil {
 				logger.Error(err.Error())
 				resultsCh <- result{nil, err}
@@ -208,9 +210,11 @@ func (p *PlanQuery) Search(
 	return &allPlans, nil
 }
 
-func (p *PlanQuery) AvailRSToPlans(res *EnvelopeRS) (*[]entity.Plan, error) {
+func (p *PlanQuery) AvailRSToPlans(res *EnvelopeRS, roomCount int, adult int, child int, nights int) (*[]entity.Plan, error) {
 	var plans []entity.Plan
 	body := res.Body.OTA_HotelAvailRS
+	guestCount := adult + child
+
 	for _, roomStay := range body.RoomStays.RoomStay {
 		hotelCode := roomStay.RPH
 		var stayable *entity.StayableStore
@@ -240,9 +244,23 @@ func (p *PlanQuery) AvailRSToPlans(res *EnvelopeRS) (*[]entity.Plan, error) {
 		// roomImageUrl := roomType.RoomDescription.URL
 
 		for index, plan := range roomStay.RatePlans.RatePlan {
-			amount := roomStay.RoomRates.RoomRate[index].Total.AmountAfterTax
+			// 一泊毎や人数ごとの追加料金
+			var nightExtraPrice uint64
+			for _, night := range roomStay.RoomRates.RoomRate[index].Rates.Rate {
+				amt := night.Base.AmountAfterTax
+				nightPrice, _ := strconv.ParseUint(amt, 10, 64)
+				nightExtraPrice += nightPrice
+			}
+			tmpAmount := roomStay.RoomRates.RoomRate[index].Total.AmountAfterTax
 			var planPrice uint64
-			planPrice, _ = strconv.ParseUint(amount, 10, 64)
+			tmpTotal, _ := strconv.ParseUint(tmpAmount, 10, 64)
+			if guestCount > 1 {
+				planPrice = tmpTotal + nightExtraPrice
+			} else {
+				planPrice = tmpTotal
+			}
+
+			planPrice = planPrice * uint64(roomCount)
 			availStatus := AvailabilityStatus(roomStay.RoomRates.RoomRate[index].AvailabilityStatus)
 			if availStatus == AvailableClosedOut {
 				//　売り切れ

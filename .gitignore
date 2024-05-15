@@ -2,6 +2,7 @@
 *.dtmp
 .env
 .env.prod
+.env.makefile
 /docker/data
 /docker/volumes/db/data
 node_modules
