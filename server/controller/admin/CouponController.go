@@ -227,7 +227,9 @@ func EntityToCustomCoupon(entity *entity.Coupon) *shared.CustomCoupon {
 	var stores []*shared.Store
 	for _, store := range entity.TargetStore {
 		stores = append(stores, &shared.Store{
-			ID: store.ID.String(),
+			ID:         store.ID.String(),
+			Name:       store.Name,
+			BranchName: store.BranchName,
 		})
 	}
 	var issueCount *uint32
@@ -265,7 +267,9 @@ func EntityToCoupon(entity *entity.Coupon) *shared.Coupon {
 	var stores []*shared.Store
 	for _, store := range entity.TargetStore {
 		stores = append(stores, &shared.Store{
-			ID: store.ID.String(),
+			ID:         store.ID.String(),
+			Name:       store.Name,
+			BranchName: store.BranchName,
 		})
 	}
 	return &shared.Coupon{

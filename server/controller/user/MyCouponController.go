@@ -54,8 +54,9 @@ func (ac *MyCouponController) GetDetail(ctx context.Context, req *connect.Reques
 	var TargetStores []*shared.Store
 	for _, store := range coupon.Coupon.TargetStore {
 		TargetStores = append(TargetStores, &shared.Store{
-			ID:   store.ID.String(),
-			Name: store.Name,
+			ID:         store.ID.String(),
+			Name:       store.Name,
+			BranchName: store.BranchName,
 		})
 	}
 	result := &shared.Coupon{
@@ -153,12 +154,20 @@ func (ac *MyCouponController) GetUsedList(ctx context.Context, req *connect.Requ
 	resposnse := UserAttachedCouponToResponse(entities)
 
 	return connect.NewResponse(resposnse), nil
-
 }
 
 func UserAttachedCouponToResponse(entities []*entity.UserAttachedCoupon) *user.MyCouponsResponse {
 	var response []*shared.Coupon
 	for _, coupon := range entities {
+		var TargetStores []*shared.Store
+		for _, store := range coupon.TargetStore {
+			TargetStores = append(TargetStores, &shared.Store{
+				ID:         store.ID.String(),
+				Name:       store.Name,
+				BranchName: store.BranchName,
+			})
+		}
+
 		response = append(response, &shared.Coupon{
 			ID:                coupon.ID.String(),
 			Name:              coupon.Coupon.Name,
@@ -167,6 +176,7 @@ func UserAttachedCouponToResponse(entities []*entity.UserAttachedCoupon) *user.M
 			ExpireAt:          timestamppb.New(coupon.Coupon.ExpireAt),
 			IsCombinationable: coupon.Coupon.IsCombinationable,
 			CreateAt:          timestamppb.New(coupon.Coupon.CreateAt),
+			TargetStore:       TargetStores,
 		})
 	}
 

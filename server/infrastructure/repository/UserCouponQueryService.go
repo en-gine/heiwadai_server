@@ -59,11 +59,11 @@ func (pq *UserCouponQueryService) GetByID(userID uuid.UUID, couponID uuid.UUID) 
 }
 
 func (pq *UserCouponQueryService) GetActiveAll(userID uuid.UUID) ([]*entity.UserAttachedCoupon, error) {
-
 	userCoupons, err := models.CouponAttachedUsers(
 		models.CouponAttachedUserWhere.UserID.EQ(userID.String()),
 		models.CouponAttachedUserWhere.UsedAt.IsNull(),
 		qm.Load(models.CouponAttachedUserRels.Coupon), // リレーションをロード
+		qm.Load(models.CouponAttachedUserRels.Coupon+"."+models.CouponRels.Stores),
 		qm.InnerJoin(models.TableNames.Coupon+" ON "+models.TableNames.CouponAttachedUser+"."+models.CouponAttachedUserColumns.CouponID+" = "+models.TableNames.Coupon+".id"),
 		models.CouponWhere.ExpireAt.GT(time.Now().AddDate(0, 0, -1)), // 親テーブルの条件を指定
 		qm.OrderBy(models.CouponAttachedUserColumns.CouponID+" DESC"),
@@ -78,7 +78,7 @@ func (pq *UserCouponQueryService) GetActiveAll(userID uuid.UUID) ([]*entity.User
 	if userCoupons == nil {
 		return nil, nil
 	}
-	var result = ModelToUserAttachedCoupon(userID, &userCoupons)
+	result := ModelToUserAttachedCoupon(userID, &userCoupons)
 	return result, nil
 }
 
@@ -89,13 +89,13 @@ func (pq *UserCouponQueryService) GetExpires(userID uuid.UUID, limit int) ([]*en
 		models.CouponAttachedUserWhere.UserID.EQ(userID.String()),
 		models.CouponAttachedUserWhere.UsedAt.IsNull(),
 		qm.Load(models.CouponAttachedUserRels.Coupon), // リレーションをロード
+		qm.Load(models.CouponAttachedUserRels.Coupon+"."+models.CouponRels.Stores),
 		qm.InnerJoin(models.TableNames.Coupon+" ON "+models.TableNames.CouponAttachedUser+"."+models.CouponAttachedUserColumns.CouponID+" = "+models.TableNames.Coupon+".id"),
 		models.CouponWhere.ExpireAt.LT(time.Now()), // 親テーブルの条件を指定
 		qm.Limit(pager.Limit()),
 		qm.Offset(pager.Offset()),
 		qm.OrderBy(models.CouponAttachedUserColumns.CouponID+" DESC"),
 	).All(ctx, pq.db)
-
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
@@ -106,7 +106,7 @@ func (pq *UserCouponQueryService) GetExpires(userID uuid.UUID, limit int) ([]*en
 	if userCoupons == nil {
 		return nil, nil
 	}
-	var result = ModelToUserAttachedCoupon(userID, &userCoupons)
+	result := ModelToUserAttachedCoupon(userID, &userCoupons)
 	return result, nil
 }
 
@@ -115,6 +115,7 @@ func (pq *UserCouponQueryService) GetUseds(userID uuid.UUID, limit int) ([]*enti
 	userCoupons, err := models.CouponAttachedUsers(
 		models.CouponAttachedUserWhere.UserID.EQ(userID.String()),
 		qm.Load(models.CouponAttachedUserRels.Coupon),
+		qm.Load(models.CouponAttachedUserRels.Coupon+"."+models.CouponRels.Stores),
 		models.CouponAttachedUserWhere.UsedAt.IsNotNull(),
 		qm.Limit(pager.Limit()), qm.Offset(pager.Offset()),
 		qm.OrderBy(models.CouponAttachedUserColumns.CouponID+" DESC"),
@@ -129,13 +130,14 @@ func (pq *UserCouponQueryService) GetUseds(userID uuid.UUID, limit int) ([]*enti
 	if userCoupons == nil {
 		return nil, nil
 	}
-	var result = ModelToUserAttachedCoupon(userID, &userCoupons)
+	result := ModelToUserAttachedCoupon(userID, &userCoupons)
 	return result, nil
 }
 
 func (pq *UserCouponQueryService) GetAll(userID uuid.UUID, pager *types.PageQuery) ([]*entity.UserAttachedCoupon, *types.PageResponse, error) {
 	userCoupons, err := models.CouponAttachedUsers(models.CouponAttachedUserWhere.UserID.EQ(userID.String()),
 		qm.Load(models.CouponAttachedUserRels.Coupon),
+		qm.Load(models.CouponAttachedUserRels.Coupon+"."+models.CouponRels.Stores),
 		qm.Limit(pager.Limit()), qm.Offset(pager.Offset()),
 		qm.OrderBy(models.CouponAttachedUserColumns.CouponID+" DESC"),
 	).All(context.Background(), pq.db)
@@ -161,7 +163,7 @@ func (pq *UserCouponQueryService) GetAll(userID uuid.UUID, pager *types.PageQuer
 		pageResponse = types.NewPageResponse(pager, int(count))
 	}
 
-	var result = ModelToUserAttachedCoupon(userID, &userCoupons)
+	result := ModelToUserAttachedCoupon(userID, &userCoupons)
 	return result, pageResponse, err
 }
 
@@ -170,7 +172,12 @@ func ModelToUserAttachedCoupon(userID uuid.UUID, userCoupons *models.CouponAttac
 
 	for _, userCoupon := range *userCoupons {
 		coupon := userCoupon.R.Coupon
-		entityCoupon := CouponModelToEntity(coupon, nil)
+		var stores []*entity.Store
+		for _, store := range coupon.R.Stores {
+			stores = append(stores, StoreModelToEntity(store, nil))
+		}
+
+		entityCoupon := CouponModelToEntity(coupon, stores)
 		entityUserCoupon := entity.RegenUserAttachedCoupon(
 			userID,
 			entityCoupon,
