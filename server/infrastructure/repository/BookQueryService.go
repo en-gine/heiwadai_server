@@ -51,12 +51,12 @@ func (pq *BookQueryService) GetByID(bookID uuid.UUID) (*entity.Booking, error) {
 	return entity, nil
 }
 
-func (pq *BookQueryService) GetMyBooking(userID uuid.UUID, stayFromAfterAt time.Time) ([]*entity.Booking, error) {
+func (pq *BookQueryService) GetMyBooking(userID uuid.UUID) ([]*entity.Booking, error) {
 	books, err := models.UserBooks(
 		models.UserBookWhere.BookUserID.EQ(userID.String()),
 		qm.Load(models.UserBookRels.GuestDatum),
 		qm.Load(models.UserBookRels.BookPlan),
-		models.UserBookWhere.StayFrom.GTE(stayFromAfterAt),
+		models.UserBookWhere.StayFrom.GT(time.Now().AddDate(0, 0, -1)),
 		models.UserBookWhere.DelateAt.IsNull(),
 		qm.OrderBy(models.UserBookColumns.StayFrom+" ASC"),
 	).All(context.Background(), pq.db)

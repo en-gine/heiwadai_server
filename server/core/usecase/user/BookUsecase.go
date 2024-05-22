@@ -42,7 +42,7 @@ func NewBookUsecase(
 }
 
 func (u *BookUsecase) GetMyBook(userID uuid.UUID) ([]*entity.Booking, *errors.DomainError) {
-	books, err := u.bookQuery.GetMyBooking(userID, time.Now())
+	books, err := u.bookQuery.GetMyBooking(userID)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())
 	}
