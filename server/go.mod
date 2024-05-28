@@ -19,7 +19,6 @@ require (
 	github.com/supabase-community/storage-go v0.7.0
 	github.com/volatiletech/null/v8 v8.1.2
 	github.com/volatiletech/randomize v0.0.1
-	github.com/volatiletech/sqlboiler v3.7.1+incompatible
 	github.com/volatiletech/sqlboiler/v4 v4.14.2
 	github.com/volatiletech/strmangle v0.0.4
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
@@ -36,7 +35,6 @@ require (
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/magiconair/properties v1.8.6 // indirect
-	github.com/miiton/kanaconv v1.1.1 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/nedpals/postgrest-go v0.1.3 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect

@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"server/core/errors"
+	"server/infrastructure/encrypt"
 	"server/infrastructure/logger"
 	validator "server/validator"
 )
@@ -23,8 +24,25 @@ func NewPassword(password string) (*Password, *errors.DomainError) {
 	return &pass, nil
 }
 
-func (p *Password) String() string {
+func (p *Password) string() string {
 	return string(*p)
+}
+
+// フロントからパスワードを暗号化して投げるようにしたため、復号化した文字列を返します。
+func (p *Password) DecriptedString() (string, error) {
+	return encrypt.Decrypt(p.string())
+}
+
+func (p *Password) EncriptedString() (*Password, error) {
+	pass, err := encrypt.Encrypt(p.string())
+	if err != nil {
+		return nil, err
+	}
+	pswd, domaiErr := NewPassword(pass)
+	if domaiErr != nil {
+		return nil, err
+	}
+	return pswd, nil
 }
 
 func GenerateRandomPassword() (*Password, *errors.DomainError) {
@@ -52,6 +70,10 @@ func GenerateRandomPassword() (*Password, *errors.DomainError) {
 	if domaiErr != nil {
 		return nil, domaiErr
 	}
-	logger.Debugf("Generated password: %s", pass.String())
-	return pass, nil
+	logger.Debugf("Generated password: %s", pass.string())
+	encryptedPass, err := pass.EncriptedString()
+	if err != nil {
+		return nil, errors.NewDomainError(errors.InternalError, err.Error())
+	}
+	return encryptedPass, nil
 }

@@ -45,10 +45,11 @@ const (
 	AdminAuthRedirectURL EnvKey = "ADMIN_AUTH_REDIRECT_URL"
 	UserAuthRedirectURL  EnvKey = "USER_AUTH_REDIRECT_URL"
 
-	RedisHost EnvKey = "REDISHOST"
-	RedisPort EnvKey = "REDISPORT"
-	RedisUser EnvKey = "REDISUSER"
-	RedisPass EnvKey = "REDISPASS"
+	EncryptKey EnvKey = "ENCRYPT_KEY"
+	RedisHost  EnvKey = "REDISHOST"
+	RedisPort  EnvKey = "REDISPORT"
+	RedisUser  EnvKey = "REDISUSER"
+	RedisPass  EnvKey = "REDISPASS"
 
 	MailHost EnvKey = "MAIL_HOST"
 	MailPort EnvKey = "MAIL_PORT"
@@ -89,6 +90,8 @@ func InitEnv() {
 
 			SupabaseUrl: os.Getenv(string(SupabaseUrl)),
 			SupabaseKey: os.Getenv(string(SupabaseKey)),
+
+			EncryptKey: os.Getenv(string(EncryptKey)),
 
 			SupabaseProjectID: os.Getenv(string(SupabaseProjectID)),
 			SupabaseBucket:    os.Getenv(string(SupabaseBucket)),

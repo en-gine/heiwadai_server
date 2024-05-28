@@ -58,9 +58,13 @@ func NewAuthClient(userType action.UserType) *AuthClient {
 
 func (au *AuthClient) SignUp(email entity.Mail, password entity.Password) (*uuid.UUID, error) {
 	ctx := context.Background()
+	pass, err := password.DecriptedString()
+	if err != nil {
+		return nil, err
+	}
 	usr, err := au.signUpWithRedirect(ctx, supa.UserCredentials{
 		Email:    email.String(),
-		Password: password.String(),
+		Password: pass,
 		Data: map[string]interface{}{
 			"user_type": au.userType.String(),
 		},
@@ -72,12 +76,15 @@ func (au *AuthClient) SignUp(email entity.Mail, password entity.Password) (*uuid
 	return &userID, nil
 }
 
-func (au *AuthClient) SignIn(email entity.Mail, password string) (*types.Token, *domainErr.DomainError, error) {
+func (au *AuthClient) SignIn(email entity.Mail, password entity.Password) (*types.Token, *domainErr.DomainError, error) {
 	ctx := context.Background()
-
+	pass, err := password.DecriptedString()
+	if err != nil {
+		return nil, nil, err
+	}
 	auth, err := au.client.Auth.SignIn(ctx, supa.UserCredentials{
 		Email:    email.String(),
-		Password: password,
+		Password: pass,
 	})
 	if err != nil {
 		if err.Error() == "invalid_grant: Invalid login credentials" {
@@ -150,11 +157,14 @@ func (au *AuthClient) ResetPasswordMail(email entity.Mail) (*domainErr.DomainErr
 
 func (au *AuthClient) UpdatePassword(password entity.Password, token string) (*domainErr.DomainError, error) {
 	ctx := context.Background()
+	pass, err := password.DecriptedString()
+	if err != nil {
+		return nil, err
+	}
 
-	_, err := au.updateUser(ctx, token, map[string]interface{}{
-		"password": password.String(),
+	_, err = au.updateUser(ctx, token, map[string]interface{}{
+		"password": pass,
 	})
-
 	if err != nil {
 		if strings.Contains(err.Error(), "422") {
 			logger.DebugPrint(err)

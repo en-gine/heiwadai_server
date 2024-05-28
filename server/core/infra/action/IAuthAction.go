@@ -33,7 +33,7 @@ func (ut UserType) String() string {
 
 type IAuthAction interface {
 	SignUp(email entity.Mail, password entity.Password) (*uuid.UUID, error)
-	SignIn(email entity.Mail, password string) (*types.Token, *errors.DomainError, error)
+	SignIn(email entity.Mail, password entity.Password) (*types.Token, *errors.DomainError, error)
 	SignOut(token string) error
 	Refresh(token string, refreshToken string) (*UserAuth, *errors.DomainError, error)
 	GetUserInfo(token string) (*UserInfo, error)

@@ -155,8 +155,11 @@ func (u *AuthUsecase) SignIn(
 	if !existUser.IsActive {
 		return nil, errors.NewDomainError(errors.UnPemitedOperation, "このアドレスで登録されているユーザーは無効化されています")
 	}
-
-	token, domainErr, err := u.authAction.SignIn(*ml, Password)
+	pass, domainErr := entity.NewPassword(Password)
+	if domainErr != nil {
+		return nil, domainErr
+	}
+	token, domainErr, err := u.authAction.SignIn(*ml, *pass)
 	if domainErr != nil {
 		return nil, domainErr
 	}
