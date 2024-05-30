@@ -2,7 +2,6 @@ package avail
 
 import (
 	"errors"
-	"fmt"
 	"strconv"
 	"time"
 
@@ -11,8 +10,6 @@ import (
 	"server/infrastructure/booking/util"
 	"server/infrastructure/env"
 	"server/infrastructure/logger"
-
-	uuid "github.com/google/uuid"
 )
 
 var _ queryservice.IPlanQueryService = &PlanQuery{}
@@ -30,108 +27,6 @@ func NewPlanQuery(storeQuery queryservice.IStoreQueryService) *PlanQuery {
 	return &PlanQuery{
 		storeQuery: storeQuery,
 	}
-}
-
-func (p *PlanQuery) GetCalendar(
-	planID string, //nolint:all
-	storeID uuid.UUID,
-	night int,
-	adult int,
-	child int,
-	roomCount int,
-	smokeTypes []entity.SmokeType,
-	mealType entity.MealType,
-	roomType entity.RoomType,
-	fromDate time.Time,
-	toDate time.Time,
-) (*entity.PlanCalendar, error) {
-	store, err := p.storeQuery.GetStayableByID(storeID)
-	if err != nil {
-		return nil, err
-	}
-	hotelCode := store.BookingSystemID
-
-	if env.GetEnv(env.TlbookingIsTest) == "true" {
-		hotelCode = "E69502"
-		planID = "14030824" //nolint:all
-	}
-
-	mealsIncluded := MealTypeToQuery(mealType)
-
-	roomStayCandidate := NewRoomStayCandidate(
-		roomType,
-		adult,
-		&child,
-		roomCount,
-		smokeTypes,
-		&fromDate,
-		&toDate,
-	)
-
-	nightFormat := fmt.Sprintf("P%dN", night)
-	reqType := AvailReqTypeNonRoom // プランのみ検索
-	reqBody := &OTA_HotelAvailRQ{
-		Version:        "1.0",
-		PrimaryLangID:  "jpn",
-		AvailRatesOnly: util.BoolPtr(true),
-		AvailRequestSegments: AvailRequestSegments{
-			AvailReqType: &reqType,
-			AvailRequestSegment: AvailRequestSegment{
-				HotelSearchCriteria: HotelSearchCriteria{
-					Criterion: Criterion{
-						HotelRef: []HotelRef{
-							{HotelCode: hotelCode},
-						},
-						RatePlanCandidates: &RatePlanCandidates{ // 食事タイプ
-							RatePlanCandidate: []RatePlanCandidate{
-								{
-									MealsIncluded: mealsIncluded,
-								},
-							},
-						},
-						StayDateRange: &StayDateRange{
-							Duration: &nightFormat,
-						},
-						RoomStayCandidates: &RoomStayCandidates{
-							RoomStayCandidate: []RoomStayCandidate{
-								*roomStayCandidate,
-							},
-						},
-					},
-				},
-			},
-		},
-	}
-
-	request := NewEnvelopeRQ(TLBookingUser, TLBookingPass, reqBody)
-
-	res, err := util.Request[EnvelopeRQ, EnvelopeRS](TLBookingSearchURL, request)
-	if err != nil {
-		return nil, err
-	}
-
-	if res.Body.OTA_HotelAvailRS.Errors != nil {
-		errs := res.Body.OTA_HotelAvailRS.Errors
-		msg := errs.Error[0].ShortText
-		return nil, errors.New(msg)
-	}
-
-	plans, err := p.AvailRSToPlans(res, roomCount, adult, child, night)
-	if err != nil {
-		logger.Error(err.Error())
-		return nil, err
-	}
-	plan := (*plans)[0]
-	statases, err := p.AvailRSToCalendarStatus(res)
-	if err != nil {
-		logger.Error(err.Error())
-		return nil, err
-	}
-
-	return &entity.PlanCalendar{
-		Plan:       plan,
-		DateStatus: *statases,
-	}, nil
 }
 
 func (p *PlanQuery) Search(
@@ -208,6 +103,41 @@ func (p *PlanQuery) Search(
 		allPlans = append(allPlans, *res.plans...)
 	}
 	return &allPlans, nil
+}
+
+func (p *PlanQuery) GetPlanDetailByID(
+	planID string,
+	store *entity.StayableStore,
+	stayFrom time.Time,
+	stayTo time.Time,
+	adult int,
+	child int,
+	roomCount int,
+	roomType entity.RoomType,
+) (*entity.Plan, error) {
+	reqBody := NewOTAHotelPlanDetailRQ(
+		planID,
+		store.StayableStoreInfo.BookingSystemID,
+		stayFrom,
+		stayTo,
+		adult,
+		child,
+		roomCount,
+		roomType,
+	)
+	request := NewEnvelopeRQ(TLBookingUser, TLBookingPass, reqBody)
+	res, err := util.Request[EnvelopeRQ, EnvelopeRS](TLBookingSearchURL, request)
+	if err != nil {
+		logger.Error(err.Error())
+		return nil, err
+	}
+	nights := stayTo.Sub(stayFrom).Hours() / 24
+	plans, err := p.AvailRSToPlans(res, roomCount, adult, child, int(nights))
+	if err != nil {
+		logger.Error(err.Error())
+		return nil, err
+	}
+	return &(*plans)[0], nil
 }
 
 func (p *PlanQuery) AvailRSToPlans(res *EnvelopeRS, roomCount int, adult int, child int, nights int) (*[]entity.Plan, error) {
@@ -305,28 +235,6 @@ func (p *PlanQuery) AvailRSToPlans(res *EnvelopeRS, roomCount int, adult int, ch
 	return &plans, nil
 }
 
-func (p *PlanQuery) AvailRSToCalendarStatus(res *EnvelopeRS) (*[]entity.DateStatus, error) {
-	var dateStatuses []entity.DateStatus
-	body := res.Body.OTA_HotelAvailRS
-	for _, roomStay := range body.RoomStays.RoomStay {
-		for _, roomRate := range roomStay.RoomRates.RoomRate {
-			amount := roomRate.Total.AmountAfterTax
-			var planPrice uint64
-			planPrice, _ = strconv.ParseUint(amount, 10, 64)
-			date, err := util.YYYYMMDDToDate(roomRate.EffectiveDate)
-			if err != nil {
-				return nil, err
-			}
-			dateStatus := entity.DateStatus{
-				Date:  date,
-				Price: uint(planPrice),
-			}
-			dateStatuses = append(dateStatuses, dateStatus)
-		}
-	}
-	return &dateStatuses, nil
-}
-
 func NewOTAHotelAvailRQ(
 	hotelCodes []string,
 	stayFrom time.Time,
@@ -376,6 +284,62 @@ func NewOTAHotelAvailRQ(
 									MealsIncluded: mealsIncluded,
 								},
 							},
+						},
+						StayDateRange: &StayDateRange{
+							Start: &start,
+							End:   &end,
+						},
+						RoomStayCandidates: &RoomStayCandidates{
+							RoomStayCandidate: []RoomStayCandidate{
+								*roomStayCandidate,
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func NewOTAHotelPlanDetailRQ(
+	// プランの詳細情報取得（合計金額含む）
+	planID string,
+	hotelCode string,
+	stayFrom time.Time,
+	stayTo time.Time,
+	adult int,
+	child int,
+	roomCount int,
+	roomType entity.RoomType,
+) *OTA_HotelAvailRQ {
+	// 日付
+	start := util.DateToYYYYMMDD(stayFrom)
+	end := util.DateToYYYYMMDD(stayTo)
+
+	// ホテルコード
+	hotelRef := HotelRef{HotelCode: hotelCode}
+
+	roomStayCandidate := NewRoomStayCandidate(
+		roomType,
+		adult,
+		&child,
+		roomCount,
+		nil, // smokeTypeは指定不可
+		nil, // EffectiveDate
+		nil, // ExpireDate
+	)
+
+	return &OTA_HotelAvailRQ{
+		Version:        "1.0",
+		PrimaryLangID:  "jpn",
+		AvailRatesOnly: util.BoolPtr(true), // プラン情報を返すフラグ
+		PricingMethod:  PricingMethodLowestperstay,
+		AvailRequestSegments: AvailRequestSegments{
+			AvailRequestSegment: AvailRequestSegment{
+				HotelSearchCriteria: HotelSearchCriteria{
+					Criterion: Criterion{
+						HotelRef: []HotelRef{
+							hotelRef,
 						},
 						StayDateRange: &StayDateRange{
 							Start: &start,

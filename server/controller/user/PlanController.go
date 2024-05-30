@@ -28,7 +28,7 @@ func NewPlanController(bookUsecase *usecase.PlanUsecase, storeUseCase *usecase.S
 	}
 }
 
-func (ac *PlanController) Search(ctx context.Context, req *connect.Request[user.PlanSearchRequest]) (*connect.Response[user.PlansResponse], error) {
+func (ac *PlanController) Search(ctx context.Context, req *connect.Request[user.PlanSearchRequest]) (*connect.Response[user.SearchPlanResponse], error) {
 	msg := req.Msg
 	var storeUUIDs []uuid.UUID
 	for _, storeID := range msg.StoreIDs {
@@ -84,7 +84,7 @@ func (ac *PlanController) Search(ctx context.Context, req *connect.Request[user.
 		}
 	}
 
-	plans, domainErr := ac.planUseCase.Search(
+	candidates, domainErr := ac.planUseCase.Search(
 		storeUUIDs,
 		msg.StayFrom.AsTime(),
 		msg.StayTo.AsTime(),
@@ -99,18 +99,47 @@ func (ac *PlanController) Search(ctx context.Context, req *connect.Request[user.
 		return nil, controller.ErrorHandler(domainErr)
 	}
 
-	var displayPlans []*user.DisplayPlan
-	for _, plan := range *plans {
-		planStore, domainErr := ac.storeUseCase.GetStayableByID(plan.StoreID)
+	var plans []*user.DisplayPlanWithSearchResultOption
+	for _, candidate := range *candidates {
+		planStore, domainErr := ac.storeUseCase.GetStayableByID(candidate.Plan.StoreID)
 		if domainErr != nil {
 			return nil, controller.ErrorHandler(domainErr)
 		}
-		plans := PlanEntityToResponse(&plan, planStore)
-		displayPlans = append(displayPlans, plans)
+		displayPlan := PlanEntityToResponse(candidate.Plan, planStore)
+
+		resPlan := &user.DisplayPlanWithSearchResultOption{
+			Plan:                 displayPlan,
+			MinimumPrice:         uint32(candidate.MinimumPrice),
+			PricePerCategory:     user.PricePerCategory(candidate.PricePerCategory),
+			PricePerCategoryName: candidate.PricePerCategory.String(),
+		}
+		plans = append(plans, resPlan)
 
 	}
 	return connect.NewResponse(
-		&user.PlansResponse{
-			Plans: displayPlans,
+		&user.SearchPlanResponse{
+			Plans: plans,
 		}), nil
+}
+
+func (ac *PlanController) GetDetail(ctx context.Context, req *connect.Request[user.PlanDetailRequest]) (*connect.Response[user.DisplayPlan], error) {
+	msg := req.Msg
+	stayStoreID, err := uuid.Parse(msg.StayStoreID)
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("プランIDが正しい形式ではありません。"))
+	}
+	var roomType entity.RoomType = entity.RoomType(msg.RoomType)
+
+	plan, domainErr := ac.planUseCase.GetDetail(msg.PlanID, msg.StayFrom.AsTime(), msg.StayTo.AsTime(), int(msg.Adult), int(msg.Child), int(msg.RoomCount), &roomType, stayStoreID)
+	if domainErr != nil {
+		return nil, controller.ErrorHandler(domainErr)
+	}
+	planStore, domainErr := ac.storeUseCase.GetStayableByID(plan.StoreID)
+	if domainErr != nil {
+		return nil, controller.ErrorHandler(domainErr)
+	}
+	displayPlan := PlanEntityToResponse(plan, planStore)
+
+	return connect.NewResponse(
+		displayPlan), nil
 }

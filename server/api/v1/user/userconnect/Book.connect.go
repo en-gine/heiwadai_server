@@ -48,6 +48,9 @@ const (
 	BookControllerReserveProcedure = "/server.user.BookController/Reserve"
 	// PlanControllerSearchProcedure is the fully-qualified name of the PlanController's Search RPC.
 	PlanControllerSearchProcedure = "/server.user.PlanController/Search"
+	// PlanControllerGetDetailProcedure is the fully-qualified name of the PlanController's GetDetail
+	// RPC.
+	PlanControllerGetDetailProcedure = "/server.user.PlanController/GetDetail"
 )
 
 // BookControllerClient is a client for the server.user.BookController service.
@@ -198,7 +201,8 @@ func (UnimplementedBookControllerHandler) Reserve(context.Context, *connect_go.R
 
 // PlanControllerClient is a client for the server.user.PlanController service.
 type PlanControllerClient interface {
-	Search(context.Context, *connect_go.Request[user.PlanSearchRequest]) (*connect_go.Response[user.PlansResponse], error)
+	Search(context.Context, *connect_go.Request[user.PlanSearchRequest]) (*connect_go.Response[user.SearchPlanResponse], error)
+	GetDetail(context.Context, *connect_go.Request[user.PlanDetailRequest]) (*connect_go.Response[user.DisplayPlan], error)
 }
 
 // NewPlanControllerClient constructs a client for the server.user.PlanController service. By
@@ -211,9 +215,14 @@ type PlanControllerClient interface {
 func NewPlanControllerClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) PlanControllerClient {
 	baseURL = strings.TrimRight(baseURL, "/")
 	return &planControllerClient{
-		search: connect_go.NewClient[user.PlanSearchRequest, user.PlansResponse](
+		search: connect_go.NewClient[user.PlanSearchRequest, user.SearchPlanResponse](
 			httpClient,
 			baseURL+PlanControllerSearchProcedure,
+			opts...,
+		),
+		getDetail: connect_go.NewClient[user.PlanDetailRequest, user.DisplayPlan](
+			httpClient,
+			baseURL+PlanControllerGetDetailProcedure,
 			opts...,
 		),
 	}
@@ -221,17 +230,24 @@ func NewPlanControllerClient(httpClient connect_go.HTTPClient, baseURL string, o
 
 // planControllerClient implements PlanControllerClient.
 type planControllerClient struct {
-	search *connect_go.Client[user.PlanSearchRequest, user.PlansResponse]
+	search    *connect_go.Client[user.PlanSearchRequest, user.SearchPlanResponse]
+	getDetail *connect_go.Client[user.PlanDetailRequest, user.DisplayPlan]
 }
 
 // Search calls server.user.PlanController.Search.
-func (c *planControllerClient) Search(ctx context.Context, req *connect_go.Request[user.PlanSearchRequest]) (*connect_go.Response[user.PlansResponse], error) {
+func (c *planControllerClient) Search(ctx context.Context, req *connect_go.Request[user.PlanSearchRequest]) (*connect_go.Response[user.SearchPlanResponse], error) {
 	return c.search.CallUnary(ctx, req)
+}
+
+// GetDetail calls server.user.PlanController.GetDetail.
+func (c *planControllerClient) GetDetail(ctx context.Context, req *connect_go.Request[user.PlanDetailRequest]) (*connect_go.Response[user.DisplayPlan], error) {
+	return c.getDetail.CallUnary(ctx, req)
 }
 
 // PlanControllerHandler is an implementation of the server.user.PlanController service.
 type PlanControllerHandler interface {
-	Search(context.Context, *connect_go.Request[user.PlanSearchRequest]) (*connect_go.Response[user.PlansResponse], error)
+	Search(context.Context, *connect_go.Request[user.PlanSearchRequest]) (*connect_go.Response[user.SearchPlanResponse], error)
+	GetDetail(context.Context, *connect_go.Request[user.PlanDetailRequest]) (*connect_go.Response[user.DisplayPlan], error)
 }
 
 // NewPlanControllerHandler builds an HTTP handler from the service implementation. It returns the
@@ -245,10 +261,17 @@ func NewPlanControllerHandler(svc PlanControllerHandler, opts ...connect_go.Hand
 		svc.Search,
 		opts...,
 	)
+	planControllerGetDetailHandler := connect_go.NewUnaryHandler(
+		PlanControllerGetDetailProcedure,
+		svc.GetDetail,
+		opts...,
+	)
 	return "/server.user.PlanController/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case PlanControllerSearchProcedure:
 			planControllerSearchHandler.ServeHTTP(w, r)
+		case PlanControllerGetDetailProcedure:
+			planControllerGetDetailHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -258,6 +281,10 @@ func NewPlanControllerHandler(svc PlanControllerHandler, opts ...connect_go.Hand
 // UnimplementedPlanControllerHandler returns CodeUnimplemented from all methods.
 type UnimplementedPlanControllerHandler struct{}
 
-func (UnimplementedPlanControllerHandler) Search(context.Context, *connect_go.Request[user.PlanSearchRequest]) (*connect_go.Response[user.PlansResponse], error) {
+func (UnimplementedPlanControllerHandler) Search(context.Context, *connect_go.Request[user.PlanSearchRequest]) (*connect_go.Response[user.SearchPlanResponse], error) {
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.PlanController.Search is not implemented"))
+}
+
+func (UnimplementedPlanControllerHandler) GetDetail(context.Context, *connect_go.Request[user.PlanDetailRequest]) (*connect_go.Response[user.DisplayPlan], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.PlanController.GetDetail is not implemented"))
 }

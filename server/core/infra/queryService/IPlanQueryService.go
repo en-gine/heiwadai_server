@@ -18,4 +18,14 @@ type IPlanQueryService interface {
 		mealType entity.MealType,
 		roomTypes []entity.RoomType,
 	) (*[]entity.Plan, error)
+	GetPlanDetailByID(
+		planID string,
+		store *entity.StayableStore,
+		stayFrom time.Time,
+		stayTo time.Time,
+		adult int,
+		child int,
+		roomCount int,
+		roomType entity.RoomType,
+	) (*entity.Plan, error)
 }

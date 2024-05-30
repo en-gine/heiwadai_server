@@ -32,7 +32,7 @@ func (u *PlanUsecase) Search(
 	smokeTypes *[]entity.SmokeType,
 	mealType *entity.MealType,
 	roomTypes *[]entity.RoomType,
-) (*[]entity.Plan, *errors.DomainError) {
+) (*[]entity.PlanCandidate, *errors.DomainError) {
 	var stayStores []*entity.StayableStore
 	var err error
 
@@ -84,5 +84,36 @@ func (u *PlanUsecase) Search(
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())
 	}
-	return plans, nil
+	var candidates []entity.PlanCandidate
+	nights := stayTo.Sub(stayFrom).Hours() / 24
+	guestCount := adult + child
+	for _, plan := range *plans {
+		candidate := entity.NewPlanCandidate(&plan, int(nights), guestCount)
+		candidates = append(candidates, *candidate)
+	}
+	return &candidates, nil
+}
+
+func (u *PlanUsecase) GetDetail(
+	PrinID string,
+	stayFrom time.Time,
+	stayTo time.Time,
+	adult int,
+	child int,
+	roomCount int,
+	roomTypes *entity.RoomType,
+	stayStoreID uuid.UUID,
+) (*entity.Plan, *errors.DomainError) {
+	stayStore, err := u.storeQuery.GetStayableByID(stayStoreID)
+	if err != nil {
+		return nil, errors.NewDomainError(errors.QueryError, err.Error())
+	}
+	if stayStore == nil {
+		return nil, errors.NewDomainError(errors.InvalidParameter, "指定された宿泊施設が見つかりませんでした。")
+	}
+	plan, err := u.planQuery.GetPlanDetailByID(PrinID, stayStore, stayFrom, stayTo, adult, child, roomCount, *roomTypes)
+	if err != nil {
+		return nil, errors.NewDomainError(errors.QueryError, err.Error())
+	}
+	return plan, nil
 }
