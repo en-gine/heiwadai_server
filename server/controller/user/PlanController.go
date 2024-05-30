@@ -122,7 +122,7 @@ func (ac *PlanController) Search(ctx context.Context, req *connect.Request[user.
 		}), nil
 }
 
-func (ac *PlanController) GetDetail(ctx context.Context, req *connect.Request[user.PlanDetailRequest]) (*connect.Response[user.DisplayPlan], error) {
+func (ac *PlanController) GetDetail(ctx context.Context, req *connect.Request[user.PlanDetailRequest]) (*connect.Response[user.PlanResponse], error) {
 	msg := req.Msg
 	stayStoreID, err := uuid.Parse(msg.StayStoreID)
 	if err != nil {
@@ -141,5 +141,7 @@ func (ac *PlanController) GetDetail(ctx context.Context, req *connect.Request[us
 	displayPlan := PlanEntityToResponse(plan, planStore)
 
 	return connect.NewResponse(
-		displayPlan), nil
+		&user.PlanResponse{
+			Plan: displayPlan,
+		}), nil
 }
