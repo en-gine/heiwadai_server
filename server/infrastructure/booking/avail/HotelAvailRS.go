@@ -71,6 +71,7 @@ type RoomStay struct {
 	RoomTypes RoomTypes `xml:"RoomTypes"`
 	RatePlans RatePlans `xml:"RatePlans"`
 	RoomRates RoomRates `xml:"RoomRates"`
+	Total     Total     `xml:"Total"`
 }
 
 type RoomTypes struct {

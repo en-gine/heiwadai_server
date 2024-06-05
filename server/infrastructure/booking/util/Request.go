@@ -8,9 +8,10 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-
 	"server/infrastructure/env"
 	"server/infrastructure/logger"
+
+	"github.com/go-xmlfmt/xmlfmt"
 )
 
 var envMode = env.GetEnv(env.EnvMode)
@@ -71,7 +72,10 @@ func Request[TRequestType any, TResultType any](url string, reqBody *TRequestTyp
 	}
 
 	if envMode == "dev" {
-		fmt.Print(string(content))
+		x := xmlfmt.FormatXML(string(content), "\t", "  ")
+		fmt.Println("------------XML RESPONSE-------------------")
+		fmt.Println(x)
+		fmt.Println("-------------------------------")
 	}
 
 	if res.StatusCode != http.StatusOK {

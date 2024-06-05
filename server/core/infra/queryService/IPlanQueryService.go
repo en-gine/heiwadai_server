@@ -17,7 +17,7 @@ type IPlanQueryService interface {
 		smokeTypes []entity.SmokeType,
 		mealType entity.MealType,
 		roomTypes []entity.RoomType,
-	) (*[]entity.Plan, error)
+	) (*[]entity.PlanCandidate, error)
 	GetPlanDetailByID(
 		planID string,
 		store *entity.StayableStore,

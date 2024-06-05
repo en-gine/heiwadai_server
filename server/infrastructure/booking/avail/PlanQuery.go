@@ -39,7 +39,7 @@ func (p *PlanQuery) Search(
 	smokeTypes []entity.SmokeType,
 	mealType entity.MealType,
 	roomTypes []entity.RoomType,
-) (*[]entity.Plan, error) {
+) (*[]entity.PlanCandidate, error) {
 	bookingIDs := []string{}
 	for _, store := range stores {
 		bookingIDs = append(bookingIDs, store.BookingSystemID)
@@ -49,12 +49,12 @@ func (p *PlanQuery) Search(
 		bookingIDs = []string{"E69502"}
 	}
 
-	type result struct {
-		plans *[]entity.Plan
-		err   error
+	type Result struct {
+		candidates *[]entity.PlanCandidate
+		err        error
 	}
 
-	resultsCh := make(chan result, len(roomTypes))
+	resultsCh := make(chan Result, len(roomTypes))
 
 	for _, roomType := range roomTypes {
 		go func(rt entity.RoomType) {
@@ -72,7 +72,7 @@ func (p *PlanQuery) Search(
 			request := NewEnvelopeRQ(TLBookingUser, TLBookingPass, reqBody)
 			res, err := util.Request[EnvelopeRQ, EnvelopeRS](TLBookingSearchURL, request)
 			if err != nil {
-				resultsCh <- result{nil, err}
+				resultsCh <- Result{nil, err}
 				return
 			}
 
@@ -80,29 +80,31 @@ func (p *PlanQuery) Search(
 				errs := res.Body.OTA_HotelAvailRS.Errors
 				msg := errs.Error[0].ShortText
 				logger.Error(msg)
-				resultsCh <- result{nil, errors.New(msg)}
+				resultsCh <- Result{nil, errors.New(msg)}
 				return
 			}
 			nights := stayTo.Sub(stayFrom).Hours() / 24
-			plans, err := p.AvailRSToPlans(res, roomCount, adult, child, int(nights))
+			guestCount := adult + child
+
+			candidates, err := p.AvailRSToCandidates(res, roomCount, guestCount, int(nights))
 			if err != nil {
 				logger.Error(err.Error())
-				resultsCh <- result{nil, err}
+				resultsCh <- Result{nil, err}
 				return
 			}
-			resultsCh <- result{plans, nil}
+			resultsCh <- Result{candidates, nil}
 		}(roomType)
 	}
 
-	var allPlans []entity.Plan
+	var allCandidates []entity.PlanCandidate
 	for i := 0; i < len(roomTypes); i++ {
 		res := <-resultsCh
 		if res.err != nil {
 			return nil, res.err
 		}
-		allPlans = append(allPlans, *res.plans...)
+		allCandidates = append(allCandidates, *res.candidates...)
 	}
-	return &allPlans, nil
+	return &allCandidates, nil
 }
 
 func (p *PlanQuery) GetPlanDetailByID(
@@ -115,9 +117,17 @@ func (p *PlanQuery) GetPlanDetailByID(
 	roomCount int,
 	roomType entity.RoomType,
 ) (*entity.Plan, error) {
+
+	var hotelCode string
+	if env.GetEnv(env.TlbookingIsTest) == "true" {
+		hotelCode = "E69502"
+	} else {
+		hotelCode = store.StayableStoreInfo.BookingSystemID
+	}
+
 	reqBody := NewOTAHotelPlanDetailRQ(
 		planID,
-		store.StayableStoreInfo.BookingSystemID,
+		hotelCode,
 		stayFrom,
 		stayTo,
 		adult,
@@ -131,19 +141,18 @@ func (p *PlanQuery) GetPlanDetailByID(
 		logger.Error(err.Error())
 		return nil, err
 	}
-	nights := stayTo.Sub(stayFrom).Hours() / 24
-	plans, err := p.AvailRSToPlans(res, roomCount, adult, child, int(nights))
+	guestCount := adult + child
+	plan, err := p.AvailDetailRSToPlan(res, roomCount, guestCount)
 	if err != nil {
 		logger.Error(err.Error())
 		return nil, err
 	}
-	return &(*plans)[0], nil
+	return plan, nil
 }
 
-func (p *PlanQuery) AvailRSToPlans(res *EnvelopeRS, roomCount int, adult int, child int, nights int) (*[]entity.Plan, error) {
-	var plans []entity.Plan
+func (p *PlanQuery) AvailRSToCandidates(res *EnvelopeRS, roomCount int, guestCount int, nights int) (*[]entity.PlanCandidate, error) {
+	var candidates []entity.PlanCandidate
 	body := res.Body.OTA_HotelAvailRS
-	guestCount := adult + child
 
 	for _, roomStay := range body.RoomStays.RoomStay {
 		hotelCode := roomStay.RPH
@@ -162,16 +171,16 @@ func (p *PlanQuery) AvailRSToPlans(res *EnvelopeRS, roomCount int, adult int, ch
 			return nil, err
 		}
 		if len(roomStay.RoomTypes.RoomType) == 0 { // room not found
-			return &[]entity.Plan{}, nil
+			return &[]entity.PlanCandidate{}, nil
 		}
 
 		roomType := roomStay.RoomTypes.RoomType[0]
-		room := BedTypeCodeToRoomType(roomType.BedTypeCode)
+		rtc, err := strconv.Atoi(roomType.RoomTypeCode)
+		if err != nil {
+			return nil, err
+		}
+		rt := entity.RoomType(rtc)
 		smokeType := IsNonSmokingToSmokeType(roomType.NonSmoking) // true false nil
-
-		// roomName := roomType.RoomDescription.Name
-		// roomText := roomType.RoomDescription.Text
-		// roomImageUrl := roomType.RoomDescription.URL
 
 		for index, plan := range roomStay.RatePlans.RatePlan {
 			// 一泊毎や人数ごとの追加料金
@@ -217,7 +226,113 @@ func (p *PlanQuery) AvailRSToPlans(res *EnvelopeRS, roomCount int, adult int, ch
 				Title:    planName,
 				Price:    uint(planPrice),
 				ImageURL: planImageURL,
-				RoomType: room,
+				RoomType: rt,
+				MealType: entity.MealType{
+					Morning: IncludeBreakfast,
+					Dinner:  IncludeDinner,
+				},
+				SmokeType: smokeType,
+				OverView:  planOverView,
+				StoreID:   stayable.ID,
+			}
+
+			candidate := entity.NewPlanCandidate(plan, nights, guestCount)
+
+			candidates = append(candidates, *candidate)
+		}
+	}
+	return &candidates, nil
+}
+
+func (p *PlanQuery) AvailDetailRSToPlan(res *EnvelopeRS, roomCount int, guestCount int) (*entity.Plan, error) {
+	var plans []entity.Plan
+	body := res.Body.OTA_HotelAvailRS
+
+	for _, roomStay := range body.RoomStays.RoomStay {
+		hotelCode := roomStay.RPH
+		var stayable *entity.StayableStore
+		var err error
+		if env.GetEnv(env.TlbookingIsTest) == "true" {
+			stayables, err := p.storeQuery.GetStayables()
+			if err != nil {
+				return nil, err
+			}
+			stayable = stayables[0]
+		} else {
+			stayable, err = p.storeQuery.GetStayableByBookingID(hotelCode)
+		}
+		if err != nil {
+			return nil, err
+		}
+		if len(roomStay.RoomTypes.RoomType) == 0 { // room not found
+			return &entity.Plan{}, nil
+		}
+
+		roomType := roomStay.RoomTypes.RoomType[0]
+		rtc, err := strconv.Atoi(roomType.RoomTypeCode)
+		if err != nil {
+			return nil, err
+		}
+		rt := entity.RoomType(rtc)
+		smokeType := IsNonSmokingToSmokeType(roomType.NonSmoking) // true false nil
+
+		availStatus := AvailabilityStatus(roomStay.RoomRates.RoomRate[0].AvailabilityStatus)
+		if availStatus == AvailableClosedOut {
+			//　売り切れ
+			return &entity.Plan{}, nil
+		}
+
+		var planTotalPrice uint64
+		// 合計金額の計算
+		for _, room := range roomStay.RoomRates.RoomRate {
+			// 一泊毎や人数ごとの追加料金
+			var nightExtraPrice uint64
+			for _, night := range room.Rates.Rate {
+				amt := night.Base.AmountAfterTax
+				nightPrice, _ := strconv.ParseUint(amt, 10, 64)
+				nightExtraPrice += nightPrice
+			}
+			tmpAmount := room.Total.AmountAfterTax
+			var roomPrice uint64
+			tmpTotal, _ := strconv.ParseUint(tmpAmount, 10, 64)
+			if guestCount > 1 {
+				roomPrice = tmpTotal + nightExtraPrice
+			} else {
+				roomPrice = tmpTotal
+			}
+
+			planTotalPrice = planTotalPrice + (roomPrice * uint64(roomCount))
+		}
+
+		for index, plan := range roomStay.RatePlans.RatePlan {
+
+			availStatus := AvailabilityStatus(roomStay.RoomRates.RoomRate[index].AvailabilityStatus)
+			if availStatus == AvailableClosedOut {
+				//　売り切れ
+				continue
+			}
+			planID := plan.RatePlanCode
+			planName := plan.RatePlanName
+
+			var planImageURL string = ""
+			if len(plan.RatePlanDescription.URL.Value) > 0 {
+				planImageURL = plan.RatePlanDescription.URL.Value
+			}
+
+			var planOverView string = ""
+			if len(plan.RatePlanDescription.Text.Value) > 0 {
+				planOverView = plan.RatePlanDescription.Text.Value
+			}
+
+			var IncludeBreakfast bool = *plan.MealsIncluded.Breakfast
+			var IncludeDinner bool = *plan.MealsIncluded.Dinner
+
+			plan := entity.Plan{
+				ID:       planID,
+				Title:    planName,
+				Price:    uint(planTotalPrice),
+				ImageURL: planImageURL,
+				RoomType: rt,
 				MealType: entity.MealType{
 					Morning: IncludeBreakfast,
 					Dinner:  IncludeDinner,
@@ -229,10 +344,8 @@ func (p *PlanQuery) AvailRSToPlans(res *EnvelopeRS, roomCount int, adult int, ch
 
 			plans = append(plans, plan)
 		}
-
 	}
-
-	return &plans, nil
+	return &(plans)[0], nil
 }
 
 func NewOTAHotelAvailRQ(
@@ -257,22 +370,24 @@ func NewOTAHotelAvailRQ(
 	}
 
 	mealsIncluded := MealTypeToQuery(mealType)
-
+	bedTypeCode := RoomTypeToBedType(roomType)
 	roomStayCandidate := NewRoomStayCandidate(
-		roomType,
+		nil,         // RoomTypeCode
+		bedTypeCode, // BedTypeCode
 		adult,
 		&child,
 		roomCount,
 		smokeTypes,
 		nil, // EffectiveDate
-		nil, // ExpireDate
+		nil, // ExpireDate,
 	)
 
+	var pricingMethod = PricingMethodLowestperstay
 	return &OTA_HotelAvailRQ{
 		Version:       "1.0",
 		PrimaryLangID: "jpn",
 		HotelStayOnly: util.BoolPtr(true), // ホテル情報のみを返すフラグ。trueにしないと返ってこない
-		PricingMethod: PricingMethodLowestperstay,
+		PricingMethod: &pricingMethod,
 		AvailRequestSegments: AvailRequestSegments{
 			AvailRequestSegment: AvailRequestSegment{
 				HotelSearchCriteria: HotelSearchCriteria{
@@ -319,8 +434,10 @@ func NewOTAHotelPlanDetailRQ(
 	// ホテルコード
 	hotelRef := HotelRef{HotelCode: hotelCode}
 
+	roomTypeCode := strconv.Itoa(int(roomType))
 	roomStayCandidate := NewRoomStayCandidate(
-		roomType,
+		&roomTypeCode,
+		nil,
 		adult,
 		&child,
 		roomCount,
@@ -333,7 +450,6 @@ func NewOTAHotelPlanDetailRQ(
 		Version:        "1.0",
 		PrimaryLangID:  "jpn",
 		AvailRatesOnly: util.BoolPtr(true), // プラン情報を返すフラグ
-		PricingMethod:  PricingMethodLowestperstay,
 		AvailRequestSegments: AvailRequestSegments{
 			AvailRequestSegment: AvailRequestSegment{
 				HotelSearchCriteria: HotelSearchCriteria{
@@ -344,6 +460,13 @@ func NewOTAHotelPlanDetailRQ(
 						StayDateRange: &StayDateRange{
 							Start: &start,
 							End:   &end,
+						},
+						RatePlanCandidates: &RatePlanCandidates{
+							RatePlanCandidate: []RatePlanCandidate{
+								{
+									RatePlanCode: &planID,
+								},
+							},
 						},
 						RoomStayCandidates: &RoomStayCandidates{
 							RoomStayCandidate: []RoomStayCandidate{
@@ -358,7 +481,8 @@ func NewOTAHotelPlanDetailRQ(
 }
 
 func NewRoomStayCandidate(
-	roomType entity.RoomType,
+	roomTypeCode *string,
+	bedTypeCode *BedTypeCode,
 	adult int,
 	child *int,
 	roomCount int,
@@ -379,11 +503,11 @@ func NewRoomStayCandidate(
 		nonSmokingQuery = nil
 	}
 
-	bedTypeCode := RoomTypeToBedType(roomType)
 	candidate := &RoomStayCandidate{
-		Quantity:    &roomCount,
-		BedTypeCode: bedTypeCode,
-		NonSmoking:  nonSmokingQuery,
+		Quantity:     &roomCount,
+		BedTypeCode:  bedTypeCode,
+		RoomTypeCode: roomTypeCode,
+		NonSmoking:   nonSmokingQuery,
 		GuestCounts: &GuestCounts{
 			GuestCount: []GuestCount{
 				{

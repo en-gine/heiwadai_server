@@ -70,7 +70,7 @@ func (u *PlanUsecase) Search(
 		}
 	}
 
-	plans, err := u.planQuery.Search(
+	candidates, err := u.planQuery.Search(
 		stayStores,
 		stayFrom,
 		stayTo,
@@ -84,14 +84,8 @@ func (u *PlanUsecase) Search(
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())
 	}
-	var candidates []entity.PlanCandidate
-	nights := stayTo.Sub(stayFrom).Hours() / 24
-	guestCount := adult + child
-	for _, plan := range *plans {
-		candidate := entity.NewPlanCandidate(&plan, int(nights), guestCount)
-		candidates = append(candidates, *candidate)
-	}
-	return &candidates, nil
+
+	return candidates, nil
 }
 
 func (u *PlanUsecase) GetDetail(

@@ -1,6 +1,8 @@
 package entity
 
-import "github.com/google/uuid"
+import (
+	"github.com/google/uuid"
+)
 
 type Plan struct {
 	ID        string
@@ -18,6 +20,7 @@ type PlanCandidate struct {
 	Plan             *Plan
 	MinimumPrice     uint
 	PricePerCategory PricePerCategory
+	// APIInquiryRoomTypeCode string // TLBookingの部屋タイプコード
 }
 
 type PricePerCategory int
@@ -31,19 +34,19 @@ const (
 func (c PricePerCategory) String() string {
 	switch c {
 	case PricePerNight:
-		return "1泊あたり"
+		return "1泊"
 	case PricePerPerson:
-		return "1名様あたり"
+		return "1名様"
 	case PricePerNightAndPerson:
-		return "1泊1名様あたり"
+		return "1泊1名様"
 	default:
 		return "Unknown"
 	}
 }
 
-func NewPlanCandidate(plan *Plan, nights int, guestCount int) *PlanCandidate {
+func NewPlanCandidate(plan Plan, nights int, guestCount int) *PlanCandidate {
 	return &PlanCandidate{
-		Plan:             plan,
+		Plan:             &plan,
 		MinimumPrice:     plan.Price / uint(nights) / uint(guestCount),
 		PricePerCategory: PricePerNightAndPerson,
 	}

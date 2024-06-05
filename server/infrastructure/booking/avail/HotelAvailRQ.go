@@ -48,7 +48,7 @@ type OTA_HotelAvailRQ struct {
 	AvailRatesOnly       *bool                `xml:"AvailRatesOnly,attr"` // 販売している部屋とプランのみを返すフラグ。デフォルトはTrue
 	HotelStayOnly        *bool                `xml:"HotelStayOnly,attr"`  // ホテル情報のみを返すフラグ。デフォルトはfalse
 	RateDetailsInd       *bool                `xml:"RateDetailsInd,attr"` // 料金の詳細情報を返すフラグ。デフォルトはTrue
-	PricingMethod        PricingMethod        `xml:"PricingMethod,attr"`  // デフォルトは"None"
+	PricingMethod        *PricingMethod       `xml:"PricingMethod,attr"`  // デフォルトは"None"
 }
 
 type PricingMethod string
