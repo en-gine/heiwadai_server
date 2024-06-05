@@ -1,13 +1,12 @@
 package user
 
 import (
+	"reflect"
 	"time"
 
 	"server/core/entity"
 	"server/core/errors"
 	queryservice "server/core/infra/queryService"
-
-	"github.com/google/uuid"
 )
 
 type PlanUsecase struct {
@@ -23,7 +22,7 @@ func NewPlanUsecase(planQuery queryservice.IPlanQueryService, storeQuery queryse
 }
 
 func (u *PlanUsecase) Search(
-	stayStoreIds []uuid.UUID,
+	stayStores []*entity.StayableStore,
 	stayFrom time.Time,
 	stayTo time.Time,
 	adult int,
@@ -33,27 +32,7 @@ func (u *PlanUsecase) Search(
 	mealType *entity.MealType,
 	roomTypes *[]entity.RoomType,
 ) (*[]entity.PlanCandidate, *errors.DomainError) {
-	var stayStores []*entity.StayableStore
 	var err error
-
-	if len(stayStoreIds) == 0 {
-		stayStores, err = u.storeQuery.GetStayables()
-		if err != nil {
-			return nil, errors.NewDomainError(errors.QueryError, err.Error())
-		}
-	} else {
-		for _, storeID := range stayStoreIds {
-			stayStore, err := u.storeQuery.GetStayableByID(storeID)
-			if err != nil {
-				return nil, errors.NewDomainError(errors.QueryError, err.Error())
-			}
-			if stayStore == nil {
-				return nil, errors.NewDomainError(errors.InvalidParameter, "指定された宿泊施設が見つかりませんでした。")
-			}
-
-			stayStores = append(stayStores, stayStore)
-		}
-	}
 
 	if roomTypes == nil || len(*roomTypes) == 0 {
 		roomTypes = &entity.RoomTypeAll
@@ -96,18 +75,15 @@ func (u *PlanUsecase) GetDetail(
 	child int,
 	roomCount int,
 	roomTypes *entity.RoomType,
-	stayStoreID uuid.UUID,
+	stayStore *entity.StayableStore,
 ) (*entity.Plan, *errors.DomainError) {
-	stayStore, err := u.storeQuery.GetStayableByID(stayStoreID)
-	if err != nil {
-		return nil, errors.NewDomainError(errors.QueryError, err.Error())
-	}
-	if stayStore == nil {
-		return nil, errors.NewDomainError(errors.InvalidParameter, "指定された宿泊施設が見つかりませんでした。")
-	}
+
 	plan, err := u.planQuery.GetPlanDetailByID(PrinID, stayStore, stayFrom, stayTo, adult, child, roomCount, *roomTypes)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())
+	}
+	if reflect.DeepEqual(plan, entity.Plan{}) || plan.ID == "" {
+		return nil, errors.NewDomainError(errors.CancelButNeedFeedBack, "プランの詳細が取得できませんでした。\n既に販売終了している可能性があります。")
 	}
 	return plan, nil
 }

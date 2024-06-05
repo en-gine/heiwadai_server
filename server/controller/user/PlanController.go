@@ -39,6 +39,27 @@ func (ac *PlanController) Search(ctx context.Context, req *connect.Request[user.
 		storeUUIDs = append(storeUUIDs, storeUUID)
 	}
 
+	var stayStores []*entity.StayableStore
+	if len(storeUUIDs) == 0 {
+		strs, err := ac.storeUseCase.GetStayables()
+		if err != nil {
+			return nil, controller.ErrorHandler(err)
+		}
+		stayStores = strs
+	} else {
+		for _, storeID := range storeUUIDs {
+			stayStore, err := ac.storeUseCase.GetStayableByID(storeID)
+			if err != nil {
+				return nil, controller.ErrorHandler(err)
+			}
+			if stayStore == nil {
+				return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("宿泊可能な店舗が見つかりません。"))
+			}
+
+			stayStores = append(stayStores, stayStore)
+		}
+	}
+
 	if msg.RoomCount <= 0 {
 		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("部屋数は1以上で指定してください。"))
 	}
@@ -85,7 +106,7 @@ func (ac *PlanController) Search(ctx context.Context, req *connect.Request[user.
 	}
 
 	candidates, domainErr := ac.planUseCase.Search(
-		storeUUIDs,
+		stayStores,
 		msg.StayFrom.AsTime(),
 		msg.StayTo.AsTime(),
 		int(msg.Adult),
@@ -101,9 +122,16 @@ func (ac *PlanController) Search(ctx context.Context, req *connect.Request[user.
 
 	var plans []*user.DisplayPlanWithSearchResultOption
 	for _, candidate := range *candidates {
-		planStore, domainErr := ac.storeUseCase.GetStayableByID(candidate.Plan.StoreID)
-		if domainErr != nil {
-			return nil, controller.ErrorHandler(domainErr)
+		planStore := func() *entity.StayableStore {
+			for _, store := range stayStores {
+				if store.ID == candidate.Plan.StoreID {
+					return store
+				}
+			}
+			return nil
+		}()
+		if planStore == nil {
+			return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("宿泊可能な店舗が見つかりません。"))
 		}
 		displayPlan := PlanEntityToResponse(candidate.Plan, planStore)
 
@@ -129,16 +157,14 @@ func (ac *PlanController) GetDetail(ctx context.Context, req *connect.Request[us
 		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("プランIDが正しい形式ではありません。"))
 	}
 	var roomType entity.RoomType = entity.RoomType(msg.RoomType)
+	stayStore, err := ac.storeUseCase.GetStayableByID(stayStoreID)
 
-	plan, domainErr := ac.planUseCase.GetDetail(msg.PlanID, msg.StayFrom.AsTime(), msg.StayTo.AsTime(), int(msg.Adult), int(msg.Child), int(msg.RoomCount), &roomType, stayStoreID)
+	plan, domainErr := ac.planUseCase.GetDetail(msg.PlanID, msg.StayFrom.AsTime(), msg.StayTo.AsTime(), int(msg.Adult), int(msg.Child), int(msg.RoomCount), &roomType, stayStore)
 	if domainErr != nil {
 		return nil, controller.ErrorHandler(domainErr)
 	}
-	planStore, domainErr := ac.storeUseCase.GetStayableByID(plan.StoreID)
-	if domainErr != nil {
-		return nil, controller.ErrorHandler(domainErr)
-	}
-	displayPlan := PlanEntityToResponse(plan, planStore)
+
+	displayPlan := PlanEntityToResponse(plan, stayStore)
 
 	return connect.NewResponse(
 		&user.PlanResponse{
