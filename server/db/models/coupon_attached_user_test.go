@@ -797,7 +797,7 @@ func testCouponAttachedUsersSelect(t *testing.T) {
 }
 
 var (
-	couponAttachedUserDBTypes = map[string]string{`CouponID`: `uuid`, `UsedAt`: `timestamp with time zone`, `UserID`: `uuid`}
+	couponAttachedUserDBTypes = map[string]string{`CouponID`: `uuid`, `UsedAt`: `timestamp with time zone`, `UserID`: `uuid`, `AttachedAt`: `timestamp with time zone`}
 	_                         = bytes.MinRead
 )
 

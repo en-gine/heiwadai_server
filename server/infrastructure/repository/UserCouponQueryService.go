@@ -66,7 +66,7 @@ func (pq *UserCouponQueryService) GetActiveAll(userID uuid.UUID) ([]*entity.User
 		qm.Load(models.CouponAttachedUserRels.Coupon+"."+models.CouponRels.Stores),
 		qm.InnerJoin(models.TableNames.Coupon+" ON "+models.TableNames.CouponAttachedUser+"."+models.CouponAttachedUserColumns.CouponID+" = "+models.TableNames.Coupon+".id"),
 		models.CouponWhere.ExpireAt.GT(time.Now().AddDate(0, 0, -1)), // 親テーブルの条件を指定
-		qm.OrderBy(models.CouponAttachedUserColumns.CouponID+" DESC"),
+		qm.OrderBy(models.CouponAttachedUserRels.Coupon+" DESC"),
 	).All(context.Background(), pq.db)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -118,7 +118,7 @@ func (pq *UserCouponQueryService) GetUseds(userID uuid.UUID, limit int) ([]*enti
 		qm.Load(models.CouponAttachedUserRels.Coupon+"."+models.CouponRels.Stores),
 		models.CouponAttachedUserWhere.UsedAt.IsNotNull(),
 		qm.Limit(pager.Limit()), qm.Offset(pager.Offset()),
-		qm.OrderBy(models.CouponAttachedUserColumns.CouponID+" DESC"),
+		qm.OrderBy(models.CouponAttachedUserColumns.AttachedAt+" DESC"),
 	).All(context.Background(), pq.db)
 	if err != nil {
 		if err == sql.ErrNoRows {

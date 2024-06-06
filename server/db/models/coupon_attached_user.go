@@ -24,44 +24,51 @@ import (
 
 // CouponAttachedUser is an object representing the database table.
 type CouponAttachedUser struct {
-	CouponID string    `boil:"coupon_id" json:"coupon_id" toml:"coupon_id" yaml:"coupon_id"`
-	UsedAt   null.Time `boil:"used_at" json:"used_at,omitempty" toml:"used_at" yaml:"used_at,omitempty"`
-	UserID   string    `boil:"user_id" json:"user_id" toml:"user_id" yaml:"user_id"`
+	CouponID   string    `boil:"coupon_id" json:"coupon_id" toml:"coupon_id" yaml:"coupon_id"`
+	UsedAt     null.Time `boil:"used_at" json:"used_at,omitempty" toml:"used_at" yaml:"used_at,omitempty"`
+	UserID     string    `boil:"user_id" json:"user_id" toml:"user_id" yaml:"user_id"`
+	AttachedAt null.Time `boil:"attached_at" json:"attached_at,omitempty" toml:"attached_at" yaml:"attached_at,omitempty"`
 
 	R *couponAttachedUserR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L couponAttachedUserL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
 var CouponAttachedUserColumns = struct {
-	CouponID string
-	UsedAt   string
-	UserID   string
+	CouponID   string
+	UsedAt     string
+	UserID     string
+	AttachedAt string
 }{
-	CouponID: "coupon_id",
-	UsedAt:   "used_at",
-	UserID:   "user_id",
+	CouponID:   "coupon_id",
+	UsedAt:     "used_at",
+	UserID:     "user_id",
+	AttachedAt: "attached_at",
 }
 
 var CouponAttachedUserTableColumns = struct {
-	CouponID string
-	UsedAt   string
-	UserID   string
+	CouponID   string
+	UsedAt     string
+	UserID     string
+	AttachedAt string
 }{
-	CouponID: "coupon_attached_user.coupon_id",
-	UsedAt:   "coupon_attached_user.used_at",
-	UserID:   "coupon_attached_user.user_id",
+	CouponID:   "coupon_attached_user.coupon_id",
+	UsedAt:     "coupon_attached_user.used_at",
+	UserID:     "coupon_attached_user.user_id",
+	AttachedAt: "coupon_attached_user.attached_at",
 }
 
 // Generated where
 
 var CouponAttachedUserWhere = struct {
-	CouponID whereHelperstring
-	UsedAt   whereHelpernull_Time
-	UserID   whereHelperstring
+	CouponID   whereHelperstring
+	UsedAt     whereHelpernull_Time
+	UserID     whereHelperstring
+	AttachedAt whereHelpernull_Time
 }{
-	CouponID: whereHelperstring{field: "\"coupon_attached_user\".\"coupon_id\""},
-	UsedAt:   whereHelpernull_Time{field: "\"coupon_attached_user\".\"used_at\""},
-	UserID:   whereHelperstring{field: "\"coupon_attached_user\".\"user_id\""},
+	CouponID:   whereHelperstring{field: "\"coupon_attached_user\".\"coupon_id\""},
+	UsedAt:     whereHelpernull_Time{field: "\"coupon_attached_user\".\"used_at\""},
+	UserID:     whereHelperstring{field: "\"coupon_attached_user\".\"user_id\""},
+	AttachedAt: whereHelpernull_Time{field: "\"coupon_attached_user\".\"attached_at\""},
 }
 
 // CouponAttachedUserRels is where relationship names are stored.
@@ -102,9 +109,9 @@ func (r *couponAttachedUserR) GetUser() *UserDatum {
 type couponAttachedUserL struct{}
 
 var (
-	couponAttachedUserAllColumns            = []string{"coupon_id", "used_at", "user_id"}
+	couponAttachedUserAllColumns            = []string{"coupon_id", "used_at", "user_id", "attached_at"}
 	couponAttachedUserColumnsWithoutDefault = []string{"coupon_id", "user_id"}
-	couponAttachedUserColumnsWithDefault    = []string{"used_at"}
+	couponAttachedUserColumnsWithDefault    = []string{"used_at", "attached_at"}
 	couponAttachedUserPrimaryKeyColumns     = []string{"coupon_id", "user_id"}
 	couponAttachedUserGeneratedColumns      = []string{}
 )

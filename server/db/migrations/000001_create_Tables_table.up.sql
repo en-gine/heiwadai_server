@@ -115,8 +115,9 @@ CREATE TABLE coupon_stores (
 
 CREATE TABLE coupon_attached_user (
 	coupon_id UUID,
-    used_at TIMESTAMPTZ,
     user_id UUID,
+    used_at TIMESTAMPTZ,
+    attached_at TIMESTAMPTZ default now(),
     FOREIGN KEY (coupon_id) REFERENCES coupon(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES user_data (user_id) ON DELETE CASCADE,
     PRIMARY KEY(coupon_id, user_id)
