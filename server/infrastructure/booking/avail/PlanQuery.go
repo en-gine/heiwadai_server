@@ -115,7 +115,7 @@ func (p *PlanQuery) GetPlanDetailByID(
 	adult int,
 	child int,
 	roomCount int,
-	roomType entity.RoomType,
+	APIInquiryRoomTypeCode string,
 ) (*entity.Plan, error) {
 
 	var hotelCode string
@@ -133,7 +133,7 @@ func (p *PlanQuery) GetPlanDetailByID(
 		adult,
 		child,
 		roomCount,
-		roomType,
+		APIInquiryRoomTypeCode,
 	)
 	request := NewEnvelopeRQ(TLBookingUser, TLBookingPass, reqBody)
 	res, err := util.Request[EnvelopeRQ, EnvelopeRS](TLBookingSearchURL, request)
@@ -174,13 +174,11 @@ func (p *PlanQuery) AvailRSToCandidates(res *EnvelopeRS, roomCount int, guestCou
 			return &[]entity.PlanCandidate{}, nil
 		}
 
-		roomType := roomStay.RoomTypes.RoomType[0]
-		rtc, err := strconv.Atoi(roomType.RoomTypeCode)
-		if err != nil {
-			return nil, err
-		}
-		rt := entity.RoomType(rtc)
-		smokeType := IsNonSmokingToSmokeType(roomType.NonSmoking) // true false nil
+		RoomTypeObject := roomStay.RoomTypes.RoomType[0]
+		apiRoomTypeCode := RoomTypeObject.RoomTypeCode
+		entityRoomType := BedTypeCodeToRoomType(RoomTypeObject.BedTypeCode)
+
+		smokeType := IsNonSmokingToSmokeType(RoomTypeObject.NonSmoking) // true false nil
 
 		for index, plan := range roomStay.RatePlans.RatePlan {
 			// 一泊毎や人数ごとの追加料金
@@ -226,7 +224,7 @@ func (p *PlanQuery) AvailRSToCandidates(res *EnvelopeRS, roomCount int, guestCou
 				Title:    planName,
 				Price:    uint(planPrice),
 				ImageURL: planImageURL,
-				RoomType: rt,
+				RoomType: entityRoomType,
 				MealType: entity.MealType{
 					Morning: IncludeBreakfast,
 					Dinner:  IncludeDinner,
@@ -236,7 +234,7 @@ func (p *PlanQuery) AvailRSToCandidates(res *EnvelopeRS, roomCount int, guestCou
 				StoreID:   stayable.ID,
 			}
 
-			candidate := entity.NewPlanCandidate(plan, nights, guestCount)
+			candidate := entity.NewPlanCandidate(plan, nights, guestCount, apiRoomTypeCode)
 
 			candidates = append(candidates, *candidate)
 		}
@@ -268,18 +266,15 @@ func (p *PlanQuery) AvailDetailRSToPlan(res *EnvelopeRS, roomCount int, guestCou
 			return &entity.Plan{}, nil
 		}
 
-		roomType := roomStay.RoomTypes.RoomType[0]
-		rtc, err := strconv.Atoi(roomType.RoomTypeCode)
-		if err != nil {
-			return nil, err
-		}
-		rt := entity.RoomType(rtc)
-		smokeType := IsNonSmokingToSmokeType(roomType.NonSmoking) // true false nil
+		roomTypeObject := roomStay.RoomTypes.RoomType[0]
+		entityRoomType := BedTypeCodeToRoomType(roomTypeObject.BedTypeCode)
+
+		smokeType := IsNonSmokingToSmokeType(roomTypeObject.NonSmoking) // true false nil
 
 		availStatus := AvailabilityStatus(roomStay.RoomRates.RoomRate[0].AvailabilityStatus)
 		if availStatus == AvailableClosedOut {
 			//　売り切れ
-			return &entity.Plan{}, nil
+			continue
 		}
 
 		var planTotalPrice uint64
@@ -309,7 +304,7 @@ func (p *PlanQuery) AvailDetailRSToPlan(res *EnvelopeRS, roomCount int, guestCou
 			availStatus := AvailabilityStatus(roomStay.RoomRates.RoomRate[index].AvailabilityStatus)
 			if availStatus == AvailableClosedOut {
 				//　売り切れ
-				continue
+				return &entity.Plan{}, nil
 			}
 			planID := plan.RatePlanCode
 			planName := plan.RatePlanName
@@ -332,7 +327,7 @@ func (p *PlanQuery) AvailDetailRSToPlan(res *EnvelopeRS, roomCount int, guestCou
 				Title:    planName,
 				Price:    uint(planTotalPrice),
 				ImageURL: planImageURL,
-				RoomType: rt,
+				RoomType: entityRoomType,
 				MealType: entity.MealType{
 					Morning: IncludeBreakfast,
 					Dinner:  IncludeDinner,
@@ -425,7 +420,7 @@ func NewOTAHotelPlanDetailRQ(
 	adult int,
 	child int,
 	roomCount int,
-	roomType entity.RoomType,
+	APIInquiryRoomTypeCode string,
 ) *OTA_HotelAvailRQ {
 	// 日付
 	start := util.DateToYYYYMMDD(stayFrom)
@@ -434,9 +429,8 @@ func NewOTAHotelPlanDetailRQ(
 	// ホテルコード
 	hotelRef := HotelRef{HotelCode: hotelCode}
 
-	roomTypeCode := strconv.Itoa(int(roomType))
 	roomStayCandidate := NewRoomStayCandidate(
-		&roomTypeCode,
+		&APIInquiryRoomTypeCode,
 		nil,
 		adult,
 		&child,
@@ -549,7 +543,7 @@ func RoomTypeToBedType(rt entity.RoomType) *BedTypeCode {
 	case entity.RoomTypeSingle:
 		code = BedTypeSingle
 	case entity.RoomTypeSemiDouble:
-		code = BedTypeDouble
+		code = BedTypeSemiDouble
 	case entity.RoomTypeTwin:
 		code = BedTypeTwin
 	case entity.RoomTypeDouble:
@@ -573,9 +567,9 @@ func BedTypeCodeToRoomType(bt BedTypeCode) entity.RoomType {
 		roomType = entity.RoomTypeTwin
 	case BedTypeFour:
 		roomType = entity.RoomTypeFourth
-	case BedTypeTatami:
-		fallthrough
 	case BedTypeSemiDouble:
+		roomType = entity.RoomTypeSemiDouble
+	case BedTypeTatami:
 		fallthrough
 	case BedTypeTriple:
 		fallthrough

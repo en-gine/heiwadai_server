@@ -177,6 +177,7 @@ func UserAttachedCouponToResponse(entities []*entity.UserAttachedCoupon) *user.M
 			IsCombinationable: coupon.Coupon.IsCombinationable,
 			CreateAt:          timestamppb.New(coupon.Coupon.CreateAt),
 			TargetStore:       TargetStores,
+			Notices:           coupon.Coupon.Notices,
 		})
 	}
 

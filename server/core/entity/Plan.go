@@ -17,10 +17,10 @@ type Plan struct {
 }
 
 type PlanCandidate struct {
-	Plan             *Plan
-	MinimumPrice     uint
-	PricePerCategory PricePerCategory
-	// APIInquiryRoomTypeCode string // TLBookingの部屋タイプコード
+	Plan                   *Plan
+	MinimumPrice           uint
+	PricePerCategory       PricePerCategory
+	APIInquiryRoomTypeCode string // TLBookingの部屋タイプコード
 }
 
 type PricePerCategory int
@@ -44,11 +44,12 @@ func (c PricePerCategory) String() string {
 	}
 }
 
-func NewPlanCandidate(plan Plan, nights int, guestCount int) *PlanCandidate {
+func NewPlanCandidate(plan Plan, nights int, guestCount int, apiInquiryRoomTypeCode string) *PlanCandidate {
 	return &PlanCandidate{
-		Plan:             &plan,
-		MinimumPrice:     plan.Price / uint(nights) / uint(guestCount),
-		PricePerCategory: PricePerNightAndPerson,
+		Plan:                   &plan,
+		MinimumPrice:           plan.Price / uint(nights) / uint(guestCount),
+		PricePerCategory:       PricePerNightAndPerson,
+		APIInquiryRoomTypeCode: apiInquiryRoomTypeCode,
 	}
 }
 

@@ -194,8 +194,8 @@ type OptionList struct {
 	OptionCode  string `xml:"OptionCode"`
 	Name        string `xml:"Name"`
 	NameRequest string `xml:"NameRequest"`
-	OptionCount int    `xml:"OptionCount"`
-	OptionRate  int    `xml:"OptionRate"`
+	OptionCount string `xml:"OptionCount"`
+	OptionRate  string `xml:"OptionRate"`
 }
 
 type RoomInformationList struct {
@@ -218,22 +218,22 @@ type RoomInformation struct {
 
 type RoomRateInformation struct {
 	RoomDate                util.YYYYMMDD `xml:"RoomDate"`
-	PerPaxRate              int           `xml:"PerPaxRate"`
-	PerPaxFemaleRate        int           `xml:"PerPaxFemaleRate"`
-	PerChildA70Rate         int           `xml:"PerChildA70Rate"`
-	PerChildA70Rate2        int           `xml:"PerChildA70Rate2"`
-	PerChildB50Rate         int           `xml:"PerChildB50Rate"`
-	PerChildB50Rate2        int           `xml:"PerChildB50Rate2"`
-	PerChildC30Rate         int           `xml:"PerChildC30Rate"`
-	PerChildDNoneRate       int           `xml:"PerChildDNoneRate"`
-	RoomRatePaxMaleCount    int           `xml:"RoomRatePaxMaleCount"`
-	RoomRatePaxFemaleCount  int           `xml:"RoomRatePaxFemaleCount"`
-	RoomRateChildA70Count   int           `xml:"RoomRateChildA70Count"`
-	RoomRateChildA70Count2  int           `xml:"RoomRateChildA70Count2"`
-	RoomRateChildB50Count   int           `xml:"RoomRateChildB50Count"`
-	RoomRateChildB50Count2  int           `xml:"RoomRateChildB50Count2"`
-	RoomRateChildC30Count   int           `xml:"RoomRateChildC30Count"`
-	RoomRateChildDNoneCount int           `xml:"RoomRateChildDNoneCount"`
+	PerPaxRate              *int          `xml:"PerPaxRate"`
+	PerPaxFemaleRate        *int          `xml:"PerPaxFemaleRate"`
+	PerChildA70Rate         *int          `xml:"PerChildA70Rate"`
+	PerChildA70Rate2        *int          `xml:"PerChildA70Rate2"`
+	PerChildB50Rate         *int          `xml:"PerChildB50Rate"`
+	PerChildB50Rate2        *int          `xml:"PerChildB50Rate2"`
+	PerChildC30Rate         *int          `xml:"PerChildC30Rate"`
+	PerChildDNoneRate       *int          `xml:"PerChildDNoneRate"`
+	RoomRatePaxMaleCount    *int          `xml:"RoomRatePaxMaleCount"`
+	RoomRatePaxFemaleCount  *int          `xml:"RoomRatePaxFemaleCount"`
+	RoomRateChildA70Count   *int          `xml:"RoomRateChildA70Count"`
+	RoomRateChildA70Count2  *int          `xml:"RoomRateChildA70Count2"`
+	RoomRateChildB50Count   *int          `xml:"RoomRateChildB50Count"`
+	RoomRateChildB50Count2  *int          `xml:"RoomRateChildB50Count2"`
+	RoomRateChildC30Count   *int          `xml:"RoomRateChildC30Count"`
+	RoomRateChildDNoneCount *int          `xml:"RoomRateChildDNoneCount"`
 	RoomPaxMaleRequest      string        `xml:"RoomPaxMaleRequest"`
 	RoomPaxFemaleRequest    string        `xml:"RoomPaxFemaleRequest"`
 	// 他のフィールドも同様に定義する

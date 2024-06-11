@@ -27,7 +27,9 @@ func Request[TRequestType any, TResultType any](url string, reqBody *TRequestTyp
 	// out = []byte(planeXml)
 
 	if envMode == "dev" {
-		fmt.Print(string(out))
+		fmt.Println("\n------------XML REQUEST-------------------")
+		fmt.Println(string(out))
+		fmt.Println("-------------------------------")
 	}
 
 	body := xml.Header + string(out)
@@ -73,7 +75,7 @@ func Request[TRequestType any, TResultType any](url string, reqBody *TRequestTyp
 
 	if envMode == "dev" {
 		x := xmlfmt.FormatXML(string(content), "\t", "  ")
-		fmt.Println("------------XML RESPONSE-------------------")
+		fmt.Println("\n------------XML RESPONSE-------------------")
 		fmt.Println(x)
 		fmt.Println("-------------------------------")
 	}

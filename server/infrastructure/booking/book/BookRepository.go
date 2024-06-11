@@ -146,7 +146,7 @@ func NewBookingRQ(bookData *entity.Booking, store *entity.StayableStore) *Envelo
 						},
 						AccommodationInformation: AccommodationInformation{ // 宿泊施設情報
 							AccommodationName: store.Name + *store.BranchName,
-							AccommodationCode: store.BookingSystemID,
+							AccommodationCode: BookingSystemID,
 						},
 						SalesOfficeInformation: SalesOfficeInformation{
 							SalesOfficeCompanyName: "平和台ホテルアプリ",
@@ -169,7 +169,6 @@ func NewBookingRQ(bookData *entity.Booking, store *entity.StayableStore) *Envelo
 							TotalRoomCount:             bookData.RoomCount,
 							GrandTotalPaxCount:         bookData.Adult + bookData.Child,
 							TotalPaxMaleCount:          bookData.Adult,
-							TotalPaxFemaleCount:        0,
 							TotalChildA70Count:         bookData.Child,
 							MealCondition:              mealCondition,
 							PackageType:                "Package",
