@@ -194,6 +194,11 @@ func (u *BookUsecase) Reserve(
 	return nil
 }
 
+func (u *BookUsecase) GetIsBookingUnderMaintenance() *entity.MaintenanceInfo {
+	return entity.GetBookingUnderMaintenance()
+
+}
+
 func reserveMailContent(
 	bookinfo *entity.Booking,
 	store *entity.StayableStore,

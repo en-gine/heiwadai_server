@@ -46,6 +46,9 @@ const (
 	BookControllerCancelProcedure = "/server.user.BookController/Cancel"
 	// BookControllerReserveProcedure is the fully-qualified name of the BookController's Reserve RPC.
 	BookControllerReserveProcedure = "/server.user.BookController/Reserve"
+	// BookControllerGetIsUnderMenternaceProcedure is the fully-qualified name of the BookController's
+	// GetIsUnderMenternace RPC.
+	BookControllerGetIsUnderMenternaceProcedure = "/server.user.BookController/GetIsUnderMenternace"
 	// PlanControllerSearchProcedure is the fully-qualified name of the PlanController's Search RPC.
 	PlanControllerSearchProcedure = "/server.user.PlanController/Search"
 	// PlanControllerGetDetailProcedure is the fully-qualified name of the PlanController's GetDetail
@@ -63,6 +66,8 @@ type BookControllerClient interface {
 	Cancel(context.Context, *connect_go.Request[user.BookIDRequest]) (*connect_go.Response[emptypb.Empty], error)
 	// 予約情報からプランの予約
 	Reserve(context.Context, *connect_go.Request[user.ReserveRequest]) (*connect_go.Response[emptypb.Empty], error)
+	// 現在メンテナンス中かどうか
+	GetIsUnderMenternace(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[user.BookUnderMenternaceResponse], error)
 }
 
 // NewBookControllerClient constructs a client for the server.user.BookController service. By
@@ -95,15 +100,21 @@ func NewBookControllerClient(httpClient connect_go.HTTPClient, baseURL string, o
 			baseURL+BookControllerReserveProcedure,
 			opts...,
 		),
+		getIsUnderMenternace: connect_go.NewClient[emptypb.Empty, user.BookUnderMenternaceResponse](
+			httpClient,
+			baseURL+BookControllerGetIsUnderMenternaceProcedure,
+			opts...,
+		),
 	}
 }
 
 // bookControllerClient implements BookControllerClient.
 type bookControllerClient struct {
-	getMyBook   *connect_go.Client[emptypb.Empty, user.BooksResponse]
-	getBookByID *connect_go.Client[user.BookIDRequest, user.BookResponse]
-	cancel      *connect_go.Client[user.BookIDRequest, emptypb.Empty]
-	reserve     *connect_go.Client[user.ReserveRequest, emptypb.Empty]
+	getMyBook            *connect_go.Client[emptypb.Empty, user.BooksResponse]
+	getBookByID          *connect_go.Client[user.BookIDRequest, user.BookResponse]
+	cancel               *connect_go.Client[user.BookIDRequest, emptypb.Empty]
+	reserve              *connect_go.Client[user.ReserveRequest, emptypb.Empty]
+	getIsUnderMenternace *connect_go.Client[emptypb.Empty, user.BookUnderMenternaceResponse]
 }
 
 // GetMyBook calls server.user.BookController.GetMyBook.
@@ -126,6 +137,11 @@ func (c *bookControllerClient) Reserve(ctx context.Context, req *connect_go.Requ
 	return c.reserve.CallUnary(ctx, req)
 }
 
+// GetIsUnderMenternace calls server.user.BookController.GetIsUnderMenternace.
+func (c *bookControllerClient) GetIsUnderMenternace(ctx context.Context, req *connect_go.Request[emptypb.Empty]) (*connect_go.Response[user.BookUnderMenternaceResponse], error) {
+	return c.getIsUnderMenternace.CallUnary(ctx, req)
+}
+
 // BookControllerHandler is an implementation of the server.user.BookController service.
 type BookControllerHandler interface {
 	// 現在の自身の予約状況
@@ -136,6 +152,8 @@ type BookControllerHandler interface {
 	Cancel(context.Context, *connect_go.Request[user.BookIDRequest]) (*connect_go.Response[emptypb.Empty], error)
 	// 予約情報からプランの予約
 	Reserve(context.Context, *connect_go.Request[user.ReserveRequest]) (*connect_go.Response[emptypb.Empty], error)
+	// 現在メンテナンス中かどうか
+	GetIsUnderMenternace(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[user.BookUnderMenternaceResponse], error)
 }
 
 // NewBookControllerHandler builds an HTTP handler from the service implementation. It returns the
@@ -164,6 +182,11 @@ func NewBookControllerHandler(svc BookControllerHandler, opts ...connect_go.Hand
 		svc.Reserve,
 		opts...,
 	)
+	bookControllerGetIsUnderMenternaceHandler := connect_go.NewUnaryHandler(
+		BookControllerGetIsUnderMenternaceProcedure,
+		svc.GetIsUnderMenternace,
+		opts...,
+	)
 	return "/server.user.BookController/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case BookControllerGetMyBookProcedure:
@@ -174,6 +197,8 @@ func NewBookControllerHandler(svc BookControllerHandler, opts ...connect_go.Hand
 			bookControllerCancelHandler.ServeHTTP(w, r)
 		case BookControllerReserveProcedure:
 			bookControllerReserveHandler.ServeHTTP(w, r)
+		case BookControllerGetIsUnderMenternaceProcedure:
+			bookControllerGetIsUnderMenternaceHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -197,6 +222,10 @@ func (UnimplementedBookControllerHandler) Cancel(context.Context, *connect_go.Re
 
 func (UnimplementedBookControllerHandler) Reserve(context.Context, *connect_go.Request[user.ReserveRequest]) (*connect_go.Response[emptypb.Empty], error) {
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.BookController.Reserve is not implemented"))
+}
+
+func (UnimplementedBookControllerHandler) GetIsUnderMenternace(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[user.BookUnderMenternaceResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.BookController.GetIsUnderMenternace is not implemented"))
 }
 
 // PlanControllerClient is a client for the server.user.PlanController service.

@@ -217,6 +217,14 @@ func BookEntityToResponse(entity *entity.Booking, bookstore *entity.StayableStor
 	}
 }
 
+func (ac *BookController) GetIsUnderMenternace(ctx context.Context, req *connect.Request[emptypb.Empty]) (*connect.Response[user.BookUnderMenternaceResponse], error) {
+	MenternaceInfo := ac.bookUseCase.GetIsBookingUnderMaintenance()
+	return connect.NewResponse(&user.BookUnderMenternaceResponse{
+		IsMentenance: MenternaceInfo.IsMaintenance,
+		Message:      MenternaceInfo.Message,
+	}), nil
+}
+
 func PlanEntityToResponse(plan *entity.Plan, planStore *entity.StayableStore) *user.DisplayPlan {
 	var mealTypes []user.MealType
 	if plan.MealType.Morning {
