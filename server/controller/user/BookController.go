@@ -217,9 +217,9 @@ func BookEntityToResponse(entity *entity.Booking, bookstore *entity.StayableStor
 	}
 }
 
-func (ac *BookController) GetIsUnderMenternace(ctx context.Context, req *connect.Request[emptypb.Empty]) (*connect.Response[user.BookUnderMenternaceResponse], error) {
+func (ac *BookController) GetMentenanceInfo(ctx context.Context, req *connect.Request[emptypb.Empty]) (*connect.Response[user.BookMentenanceInfoResponse], error) {
 	MenternaceInfo := ac.bookUseCase.GetIsBookingUnderMaintenance()
-	return connect.NewResponse(&user.BookUnderMenternaceResponse{
+	return connect.NewResponse(&user.BookMentenanceInfoResponse{
 		IsMentenance: MenternaceInfo.IsMaintenance,
 		Message:      MenternaceInfo.Message,
 	}), nil
