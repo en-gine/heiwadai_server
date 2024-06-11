@@ -187,7 +187,7 @@ func GetBookingUnderMaintenance() *MaintenanceInfo {
 	}
 
 	isMaintenace := now.After(startMaintenance) && now.Before(endMaintenance)
-	message := "毎月第2日曜26:00～28:30は、\n予約システムの定期メンテナンスのため、\n機能をご利用いただけません。"
+	message := "毎月第2日曜26:00～28:30は、\n予約システムの定期メンテナンスのため、\n予約及びキャンセル機能をご利用いただけません。"
 	if isMaintenace {
 		return &MaintenanceInfo{
 			IsMaintenance: true,

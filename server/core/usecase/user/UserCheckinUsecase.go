@@ -151,7 +151,7 @@ func (u *UserCheckinUsecase) Checkin(authID uuid.UUID, QrHash uuid.UUID) (*entit
 			return nil, nil, errors.NewDomainError(errors.QueryError, err.Error())
 		}
 
-		userAttachedCoupon := entity.CreateUserAttachedCoupon(authID, standardCoupon)
+		userAttachedCoupon = entity.CreateUserAttachedCoupon(authID, standardCoupon)
 
 		err = u.usercouponRepository.Save(u.transaction, userAttachedCoupon)
 		if err != nil {
@@ -182,6 +182,5 @@ func (u *UserCheckinUsecase) Checkin(authID uuid.UUID, QrHash uuid.UUID) (*entit
 	if domainErr != nil {
 		return nil, nil, domainErr
 	}
-
 	return NewStampCard, userAttachedCoupon, nil
 }
