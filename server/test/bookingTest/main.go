@@ -62,6 +62,7 @@ func Book() {
 		smork,
 		"広々とした部屋です。",
 		stores[0].ID,
+		"1",
 	)
 
 	bookData, domainErr := entity.CreateBooking(

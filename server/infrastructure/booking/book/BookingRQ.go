@@ -208,7 +208,7 @@ type RoomAndGuest struct {
 }
 
 type RoomInformation struct {
-	RoomTypeCode             int    `xml:"RoomTypeCode"`
+	RoomTypeCode             string `xml:"RoomTypeCode"`
 	RoomTypeName             string `xml:"RoomTypeName"`
 	RelationRoomCode         *int   `xml:"RelationRoomCode"`
 	RelationRoomName         *int   `xml:"RelationRoomName"`

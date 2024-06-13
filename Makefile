@@ -21,6 +21,9 @@ dev:
 buf: 
 	docker compose exec server buf generate
 
+sqlboiler: 
+	docker compose exec server make sqlboiler
+
 reload-env:
 	docker-compose --env-file .env up -d
 
@@ -28,7 +31,6 @@ build:
 	docker build -t ${AWS_ID}.dkr.ecr.ap-northeast-1.amazonaws.com/heiwadai-server:latest -f ./docker/Dockerfile/server/Dockerfile.prod .
 
 push:
-	@make build
 	docker push ${AWS_ID}.dkr.ecr.ap-northeast-1.amazonaws.com/heiwadai-server:latest
 
 login:

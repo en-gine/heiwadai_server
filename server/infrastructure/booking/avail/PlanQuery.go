@@ -115,9 +115,8 @@ func (p *PlanQuery) GetPlanDetailByID(
 	adult int,
 	child int,
 	roomCount int,
-	APIInquiryRoomTypeCode string,
+	TlBookingRoomTypeCode string,
 ) (*entity.Plan, error) {
-
 	var hotelCode string
 	if env.GetEnv(env.TlbookingIsTest) == "true" {
 		hotelCode = "E69502"
@@ -133,7 +132,7 @@ func (p *PlanQuery) GetPlanDetailByID(
 		adult,
 		child,
 		roomCount,
-		APIInquiryRoomTypeCode,
+		TlBookingRoomTypeCode,
 	)
 	request := NewEnvelopeRQ(TLBookingUser, TLBookingPass, reqBody)
 	res, err := util.Request[EnvelopeRQ, EnvelopeRS](TLBookingSearchURL, request)
@@ -177,7 +176,6 @@ func (p *PlanQuery) AvailRSToCandidates(res *EnvelopeRS, roomCount int, guestCou
 		RoomTypeObject := roomStay.RoomTypes.RoomType[0]
 		apiRoomTypeCode := RoomTypeObject.RoomTypeCode
 		entityRoomType := BedTypeCodeToRoomType(RoomTypeObject.BedTypeCode)
-
 		smokeType := IsNonSmokingToSmokeType(RoomTypeObject.NonSmoking) // true false nil
 
 		for index, plan := range roomStay.RatePlans.RatePlan {
@@ -219,22 +217,23 @@ func (p *PlanQuery) AvailRSToCandidates(res *EnvelopeRS, roomCount int, guestCou
 			var IncludeBreakfast bool = *plan.MealsIncluded.Breakfast
 			var IncludeDinner bool = *plan.MealsIncluded.Dinner
 
-			plan := entity.Plan{
-				ID:       planID,
-				Title:    planName,
-				Price:    uint(planPrice),
-				ImageURL: planImageURL,
-				RoomType: entityRoomType,
-				MealType: entity.MealType{
+			plan := entity.RegenPlan(
+				planID,
+				planName,
+				uint(planPrice),
+				planImageURL,
+				entityRoomType,
+				entity.MealType{
 					Morning: IncludeBreakfast,
 					Dinner:  IncludeDinner,
 				},
-				SmokeType: smokeType,
-				OverView:  planOverView,
-				StoreID:   stayable.ID,
-			}
+				smokeType,
+				planOverView,
+				stayable.ID,
+				apiRoomTypeCode,
+			)
 
-			candidate := entity.NewPlanCandidate(plan, nights, guestCount, apiRoomTypeCode)
+			candidate := entity.NewPlanCandidate(plan, nights, guestCount)
 
 			candidates = append(candidates, *candidate)
 		}
@@ -322,22 +321,23 @@ func (p *PlanQuery) AvailDetailRSToPlan(res *EnvelopeRS, roomCount int, guestCou
 			var IncludeBreakfast bool = *plan.MealsIncluded.Breakfast
 			var IncludeDinner bool = *plan.MealsIncluded.Dinner
 
-			plan := entity.Plan{
-				ID:       planID,
-				Title:    planName,
-				Price:    uint(planTotalPrice),
-				ImageURL: planImageURL,
-				RoomType: entityRoomType,
-				MealType: entity.MealType{
+			plan := entity.RegenPlan(
+				planID,
+				planName,
+				uint(planTotalPrice),
+				planImageURL,
+				entityRoomType,
+				entity.MealType{
 					Morning: IncludeBreakfast,
 					Dinner:  IncludeDinner,
 				},
-				SmokeType: smokeType,
-				OverView:  planOverView,
-				StoreID:   stayable.ID,
-			}
+				smokeType,
+				planOverView,
+				stayable.ID,
+				roomTypeObject.RoomTypeCode,
+			)
 
-			plans = append(plans, plan)
+			plans = append(plans, *plan)
 		}
 	}
 	return &(plans)[0], nil
@@ -363,7 +363,6 @@ func NewOTAHotelAvailRQ(
 	for _, hotelCode := range hotelCodes {
 		hotelRef = append(hotelRef, HotelRef{HotelCode: hotelCode})
 	}
-
 	mealsIncluded := MealTypeToQuery(mealType)
 	bedTypeCode := RoomTypeToBedType(roomType)
 	roomStayCandidate := NewRoomStayCandidate(
@@ -377,7 +376,7 @@ func NewOTAHotelAvailRQ(
 		nil, // ExpireDate,
 	)
 
-	var pricingMethod = PricingMethodLowestperstay
+	pricingMethod := PricingMethodLowestperstay
 	return &OTA_HotelAvailRQ{
 		Version:       "1.0",
 		PrimaryLangID: "jpn",
@@ -420,7 +419,7 @@ func NewOTAHotelPlanDetailRQ(
 	adult int,
 	child int,
 	roomCount int,
-	APIInquiryRoomTypeCode string,
+	TlBookingRoomTypeCode string,
 ) *OTA_HotelAvailRQ {
 	// 日付
 	start := util.DateToYYYYMMDD(stayFrom)
@@ -430,7 +429,7 @@ func NewOTAHotelPlanDetailRQ(
 	hotelRef := HotelRef{HotelCode: hotelCode}
 
 	roomStayCandidate := NewRoomStayCandidate(
-		&APIInquiryRoomTypeCode,
+		&TlBookingRoomTypeCode,
 		nil,
 		adult,
 		&child,
@@ -475,7 +474,7 @@ func NewOTAHotelPlanDetailRQ(
 }
 
 func NewRoomStayCandidate(
-	roomTypeCode *string,
+	TlBookingRoomTypeCode *string,
 	bedTypeCode *BedTypeCode,
 	adult int,
 	child *int,
@@ -488,19 +487,18 @@ func NewRoomStayCandidate(
 	var nonSmokingQuery *bool
 	if smokeTypes == nil {
 		nonSmokingQuery = nil
+	} else if entity.IncludeSmokeType(smokeTypes, entity.SmokeTypeNonSmoking) && entity.IncludeSmokeType(smokeTypes, entity.SmokeTypeSmoking) {
+		// 禁煙喫煙両方の場合は条件指定なし
+		nonSmokingQuery = nil
 	} else if entity.IncludeSmokeType(smokeTypes, entity.SmokeTypeNonSmoking) {
 		nonSmokingQuery = util.BoolPtr(true)
 	} else if entity.IncludeSmokeType(smokeTypes, entity.SmokeTypeSmoking) {
 		nonSmokingQuery = util.BoolPtr(false)
-	} else if entity.IncludeSmokeType(smokeTypes, entity.SmokeTypeNonSmoking) && entity.IncludeSmokeType(smokeTypes, entity.SmokeTypeSmoking) {
-		// 禁煙喫煙両方の場合は条件指定なし
-		nonSmokingQuery = nil
 	}
-
 	candidate := &RoomStayCandidate{
 		Quantity:     &roomCount,
 		BedTypeCode:  bedTypeCode,
-		RoomTypeCode: roomTypeCode,
+		RoomTypeCode: TlBookingRoomTypeCode,
 		NonSmoking:   nonSmokingQuery,
 		GuestCounts: &GuestCounts{
 			GuestCount: []GuestCount{
@@ -529,8 +527,19 @@ func NewRoomStayCandidate(
 }
 
 func MealTypeToQuery(mealType entity.MealType) *MealsIncluded {
-	var mealMorning *bool
-	var mealDinner *bool
+	var mealMorning *bool = nil
+	if mealType.Morning {
+		mealMorning = util.BoolPtr(true)
+	}
+	var mealDinner *bool = nil
+	if mealType.Dinner {
+		mealDinner = util.BoolPtr(true)
+	}
+	if mealType.Morning && mealType.Dinner {
+		// 朝食と夕食が両方ある場合は条件指定なし
+		mealMorning = nil
+		mealDinner = nil
+	}
 	return &MealsIncluded{
 		Breakfast: mealMorning,
 		Dinner:    mealDinner,
@@ -580,12 +589,13 @@ func BedTypeCodeToRoomType(bt BedTypeCode) entity.RoomType {
 	return roomType
 }
 
-func IsNonSmokingToSmokeType(isNonSmoke bool) entity.SmokeType {
-	switch isNonSmoke {
-	case true:
-		return entity.SmokeTypeNonSmoking
-	case false:
-		return entity.SmokeTypeNonSmoking
+func IsNonSmokingToSmokeType(isNonSmoke *bool) entity.SmokeType {
+	if isNonSmoke == nil {
+		return entity.SmokeTypeUnknown
 	}
-	return entity.SmokeTypeUnknown
+	if *isNonSmoke {
+		return entity.SmokeTypeNonSmoking
+	} else {
+		return entity.SmokeTypeSmoking
+	}
 }

@@ -136,11 +136,10 @@ func (ac *PlanController) Search(ctx context.Context, req *connect.Request[user.
 		displayPlan := PlanEntityToResponse(candidate.Plan, planStore)
 
 		resPlan := &user.DisplayPlanWithSearchResultOption{
-			Plan:                   displayPlan,
-			MinimumPrice:           uint32(candidate.MinimumPrice),
-			PricePerCategory:       user.PricePerCategory(candidate.PricePerCategory),
-			PricePerCategoryName:   candidate.PricePerCategory.String(),
-			APIInquiryRoomTypeCode: candidate.APIInquiryRoomTypeCode,
+			Plan:                 displayPlan,
+			MinimumPrice:         uint32(candidate.MinimumPrice),
+			PricePerCategory:     user.PricePerCategory(candidate.PricePerCategory),
+			PricePerCategoryName: candidate.PricePerCategory.String(),
 		}
 		plans = append(plans, resPlan)
 
@@ -157,8 +156,11 @@ func (ac *PlanController) GetDetail(ctx context.Context, req *connect.Request[us
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("プランIDが正しい形式ではありません。"))
 	}
-	stayStore, err := ac.storeUseCase.GetStayableByID(stayStoreID)
-	plan, domainErr := ac.planUseCase.GetDetail(msg.PlanID, msg.StayFrom.AsTime(), msg.StayTo.AsTime(), int(msg.Adult), int(msg.Child), int(msg.RoomCount), msg.APIInquiryRoomTypeCode, stayStore)
+	stayStore, domainErr := ac.storeUseCase.GetStayableByID(stayStoreID)
+	if domainErr != nil {
+		return nil, controller.ErrorHandler(domainErr)
+	}
+	plan, domainErr := ac.planUseCase.GetDetail(msg.PlanID, msg.StayFrom.AsTime(), msg.StayTo.AsTime(), int(msg.Adult), int(msg.Child), int(msg.RoomCount), msg.TlBookingRoomTypeCode, stayStore)
 	if domainErr != nil {
 		return nil, controller.ErrorHandler(domainErr)
 	}

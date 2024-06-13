@@ -23,82 +23,87 @@ import (
 
 // BookPlan is an object representing the database table.
 type BookPlan struct {
-	ID              string    `boil:"id" json:"id" toml:"id" yaml:"id"`
-	PlanID          string    `boil:"plan_id" json:"plan_id" toml:"plan_id" yaml:"plan_id"`
-	Title           string    `boil:"title" json:"title" toml:"title" yaml:"title"`
-	Price           int       `boil:"price" json:"price" toml:"price" yaml:"price"`
-	ImageURL        string    `boil:"image_url" json:"image_url" toml:"image_url" yaml:"image_url"`
-	RoomType        int       `boil:"room_type" json:"room_type" toml:"room_type" yaml:"room_type"`
-	MealTypeMorning bool      `boil:"meal_type_morning" json:"meal_type_morning" toml:"meal_type_morning" yaml:"meal_type_morning"`
-	MealTypeDinner  bool      `boil:"meal_type_dinner" json:"meal_type_dinner" toml:"meal_type_dinner" yaml:"meal_type_dinner"`
-	SmokeType       int       `boil:"smoke_type" json:"smoke_type" toml:"smoke_type" yaml:"smoke_type"`
-	Overview        string    `boil:"overview" json:"overview" toml:"overview" yaml:"overview"`
-	StoreID         string    `boil:"store_id" json:"store_id" toml:"store_id" yaml:"store_id"`
-	CreateAt        time.Time `boil:"create_at" json:"create_at" toml:"create_at" yaml:"create_at"`
-	UpdateAt        time.Time `boil:"update_at" json:"update_at" toml:"update_at" yaml:"update_at"`
+	ID                     string    `boil:"id" json:"id" toml:"id" yaml:"id"`
+	PlanID                 string    `boil:"plan_id" json:"plan_id" toml:"plan_id" yaml:"plan_id"`
+	Title                  string    `boil:"title" json:"title" toml:"title" yaml:"title"`
+	Price                  int       `boil:"price" json:"price" toml:"price" yaml:"price"`
+	ImageURL               string    `boil:"image_url" json:"image_url" toml:"image_url" yaml:"image_url"`
+	RoomType               int       `boil:"room_type" json:"room_type" toml:"room_type" yaml:"room_type"`
+	MealTypeMorning        bool      `boil:"meal_type_morning" json:"meal_type_morning" toml:"meal_type_morning" yaml:"meal_type_morning"`
+	MealTypeDinner         bool      `boil:"meal_type_dinner" json:"meal_type_dinner" toml:"meal_type_dinner" yaml:"meal_type_dinner"`
+	SmokeType              int       `boil:"smoke_type" json:"smoke_type" toml:"smoke_type" yaml:"smoke_type"`
+	Overview               string    `boil:"overview" json:"overview" toml:"overview" yaml:"overview"`
+	StoreID                string    `boil:"store_id" json:"store_id" toml:"store_id" yaml:"store_id"`
+	CreateAt               time.Time `boil:"create_at" json:"create_at" toml:"create_at" yaml:"create_at"`
+	UpdateAt               time.Time `boil:"update_at" json:"update_at" toml:"update_at" yaml:"update_at"`
+	TLBookdataRoomTypeCode string    `boil:"tl_bookdata_room_type_code" json:"tl_bookdata_room_type_code" toml:"tl_bookdata_room_type_code" yaml:"tl_bookdata_room_type_code"`
 
 	R *bookPlanR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L bookPlanL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
 var BookPlanColumns = struct {
-	ID              string
-	PlanID          string
-	Title           string
-	Price           string
-	ImageURL        string
-	RoomType        string
-	MealTypeMorning string
-	MealTypeDinner  string
-	SmokeType       string
-	Overview        string
-	StoreID         string
-	CreateAt        string
-	UpdateAt        string
+	ID                     string
+	PlanID                 string
+	Title                  string
+	Price                  string
+	ImageURL               string
+	RoomType               string
+	MealTypeMorning        string
+	MealTypeDinner         string
+	SmokeType              string
+	Overview               string
+	StoreID                string
+	CreateAt               string
+	UpdateAt               string
+	TLBookdataRoomTypeCode string
 }{
-	ID:              "id",
-	PlanID:          "plan_id",
-	Title:           "title",
-	Price:           "price",
-	ImageURL:        "image_url",
-	RoomType:        "room_type",
-	MealTypeMorning: "meal_type_morning",
-	MealTypeDinner:  "meal_type_dinner",
-	SmokeType:       "smoke_type",
-	Overview:        "overview",
-	StoreID:         "store_id",
-	CreateAt:        "create_at",
-	UpdateAt:        "update_at",
+	ID:                     "id",
+	PlanID:                 "plan_id",
+	Title:                  "title",
+	Price:                  "price",
+	ImageURL:               "image_url",
+	RoomType:               "room_type",
+	MealTypeMorning:        "meal_type_morning",
+	MealTypeDinner:         "meal_type_dinner",
+	SmokeType:              "smoke_type",
+	Overview:               "overview",
+	StoreID:                "store_id",
+	CreateAt:               "create_at",
+	UpdateAt:               "update_at",
+	TLBookdataRoomTypeCode: "tl_bookdata_room_type_code",
 }
 
 var BookPlanTableColumns = struct {
-	ID              string
-	PlanID          string
-	Title           string
-	Price           string
-	ImageURL        string
-	RoomType        string
-	MealTypeMorning string
-	MealTypeDinner  string
-	SmokeType       string
-	Overview        string
-	StoreID         string
-	CreateAt        string
-	UpdateAt        string
+	ID                     string
+	PlanID                 string
+	Title                  string
+	Price                  string
+	ImageURL               string
+	RoomType               string
+	MealTypeMorning        string
+	MealTypeDinner         string
+	SmokeType              string
+	Overview               string
+	StoreID                string
+	CreateAt               string
+	UpdateAt               string
+	TLBookdataRoomTypeCode string
 }{
-	ID:              "book_plan.id",
-	PlanID:          "book_plan.plan_id",
-	Title:           "book_plan.title",
-	Price:           "book_plan.price",
-	ImageURL:        "book_plan.image_url",
-	RoomType:        "book_plan.room_type",
-	MealTypeMorning: "book_plan.meal_type_morning",
-	MealTypeDinner:  "book_plan.meal_type_dinner",
-	SmokeType:       "book_plan.smoke_type",
-	Overview:        "book_plan.overview",
-	StoreID:         "book_plan.store_id",
-	CreateAt:        "book_plan.create_at",
-	UpdateAt:        "book_plan.update_at",
+	ID:                     "book_plan.id",
+	PlanID:                 "book_plan.plan_id",
+	Title:                  "book_plan.title",
+	Price:                  "book_plan.price",
+	ImageURL:               "book_plan.image_url",
+	RoomType:               "book_plan.room_type",
+	MealTypeMorning:        "book_plan.meal_type_morning",
+	MealTypeDinner:         "book_plan.meal_type_dinner",
+	SmokeType:              "book_plan.smoke_type",
+	Overview:               "book_plan.overview",
+	StoreID:                "book_plan.store_id",
+	CreateAt:               "book_plan.create_at",
+	UpdateAt:               "book_plan.update_at",
+	TLBookdataRoomTypeCode: "book_plan.tl_bookdata_room_type_code",
 }
 
 // Generated where
@@ -127,33 +132,35 @@ func (w whereHelperint) NIN(slice []int) qm.QueryMod {
 }
 
 var BookPlanWhere = struct {
-	ID              whereHelperstring
-	PlanID          whereHelperstring
-	Title           whereHelperstring
-	Price           whereHelperint
-	ImageURL        whereHelperstring
-	RoomType        whereHelperint
-	MealTypeMorning whereHelperbool
-	MealTypeDinner  whereHelperbool
-	SmokeType       whereHelperint
-	Overview        whereHelperstring
-	StoreID         whereHelperstring
-	CreateAt        whereHelpertime_Time
-	UpdateAt        whereHelpertime_Time
+	ID                     whereHelperstring
+	PlanID                 whereHelperstring
+	Title                  whereHelperstring
+	Price                  whereHelperint
+	ImageURL               whereHelperstring
+	RoomType               whereHelperint
+	MealTypeMorning        whereHelperbool
+	MealTypeDinner         whereHelperbool
+	SmokeType              whereHelperint
+	Overview               whereHelperstring
+	StoreID                whereHelperstring
+	CreateAt               whereHelpertime_Time
+	UpdateAt               whereHelpertime_Time
+	TLBookdataRoomTypeCode whereHelperstring
 }{
-	ID:              whereHelperstring{field: "\"book_plan\".\"id\""},
-	PlanID:          whereHelperstring{field: "\"book_plan\".\"plan_id\""},
-	Title:           whereHelperstring{field: "\"book_plan\".\"title\""},
-	Price:           whereHelperint{field: "\"book_plan\".\"price\""},
-	ImageURL:        whereHelperstring{field: "\"book_plan\".\"image_url\""},
-	RoomType:        whereHelperint{field: "\"book_plan\".\"room_type\""},
-	MealTypeMorning: whereHelperbool{field: "\"book_plan\".\"meal_type_morning\""},
-	MealTypeDinner:  whereHelperbool{field: "\"book_plan\".\"meal_type_dinner\""},
-	SmokeType:       whereHelperint{field: "\"book_plan\".\"smoke_type\""},
-	Overview:        whereHelperstring{field: "\"book_plan\".\"overview\""},
-	StoreID:         whereHelperstring{field: "\"book_plan\".\"store_id\""},
-	CreateAt:        whereHelpertime_Time{field: "\"book_plan\".\"create_at\""},
-	UpdateAt:        whereHelpertime_Time{field: "\"book_plan\".\"update_at\""},
+	ID:                     whereHelperstring{field: "\"book_plan\".\"id\""},
+	PlanID:                 whereHelperstring{field: "\"book_plan\".\"plan_id\""},
+	Title:                  whereHelperstring{field: "\"book_plan\".\"title\""},
+	Price:                  whereHelperint{field: "\"book_plan\".\"price\""},
+	ImageURL:               whereHelperstring{field: "\"book_plan\".\"image_url\""},
+	RoomType:               whereHelperint{field: "\"book_plan\".\"room_type\""},
+	MealTypeMorning:        whereHelperbool{field: "\"book_plan\".\"meal_type_morning\""},
+	MealTypeDinner:         whereHelperbool{field: "\"book_plan\".\"meal_type_dinner\""},
+	SmokeType:              whereHelperint{field: "\"book_plan\".\"smoke_type\""},
+	Overview:               whereHelperstring{field: "\"book_plan\".\"overview\""},
+	StoreID:                whereHelperstring{field: "\"book_plan\".\"store_id\""},
+	CreateAt:               whereHelpertime_Time{field: "\"book_plan\".\"create_at\""},
+	UpdateAt:               whereHelpertime_Time{field: "\"book_plan\".\"update_at\""},
+	TLBookdataRoomTypeCode: whereHelperstring{field: "\"book_plan\".\"tl_bookdata_room_type_code\""},
 }
 
 // BookPlanRels is where relationship names are stored.
@@ -194,8 +201,8 @@ func (r *bookPlanR) GetUserBooks() UserBookSlice {
 type bookPlanL struct{}
 
 var (
-	bookPlanAllColumns            = []string{"id", "plan_id", "title", "price", "image_url", "room_type", "meal_type_morning", "meal_type_dinner", "smoke_type", "overview", "store_id", "create_at", "update_at"}
-	bookPlanColumnsWithoutDefault = []string{"id", "plan_id", "title", "price", "image_url", "room_type", "meal_type_morning", "meal_type_dinner", "smoke_type", "overview", "store_id"}
+	bookPlanAllColumns            = []string{"id", "plan_id", "title", "price", "image_url", "room_type", "meal_type_morning", "meal_type_dinner", "smoke_type", "overview", "store_id", "create_at", "update_at", "tl_bookdata_room_type_code"}
+	bookPlanColumnsWithoutDefault = []string{"id", "plan_id", "title", "price", "image_url", "room_type", "meal_type_morning", "meal_type_dinner", "smoke_type", "overview", "store_id", "tl_bookdata_room_type_code"}
 	bookPlanColumnsWithDefault    = []string{"create_at", "update_at"}
 	bookPlanPrimaryKeyColumns     = []string{"id"}
 	bookPlanGeneratedColumns      = []string{}

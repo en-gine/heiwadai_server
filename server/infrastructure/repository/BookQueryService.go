@@ -133,17 +133,18 @@ func BookModelToEntity(book *models.UserBook, guest *models.BookGuestDatum, plan
 		Mail:          guest.Mail,
 	}
 
-	planEntity := &entity.Plan{
-		ID:        plan.ID,
-		Title:     plan.Title,
-		Price:     uint(plan.Price),
-		ImageURL:  plan.ImageURL,
-		RoomType:  entity.RoomType(plan.RoomType),
-		MealType:  entity.MealType{Morning: plan.MealTypeMorning, Dinner: plan.MealTypeDinner},
-		SmokeType: entity.SmokeType(plan.SmokeType),
-		OverView:  plan.Overview,
-		StoreID:   uuid.MustParse(plan.StoreID),
-	}
+	planEntity := entity.RegenPlan(
+		plan.ID,
+		plan.Title,
+		uint(plan.Price),
+		plan.ImageURL,
+		entity.RoomType(plan.RoomType),
+		entity.MealType{Morning: plan.MealTypeMorning, Dinner: plan.MealTypeDinner},
+		entity.SmokeType(plan.SmokeType),
+		plan.Overview,
+		uuid.MustParse(plan.StoreID),
+		plan.TLBookdataRoomTypeCode,
+	)
 
 	return &entity.Booking{
 		ID:              uuid.MustParse(book.ID),

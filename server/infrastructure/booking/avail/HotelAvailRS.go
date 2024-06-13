@@ -80,7 +80,7 @@ type RoomTypes struct {
 
 type RoomType struct {
 	BedTypeCode     BedTypeCode     `xml:"BedTypeCode,attr"`
-	NonSmoking      bool            `xml:"NonSmoking,attr"`
+	NonSmoking      *bool           `xml:"NonSmoking,attr"`
 	RoomTypeCode    string          `xml:"RoomTypeCode,attr"`
 	RoomDescription RoomDescription `xml:"RoomDescription"`
 	Amenities       Amenities       `xml:"Amenities"`

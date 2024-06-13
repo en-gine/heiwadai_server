@@ -190,7 +190,7 @@ func NewBookingRQ(bookData *entity.Booking, store *entity.StayableStore) *Envelo
 							RoomAndGuestList: []RoomAndGuest{
 								{
 									RoomInformation: RoomInformation{
-										RoomTypeCode:    int(plan.RoomType),
+										RoomTypeCode:    plan.TlBookingRoomTypeCode,
 										RoomTypeName:    plan.RoomType.String(),
 										PerRoomPaxCount: bookData.Adult + bookData.Child,
 									},

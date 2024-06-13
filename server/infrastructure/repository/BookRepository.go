@@ -45,17 +45,18 @@ func (pq *BookRepository) Save(entity *entity.Booking) error {
 	}
 
 	plan := models.BookPlan{
-		ID:              uuid.New().String(),
-		PlanID:          entity.BookPlan.ID,
-		Title:           entity.BookPlan.Title,
-		Price:           int(entity.BookPlan.Price),
-		ImageURL:        entity.BookPlan.ImageURL,
-		RoomType:        int(entity.BookPlan.RoomType),
-		MealTypeMorning: entity.BookPlan.MealType.Morning,
-		MealTypeDinner:  entity.BookPlan.MealType.Dinner,
-		SmokeType:       int(entity.BookPlan.SmokeType),
-		Overview:        entity.BookPlan.OverView,
-		StoreID:         entity.BookPlan.StoreID.String(),
+		ID:                     uuid.New().String(),
+		PlanID:                 entity.BookPlan.ID,
+		Title:                  entity.BookPlan.Title,
+		Price:                  int(entity.BookPlan.Price),
+		ImageURL:               entity.BookPlan.ImageURL,
+		RoomType:               int(entity.BookPlan.RoomType),
+		MealTypeMorning:        entity.BookPlan.MealType.Morning,
+		MealTypeDinner:         entity.BookPlan.MealType.Dinner,
+		SmokeType:              int(entity.BookPlan.SmokeType),
+		Overview:               entity.BookPlan.OverView,
+		StoreID:                entity.BookPlan.StoreID.String(),
+		TLBookdataRoomTypeCode: entity.BookPlan.TlBookingRoomTypeCode,
 	}
 
 	book := models.UserBook{

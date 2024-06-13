@@ -74,11 +74,11 @@ func (u *PlanUsecase) GetDetail(
 	adult int,
 	child int,
 	roomCount int,
-	APIInquiryRoomTypeCode string, // 検索時に返ってくるTLBookingの部屋タイプコード
+	TlBookingRoomTypeCode string, // 検索時に返ってくるTLBookingの部屋タイプコード
 	stayStore *entity.StayableStore,
 ) (*entity.Plan, *errors.DomainError) {
 
-	plan, err := u.planQuery.GetPlanDetailByID(PrinID, stayStore, stayFrom, stayTo, adult, child, roomCount, APIInquiryRoomTypeCode)
+	plan, err := u.planQuery.GetPlanDetailByID(PrinID, stayStore, stayFrom, stayTo, adult, child, roomCount, TlBookingRoomTypeCode)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())
 	}

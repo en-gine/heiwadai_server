@@ -5,22 +5,22 @@ import (
 )
 
 type Plan struct {
-	ID        string
-	Title     string
-	Price     uint
-	ImageURL  string
-	RoomType  RoomType
-	MealType  MealType
-	SmokeType SmokeType
-	OverView  string
-	StoreID   uuid.UUID
+	ID                    string
+	Title                 string
+	Price                 uint
+	ImageURL              string
+	RoomType              RoomType
+	MealType              MealType
+	SmokeType             SmokeType
+	OverView              string
+	StoreID               uuid.UUID
+	TlBookingRoomTypeCode string
 }
 
 type PlanCandidate struct {
-	Plan                   *Plan
-	MinimumPrice           uint
-	PricePerCategory       PricePerCategory
-	APIInquiryRoomTypeCode string // TLBookingの部屋タイプコード
+	Plan             *Plan
+	MinimumPrice     uint
+	PricePerCategory PricePerCategory
 }
 
 type PricePerCategory int
@@ -44,12 +44,11 @@ func (c PricePerCategory) String() string {
 	}
 }
 
-func NewPlanCandidate(plan Plan, nights int, guestCount int, apiInquiryRoomTypeCode string) *PlanCandidate {
+func NewPlanCandidate(plan *Plan, nights int, guestCount int) *PlanCandidate {
 	return &PlanCandidate{
-		Plan:                   &plan,
-		MinimumPrice:           plan.Price / uint(nights) / uint(guestCount),
-		PricePerCategory:       PricePerNightAndPerson,
-		APIInquiryRoomTypeCode: apiInquiryRoomTypeCode,
+		Plan:             plan,
+		MinimumPrice:     plan.Price / uint(nights) / uint(guestCount),
+		PricePerCategory: PricePerNightAndPerson,
 	}
 }
 
@@ -83,7 +82,7 @@ func (m MealType) String() string {
 type RoomType int
 
 const (
-	RoomTypeUnknown RoomType = iota //予約システムが1からなので0がUnknownとする
+	RoomTypeUnknown RoomType = iota // 予約システムが1からなので0がUnknownとする
 	RoomTypeSingle
 	RoomTypeSemiDouble
 	RoomTypeDouble
@@ -191,36 +190,18 @@ func RegenPlan(
 	SmokeType SmokeType,
 	OverView string,
 	StoreID uuid.UUID,
+	TlBookingRoomTypeCode string,
 ) *Plan {
 	return &Plan{
-		ID:        ID,
-		Title:     Title,
-		Price:     Price,
-		ImageURL:  ImageURL,
-		RoomType:  RoomType,
-		MealType:  MealType,
-		SmokeType: SmokeType,
-		OverView:  OverView,
-		StoreID:   StoreID,
-	}
-}
-
-func RegenRequestPlan(
-	ID string,
-	Title string,
-	Price uint,
-	RoomType RoomType,
-	MealType MealType,
-	SmokeType SmokeType,
-	StoreID uuid.UUID,
-) *Plan {
-	return &Plan{
-		ID:        ID,
-		Title:     Title,
-		Price:     Price,
-		RoomType:  RoomType,
-		MealType:  MealType,
-		SmokeType: SmokeType,
-		StoreID:   StoreID,
+		ID:                    ID,
+		Title:                 Title,
+		Price:                 Price,
+		ImageURL:              ImageURL,
+		RoomType:              RoomType,
+		MealType:              MealType,
+		SmokeType:             SmokeType,
+		OverView:              OverView,
+		StoreID:               StoreID,
+		TlBookingRoomTypeCode: TlBookingRoomTypeCode,
 	}
 }

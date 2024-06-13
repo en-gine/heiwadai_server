@@ -5,7 +5,6 @@ import (
 	"errors"
 
 	shared "server/api/v1/shared"
-	"server/api/v1/user"
 	userv1 "server/api/v1/user"
 	userv1connect "server/api/v1/user/userconnect"
 	"server/controller"
@@ -85,7 +84,7 @@ func (u *UserDataController) GetUser(ctx context.Context, req *connect.Request[e
 	return connect.NewResponse(res), nil
 }
 
-func UserEntityToResponse(user *entity.User) *user.UserDataResponse {
+func UserEntityToResponse(user *entity.User) *userv1.UserDataResponse {
 	return &userv1.UserDataResponse{
 		ID:            user.ID.String(),
 		FirstName:     user.FirstName,

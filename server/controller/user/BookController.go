@@ -154,6 +154,7 @@ func (ac *BookController) Reserve(ctx context.Context, req *connect.Request[user
 		entity.SmokeType(req.Msg.RequestPlan.SmokeType),
 		req.Msg.RequestPlan.OverView,
 		uuid.MustParse(req.Msg.RequestPlan.StoreID),
+		req.Msg.RequestPlan.TlBookingRoomTypeCode,
 	)
 
 	var note string
@@ -235,19 +236,20 @@ func PlanEntityToResponse(plan *entity.Plan, planStore *entity.StayableStore) *u
 	}
 
 	return &user.DisplayPlan{
-		ID:              plan.ID,
-		Title:           plan.Title,
-		Price:           uint32(plan.Price),
-		ImageURL:        plan.ImageURL,
-		RoomType:        user.RoomType(plan.RoomType),
-		RoomTypeName:    plan.RoomType.String(),
-		MealTypes:       mealTypes,
-		MealTypeName:    plan.MealType.String(),
-		SmokeType:       user.SmokeType(plan.SmokeType),
-		SmokeTypeName:   plan.SmokeType.String(),
-		OverView:        plan.OverView,
-		StoreID:         plan.StoreID.String(),
-		StoreName:       planStore.Name,
-		StoreBranchName: planStore.BranchName,
+		ID:                    plan.ID,
+		Title:                 plan.Title,
+		Price:                 uint32(plan.Price),
+		ImageURL:              plan.ImageURL,
+		RoomType:              user.RoomType(plan.RoomType),
+		RoomTypeName:          plan.RoomType.String(),
+		MealTypes:             mealTypes,
+		MealTypeName:          plan.MealType.String(),
+		SmokeType:             user.SmokeType(plan.SmokeType),
+		SmokeTypeName:         plan.SmokeType.String(),
+		OverView:              plan.OverView,
+		StoreID:               plan.StoreID.String(),
+		StoreName:             planStore.Name,
+		StoreBranchName:       planStore.BranchName,
+		TlBookingRoomTypeCode: plan.TlBookingRoomTypeCode,
 	}
 }

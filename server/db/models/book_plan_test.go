@@ -840,7 +840,7 @@ func testBookPlansSelect(t *testing.T) {
 }
 
 var (
-	bookPlanDBTypes = map[string]string{`ID`: `uuid`, `PlanID`: `character varying`, `Title`: `character varying`, `Price`: `integer`, `ImageURL`: `character varying`, `RoomType`: `integer`, `MealTypeMorning`: `boolean`, `MealTypeDinner`: `boolean`, `SmokeType`: `integer`, `Overview`: `text`, `StoreID`: `uuid`, `CreateAt`: `timestamp with time zone`, `UpdateAt`: `timestamp with time zone`}
+	bookPlanDBTypes = map[string]string{`ID`: `uuid`, `PlanID`: `character varying`, `Title`: `character varying`, `Price`: `integer`, `ImageURL`: `character varying`, `RoomType`: `integer`, `MealTypeMorning`: `boolean`, `MealTypeDinner`: `boolean`, `SmokeType`: `integer`, `Overview`: `text`, `StoreID`: `uuid`, `CreateAt`: `timestamp with time zone`, `UpdateAt`: `timestamp with time zone`, `TLBookdataRoomTypeCode`: `character varying`}
 	_               = bytes.MinRead
 )
 
