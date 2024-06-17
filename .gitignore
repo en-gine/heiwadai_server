@@ -9,3 +9,4 @@ node_modules
 /server/keys
 /server/log
 /server/tmp
+__debug_bin

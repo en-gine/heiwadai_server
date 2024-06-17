@@ -142,7 +142,7 @@ func (u *BookUsecase) Reserve(
 		return errors.NewDomainError(errors.QueryError, "予約番号の生成に失敗しました。")
 	}
 
-	newBook, domainErr := entity.CreateBooking(
+	newBook := entity.CreateBooking(
 		stayFrom,
 		stayTo,
 		adult,
@@ -156,9 +156,6 @@ func (u *BookUsecase) Reserve(
 		Note,
 		*TlDataID,
 		nil)
-	if domainErr != nil {
-		return domainErr
-	}
 
 	tlnumber, domainError, err := u.bookAPI.Reserve(newBook)
 	if err != nil {

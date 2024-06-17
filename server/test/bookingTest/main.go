@@ -65,7 +65,7 @@ func Book() {
 		"1",
 	)
 
-	bookData, domainErr := entity.CreateBooking(
+	bookData := entity.CreateBooking(
 		time.Now(),
 		tomorrow,
 		uint(1), // adult
@@ -80,10 +80,6 @@ func Book() {
 		"123456789",
 		nil,
 	)
-	if domainErr != nil {
-		fmt.Print(err)
-		return
-	}
 
 	reserveID, domainErr, err := p.Reserve(bookData)
 	if err != nil {

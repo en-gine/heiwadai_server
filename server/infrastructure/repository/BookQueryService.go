@@ -146,20 +146,20 @@ func BookModelToEntity(book *models.UserBook, guest *models.BookGuestDatum, plan
 		plan.TLBookdataRoomTypeCode,
 	)
 
-	return &entity.Booking{
-		ID:              uuid.MustParse(book.ID),
-		TlDataID:        book.TLBookdataID,
-		TlBookingNumber: &book.TLBookingNumber,
-		StayFrom:        book.StayFrom,
-		StayTo:          book.StayTo,
-		Adult:           uint(book.Adult),
-		Child:           uint(book.Child),
-		RoomCount:       uint(book.RoomCount),
-		CheckInTime:     entity.CheckInTime(book.CheckInTime),
-		TotalCost:       uint(book.TotalCost),
-		GuestData:       guestEntity,
-		BookPlan:        planEntity,
-		BookUserID:      uuid.MustParse(book.BookUserID),
-		Note:            book.Note.String,
-	}
+	return entity.RegenBooking(
+		uuid.MustParse(book.ID),
+		book.StayFrom,
+		book.StayTo,
+		uint(book.Adult),
+		uint(book.Child),
+		uint(book.RoomCount),
+		entity.CheckInTime(book.CheckInTime),
+		uint(book.TotalCost),
+		guestEntity,
+		planEntity,
+		uuid.MustParse(book.BookUserID),
+		book.Note.String,
+		book.TLBookdataID,
+		&book.TLBookingNumber,
+	)
 }

@@ -162,7 +162,7 @@ func (s SmokeType) String() string {
 	case SmokeTypeUnknown:
 		fallthrough
 	default:
-		return "Unknown"
+		return "情報なし"
 	}
 }
 

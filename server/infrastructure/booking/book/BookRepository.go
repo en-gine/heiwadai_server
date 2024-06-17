@@ -116,7 +116,27 @@ func NewBookingRQ(bookData *entity.Booking, store *entity.StayableStore) *Envelo
 		BookingSystemID = store.BookingSystemID
 	}
 
-	guestNameKana := guest.LastNameKana + " " + guest.FirstNameKana
+	guestNameKana := util.HiraToHalfKana(guest.LastNameKana + " " + guest.FirstNameKana)
+
+	var RoomAndGuestList []RoomAndGuest
+	unitPrice := int(bookData.TotalCost) / int(bookData.RoomCount) / int(bookData.Adult+bookData.Child)
+	for d := bookData.StayFrom; d.Unix() < bookData.StayTo.Unix(); d = d.AddDate(0, 0, 1) {
+		for i := 0; i < int(bookData.RoomCount); i++ {
+			xml := RoomAndGuest{
+				RoomInformation: RoomInformation{
+					RoomTypeCode:    plan.TlBookingRoomTypeCode,
+					RoomTypeName:    plan.RoomType.String(),
+					PerRoomPaxCount: bookData.Adult + bookData.Child,
+				},
+				RoomRateInformation: RoomRateInformation{
+					RoomDate:   util.YYYYMMDD(d.Format("2006-01-02")),
+					PerPaxRate: &unitPrice,
+				},
+			}
+
+			RoomAndGuestList = append(RoomAndGuestList, xml)
+		}
+	}
 
 	return &EnvelopeRQ[Body]{
 		SoapEnv: "http://schemas.xmlsoap.org/soap/envelope/",
@@ -177,7 +197,7 @@ func NewBookingRQ(bookData *entity.Booking, store *entity.StayableStore) *Envelo
 							SpecialServiceRequest:      bookData.Note,
 						},
 						BasicRateInformation: BasicRateInformation{
-							RoomRateOrPersonalRate:   RoomRateRoom,
+							RoomRateOrPersonalRate:   RoomRatePersonal,
 							TaxServiceFee:            IncludingServiceAndTax,
 							Payment:                  "Cash",
 							SettlementDiv:            0, // 現地決済
@@ -187,18 +207,7 @@ func NewBookingRQ(bookData *entity.Booking, store *entity.StayableStore) *Envelo
 							},
 						},
 						RoomInformationList: RoomInformationList{
-							RoomAndGuestList: []RoomAndGuest{
-								{
-									RoomInformation: RoomInformation{
-										RoomTypeCode:    plan.TlBookingRoomTypeCode,
-										RoomTypeName:    plan.RoomType.String(),
-										PerRoomPaxCount: bookData.Adult + bookData.Child,
-									},
-									RoomRateInformation: RoomRateInformation{
-										RoomDate: util.YYYYMMDD(bookData.StayFrom.Format("2006-01-02")),
-									},
-								},
-							},
+							RoomAndGuestList: RoomAndGuestList,
 						},
 					},
 				},

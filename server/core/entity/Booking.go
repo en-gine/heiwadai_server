@@ -134,7 +134,7 @@ func CreateBooking(
 	Note string,
 	TlDataID string,
 	TlBookingNumber *string,
-) (*Booking, *errors.DomainError) {
+) *Booking {
 	return &Booking{
 		ID:              uuid.New(),
 		StayFrom:        stayFrom,
@@ -150,7 +150,41 @@ func CreateBooking(
 		Note:            Note,
 		TlDataID:        TlDataID,
 		TlBookingNumber: TlBookingNumber,
-	}, nil
+	}
+}
+
+func RegenBooking(
+	ID uuid.UUID,
+	stayFrom time.Time,
+	stayTo time.Time,
+	adult uint,
+	child uint,
+	roomCount uint,
+	CheckInTime CheckInTime,
+	TotalCost uint,
+	GuestData *GuestData,
+	BookPlan *Plan,
+	BookUserID uuid.UUID,
+	Note string,
+	TlDataID string,
+	TlBookingNumber *string,
+) *Booking {
+	return &Booking{
+		ID:              uuid.New(),
+		StayFrom:        stayFrom,
+		StayTo:          stayTo,
+		Adult:           adult,
+		Child:           child,
+		RoomCount:       roomCount,
+		CheckInTime:     CheckInTime,
+		TotalCost:       TotalCost,
+		GuestData:       GuestData,
+		BookPlan:        BookPlan,
+		BookUserID:      BookUserID,
+		Note:            Note,
+		TlDataID:        TlDataID,
+		TlBookingNumber: TlBookingNumber,
+	}
 }
 
 type MaintenanceInfo struct {

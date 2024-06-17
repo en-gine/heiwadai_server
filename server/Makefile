@@ -125,3 +125,8 @@ birthCouponTest:
 
 passTest:
 	go run /server/test/passTest/.
+
+
+kanaTest:
+	# go run /server/test/kana/.
+	go test -run . -v ./test/kana/.

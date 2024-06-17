@@ -218,7 +218,7 @@ type RoomInformation struct {
 
 type RoomRateInformation struct {
 	RoomDate                util.YYYYMMDD `xml:"RoomDate"`
-	PerPaxRate              *int          `xml:"PerPaxRate"`
+	PerPaxRate              *int          `xml:"PerPaxRate"` // 1名料金
 	PerPaxFemaleRate        *int          `xml:"PerPaxFemaleRate"`
 	PerChildA70Rate         *int          `xml:"PerChildA70Rate"`
 	PerChildA70Rate2        *int          `xml:"PerChildA70Rate2"`
@@ -236,5 +236,6 @@ type RoomRateInformation struct {
 	RoomRateChildDNoneCount *int          `xml:"RoomRateChildDNoneCount"`
 	RoomPaxMaleRequest      string        `xml:"RoomPaxMaleRequest"`
 	RoomPaxFemaleRequest    string        `xml:"RoomPaxFemaleRequest"`
+	TotalPerRoomRate        *int          `xml:"TotalPerRoomRate"` // 1室料金
 	// 他のフィールドも同様に定義する
 }
