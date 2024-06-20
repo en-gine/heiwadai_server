@@ -76,13 +76,13 @@ func (u *PlanUsecase) GetDetail(
 	roomCount int,
 	TlBookingRoomTypeCode string, // 検索時に返ってくるTLBookingの部屋タイプコード
 	stayStore *entity.StayableStore,
-) (*entity.Plan, *errors.DomainError) {
+) (*entity.PlanStayDetail, *errors.DomainError) {
 
 	plan, err := u.planQuery.GetPlanDetailByID(PrinID, stayStore, stayFrom, stayTo, adult, child, roomCount, TlBookingRoomTypeCode)
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())
 	}
-	if reflect.DeepEqual(plan, entity.Plan{}) || plan.ID == "" {
+	if plan == nil || reflect.DeepEqual(plan, entity.PlanStayDetail{}) || plan.Plan.ID == "" {
 		return nil, errors.NewDomainError(errors.CancelButNeedFeedBack, "プランの詳細が取得できませんでした。\n既に販売終了している可能性があります。")
 	}
 	return plan, nil

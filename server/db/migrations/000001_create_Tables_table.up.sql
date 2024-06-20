@@ -209,6 +209,15 @@ CREATE TABLE book_plan (
     FOREIGN KEY (store_id) REFERENCES store(id)
 );
 
+CREATE TABLE book_plan_stay_date_info (
+    plan_id UUID,
+    stay_date TIMESTAMP NOT NULL,
+    stay_date_total_price INTEGER NOT NULL CHECK (stay_date_total_price >= 0),
+    FOREIGN KEY (plan_id) REFERENCES book_plan(id),
+    PRIMARY KEY(plan_id, stay_date)
+);
+
+
 CREATE TABLE user_book (
     id UUID PRIMARY KEY,
     tl_booking_number VARCHAR(255) NOT NULL,

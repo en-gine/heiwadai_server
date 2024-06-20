@@ -65,6 +65,15 @@ func Book() {
 		"1",
 	)
 
+	detailPlan := &entity.PlanStayDetail{
+		Plan: plan,
+		StayDateInfos: &[]entity.StayDateInfo{
+			entity.StayDateInfo{
+				StayDate:           tomorrow,
+				StayDateTotalPrice: 10000,
+			},
+		},
+	}
 	bookData := entity.CreateBooking(
 		time.Now(),
 		tomorrow,
@@ -74,7 +83,7 @@ func Book() {
 		"18:00",
 		10000,
 		guest,
-		plan,
+		detailPlan,
 		uuid.New(),
 		"駐車場利用します",
 		"123456789",

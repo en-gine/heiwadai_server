@@ -34,6 +34,7 @@ func (pq *BookQueryService) GetByID(bookID uuid.UUID) (*entity.Booking, error) {
 		models.UserBookWhere.ID.EQ(bookID.String()),
 		qm.Load(models.UserBookRels.GuestDatum),
 		qm.Load(models.UserBookRels.BookPlan),
+		qm.Load(models.UserBookRels.BookPlan+"."+models.BookPlanRels.PlanBookPlanStayDateInfos),
 	).One(context.Background(), pq.db)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -47,7 +48,8 @@ func (pq *BookQueryService) GetByID(bookID uuid.UUID) (*entity.Booking, error) {
 	}
 	guest := book.R.GuestDatum
 	plan := book.R.BookPlan
-	entity := BookModelToEntity(book, guest, plan)
+	dateInfos := book.R.BookPlan.R.PlanBookPlanStayDateInfos
+	entity := BookModelToEntity(book, guest, plan, &dateInfos)
 	return entity, nil
 }
 
@@ -56,6 +58,7 @@ func (pq *BookQueryService) GetMyBooking(userID uuid.UUID) ([]*entity.Booking, e
 		models.UserBookWhere.BookUserID.EQ(userID.String()),
 		qm.Load(models.UserBookRels.GuestDatum),
 		qm.Load(models.UserBookRels.BookPlan),
+		qm.Load(models.UserBookRels.BookPlan+"."+models.BookPlanRels.PlanBookPlanStayDateInfos),
 		models.UserBookWhere.StayFrom.GT(time.Now().AddDate(0, 0, -1)),
 		models.UserBookWhere.DelateAt.IsNull(),
 		qm.OrderBy(models.UserBookColumns.StayFrom+" ASC"),
@@ -64,7 +67,8 @@ func (pq *BookQueryService) GetMyBooking(userID uuid.UUID) ([]*entity.Booking, e
 	for _, book := range books {
 		guest := book.R.GuestDatum
 		plan := book.R.BookPlan
-		entity := BookModelToEntity(book, guest, plan)
+		dateInfos := book.R.BookPlan.R.PlanBookPlanStayDateInfos
+		entity := BookModelToEntity(book, guest, plan, &dateInfos)
 		if err != nil {
 			return nil, err
 		}
@@ -109,7 +113,7 @@ func (pq *BookQueryService) GenerateBookDataID() (*string, error) {
 	return &reqID, nil
 }
 
-func BookModelToEntity(book *models.UserBook, guest *models.BookGuestDatum, plan *models.BookPlan) *entity.Booking {
+func BookModelToEntity(book *models.UserBook, guest *models.BookGuestDatum, plan *models.BookPlan, dateInfos *models.BookPlanStayDateInfoSlice) *entity.Booking {
 	prefCode := guest.Prefecture.Ptr()
 	var pref *entity.Prefecture
 	if prefCode == nil {
@@ -133,6 +137,17 @@ func BookModelToEntity(book *models.UserBook, guest *models.BookGuestDatum, plan
 		Mail:          guest.Mail,
 	}
 
+	var dateInfosEntity []entity.StayDateInfo
+
+	for _, dateInfo := range *dateInfos {
+		if dateInfo == nil {
+			continue
+		}
+		dateInfosEntity = append(dateInfosEntity, entity.StayDateInfo{
+			StayDate:           dateInfo.StayDate,
+			StayDateTotalPrice: uint(dateInfo.StayDateTotalPrice),
+		})
+	}
 	planEntity := entity.RegenPlan(
 		plan.ID,
 		plan.Title,
@@ -146,6 +161,11 @@ func BookModelToEntity(book *models.UserBook, guest *models.BookGuestDatum, plan
 		plan.TLBookdataRoomTypeCode,
 	)
 
+	bookPlan := &entity.PlanStayDetail{
+		Plan:          planEntity,
+		StayDateInfos: &dateInfosEntity,
+	}
+
 	return entity.RegenBooking(
 		uuid.MustParse(book.ID),
 		book.StayFrom,
@@ -156,7 +176,7 @@ func BookModelToEntity(book *models.UserBook, guest *models.BookGuestDatum, plan
 		entity.CheckInTime(book.CheckInTime),
 		uint(book.TotalCost),
 		guestEntity,
-		planEntity,
+		bookPlan,
 		uuid.MustParse(book.BookUserID),
 		book.Note.String,
 		book.TLBookdataID,

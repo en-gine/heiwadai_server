@@ -81,7 +81,7 @@ func (u *BookUsecase) Cancel(bookID uuid.UUID) *errors.DomainError {
 		return errors.NewDomainError(errors.CancelButNeedFeedBack, "キャンセル処理は成功しましたが、DBの削除に失敗しました。")
 	}
 
-	store, err := u.storeQuery.GetStayableByID(book.BookPlan.StoreID)
+	store, err := u.storeQuery.GetStayableByID(book.BookPlan.Plan.StoreID)
 	if err != nil {
 		return errors.NewDomainError(errors.QueryError, err.Error())
 	}
@@ -120,12 +120,12 @@ func (u *BookUsecase) Reserve(
 	CheckInTime entity.CheckInTime,
 	TotalCost uint,
 	GuestData *entity.GuestData,
-	BookPlan *entity.Plan,
+	BookPlan *entity.PlanStayDetail,
 	BookUserID uuid.UUID,
 	Note string,
 ) *errors.DomainError {
 
-	store, err := u.storeQuery.GetStayableByID(BookPlan.StoreID)
+	store, err := u.storeQuery.GetStayableByID(BookPlan.Plan.StoreID)
 	if err != nil {
 		return errors.NewDomainError(errors.QueryError, err.Error())
 	}
@@ -262,12 +262,12 @@ func reserveMailContent(
 		"CheckInDate":       bookinfo.StayFrom.Format("2006年1月2日"),
 		"CheckOutDate":      bookinfo.StayTo.Format("2006年1月2日"),
 		"CheckInTime":       bookinfo.CheckInTime.String(),
-		"ReservationPlan":   bookinfo.BookPlan.Title,
+		"ReservationPlan":   bookinfo.BookPlan.Plan.Title,
 		"NumberOfGuests":    people,
 		"RoomCount":         strconv.FormatUint(uint64(bookinfo.RoomCount), 10),
-		"RoomType":          bookinfo.BookPlan.RoomType.String(),
-		"MealType":          bookinfo.BookPlan.MealType.String(),
-		"SmokingType":       bookinfo.BookPlan.SmokeType.String(),
+		"RoomType":          bookinfo.BookPlan.Plan.RoomType.String(),
+		"MealType":          bookinfo.BookPlan.Plan.MealType.String(),
+		"SmokingType":       bookinfo.BookPlan.Plan.SmokeType.String(),
 		"TotalAmount":       strconv.FormatUint(uint64(bookinfo.TotalCost), 10),
 		"Note":              bookinfo.Note,
 		"HotelName":         store.Name + *store.BranchName,
@@ -328,10 +328,10 @@ func cancelMailContent(
 		"ReservationNumber": bookinfo.TlDataID,
 		"CheckInDate":       bookinfo.StayFrom.Format("2006年1月2日"),
 		"CheckOutDate":      bookinfo.StayTo.Format("2006年1月2日"),
-		"ReservationPlan":   bookinfo.BookPlan.Title,
+		"ReservationPlan":   bookinfo.BookPlan.Plan.Title,
 		"NumberOfGuests":    people,
 		"RoomCount":         strconv.FormatUint(uint64(bookinfo.RoomCount), 10),
-		"RoomType":          bookinfo.BookPlan.RoomType.String(),
+		"RoomType":          bookinfo.BookPlan.Plan.RoomType.String(),
 		"HotelName":         store.Name + *store.BranchName,
 		"HotelAddress":      store.Address,
 		"HotelPhone":        store.Tel,

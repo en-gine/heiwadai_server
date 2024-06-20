@@ -33,7 +33,7 @@ func NewBookRepository(storeQuery queryservice.IStoreQueryService, bookQuery que
 }
 
 func (p BookRepository) Cancel(bookData *entity.Booking, newDataID string) (*domainErr.DomainError, error) {
-	store, err := p.storeQuery.GetStayableByID(bookData.BookPlan.StoreID)
+	store, err := p.storeQuery.GetStayableByID(bookData.BookPlan.Plan.StoreID)
 	if err != nil {
 		logger.Error(err.Error())
 		return nil, err
@@ -63,7 +63,7 @@ func (p BookRepository) Cancel(bookData *entity.Booking, newDataID string) (*dom
 func (p *BookRepository) Reserve(
 	bookData *entity.Booking,
 ) (*string, *domainErr.DomainError, error) {
-	store, err := p.storeQuery.GetStayableByID(bookData.BookPlan.StoreID)
+	store, err := p.storeQuery.GetStayableByID(bookData.BookPlan.Plan.StoreID)
 	if err != nil {
 		logger.Error(err.Error())
 		return nil, nil, err
@@ -91,19 +91,22 @@ func (p *BookRepository) Reserve(
 }
 
 func NewBookingRQ(bookData *entity.Booking, store *entity.StayableStore) *EnvelopeRQ[Body] {
-	plan := bookData.BookPlan
+	plan := bookData.BookPlan.Plan
 	guest := bookData.GuestData
 
 	var mealCondition MealCondition
-
+	var specificMealCondition SpecificMealCondition
 	switch plan.MealType.String() {
 	case "朝食あり夕食あり":
 		mealCondition = MealCondition1night2meals
+		specificMealCondition = SpecificMealConditionIncludingBreakfastAndDinner
 	case "朝食あり夕食なし":
 		mealCondition = MealCondition1nightBreakfast
+		specificMealCondition = SpecificMealConditionIncludingBreakfast
 	case "朝食なし夕食あり":
-		mealCondition = MealCondition1nightBreakfast
-	case "食事なし":
+		mealCondition = MealConditionOther
+		specificMealCondition = SpecificMealConditionIncludingDinner
+	case "食事なし": // SpecificMealConditionはない
 		mealCondition = MealConditionWithoutMeal
 	default:
 		mealCondition = MealConditionOther
@@ -119,24 +122,41 @@ func NewBookingRQ(bookData *entity.Booking, store *entity.StayableStore) *Envelo
 	guestNameKana := util.HiraToHalfKana(guest.LastNameKana + " " + guest.FirstNameKana)
 
 	var RoomAndGuestList []RoomAndGuest
-	unitPrice := int(bookData.TotalCost) / int(bookData.RoomCount) / int(bookData.Adult+bookData.Child)
-	for d := bookData.StayFrom; d.Unix() < bookData.StayTo.Unix(); d = d.AddDate(0, 0, 1) {
+	for j := 0; j < len(*bookData.BookPlan.StayDateInfos); j++ {
+		unitPrice := int((*bookData.BookPlan.StayDateInfos)[j].StayDateTotalPrice) / int(bookData.RoomCount) / int(bookData.Adult+bookData.Child)
 		for i := 0; i < int(bookData.RoomCount); i++ {
 			xml := RoomAndGuest{
 				RoomInformation: RoomInformation{
 					RoomTypeCode:    plan.TlBookingRoomTypeCode,
 					RoomTypeName:    plan.RoomType.String(),
-					PerRoomPaxCount: bookData.Adult + bookData.Child,
+					PerRoomPaxCount: (bookData.Adult + bookData.Child) / bookData.RoomCount, // 1部屋あたりの人数
 				},
 				RoomRateInformation: RoomRateInformation{
-					RoomDate:   util.YYYYMMDD(d.Format("2006-01-02")),
+					RoomDate:   util.DateToStrDate(bookData.StayFrom),
 					PerPaxRate: &unitPrice,
 				},
 			}
-
 			RoomAndGuestList = append(RoomAndGuestList, xml)
 		}
 	}
+
+	// for d := bookData.StayFrom; d.Unix() < bookData.StayTo.Unix(); d = d.AddDate(0, 0, 1) {
+	// 	for i := 0; i < int(bookData.RoomCount); i++ {
+	// 		xml := RoomAndGuest{
+	// 			RoomInformation: RoomInformation{
+	// 				RoomTypeCode:    plan.TlBookingRoomTypeCode,
+	// 				RoomTypeName:    plan.RoomType.String(),
+	// 				PerRoomPaxCount: (bookData.Adult + bookData.Child) / bookData.RoomCount, // 1部屋あたりの人数
+	// 			},
+	// 			RoomRateInformation: RoomRateInformation{
+	// 				RoomDate:   util.DateToStrDate(d),
+	// 				PerPaxRate: &unitPrice,
+	// 			},
+	// 		}
+
+	// 		RoomAndGuestList = append(RoomAndGuestList, xml)
+	// 	}
+	// }
 
 	return &EnvelopeRQ[Body]{
 		SoapEnv: "http://schemas.xmlsoap.org/soap/envelope/",
@@ -183,7 +203,7 @@ func NewBookingRQ(bookData *entity.Booking, store *entity.StayableStore) *Envelo
 							GuestOrGroupEmail:          guest.Mail,
 							GuestOrGroupPostalCode:     *guest.ZipCode,
 							GuestOrGroupAddress:        guest.Prefecture.String() + *guest.City + *guest.Address,
-							CheckInDate:                util.YYYYMMDD(bookData.StayFrom.Format("2006-01-02")),
+							CheckInDate:                util.DateToStrDate(bookData.StayFrom),
 							CheckInTime:                string(bookData.CheckInTime),
 							Nights:                     uint(bookData.StayTo.Sub(bookData.StayFrom).Hours() / 24),
 							TotalRoomCount:             bookData.RoomCount,
@@ -191,6 +211,7 @@ func NewBookingRQ(bookData *entity.Booking, store *entity.StayableStore) *Envelo
 							TotalPaxMaleCount:          bookData.Adult,
 							TotalChildA70Count:         bookData.Child,
 							MealCondition:              mealCondition,
+							SpecificMealCondition:      specificMealCondition,
 							PackageType:                "Package",
 							PackagePlanCode:            plan.ID,
 							PackagePlanName:            plan.Title,
@@ -199,8 +220,8 @@ func NewBookingRQ(bookData *entity.Booking, store *entity.StayableStore) *Envelo
 						BasicRateInformation: BasicRateInformation{
 							RoomRateOrPersonalRate:   RoomRatePersonal,
 							TaxServiceFee:            IncludingServiceAndTax,
-							Payment:                  "Cash",
-							SettlementDiv:            0, // 現地決済
+							Payment:                  "Cash", //客の宿泊施設に対する支払い方法　事前カード決済などの場合は省略
+							SettlementDiv:            0,      // 現地決済
 							TotalAccommodationCharge: int(bookData.TotalCost),
 							PointsDiscountList: PointsDiscountList{
 								PointsDiscount: 0, // ポイント値引き

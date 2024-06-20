@@ -38,9 +38,9 @@ type HotelStay struct {
 }
 
 type Availability struct {
-	End    util.YYYYMMDD `xml:"End,attr"`
-	Start  util.YYYYMMDD `xml:"Start,attr"`
-	Status Status        `xml:"Status,attr"`
+	End    util.StrDate `xml:"End,attr"`
+	Start  util.StrDate `xml:"Start,attr"`
+	Status Status       `xml:"Status,attr"`
 }
 type Status string
 
@@ -210,15 +210,15 @@ type RoomRates struct {
 }
 
 type RoomRate struct {
-	AvailabilityStatus string        `xml:"AvailabilityStatus,attr"`
-	NumberOfUnits      string        `xml:"NumberOfUnits,attr"`
-	RatePlanCode       string        `xml:"RatePlanCode,attr"`
-	RoomTypeCode       string        `xml:"RoomTypeCode,attr"`
-	EffectiveDate      util.YYYYMMDD `xml:"EffectiveDate,attr"`
-	ExpireDate         util.YYYYMMDD `xml:"ExpireDate,attr"`
-	Rates              Rates         `xml:"Rates"`
-	Total              Total         `xml:"Total"`
-	GuestCounts        GuestCounts   `xml:"GuestCounts"`
+	AvailabilityStatus string       `xml:"AvailabilityStatus,attr"`
+	NumberOfUnits      string       `xml:"NumberOfUnits,attr"`
+	RatePlanCode       string       `xml:"RatePlanCode,attr"`
+	RoomTypeCode       string       `xml:"RoomTypeCode,attr"`
+	EffectiveDate      util.StrDate `xml:"EffectiveDate,attr"`
+	ExpireDate         util.StrDate `xml:"ExpireDate,attr"`
+	Rates              Rates        `xml:"Rates"`
+	Total              Total        `xml:"Total"`
+	GuestCounts        GuestCounts  `xml:"GuestCounts"`
 }
 type AvailabilityStatus string
 

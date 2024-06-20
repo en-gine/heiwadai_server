@@ -19,7 +19,7 @@ type Booking struct {
 	CheckInTime     CheckInTime
 	TotalCost       uint
 	GuestData       *GuestData
-	BookPlan        *Plan
+	BookPlan        *PlanStayDetail
 	BookUserID      uuid.UUID
 	Note            string
 	TlDataID        string  // TLDataID(予約番号)
@@ -129,7 +129,7 @@ func CreateBooking(
 	CheckInTime CheckInTime,
 	TotalCost uint,
 	GuestData *GuestData,
-	BookPlan *Plan,
+	BookPlan *PlanStayDetail,
 	BookUserID uuid.UUID,
 	Note string,
 	TlDataID string,
@@ -163,7 +163,7 @@ func RegenBooking(
 	CheckInTime CheckInTime,
 	TotalCost uint,
 	GuestData *GuestData,
-	BookPlan *Plan,
+	BookPlan *PlanStayDetail,
 	BookUserID uuid.UUID,
 	Note string,
 	TlDataID string,

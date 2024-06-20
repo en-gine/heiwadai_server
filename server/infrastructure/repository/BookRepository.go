@@ -46,17 +46,25 @@ func (pq *BookRepository) Save(entity *entity.Booking) error {
 
 	plan := models.BookPlan{
 		ID:                     uuid.New().String(),
-		PlanID:                 entity.BookPlan.ID,
-		Title:                  entity.BookPlan.Title,
-		Price:                  int(entity.BookPlan.Price),
-		ImageURL:               entity.BookPlan.ImageURL,
-		RoomType:               int(entity.BookPlan.RoomType),
-		MealTypeMorning:        entity.BookPlan.MealType.Morning,
-		MealTypeDinner:         entity.BookPlan.MealType.Dinner,
-		SmokeType:              int(entity.BookPlan.SmokeType),
-		Overview:               entity.BookPlan.OverView,
-		StoreID:                entity.BookPlan.StoreID.String(),
-		TLBookdataRoomTypeCode: entity.BookPlan.TlBookingRoomTypeCode,
+		PlanID:                 entity.BookPlan.Plan.ID,
+		Title:                  entity.BookPlan.Plan.Title,
+		Price:                  int(entity.BookPlan.Plan.Price),
+		ImageURL:               entity.BookPlan.Plan.ImageURL,
+		RoomType:               int(entity.BookPlan.Plan.RoomType),
+		MealTypeMorning:        entity.BookPlan.Plan.MealType.Morning,
+		MealTypeDinner:         entity.BookPlan.Plan.MealType.Dinner,
+		SmokeType:              int(entity.BookPlan.Plan.SmokeType),
+		Overview:               entity.BookPlan.Plan.OverView,
+		StoreID:                entity.BookPlan.Plan.StoreID.String(),
+		TLBookdataRoomTypeCode: entity.BookPlan.Plan.TlBookingRoomTypeCode,
+	}
+
+	var dateInfos []models.BookPlanStayDateInfo
+	for _, dateInfo := range *entity.BookPlan.StayDateInfos {
+		dateInfos = append(dateInfos, models.BookPlanStayDateInfo{
+			StayDate:           dateInfo.StayDate,
+			StayDateTotalPrice: int(dateInfo.StayDateTotalPrice),
+		})
 	}
 
 	book := models.UserBook{
@@ -94,6 +102,13 @@ func (pq *BookRepository) Save(entity *entity.Booking) error {
 		return err
 	}
 
+	for _, dateInfo := range dateInfos {
+		err = dateInfo.Upsert(ctx, tran, true, []string{"plan_id", "stay_date"}, boil.Infer(), boil.Infer())
+		if err != nil {
+			return err
+		}
+	}
+
 	err = guest.Upsert(ctx, tran, true, []string{"id"}, boil.Infer(), boil.Infer())
 	if err != nil {
 		return err
@@ -117,6 +132,7 @@ func (pq *BookRepository) Delete(bookID uuid.UUID) error {
 	}
 	return nil
 }
+
 func (pq *BookRepository) SoftDelete(bookID uuid.UUID) error {
 	book, err := models.FindUserBook(context.Background(), pq.db, bookID.String())
 	if err != nil {

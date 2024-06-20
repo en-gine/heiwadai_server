@@ -116,7 +116,7 @@ func (p *PlanQuery) GetPlanDetailByID(
 	child int,
 	roomCount int,
 	TlBookingRoomTypeCode string,
-) (*entity.Plan, error) {
+) (*entity.PlanStayDetail, error) {
 	var hotelCode string
 	if env.GetEnv(env.TlbookingIsTest) == "true" {
 		hotelCode = "E69502"
@@ -141,7 +141,7 @@ func (p *PlanQuery) GetPlanDetailByID(
 		return nil, err
 	}
 	guestCount := adult + child
-	plan, err := p.AvailDetailRSToPlan(res, roomCount, guestCount)
+	plan, err := p.AvailDetailRSToPlanDetail(res, roomCount, guestCount)
 	if err != nil {
 		logger.Error(err.Error())
 		return nil, err
@@ -241,9 +241,10 @@ func (p *PlanQuery) AvailRSToCandidates(res *EnvelopeRS, roomCount int, guestCou
 	return &candidates, nil
 }
 
-func (p *PlanQuery) AvailDetailRSToPlan(res *EnvelopeRS, roomCount int, guestCount int) (*entity.Plan, error) {
+func (p *PlanQuery) AvailDetailRSToPlanDetail(res *EnvelopeRS, roomCount int, guestCount int) (*entity.PlanStayDetail, error) {
 	var plans []entity.Plan
 	body := res.Body.OTA_HotelAvailRS
+	var planStayDateInfos []entity.StayDateInfo
 
 	for _, roomStay := range body.RoomStays.RoomStay {
 		hotelCode := roomStay.RPH
@@ -262,7 +263,7 @@ func (p *PlanQuery) AvailDetailRSToPlan(res *EnvelopeRS, roomCount int, guestCou
 			return nil, err
 		}
 		if len(roomStay.RoomTypes.RoomType) == 0 { // room not found
-			return &entity.Plan{}, nil
+			return &entity.PlanStayDetail{}, nil
 		}
 
 		roomTypeObject := roomStay.RoomTypes.RoomType[0]
@@ -276,26 +277,37 @@ func (p *PlanQuery) AvailDetailRSToPlan(res *EnvelopeRS, roomCount int, guestCou
 			continue
 		}
 
-		var planTotalPrice uint64
+		var planTotalPrice uint
 		// 合計金額の計算
 		for _, room := range roomStay.RoomRates.RoomRate {
 			// 一泊毎や人数ごとの追加料金
-			var nightExtraPrice uint64
+			var nightExtraPrice uint
+			var planStayDateInfo entity.StayDateInfo
+			stayDate, err := room.EffectiveDate.ToDate()
+			if err != nil {
+				return nil, errors.New("EffectiveDateの変換に失敗しました")
+			}
+			planStayDateInfo.StayDate = stayDate
 			for _, night := range room.Rates.Rate {
 				amt := night.Base.AmountAfterTax
-				nightPrice, _ := strconv.ParseUint(amt, 10, 64)
-				nightExtraPrice += nightPrice
+				nightPrice, _ := strconv.ParseInt(amt, 10, 64)
+				nightExtraPrice += uint(nightPrice)
 			}
 			tmpAmount := room.Total.AmountAfterTax
-			var roomPrice uint64
+			var roomPrice uint
 			tmpTotal, _ := strconv.ParseUint(tmpAmount, 10, 64)
 			if guestCount > 1 {
-				roomPrice = tmpTotal + nightExtraPrice
+				roomPrice = uint(tmpTotal) + nightExtraPrice
 			} else {
-				roomPrice = tmpTotal
+				roomPrice = uint(tmpTotal)
+			}
+			planStayDateInfo = entity.StayDateInfo{
+				StayDate:           stayDate,
+				StayDateTotalPrice: (roomPrice * uint(roomCount)),
 			}
 
-			planTotalPrice = planTotalPrice + (roomPrice * uint64(roomCount))
+			planTotalPrice = planTotalPrice + (roomPrice * uint(roomCount))
+			planStayDateInfos = append(planStayDateInfos, planStayDateInfo)
 		}
 
 		for index, plan := range roomStay.RatePlans.RatePlan {
@@ -303,7 +315,7 @@ func (p *PlanQuery) AvailDetailRSToPlan(res *EnvelopeRS, roomCount int, guestCou
 			availStatus := AvailabilityStatus(roomStay.RoomRates.RoomRate[index].AvailabilityStatus)
 			if availStatus == AvailableClosedOut {
 				//　売り切れ
-				return &entity.Plan{}, nil
+				return &entity.PlanStayDetail{}, nil
 			}
 			planID := plan.RatePlanCode
 			planName := plan.RatePlanName
@@ -324,7 +336,7 @@ func (p *PlanQuery) AvailDetailRSToPlan(res *EnvelopeRS, roomCount int, guestCou
 			plan := entity.RegenPlan(
 				planID,
 				planName,
-				uint(planTotalPrice),
+				planTotalPrice,
 				planImageURL,
 				entityRoomType,
 				entity.MealType{
@@ -340,7 +352,14 @@ func (p *PlanQuery) AvailDetailRSToPlan(res *EnvelopeRS, roomCount int, guestCou
 			plans = append(plans, *plan)
 		}
 	}
-	return &(plans)[0], nil
+	if len(plans) == 0 {
+		return &entity.PlanStayDetail{}, nil
+	}
+	planDetail := &entity.PlanStayDetail{
+		Plan:          &(plans)[0],
+		StayDateInfos: &planStayDateInfos,
+	}
+	return planDetail, nil
 }
 
 func NewOTAHotelAvailRQ(

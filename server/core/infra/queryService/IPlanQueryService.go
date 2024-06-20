@@ -27,5 +27,5 @@ type IPlanQueryService interface {
 		child int,
 		roomCount int,
 		TlBookingRoomTypeCode string,
-	) (*entity.Plan, error)
+	) (*entity.PlanStayDetail, error)
 }

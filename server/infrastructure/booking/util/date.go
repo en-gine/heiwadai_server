@@ -30,3 +30,20 @@ func StringToYYYYMMDD(dateStr string) (*YYYYMMDD, error) {
 func YYYYMMDDToDate(str YYYYMMDD) (time.Time, error) {
 	return time.Parse("2006-01-02", str.ToString())
 }
+
+// --------------------------------------------------------
+
+type StrDate string // 'YYYY-MM-DD形式'
+
+func (s StrDate) ToDate() (time.Time, error) {
+	return time.Parse("2006-01-02", s.ToString())
+}
+
+func (s StrDate) ToString() string {
+	return string(s)
+}
+
+func DateToStrDate(date time.Time) StrDate {
+	// date型を受け取ってYYYY-MM-DDの形式の文字列に変換する
+	return StrDate(date.Format("2006-01-02"))
+}

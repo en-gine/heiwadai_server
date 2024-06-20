@@ -58,7 +58,7 @@ func (ac *BookController) GetMyBook(ctx context.Context, req *connect.Request[em
 	for _, book := range books {
 		var bookstore *entity.StayableStore
 		for _, stayStore := range stayStores {
-			if stayStore.ID == book.BookPlan.StoreID {
+			if stayStore.ID == book.BookPlan.Plan.StoreID {
 				bookstore = stayStore
 				break
 			}
@@ -82,7 +82,7 @@ func (ac *BookController) GetBookByID(ctx context.Context, req *connect.Request[
 	if domainErr != nil {
 		return nil, controller.ErrorHandler(domainErr)
 	}
-	stayStore, domainErr := ac.storeUseCase.GetStayableByID(book.BookPlan.StoreID)
+	stayStore, domainErr := ac.storeUseCase.GetStayableByID(book.BookPlan.Plan.StoreID)
 	if domainErr != nil {
 		return nil, controller.ErrorHandler(domainErr)
 	}
@@ -157,6 +157,19 @@ func (ac *BookController) Reserve(ctx context.Context, req *connect.Request[user
 		req.Msg.RequestPlan.TlBookingRoomTypeCode,
 	)
 
+	var stayDateInfos []entity.StayDateInfo
+	for _, dateInfo := range req.Msg.PlanStayDateInfos {
+		stayDateInfos = append(stayDateInfos, entity.StayDateInfo{
+			StayDate:           dateInfo.StayDate.AsTime(),
+			StayDateTotalPrice: uint(dateInfo.StayDateTotalPrice),
+		})
+	}
+
+	bookPlan := &entity.PlanStayDetail{
+		Plan:          plan,
+		StayDateInfos: &stayDateInfos,
+	}
+
 	var note string
 	if req.Msg.Note == nil {
 		note = ""
@@ -173,7 +186,7 @@ func (ac *BookController) Reserve(ctx context.Context, req *connect.Request[user
 		entity.CheckInTime(req.Msg.CheckInTime),
 		uint(req.Msg.TotalCost),
 		guest,
-		plan,
+		bookPlan,
 		userID,
 		note,
 	)
@@ -214,7 +227,7 @@ func BookEntityToResponse(entity *entity.Booking, bookstore *entity.StayableStor
 			Tel:           entity.GuestData.Tel,
 			Mail:          entity.GuestData.Mail,
 		},
-		Plan: PlanEntityToResponse(entity.BookPlan, bookstore),
+		Plan: PlanEntityToResponse(entity.BookPlan.Plan, bookstore),
 	}
 }
 

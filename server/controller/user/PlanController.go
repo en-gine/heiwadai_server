@@ -12,6 +12,7 @@ import (
 
 	connect "github.com/bufbuild/connect-go"
 	"github.com/google/uuid"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type PlanController struct {
@@ -150,7 +151,7 @@ func (ac *PlanController) Search(ctx context.Context, req *connect.Request[user.
 		}), nil
 }
 
-func (ac *PlanController) GetDetail(ctx context.Context, req *connect.Request[user.PlanDetailRequest]) (*connect.Response[user.PlanResponse], error) {
+func (ac *PlanController) GetDetail(ctx context.Context, req *connect.Request[user.PlanDetailRequest]) (*connect.Response[user.PlanStayDetailResponse], error) {
 	msg := req.Msg
 	stayStoreID, err := uuid.Parse(msg.StayStoreID)
 	if err != nil {
@@ -160,15 +161,22 @@ func (ac *PlanController) GetDetail(ctx context.Context, req *connect.Request[us
 	if domainErr != nil {
 		return nil, controller.ErrorHandler(domainErr)
 	}
-	plan, domainErr := ac.planUseCase.GetDetail(msg.PlanID, msg.StayFrom.AsTime(), msg.StayTo.AsTime(), int(msg.Adult), int(msg.Child), int(msg.RoomCount), msg.TlBookingRoomTypeCode, stayStore)
+	planDetail, domainErr := ac.planUseCase.GetDetail(msg.PlanID, msg.StayFrom.AsTime(), msg.StayTo.AsTime(), int(msg.Adult), int(msg.Child), int(msg.RoomCount), msg.TlBookingRoomTypeCode, stayStore)
 	if domainErr != nil {
 		return nil, controller.ErrorHandler(domainErr)
 	}
 
-	displayPlan := PlanEntityToResponse(plan, stayStore)
-
+	displayPlan := PlanEntityToResponse(planDetail.Plan, stayStore)
+	var planStayDateInfos []*user.PlanStayDateInfo
+	for _, stayDateInfo := range *planDetail.StayDateInfos {
+		planStayDateInfos = append(planStayDateInfos, &user.PlanStayDateInfo{
+			StayDate:           timestamppb.New(stayDateInfo.StayDate),
+			StayDateTotalPrice: uint32(stayDateInfo.StayDateTotalPrice),
+		})
+	}
 	return connect.NewResponse(
-		&user.PlanResponse{
-			Plan: displayPlan,
+		&user.PlanStayDetailResponse{
+			Plan:              displayPlan,
+			PlanStayDateInfos: planStayDateInfos,
 		}), nil
 }

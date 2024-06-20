@@ -1,6 +1,8 @@
 package entity
 
 import (
+	"time"
+
 	"github.com/google/uuid"
 )
 
@@ -17,6 +19,15 @@ type Plan struct {
 	TlBookingRoomTypeCode string
 }
 
+type StayDateInfo struct {
+	StayDateTotalPrice uint
+	StayDate           time.Time
+}
+
+type PlanStayDetail struct {
+	Plan          *Plan
+	StayDateInfos *[]StayDateInfo
+}
 type PlanCandidate struct {
 	Plan             *Plan
 	MinimumPrice     uint

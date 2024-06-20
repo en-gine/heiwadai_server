@@ -165,17 +165,20 @@ var BookPlanWhere = struct {
 
 // BookPlanRels is where relationship names are stored.
 var BookPlanRels = struct {
-	Store     string
-	UserBooks string
+	Store                     string
+	PlanBookPlanStayDateInfos string
+	UserBooks                 string
 }{
-	Store:     "Store",
-	UserBooks: "UserBooks",
+	Store:                     "Store",
+	PlanBookPlanStayDateInfos: "PlanBookPlanStayDateInfos",
+	UserBooks:                 "UserBooks",
 }
 
 // bookPlanR is where relationships are stored.
 type bookPlanR struct {
-	Store     *Store        `boil:"Store" json:"Store" toml:"Store" yaml:"Store"`
-	UserBooks UserBookSlice `boil:"UserBooks" json:"UserBooks" toml:"UserBooks" yaml:"UserBooks"`
+	Store                     *Store                    `boil:"Store" json:"Store" toml:"Store" yaml:"Store"`
+	PlanBookPlanStayDateInfos BookPlanStayDateInfoSlice `boil:"PlanBookPlanStayDateInfos" json:"PlanBookPlanStayDateInfos" toml:"PlanBookPlanStayDateInfos" yaml:"PlanBookPlanStayDateInfos"`
+	UserBooks                 UserBookSlice             `boil:"UserBooks" json:"UserBooks" toml:"UserBooks" yaml:"UserBooks"`
 }
 
 // NewStruct creates a new relationship struct
@@ -188,6 +191,13 @@ func (r *bookPlanR) GetStore() *Store {
 		return nil
 	}
 	return r.Store
+}
+
+func (r *bookPlanR) GetPlanBookPlanStayDateInfos() BookPlanStayDateInfoSlice {
+	if r == nil {
+		return nil
+	}
+	return r.PlanBookPlanStayDateInfos
 }
 
 func (r *bookPlanR) GetUserBooks() UserBookSlice {
@@ -497,6 +507,20 @@ func (o *BookPlan) Store(mods ...qm.QueryMod) storeQuery {
 	return Stores(queryMods...)
 }
 
+// PlanBookPlanStayDateInfos retrieves all the book_plan_stay_date_info's BookPlanStayDateInfos with an executor via plan_id column.
+func (o *BookPlan) PlanBookPlanStayDateInfos(mods ...qm.QueryMod) bookPlanStayDateInfoQuery {
+	var queryMods []qm.QueryMod
+	if len(mods) != 0 {
+		queryMods = append(queryMods, mods...)
+	}
+
+	queryMods = append(queryMods,
+		qm.Where("\"book_plan_stay_date_info\".\"plan_id\"=?", o.ID),
+	)
+
+	return BookPlanStayDateInfos(queryMods...)
+}
+
 // UserBooks retrieves all the user_book's UserBooks with an executor.
 func (o *BookPlan) UserBooks(mods ...qm.QueryMod) userBookQuery {
 	var queryMods []qm.QueryMod
@@ -623,6 +647,120 @@ func (bookPlanL) LoadStore(ctx context.Context, e boil.ContextExecutor, singular
 					foreign.R = &storeR{}
 				}
 				foreign.R.BookPlans = append(foreign.R.BookPlans, local)
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+// LoadPlanBookPlanStayDateInfos allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-M or N-M relationship.
+func (bookPlanL) LoadPlanBookPlanStayDateInfos(ctx context.Context, e boil.ContextExecutor, singular bool, maybeBookPlan interface{}, mods queries.Applicator) error {
+	var slice []*BookPlan
+	var object *BookPlan
+
+	if singular {
+		var ok bool
+		object, ok = maybeBookPlan.(*BookPlan)
+		if !ok {
+			object = new(BookPlan)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeBookPlan)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeBookPlan))
+			}
+		}
+	} else {
+		s, ok := maybeBookPlan.(*[]*BookPlan)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeBookPlan)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeBookPlan))
+			}
+		}
+	}
+
+	args := make([]interface{}, 0, 1)
+	if singular {
+		if object.R == nil {
+			object.R = &bookPlanR{}
+		}
+		args = append(args, object.ID)
+	} else {
+	Outer:
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &bookPlanR{}
+			}
+
+			for _, a := range args {
+				if a == obj.ID {
+					continue Outer
+				}
+			}
+
+			args = append(args, obj.ID)
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	query := NewQuery(
+		qm.From(`book_plan_stay_date_info`),
+		qm.WhereIn(`book_plan_stay_date_info.plan_id in ?`, args...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load book_plan_stay_date_info")
+	}
+
+	var resultSlice []*BookPlanStayDateInfo
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice book_plan_stay_date_info")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results in eager load on book_plan_stay_date_info")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for book_plan_stay_date_info")
+	}
+
+	if len(bookPlanStayDateInfoAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+	if singular {
+		object.R.PlanBookPlanStayDateInfos = resultSlice
+		for _, foreign := range resultSlice {
+			if foreign.R == nil {
+				foreign.R = &bookPlanStayDateInfoR{}
+			}
+			foreign.R.Plan = object
+		}
+		return nil
+	}
+
+	for _, foreign := range resultSlice {
+		for _, local := range slice {
+			if local.ID == foreign.PlanID {
+				local.R.PlanBookPlanStayDateInfos = append(local.R.PlanBookPlanStayDateInfos, foreign)
+				if foreign.R == nil {
+					foreign.R = &bookPlanStayDateInfoR{}
+				}
+				foreign.R.Plan = local
 				break
 			}
 		}
@@ -789,6 +927,59 @@ func (o *BookPlan) SetStore(ctx context.Context, exec boil.ContextExecutor, inse
 		related.R.BookPlans = append(related.R.BookPlans, o)
 	}
 
+	return nil
+}
+
+// AddPlanBookPlanStayDateInfos adds the given related objects to the existing relationships
+// of the book_plan, optionally inserting them as new records.
+// Appends related to o.R.PlanBookPlanStayDateInfos.
+// Sets related.R.Plan appropriately.
+func (o *BookPlan) AddPlanBookPlanStayDateInfos(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*BookPlanStayDateInfo) error {
+	var err error
+	for _, rel := range related {
+		if insert {
+			rel.PlanID = o.ID
+			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
+				return errors.Wrap(err, "failed to insert into foreign table")
+			}
+		} else {
+			updateQuery := fmt.Sprintf(
+				"UPDATE \"book_plan_stay_date_info\" SET %s WHERE %s",
+				strmangle.SetParamNames("\"", "\"", 1, []string{"plan_id"}),
+				strmangle.WhereClause("\"", "\"", 2, bookPlanStayDateInfoPrimaryKeyColumns),
+			)
+			values := []interface{}{o.ID, rel.PlanID, rel.StayDate}
+
+			if boil.IsDebug(ctx) {
+				writer := boil.DebugWriterFrom(ctx)
+				fmt.Fprintln(writer, updateQuery)
+				fmt.Fprintln(writer, values)
+			}
+			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+				return errors.Wrap(err, "failed to update foreign table")
+			}
+
+			rel.PlanID = o.ID
+		}
+	}
+
+	if o.R == nil {
+		o.R = &bookPlanR{
+			PlanBookPlanStayDateInfos: related,
+		}
+	} else {
+		o.R.PlanBookPlanStayDateInfos = append(o.R.PlanBookPlanStayDateInfos, related...)
+	}
+
+	for _, rel := range related {
+		if rel.R == nil {
+			rel.R = &bookPlanStayDateInfoR{
+				Plan: o,
+			}
+		} else {
+			rel.R.Plan = o
+		}
+	}
 	return nil
 }
 

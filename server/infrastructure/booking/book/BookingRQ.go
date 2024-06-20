@@ -82,34 +82,35 @@ type SalesOfficeInformation struct {
 }
 
 type BasicInformation struct {
-	TravelAgencyBookingNumber  string        `xml:"TravelAgencyBookingNumber"`
-	TravelAgencyBookingDate    string        `xml:"TravelAgencyBookingDate"`
-	TravelAgencyBookingTime    string        `xml:"TravelAgencyBookingTime"`
-	GuestOrGroupMiddleName     *string       `xml:"GuestOrGroupMiddleName"`
-	GuestOrGroupNameSingleByte string        `xml:"GuestOrGroupNameSingleByte"`
-	GuestOrGroupNameDoubleByte *string       `xml:"GuestOrGroupNameDoubleByte"`
-	GuestOrGroupKanjiName      string        `xml:"GuestOrGroupKanjiName"`
-	GuestOrGroupContactDiv     *string       `xml:"GuestOrGroupContactDiv"`
-	GuestOrGroupCellularNumber *string       `xml:"GuestOrGroupCellularNumber"`
-	GuestOrGroupOfficeNumber   *string       `xml:"GuestOrGroupOfficeNumber"`
-	GuestOrGroupPhoneNumber    string        `xml:"GuestOrGroupPhoneNumber"`
-	GuestOrGroupEmail          string        `xml:"GuestOrGroupEmail"`
-	GuestOrGroupPostalCode     string        `xml:"GuestOrGroupPostalCode"`
-	GuestOrGroupAddress        string        `xml:"GuestOrGroupAddress"`
-	CheckInDate                util.YYYYMMDD `xml:"CheckInDate"`
-	CheckInTime                string        `xml:"CheckInTime"`
-	Nights                     uint          `xml:"Nights"`
-	TotalRoomCount             uint          `xml:"TotalRoomCount"`        // 利用客室合計数
-	GrandTotalPaxCount         uint          `xml:"GrandTotalPaxCount"`    //	お客様総合計人数
-	TotalPaxMaleCount          uint          `xml:"TotalPaxMaleCount"`     //	お客様総合計男性人数
-	TotalPaxFemaleCount        uint          `xml:"TotalPaxFemaleCount"`   //	お客様総合計女性人数（男女区別が無い場合は0）
-	TotalChildA70Count         uint          `xml:"TotalChildA70Count"`    //	お客様総合計子供A（70%）人数
-	MealCondition              MealCondition `xml:"MealCondition"`         // 食事条件
-	PackageType                string        `xml:"PackageType"`           // Package固定
-	PackagePlanCode            string        `xml:"PackagePlanCode"`       // 企画(パッケージ)コード
-	PackagePlanName            string        `xml:"PackagePlanName"`       // 企画(パッケージ)名
-	PackagePlanContent         string        `xml:"PackagePlanContent"`    // 企画(パッケージ)内容
-	SpecialServiceRequest      string        `xml:"SpecialServiceRequest"` // お客様からの要望
+	TravelAgencyBookingNumber  string                `xml:"TravelAgencyBookingNumber"`
+	TravelAgencyBookingDate    string                `xml:"TravelAgencyBookingDate"`
+	TravelAgencyBookingTime    string                `xml:"TravelAgencyBookingTime"`
+	GuestOrGroupMiddleName     *string               `xml:"GuestOrGroupMiddleName"`
+	GuestOrGroupNameSingleByte string                `xml:"GuestOrGroupNameSingleByte"`
+	GuestOrGroupNameDoubleByte *string               `xml:"GuestOrGroupNameDoubleByte"`
+	GuestOrGroupKanjiName      string                `xml:"GuestOrGroupKanjiName"`
+	GuestOrGroupContactDiv     *string               `xml:"GuestOrGroupContactDiv"`
+	GuestOrGroupCellularNumber *string               `xml:"GuestOrGroupCellularNumber"`
+	GuestOrGroupOfficeNumber   *string               `xml:"GuestOrGroupOfficeNumber"`
+	GuestOrGroupPhoneNumber    string                `xml:"GuestOrGroupPhoneNumber"`
+	GuestOrGroupEmail          string                `xml:"GuestOrGroupEmail"`
+	GuestOrGroupPostalCode     string                `xml:"GuestOrGroupPostalCode"`
+	GuestOrGroupAddress        string                `xml:"GuestOrGroupAddress"`
+	CheckInDate                util.StrDate          `xml:"CheckInDate"`
+	CheckInTime                string                `xml:"CheckInTime"`
+	Nights                     uint                  `xml:"Nights"`
+	TotalRoomCount             uint                  `xml:"TotalRoomCount"`        // 利用客室合計数
+	GrandTotalPaxCount         uint                  `xml:"GrandTotalPaxCount"`    //	お客様総合計人数
+	TotalPaxMaleCount          uint                  `xml:"TotalPaxMaleCount"`     //	お客様総合計男性人数
+	TotalPaxFemaleCount        uint                  `xml:"TotalPaxFemaleCount"`   //	お客様総合計女性人数（男女区別が無い場合は0）
+	TotalChildA70Count         uint                  `xml:"TotalChildA70Count"`    //	お客様総合計子供A（70%）人数
+	MealCondition              MealCondition         `xml:"MealCondition"`         // 食事条件
+	SpecificMealCondition      SpecificMealCondition `xml:"SpecificMealCondition"` // 食事条件詳細
+	PackageType                string                `xml:"PackageType"`           // Package固定
+	PackagePlanCode            string                `xml:"PackagePlanCode"`       // 企画(パッケージ)コード
+	PackagePlanName            string                `xml:"PackagePlanName"`       // 企画(パッケージ)名
+	PackagePlanContent         string                `xml:"PackagePlanContent"`    // 企画(パッケージ)内容
+	SpecialServiceRequest      string                `xml:"SpecialServiceRequest"` // お客様からの要望
 }
 type MealCondition string
 
@@ -118,6 +119,19 @@ const (
 	MealCondition1nightBreakfast MealCondition = "1nightBreakfast" // 一泊朝食付
 	MealConditionWithoutMeal     MealCondition = "WithoutMeal"     // 食事なし
 	MealConditionOther           MealCondition = "Other"           // 他
+)
+
+type SpecificMealCondition string
+
+const (
+	SpecificMealConditionIncludingBreakfast                  SpecificMealCondition = "IncludingBreakfast"                  // 朝食付
+	SpecificMealConditionIncludingDinner                     SpecificMealCondition = "IncludingDinner"                     // 夕食付
+	SpecificMealConditionIncludingBreakfastAndDinner         SpecificMealCondition = "IncludingBreakfastAndDinner"         // 朝夕食付
+	SpecificMealConditionIncludingBreakfastAndLunchAndDinner SpecificMealCondition = "IncludingBreakfastAndLunchAndDinner" // ３食付
+	SpecificMealConditionIncludingLunch                      SpecificMealCondition = "IncludingLunch"                      // 昼食付
+	SpecificMealConditionIncludingBreakfastAndLunch          SpecificMealCondition = "IncludingBreakfastAndLunch"          // 朝昼食付
+	SpecificMealConditionIncludingLunchAndDinner             SpecificMealCondition = "IncludingLunchAndDinner"             // 昼夕食付
+
 )
 
 type BasicRateInformation struct {
@@ -217,25 +231,25 @@ type RoomInformation struct {
 }
 
 type RoomRateInformation struct {
-	RoomDate                util.YYYYMMDD `xml:"RoomDate"`
-	PerPaxRate              *int          `xml:"PerPaxRate"` // 1名料金
-	PerPaxFemaleRate        *int          `xml:"PerPaxFemaleRate"`
-	PerChildA70Rate         *int          `xml:"PerChildA70Rate"`
-	PerChildA70Rate2        *int          `xml:"PerChildA70Rate2"`
-	PerChildB50Rate         *int          `xml:"PerChildB50Rate"`
-	PerChildB50Rate2        *int          `xml:"PerChildB50Rate2"`
-	PerChildC30Rate         *int          `xml:"PerChildC30Rate"`
-	PerChildDNoneRate       *int          `xml:"PerChildDNoneRate"`
-	RoomRatePaxMaleCount    *int          `xml:"RoomRatePaxMaleCount"`
-	RoomRatePaxFemaleCount  *int          `xml:"RoomRatePaxFemaleCount"`
-	RoomRateChildA70Count   *int          `xml:"RoomRateChildA70Count"`
-	RoomRateChildA70Count2  *int          `xml:"RoomRateChildA70Count2"`
-	RoomRateChildB50Count   *int          `xml:"RoomRateChildB50Count"`
-	RoomRateChildB50Count2  *int          `xml:"RoomRateChildB50Count2"`
-	RoomRateChildC30Count   *int          `xml:"RoomRateChildC30Count"`
-	RoomRateChildDNoneCount *int          `xml:"RoomRateChildDNoneCount"`
-	RoomPaxMaleRequest      string        `xml:"RoomPaxMaleRequest"`
-	RoomPaxFemaleRequest    string        `xml:"RoomPaxFemaleRequest"`
-	TotalPerRoomRate        *int          `xml:"TotalPerRoomRate"` // 1室料金
+	RoomDate                util.StrDate `xml:"RoomDate"`
+	PerPaxRate              *int         `xml:"PerPaxRate"` // 1名料金
+	PerPaxFemaleRate        *int         `xml:"PerPaxFemaleRate"`
+	PerChildA70Rate         *int         `xml:"PerChildA70Rate"`
+	PerChildA70Rate2        *int         `xml:"PerChildA70Rate2"`
+	PerChildB50Rate         *int         `xml:"PerChildB50Rate"`
+	PerChildB50Rate2        *int         `xml:"PerChildB50Rate2"`
+	PerChildC30Rate         *int         `xml:"PerChildC30Rate"`
+	PerChildDNoneRate       *int         `xml:"PerChildDNoneRate"`
+	RoomRatePaxMaleCount    *int         `xml:"RoomRatePaxMaleCount"`
+	RoomRatePaxFemaleCount  *int         `xml:"RoomRatePaxFemaleCount"`
+	RoomRateChildA70Count   *int         `xml:"RoomRateChildA70Count"`
+	RoomRateChildA70Count2  *int         `xml:"RoomRateChildA70Count2"`
+	RoomRateChildB50Count   *int         `xml:"RoomRateChildB50Count"`
+	RoomRateChildB50Count2  *int         `xml:"RoomRateChildB50Count2"`
+	RoomRateChildC30Count   *int         `xml:"RoomRateChildC30Count"`
+	RoomRateChildDNoneCount *int         `xml:"RoomRateChildDNoneCount"`
+	RoomPaxMaleRequest      string       `xml:"RoomPaxMaleRequest"`
+	RoomPaxFemaleRequest    string       `xml:"RoomPaxFemaleRequest"`
+	TotalPerRoomRate        *int         `xml:"TotalPerRoomRate"` // 1室料金
 	// 他のフィールドも同様に定義する
 }

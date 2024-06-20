@@ -494,6 +494,84 @@ func testBookPlansInsertWhitelist(t *testing.T) {
 	}
 }
 
+func testBookPlanToManyPlanBookPlanStayDateInfos(t *testing.T) {
+	var err error
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+
+	var a BookPlan
+	var b, c BookPlanStayDateInfo
+
+	seed := randomize.NewSeed()
+	if err = randomize.Struct(seed, &a, bookPlanDBTypes, true, bookPlanColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize BookPlan struct: %s", err)
+	}
+
+	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	if err = randomize.Struct(seed, &b, bookPlanStayDateInfoDBTypes, false, bookPlanStayDateInfoColumnsWithDefault...); err != nil {
+		t.Fatal(err)
+	}
+	if err = randomize.Struct(seed, &c, bookPlanStayDateInfoDBTypes, false, bookPlanStayDateInfoColumnsWithDefault...); err != nil {
+		t.Fatal(err)
+	}
+
+	b.PlanID = a.ID
+	c.PlanID = a.ID
+
+	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+	if err = c.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	check, err := a.PlanBookPlanStayDateInfos().All(ctx, tx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	bFound, cFound := false, false
+	for _, v := range check {
+		if v.PlanID == b.PlanID {
+			bFound = true
+		}
+		if v.PlanID == c.PlanID {
+			cFound = true
+		}
+	}
+
+	if !bFound {
+		t.Error("expected to find b")
+	}
+	if !cFound {
+		t.Error("expected to find c")
+	}
+
+	slice := BookPlanSlice{&a}
+	if err = a.L.LoadPlanBookPlanStayDateInfos(ctx, tx, false, (*[]*BookPlan)(&slice), nil); err != nil {
+		t.Fatal(err)
+	}
+	if got := len(a.R.PlanBookPlanStayDateInfos); got != 2 {
+		t.Error("number of eager loaded records wrong, got:", got)
+	}
+
+	a.R.PlanBookPlanStayDateInfos = nil
+	if err = a.L.LoadPlanBookPlanStayDateInfos(ctx, tx, true, &a, nil); err != nil {
+		t.Fatal(err)
+	}
+	if got := len(a.R.PlanBookPlanStayDateInfos); got != 2 {
+		t.Error("number of eager loaded records wrong, got:", got)
+	}
+
+	if t.Failed() {
+		t.Logf("%#v", check)
+	}
+}
+
 func testBookPlanToManyUserBooks(t *testing.T) {
 	var err error
 	ctx := context.Background()
@@ -572,6 +650,81 @@ func testBookPlanToManyUserBooks(t *testing.T) {
 	}
 }
 
+func testBookPlanToManyAddOpPlanBookPlanStayDateInfos(t *testing.T) {
+	var err error
+
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+
+	var a BookPlan
+	var b, c, d, e BookPlanStayDateInfo
+
+	seed := randomize.NewSeed()
+	if err = randomize.Struct(seed, &a, bookPlanDBTypes, false, strmangle.SetComplement(bookPlanPrimaryKeyColumns, bookPlanColumnsWithoutDefault)...); err != nil {
+		t.Fatal(err)
+	}
+	foreigners := []*BookPlanStayDateInfo{&b, &c, &d, &e}
+	for _, x := range foreigners {
+		if err = randomize.Struct(seed, x, bookPlanStayDateInfoDBTypes, false, strmangle.SetComplement(bookPlanStayDateInfoPrimaryKeyColumns, bookPlanStayDateInfoColumnsWithoutDefault)...); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+	if err = c.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	foreignersSplitByInsertion := [][]*BookPlanStayDateInfo{
+		{&b, &c},
+		{&d, &e},
+	}
+
+	for i, x := range foreignersSplitByInsertion {
+		err = a.AddPlanBookPlanStayDateInfos(ctx, tx, i != 0, x...)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		first := x[0]
+		second := x[1]
+
+		if a.ID != first.PlanID {
+			t.Error("foreign key was wrong value", a.ID, first.PlanID)
+		}
+		if a.ID != second.PlanID {
+			t.Error("foreign key was wrong value", a.ID, second.PlanID)
+		}
+
+		if first.R.Plan != &a {
+			t.Error("relationship was not added properly to the foreign slice")
+		}
+		if second.R.Plan != &a {
+			t.Error("relationship was not added properly to the foreign slice")
+		}
+
+		if a.R.PlanBookPlanStayDateInfos[i*2] != first {
+			t.Error("relationship struct slice not set to correct value")
+		}
+		if a.R.PlanBookPlanStayDateInfos[i*2+1] != second {
+			t.Error("relationship struct slice not set to correct value")
+		}
+
+		count, err := a.PlanBookPlanStayDateInfos().Count(ctx, tx)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if want := int64((i + 1) * 2); count != want {
+			t.Error("want", want, "got", count)
+		}
+	}
+}
 func testBookPlanToManyAddOpUserBooks(t *testing.T) {
 	var err error
 
