@@ -204,6 +204,14 @@ func BookEntityToResponse(entity *entity.Booking, bookstore *entity.StayableStor
 		pref = &tempPref
 	}
 
+	var infos []*user.PlanStayDateInfo
+	for _, info := range *entity.BookPlan.StayDateInfos {
+		infos = append(infos, &user.PlanStayDateInfo{
+			StayDate:           timestamppb.New(info.StayDate),
+			StayDateTotalPrice: uint32(info.StayDateTotalPrice),
+		})
+	}
+
 	return &user.BookResponse{
 		ID:          entity.ID.String(),
 		StayFrom:    timestamppb.New(entity.StayFrom),
@@ -227,7 +235,8 @@ func BookEntityToResponse(entity *entity.Booking, bookstore *entity.StayableStor
 			Tel:           entity.GuestData.Tel,
 			Mail:          entity.GuestData.Mail,
 		},
-		Plan: PlanEntityToResponse(entity.BookPlan.Plan, bookstore),
+		Plan:              PlanEntityToResponse(entity.BookPlan.Plan, bookstore),
+		PlanStayDateInfos: infos,
 	}
 }
 
