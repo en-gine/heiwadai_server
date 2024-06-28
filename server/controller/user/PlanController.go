@@ -136,11 +136,15 @@ func (ac *PlanController) Search(ctx context.Context, req *connect.Request[user.
 		}
 		displayPlan := PlanEntityToResponse(candidate.Plan, planStore)
 
+		priceCategoryName := candidate.PricePerCategory.String()
+		if msg.RoomCount > 1 {
+			priceCategoryName += "（1部屋）"
+		}
 		resPlan := &user.DisplayPlanWithSearchResultOption{
 			Plan:                 displayPlan,
 			MinimumPrice:         uint32(candidate.MinimumPrice),
 			PricePerCategory:     user.PricePerCategory(candidate.PricePerCategory),
-			PricePerCategoryName: candidate.PricePerCategory.String(),
+			PricePerCategoryName: priceCategoryName,
 		}
 		plans = append(plans, resPlan)
 

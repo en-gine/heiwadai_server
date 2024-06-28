@@ -180,22 +180,11 @@ func (p *PlanQuery) AvailRSToCandidates(res *EnvelopeRS, roomCount int, guestCou
 
 		for index, plan := range roomStay.RatePlans.RatePlan {
 			// 一泊毎や人数ごとの追加料金
-			var nightExtraPrice uint64
-			for _, night := range roomStay.RoomRates.RoomRate[index].Rates.Rate {
-				amt := night.Base.AmountAfterTax
-				nightPrice, _ := strconv.ParseUint(amt, 10, 64)
-				nightExtraPrice += nightPrice
-			}
 			tmpAmount := roomStay.RoomRates.RoomRate[index].Total.AmountAfterTax
 			var planPrice uint64
-			tmpTotal, _ := strconv.ParseUint(tmpAmount, 10, 64)
-			if guestCount > 1 {
-				planPrice = tmpTotal + nightExtraPrice
-			} else {
-				planPrice = tmpTotal
-			}
+			roomPrice, _ := strconv.ParseUint(tmpAmount, 10, 64)
 
-			planPrice = planPrice * uint64(roomCount)
+			planPrice = roomPrice * uint64(roomCount)
 			availStatus := AvailabilityStatus(roomStay.RoomRates.RoomRate[index].AvailabilityStatus)
 			if availStatus == AvailableClosedOut {
 				//　売り切れ
@@ -281,32 +270,21 @@ func (p *PlanQuery) AvailDetailRSToPlanDetail(res *EnvelopeRS, roomCount int, gu
 		// 合計金額の計算
 		for _, room := range roomStay.RoomRates.RoomRate {
 			// 一泊毎や人数ごとの追加料金
-			var nightExtraPrice uint
 			var planStayDateInfo entity.StayDateInfo
 			stayDate, err := room.EffectiveDate.ToDate()
 			if err != nil {
 				return nil, errors.New("EffectiveDateの変換に失敗しました")
 			}
 			planStayDateInfo.StayDate = stayDate
-			for _, night := range room.Rates.Rate {
-				amt := night.Base.AmountAfterTax
-				nightPrice, _ := strconv.ParseInt(amt, 10, 64)
-				nightExtraPrice += uint(nightPrice)
-			}
-			tmpAmount := room.Total.AmountAfterTax
-			var roomPrice uint
-			tmpTotal, _ := strconv.ParseUint(tmpAmount, 10, 64)
-			if guestCount > 1 {
-				roomPrice = uint(tmpTotal) + nightExtraPrice
-			} else {
-				roomPrice = uint(tmpTotal)
-			}
+
+			roomPrice, _ := strconv.ParseUint(room.Total.AmountAfterTax, 10, 64)
+			dayTotalPrice := (uint(roomPrice) * uint(roomCount))
 			planStayDateInfo = entity.StayDateInfo{
 				StayDate:           stayDate,
-				StayDateTotalPrice: (roomPrice * uint(roomCount)),
+				StayDateTotalPrice: dayTotalPrice,
 			}
 
-			planTotalPrice = planTotalPrice + (roomPrice * uint(roomCount))
+			planTotalPrice = planTotalPrice + dayTotalPrice
 			planStayDateInfos = append(planStayDateInfos, planStayDateInfo)
 		}
 

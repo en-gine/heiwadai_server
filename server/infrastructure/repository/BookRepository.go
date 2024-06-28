@@ -62,6 +62,7 @@ func (pq *BookRepository) Save(entity *entity.Booking) error {
 	var dateInfos []models.BookPlanStayDateInfo
 	for _, dateInfo := range *entity.BookPlan.StayDateInfos {
 		dateInfos = append(dateInfos, models.BookPlanStayDateInfo{
+			PlanID:             plan.ID,
 			StayDate:           dateInfo.StayDate,
 			StayDateTotalPrice: int(dateInfo.StayDateTotalPrice),
 		})

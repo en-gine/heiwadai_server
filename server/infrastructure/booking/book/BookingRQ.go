@@ -240,7 +240,7 @@ type RoomRateInformation struct {
 	PerChildB50Rate2        *int         `xml:"PerChildB50Rate2"`
 	PerChildC30Rate         *int         `xml:"PerChildC30Rate"`
 	PerChildDNoneRate       *int         `xml:"PerChildDNoneRate"`
-	RoomRatePaxMaleCount    *int         `xml:"RoomRatePaxMaleCount"`
+	RoomRatePaxMaleCount    uint         `xml:"RoomRatePaxMaleCount"`
 	RoomRatePaxFemaleCount  *int         `xml:"RoomRatePaxFemaleCount"`
 	RoomRateChildA70Count   *int         `xml:"RoomRateChildA70Count"`
 	RoomRateChildA70Count2  *int         `xml:"RoomRateChildA70Count2"`

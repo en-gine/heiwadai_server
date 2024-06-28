@@ -120,10 +120,11 @@ func NewBookingRQ(bookData *entity.Booking, store *entity.StayableStore) *Envelo
 	}
 
 	guestNameKana := util.HiraToHalfKana(guest.LastNameKana + " " + guest.FirstNameKana)
-
+	dateInfos := *bookData.BookPlan.StayDateInfos
 	var RoomAndGuestList []RoomAndGuest
-	for j := 0; j < len(*bookData.BookPlan.StayDateInfos); j++ {
-		unitPrice := int((*bookData.BookPlan.StayDateInfos)[j].StayDateTotalPrice) / int(bookData.RoomCount) / int(bookData.Adult+bookData.Child)
+	for _, dateInfo := range dateInfos {
+		unitPrice := int(dateInfo.StayDateTotalPrice) / int(bookData.RoomCount) / int(bookData.Adult+bookData.Child)
+
 		for i := 0; i < int(bookData.RoomCount); i++ {
 			xml := RoomAndGuest{
 				RoomInformation: RoomInformation{
@@ -132,8 +133,9 @@ func NewBookingRQ(bookData *entity.Booking, store *entity.StayableStore) *Envelo
 					PerRoomPaxCount: (bookData.Adult + bookData.Child) / bookData.RoomCount, // 1部屋あたりの人数
 				},
 				RoomRateInformation: RoomRateInformation{
-					RoomDate:   util.DateToStrDate(bookData.StayFrom),
-					PerPaxRate: &unitPrice,
+					RoomDate:             util.DateToStrDate(dateInfo.StayDate),
+					PerPaxRate:           &unitPrice,
+					RoomRatePaxMaleCount: bookData.Adult,
 				},
 			}
 			RoomAndGuestList = append(RoomAndGuestList, xml)

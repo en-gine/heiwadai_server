@@ -49,7 +49,7 @@ func (c PricePerCategory) String() string {
 	case PricePerPerson:
 		return "1名様"
 	case PricePerNightAndPerson:
-		return "1泊1名様"
+		return "1名様1泊"
 	default:
 		return "Unknown"
 	}
