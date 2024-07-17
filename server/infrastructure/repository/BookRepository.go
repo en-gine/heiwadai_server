@@ -57,6 +57,7 @@ func (pq *BookRepository) Save(entity *entity.Booking) error {
 		Overview:               entity.BookPlan.Plan.OverView,
 		StoreID:                entity.BookPlan.Plan.StoreID.String(),
 		TLBookdataRoomTypeCode: entity.BookPlan.Plan.TlBookingRoomTypeCode,
+		TLBookdataRoomTypeName: entity.BookPlan.Plan.TlBookingRoomTypeName,
 	}
 
 	var dateInfos []models.BookPlanStayDateInfo

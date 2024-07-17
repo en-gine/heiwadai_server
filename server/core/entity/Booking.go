@@ -102,7 +102,7 @@ func RegenGuestData(
 type CheckInTime string
 
 func NewCheckInTime(s string) (*CheckInTime, *errors.DomainError) {
-	if IsValidTimeFormat(s) {
+	if !IsValidTimeFormat(s) {
 		return nil, errors.NewDomainError(errors.InvalidParameter, "CheckInTimeの形式が正しくありません。")
 	}
 	result := CheckInTime(s)

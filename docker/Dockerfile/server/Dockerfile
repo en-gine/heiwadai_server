@@ -5,6 +5,9 @@ WORKDIR /server
 RUN apt-get update && apt-get install -y git
 COPY ./server .
 
+## brew 
+RUN /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
 ### connnect buf https://github.com/bufbuild/connect-go
 RUN go mod tidy & \
   go install github.com/bufbuild/buf/cmd/buf@latest & \
@@ -13,7 +16,11 @@ RUN go mod tidy & \
   go install github.com/bufbuild/connect-go/cmd/protoc-gen-connect-go@latest & \
   go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2@latest
 
-RUN export PATH="$(go env GOBIN):${PATH}" && export PATH="$(go env GOPATH)/bin:${PATH}"
+RUN export PATH="$(go env GOBIN):${PATH}" && export PATH="$(go env GOPATH)/bin:${PATH}" & \
+  (echo; echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"') >> /root/.bashrc & \
+  eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)" & \
+  apt-get install build-essential -y & \
+  brew install gcc
 
 ### migrate https://github.com/golang-migrate/migrate
 RUN go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest

@@ -155,6 +155,7 @@ func (ac *BookController) Reserve(ctx context.Context, req *connect.Request[user
 		req.Msg.RequestPlan.OverView,
 		uuid.MustParse(req.Msg.RequestPlan.StoreID),
 		req.Msg.RequestPlan.TlBookingRoomTypeCode,
+		req.Msg.RequestPlan.TlBookingRoomTypeName,
 	)
 
 	var stayDateInfos []entity.StayDateInfo
@@ -176,14 +177,18 @@ func (ac *BookController) Reserve(ctx context.Context, req *connect.Request[user
 	} else {
 		note = *req.Msg.Note
 	}
+	checkIntime, domainErr := entity.NewCheckInTime(req.Msg.CheckInTime)
+	if domainErr != nil {
+		return nil, controller.ErrorHandler(domainErr)
+	}
 
-	domainErr := ac.bookUseCase.Reserve(
+	domainErr = ac.bookUseCase.Reserve(
 		req.Msg.StayFrom.AsTime(),
 		req.Msg.StayTo.AsTime(),
 		uint(req.Msg.Adult),
 		uint(req.Msg.Child),
 		uint(req.Msg.RoomCount),
-		entity.CheckInTime(req.Msg.CheckInTime),
+		*checkIntime,
 		uint(req.Msg.TotalCost),
 		guest,
 		bookPlan,
@@ -273,5 +278,6 @@ func PlanEntityToResponse(plan *entity.Plan, planStore *entity.StayableStore) *u
 		StoreName:             planStore.Name,
 		StoreBranchName:       planStore.BranchName,
 		TlBookingRoomTypeCode: plan.TlBookingRoomTypeCode,
+		TlBookingRoomTypeName: plan.TlBookingRoomTypeName,
 	}
 }

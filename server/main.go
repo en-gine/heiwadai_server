@@ -1,5 +1,7 @@
 package main
 
+//go:generate go run linter/main.go .
+
 import (
 	"fmt"
 	"log"

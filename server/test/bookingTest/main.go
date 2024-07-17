@@ -63,12 +63,13 @@ func Book() {
 		"広々とした部屋です。",
 		stores[0].ID,
 		"1",
+		"ダブル",
 	)
 
 	detailPlan := &entity.PlanStayDetail{
 		Plan: plan,
 		StayDateInfos: &[]entity.StayDateInfo{
-			entity.StayDateInfo{
+			{
 				StayDate:           tomorrow,
 				StayDateTotalPrice: 10000,
 			},

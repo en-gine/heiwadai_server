@@ -129,7 +129,7 @@ func NewBookingRQ(bookData *entity.Booking, store *entity.StayableStore) *Envelo
 			xml := RoomAndGuest{
 				RoomInformation: RoomInformation{
 					RoomTypeCode:    plan.TlBookingRoomTypeCode,
-					RoomTypeName:    plan.RoomType.String(),
+					RoomTypeName:    plan.TlBookingRoomTypeName,
 					PerRoomPaxCount: (bookData.Adult + bookData.Child) / bookData.RoomCount, // 1部屋あたりの人数
 				},
 				RoomRateInformation: RoomRateInformation{
@@ -174,7 +174,7 @@ func NewBookingRQ(bookData *entity.Booking, store *entity.StayableStore) *Envelo
 					},
 					ExtendLincoln: ExtendLincoln{
 						TllHotelCode: BookingSystemID,
-						UseTllPlan:   1,
+						UseTllPlan:   0,
 					},
 					SendInformation: SendInformation{
 						AssignDiv: 1, // 部屋割ありデフォルト
@@ -192,7 +192,7 @@ func NewBookingRQ(bookData *entity.Booking, store *entity.StayableStore) *Envelo
 						},
 						SalesOfficeInformation: SalesOfficeInformation{
 							SalesOfficeCompanyName: "平和台ホテルアプリ",
-							SalesOfficeName:        store.Name + *store.BranchName,
+							SalesOfficeName:        "平和台ホテルアプリ",
 							SalesOfficeCode:        "10000000",
 						},
 						BasicInformation: BasicInformation{
@@ -228,6 +228,7 @@ func NewBookingRQ(bookData *entity.Booking, store *entity.StayableStore) *Envelo
 							PointsDiscountList: PointsDiscountList{
 								PointsDiscount: 0, // ポイント値引き
 							},
+							AmountClaimed: int(bookData.TotalCost),
 						},
 						RoomInformationList: RoomInformationList{
 							RoomAndGuestList: RoomAndGuestList,

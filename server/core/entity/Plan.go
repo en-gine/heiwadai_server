@@ -17,6 +17,7 @@ type Plan struct {
 	OverView              string
 	StoreID               uuid.UUID
 	TlBookingRoomTypeCode string
+	TlBookingRoomTypeName string
 }
 
 type StayDateInfo struct {
@@ -202,6 +203,7 @@ func RegenPlan(
 	OverView string,
 	StoreID uuid.UUID,
 	TlBookingRoomTypeCode string,
+	TlBookingRoomTypeName string,
 ) *Plan {
 	return &Plan{
 		ID:                    ID,
@@ -214,5 +216,6 @@ func RegenPlan(
 		OverView:              OverView,
 		StoreID:               StoreID,
 		TlBookingRoomTypeCode: TlBookingRoomTypeCode,
+		TlBookingRoomTypeName: TlBookingRoomTypeName,
 	}
 }

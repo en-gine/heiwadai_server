@@ -204,6 +204,7 @@ CREATE TABLE book_plan (
     overview TEXT NOT NULL,
     store_id UUID NOT NULL,
     tl_bookdata_room_type_code VARCHAR(255) NOT NULL,
+    tl_bookdata_room_type_name VARCHAR(255) NOT NULL DEFAULT '',
     create_at TIMESTAMPTZ NOT NULL default now(),
     update_at TIMESTAMPTZ NOT NULL default now(),
     FOREIGN KEY (store_id) REFERENCES store(id)

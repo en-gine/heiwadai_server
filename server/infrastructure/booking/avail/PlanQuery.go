@@ -175,6 +175,7 @@ func (p *PlanQuery) AvailRSToCandidates(res *EnvelopeRS, roomCount int, guestCou
 
 		RoomTypeObject := roomStay.RoomTypes.RoomType[0]
 		apiRoomTypeCode := RoomTypeObject.RoomTypeCode
+		apiRoomTypeName := RoomTypeObject.RoomDescription.Name
 		entityRoomType := BedTypeCodeToRoomType(RoomTypeObject.BedTypeCode)
 		smokeType := IsNonSmokingToSmokeType(RoomTypeObject.NonSmoking) // true false nil
 
@@ -220,6 +221,7 @@ func (p *PlanQuery) AvailRSToCandidates(res *EnvelopeRS, roomCount int, guestCou
 				planOverView,
 				stayable.ID,
 				apiRoomTypeCode,
+				apiRoomTypeName,
 			)
 
 			candidate := entity.NewPlanCandidate(plan, nights, guestCount)
@@ -325,6 +327,7 @@ func (p *PlanQuery) AvailDetailRSToPlanDetail(res *EnvelopeRS, roomCount int, gu
 				planOverView,
 				stayable.ID,
 				roomTypeObject.RoomTypeCode,
+				roomTypeObject.RoomDescription.Name,
 			)
 
 			plans = append(plans, *plan)

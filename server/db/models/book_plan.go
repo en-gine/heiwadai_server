@@ -37,6 +37,7 @@ type BookPlan struct {
 	CreateAt               time.Time `boil:"create_at" json:"create_at" toml:"create_at" yaml:"create_at"`
 	UpdateAt               time.Time `boil:"update_at" json:"update_at" toml:"update_at" yaml:"update_at"`
 	TLBookdataRoomTypeCode string    `boil:"tl_bookdata_room_type_code" json:"tl_bookdata_room_type_code" toml:"tl_bookdata_room_type_code" yaml:"tl_bookdata_room_type_code"`
+	TLBookdataRoomTypeName string    `boil:"tl_bookdata_room_type_name" json:"tl_bookdata_room_type_name" toml:"tl_bookdata_room_type_name" yaml:"tl_bookdata_room_type_name"`
 
 	R *bookPlanR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L bookPlanL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -57,6 +58,7 @@ var BookPlanColumns = struct {
 	CreateAt               string
 	UpdateAt               string
 	TLBookdataRoomTypeCode string
+	TLBookdataRoomTypeName string
 }{
 	ID:                     "id",
 	PlanID:                 "plan_id",
@@ -72,6 +74,7 @@ var BookPlanColumns = struct {
 	CreateAt:               "create_at",
 	UpdateAt:               "update_at",
 	TLBookdataRoomTypeCode: "tl_bookdata_room_type_code",
+	TLBookdataRoomTypeName: "tl_bookdata_room_type_name",
 }
 
 var BookPlanTableColumns = struct {
@@ -89,6 +92,7 @@ var BookPlanTableColumns = struct {
 	CreateAt               string
 	UpdateAt               string
 	TLBookdataRoomTypeCode string
+	TLBookdataRoomTypeName string
 }{
 	ID:                     "book_plan.id",
 	PlanID:                 "book_plan.plan_id",
@@ -104,6 +108,7 @@ var BookPlanTableColumns = struct {
 	CreateAt:               "book_plan.create_at",
 	UpdateAt:               "book_plan.update_at",
 	TLBookdataRoomTypeCode: "book_plan.tl_bookdata_room_type_code",
+	TLBookdataRoomTypeName: "book_plan.tl_bookdata_room_type_name",
 }
 
 // Generated where
@@ -146,6 +151,7 @@ var BookPlanWhere = struct {
 	CreateAt               whereHelpertime_Time
 	UpdateAt               whereHelpertime_Time
 	TLBookdataRoomTypeCode whereHelperstring
+	TLBookdataRoomTypeName whereHelperstring
 }{
 	ID:                     whereHelperstring{field: "\"book_plan\".\"id\""},
 	PlanID:                 whereHelperstring{field: "\"book_plan\".\"plan_id\""},
@@ -161,6 +167,7 @@ var BookPlanWhere = struct {
 	CreateAt:               whereHelpertime_Time{field: "\"book_plan\".\"create_at\""},
 	UpdateAt:               whereHelpertime_Time{field: "\"book_plan\".\"update_at\""},
 	TLBookdataRoomTypeCode: whereHelperstring{field: "\"book_plan\".\"tl_bookdata_room_type_code\""},
+	TLBookdataRoomTypeName: whereHelperstring{field: "\"book_plan\".\"tl_bookdata_room_type_name\""},
 }
 
 // BookPlanRels is where relationship names are stored.
@@ -211,9 +218,9 @@ func (r *bookPlanR) GetUserBooks() UserBookSlice {
 type bookPlanL struct{}
 
 var (
-	bookPlanAllColumns            = []string{"id", "plan_id", "title", "price", "image_url", "room_type", "meal_type_morning", "meal_type_dinner", "smoke_type", "overview", "store_id", "create_at", "update_at", "tl_bookdata_room_type_code"}
+	bookPlanAllColumns            = []string{"id", "plan_id", "title", "price", "image_url", "room_type", "meal_type_morning", "meal_type_dinner", "smoke_type", "overview", "store_id", "create_at", "update_at", "tl_bookdata_room_type_code", "tl_bookdata_room_type_name"}
 	bookPlanColumnsWithoutDefault = []string{"id", "plan_id", "title", "price", "image_url", "room_type", "meal_type_morning", "meal_type_dinner", "smoke_type", "overview", "store_id", "tl_bookdata_room_type_code"}
-	bookPlanColumnsWithDefault    = []string{"create_at", "update_at"}
+	bookPlanColumnsWithDefault    = []string{"create_at", "update_at", "tl_bookdata_room_type_name"}
 	bookPlanPrimaryKeyColumns     = []string{"id"}
 	bookPlanGeneratedColumns      = []string{}
 )

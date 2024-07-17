@@ -159,6 +159,7 @@ func BookModelToEntity(book *models.UserBook, guest *models.BookGuestDatum, plan
 		plan.Overview,
 		uuid.MustParse(plan.StoreID),
 		plan.TLBookdataRoomTypeCode,
+		plan.TLBookdataRoomTypeName,
 	)
 
 	bookPlan := &entity.PlanStayDetail{

@@ -54,7 +54,7 @@ type AllotmentBookingReport struct {
 	BasicInformation         BasicInformation         `xml:"BasicInformation"`
 	BasicRateInformation     BasicRateInformation     `xml:"BasicRateInformation"`
 	MemberInformation        MemberInformation        `xml:"MemberInformation"`
-	OptionInformation        OptionInformation        `xml:"OptionInformation"`
+	OptionInformation        *OptionInformation       `xml:"OptionInformation"`
 	RoomInformationList      RoomInformationList      `xml:"RoomInformationList"`
 }
 
