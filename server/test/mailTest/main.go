@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"server/core/entity"
+	"server/core/infra/action"
 	SendMailAction "server/infrastructure/action"
 	"server/infrastructure/env"
 	repository "server/infrastructure/repository"
@@ -11,15 +12,26 @@ import (
 
 func main() {
 	Send()
+	SendHTML()
 	GetMailOKUser()
 }
-
 func Send() {
-	action := SendMailAction.NewSendMailAction()
+	act := SendMailAction.NewSendMailAction()
 	To := env.GetEnv(env.TestAdminMail)
 	Title := "タイトル"
-	Body := "本文"
-	err := action.Send(To, Title, Body)
+	Body := "こんにちはこれはHTMLメールのテストです。"
+	err := act.Send(To, Title, Body, action.SendStylePlainText)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func SendHTML() {
+	act := SendMailAction.NewSendMailAction()
+	To := env.GetEnv(env.TestAdminMail)
+	Title := "タイトル"
+	Body := "<html><body><h1>こんにちは</h1><p>これはHTMLメールのテストです。</p></body></html>"
+	err := act.Send(To, Title, Body, action.SendStyleHTML)
 	if err != nil {
 		panic(err)
 	}

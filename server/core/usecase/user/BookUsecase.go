@@ -13,6 +13,7 @@ import (
 	queryservice "server/core/infra/queryService"
 	"server/core/infra/repository"
 	"server/infrastructure/logger"
+	"server/infrastructure/parser"
 
 	"github.com/google/uuid"
 )
@@ -85,14 +86,20 @@ func (u *BookUsecase) Cancel(bookID uuid.UUID) *errors.DomainError {
 	if err != nil {
 		return errors.NewDomainError(errors.QueryError, err.Error())
 	}
+
+	tmpl, err := template.ParseFiles("core/usecase/template/CancelMail.html")
+	if err != nil {
+		return errors.NewDomainError(errors.CancelButNeedFeedBack, "予約はキャンセルしましたが、メールテンプレートの取得に失敗しました。")
+	}
+
 	// 予約キャンセル完了メールの内容を取得
-	content, err := cancelMailContent(book, store)
+	content, err := cancelMailContent(tmpl, book, store)
 	if err != nil {
 		return errors.NewDomainError(errors.CancelButNeedFeedBack, "予約はキャンセルしましたが、お客様へのメール作成に失敗しました。")
 	}
 
 	// 予約完了メール送信
-	err = u.mailAction.Send(book.GuestData.Mail, "【"+store.Name+*store.BranchName+"】予約をキャンセルしました", *content)
+	err = u.mailAction.Send(book.GuestData.Mail, "【"+store.Name+*store.BranchName+"】予約をキャンセルしました", *content, action.SendStyleHTML)
 	if err != nil {
 		return errors.NewDomainError(errors.CancelButNeedFeedBack, "予約はキャンセルしましたが、お客様へのメール送信に失敗しました。")
 	}
@@ -178,13 +185,17 @@ func (u *BookUsecase) Reserve(
 	}
 
 	// 予約完了メールの内容を取得
-	content, err := reserveMailContent(newBook, store)
+	tmpl, err := template.ParseFiles("core/usecase/template/ReserveMail.html")
+	if err != nil {
+		return errors.NewDomainError(errors.CancelButNeedFeedBack, "予約は完了しましたが、メールテンプレートの取得に失敗しました。")
+	}
+	content, err := reserveMailContent(tmpl, newBook, store)
 	if err != nil {
 		return errors.NewDomainError(errors.CancelButNeedFeedBack, "予約は完了しましたが、お客様へのメール作成に失敗しました。")
 	}
 
 	// 予約完了メール送信
-	err = u.mailAction.Send(GuestData.Mail, "【"+store.Name+*store.BranchName+"】宿泊予約完了のお知らせ", *content)
+	err = u.mailAction.Send(GuestData.Mail, "【"+store.Name+*store.BranchName+"】宿泊予約完了のお知らせ", *content, action.SendStyleHTML)
 	if err != nil {
 		return errors.NewDomainError(errors.CancelButNeedFeedBack, "予約は完了しましたが、お客様へのメール送信に失敗しました。: "+err.Error())
 	}
@@ -197,57 +208,10 @@ func (u *BookUsecase) GetIsBookingUnderMaintenance() *entity.MaintenanceInfo {
 }
 
 func reserveMailContent(
+	contentTemplate *template.Template,
 	bookinfo *entity.Booking,
 	store *entity.StayableStore,
 ) (*string, error) {
-	contentTemplate := `
-{{.GuestName}} 様
-
-この度は、当ホテルをご予約いただき、誠にありがとうございます。
-以下の内容でご予約が完了しましたので、お知らせいたします。
-
-予約番号: {{.ReservationNumber}}
-チェックイン日: {{.CheckInDate}}
-チェックアウト日: {{.CheckOutDate}}
-チェックイン時間：{{.CheckInTime}}
-宿泊プラン: {{.ReservationPlan}}
-宿泊人数: {{.NumberOfGuests}}名様
-部屋数：{{.RoomCount}}部屋
-部屋タイプ：{{.RoomType}}
-食事タイプ：{{.MealType}}
-禁煙喫煙：{{.SmokingType}}
-
-合計金額: {{.TotalAmount}}円
-
-お客様備考: {{.Note}}
-
-
-【ご注意事項】
-※チェックイン時間
-変更がある場合は、必ず宿泊ホテルまでご連絡ください。
-
-※駐車場について
-駐車場は完全予約制です。
-宿泊ホテルまで事前にご連絡下さい。
-ご連絡がない場合はご利用いただけない場合がございます。
-
-※乳幼児について
-乳幼児の添い寝には別途料金を頂戴しております。
-事前に施設までご連絡ください。
-
-※宿泊税について
-ご宿泊代金とは別に宿泊税が掛かります。
-
-ご不明な点がございましたら、お気軽にお問い合わせください。
-当日は、お客様のお越しを心よりお待ちしております。
-
-敬具
-
-{{.HotelName}}
-{{.HotelAddress}}
-{{.HotelPhone}}
-{{.HotelURL}}
-`
 
 	// メールのデータを定義（実際のデータはアプリケーションから取得）
 	var people string
@@ -256,24 +220,33 @@ func reserveMailContent(
 	} else {
 		people = "大人: " + strconv.FormatUint(uint64(bookinfo.Adult), 10) + "名様"
 	}
+
+	address := parser.ParseAddress(store.Address)
 	data := map[string]string{
-		"GuestName":         bookinfo.GuestData.LastName + bookinfo.GuestData.FirstName,
-		"ReservationNumber": bookinfo.TlDataID,
-		"CheckInDate":       bookinfo.StayFrom.Format("2006年1月2日"),
-		"CheckOutDate":      bookinfo.StayTo.Format("2006年1月2日"),
-		"CheckInTime":       bookinfo.CheckInTime.String(),
-		"ReservationPlan":   bookinfo.BookPlan.Plan.Title,
-		"NumberOfGuests":    people,
-		"RoomCount":         strconv.FormatUint(uint64(bookinfo.RoomCount), 10),
-		"RoomType":          bookinfo.BookPlan.Plan.RoomType.String(),
-		"MealType":          bookinfo.BookPlan.Plan.MealType.String(),
-		"SmokingType":       bookinfo.BookPlan.Plan.SmokeType.String(),
-		"TotalAmount":       strconv.FormatUint(uint64(bookinfo.TotalCost), 10),
-		"Note":              bookinfo.Note,
-		"HotelName":         store.Name + *store.BranchName,
-		"HotelAddress":      store.Address,
-		"HotelPhone":        store.Tel,
-		"HotelURL":          store.SiteURL,
+		"GuestName":              bookinfo.GuestData.LastName + bookinfo.GuestData.FirstName,
+		"GuestMail":              bookinfo.GuestData.Mail,
+		"ReservationNumber":      bookinfo.TlDataID,
+		"CheckInDate":            bookinfo.StayFrom.Format("2006年1月2日"),
+		"CheckOutDate":           bookinfo.StayTo.Format("2006年1月2日"),
+		"CheckInTime":            bookinfo.CheckInTime.String(),
+		"CheckInDateTimeFormat":  bookinfo.StayFrom.Format("2006-01-02") + "T00:00:00+09:00",
+		"CheckOutDateTimeFormat": bookinfo.StayTo.Format("2006-01-02") + "T00:00:00+09:00",
+		"ReservationPlan":        bookinfo.BookPlan.Plan.Title,
+		"NumberOfGuests":         people,
+		"RoomCount":              strconv.FormatUint(uint64(bookinfo.RoomCount), 10),
+		"RoomType":               bookinfo.BookPlan.Plan.TlBookingRoomTypeName,
+		"MealType":               bookinfo.BookPlan.Plan.MealType.String(),
+		"SmokingType":            bookinfo.BookPlan.Plan.SmokeType.String(),
+		"TotalAmount":            strconv.FormatUint(uint64(bookinfo.TotalCost), 10),
+		"Note":                   bookinfo.Note,
+		"HotelName":              store.Name + *store.BranchName,
+		"HotelAddress":           store.Address,
+		"HotelAddressLocality":   address[1],
+		"HotelAddressRegion":     address[0],
+		"HotelAddressStreet":     address[2],
+		"HotelPostalCode":        store.ZipCode,
+		"HotelPhone":             store.Tel,
+		"HotelURL":               store.SiteURL,
 	}
 
 	// テンプレートを解析
@@ -286,36 +259,10 @@ func reserveMailContent(
 }
 
 func cancelMailContent(
+	contentTemplate *template.Template,
 	bookinfo *entity.Booking,
 	store *entity.StayableStore,
 ) (*string, error) {
-	contentTemplate := `
-{{.GuestName}} 様
-
-この度は、当ホテルのご利用ご検討いただき、誠にありがとうございます。
-以下の内容でご予約のキャンセルを完了しましたので、お知らせいたします。
-またのご利用を心よりお待ちしております。
-
-予約番号: {{.ReservationNumber}}
-チェックイン日: {{.CheckInDate}}
-チェックアウト日: {{.CheckOutDate}}
-宿泊プラン: {{.ReservationPlan}}
-宿泊人数: {{.NumberOfGuests}}名様
-部屋数：{{.RoomCount}}部屋
-部屋タイプ：{{.RoomType}}
-
-
-ご不明な点がございましたら、お気軽にお問い合わせください。
-お客様のまたお越しをお待ちしております。
-
-敬具
-
-{{.HotelName}}
-{{.HotelAddress}}
-{{.HotelPhone}}
-{{.HotelURL}}
-`
-
 	// メールのデータを定義（実際のデータはアプリケーションから取得）
 	var people string
 	if bookinfo.Child > 0 {
@@ -331,7 +278,7 @@ func cancelMailContent(
 		"ReservationPlan":   bookinfo.BookPlan.Plan.Title,
 		"NumberOfGuests":    people,
 		"RoomCount":         strconv.FormatUint(uint64(bookinfo.RoomCount), 10),
-		"RoomType":          bookinfo.BookPlan.Plan.RoomType.String(),
+		"RoomType":          bookinfo.BookPlan.Plan.TlBookingRoomTypeName,
 		"HotelName":         store.Name + *store.BranchName,
 		"HotelAddress":      store.Address,
 		"HotelPhone":        store.Tel,
@@ -347,18 +294,11 @@ func cancelMailContent(
 	return contentStr, nil
 }
 
-func analyzeTemplate(templateContent string, dataMap map[string]string) (*string, error) {
-
-	// テンプレートを解析
-	tmpl, err := template.New("email").Parse(templateContent)
-	if err != nil {
-		fmt.Println("テンプレートの解析に失敗しました:", err)
-		return nil, err
-	}
+func analyzeTemplate(templateContent *template.Template, dataMap map[string]string) (*string, error) {
 
 	// テンプレートに値を埋め込む
 	var content bytes.Buffer
-	err = tmpl.Execute(&content, dataMap)
+	err := templateContent.Execute(&content, dataMap)
 	if err != nil {
 		fmt.Println("テンプレートへの値の埋め込みに失敗しました:", err)
 		return nil, err

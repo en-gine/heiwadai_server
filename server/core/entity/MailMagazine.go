@@ -156,7 +156,7 @@ func RegenMailMagazine(
 	UpdateAt time.Time,
 ) *MailMagazine {
 	return &MailMagazine{
-		ID:                 uuid.New(),
+		ID:                 ID,
 		Title:              Title,
 		Content:            Content,
 		AuthorID:           AuthorID,

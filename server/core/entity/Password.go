@@ -28,8 +28,8 @@ func (p *Password) string() string {
 	return string(*p)
 }
 
-// フロントからパスワードを暗号化して投げるようにしたため、復号化した文字列を返します。
 func (p *Password) DecriptedString() (string, error) {
+	// フロントからパスワードを暗号化して投げるようにしたため、復号化した文字列を返します。
 	return encrypt.Decrypt(p.string())
 }
 

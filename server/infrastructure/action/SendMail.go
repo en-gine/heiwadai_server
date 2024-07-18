@@ -1,10 +1,12 @@
 package action
 
 import (
+	"bytes"
 	"encoding/base64"
 	"errors"
 	"fmt"
 	"mime"
+	"mime/quotedprintable"
 	"net/smtp"
 	"strings"
 
@@ -31,29 +33,40 @@ type SendMailAction struct{}
 
 func (s *SendMailAction) SendAll(mails *[]string, Title string, Body string) error {
 	To := "no-reply@heiwadai-hotel.app" // 一斉送信の場合ダミー
-	err := s.SendMail(To, Title, Body, mails)
+	err := s.SendMail(To, Title, Body, mails, action.SendStylePlainText)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (s *SendMailAction) Send(To string, Title string, Body string) error {
-	err := s.SendMail(To, Title, Body, nil)
+func (s *SendMailAction) Send(To string, Title string, Body string, sendStyle action.SendStyle) error {
+	err := s.SendMail(To, Title, Body, nil, sendStyle)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (s *SendMailAction) SendMail(To string, Title string, Body string, BulkTo *[]string) error {
+func (s *SendMailAction) SendMail(To string, Title string, Body string, BulkTo *[]string, sendStyle action.SendStyle) error {
+	var encodedBody string
 	header := make(map[string]string)
 	header["From"] = "平和台ホテル送信専用<" + MAILFROM + ">"
 	header["To"] = To
 	header["Subject"] = mime.QEncoding.Encode("UTF-8", Title)
 	header["MIME-Version"] = "1.0"
-	header["Content-Type"] = "text/plain; charset=\"utf-8\""
-	header["Content-Transfer-Encoding"] = "base64"
+	switch sendStyle {
+	case action.SendStyleHTML:
+		header["Content-Type"] = "text/html; charset=\"utf-8\""
+		header["Content-Transfer-Encoding"] = "quoted-printable"
+		encodedBody = quoteString(Body)
+	case action.SendStylePlainText:
+		fallthrough
+	default:
+		header["Content-Type"] = "text/plain; charset=\"utf-8\""
+		header["Content-Transfer-Encoding"] = "base64"
+		encodedBody = base64.StdEncoding.EncodeToString([]byte(Body))
+	}
 
 	// BulkToがnilでない場合に一斉送信用のアドレスを処理
 	if BulkTo != nil {
@@ -72,20 +85,27 @@ func (s *SendMailAction) SendMail(To string, Title string, Body string, BulkTo *
 	}
 
 	// メッセージ本文を追加
-	message += "\r\n" + base64.StdEncoding.EncodeToString([]byte(Body))
+	message += "\r\n" + encodedBody
 
 	// メール送信
 	if MAILHOST == "" || MAILPORT == "" || MAILUSER == "" || MAILPASS == "" {
-		logger.Fatalf("smtp error: %s", "環境変数が設定されていません")
+		logger.Errorf("smtp error: %s", "環境変数が設定されていません")
 		return errors.New("環境変数が設定されていません")
 	}
 	err := smtp.SendMail(MAILHOST+":"+MAILPORT,
 		smtp.PlainAuth("", MAILUSER, MAILPASS, MAILHOST),
 		MAILFROM, []string{To}, []byte(message))
 	if err != nil {
-		logger.Fatalf("smtp error: %s", err)
+		logger.Errorf("smtp error: %s", err)
 		return err
 	}
 
 	return nil
+}
+func quoteString(s string) string {
+	var buf bytes.Buffer
+	w := quotedprintable.NewWriter(&buf)
+	w.Write([]byte(s))
+	w.Close()
+	return buf.String()
 }

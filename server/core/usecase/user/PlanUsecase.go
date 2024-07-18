@@ -82,7 +82,7 @@ func (u *PlanUsecase) GetDetail(
 	if err != nil {
 		return nil, errors.NewDomainError(errors.QueryError, err.Error())
 	}
-	if plan == nil || reflect.DeepEqual(plan, entity.PlanStayDetail{}) || plan.Plan.ID == "" {
+	if plan == nil || plan.Plan == nil || reflect.DeepEqual(plan, entity.PlanStayDetail{}) || plan.Plan.ID == "" {
 		return nil, errors.NewDomainError(errors.CancelButNeedFeedBack, "プランの詳細が取得できませんでした。\n既に販売終了している可能性があります。")
 	}
 	return plan, nil

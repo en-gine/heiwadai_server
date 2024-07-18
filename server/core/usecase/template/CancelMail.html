@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ホテル予約キャンセル確認</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f0f0f0;
+      }
+      .container {
+        background-color: #ffffff;
+        padding: 10px;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      h1 {
+        color: #4a4a4a;
+        font-size: 1.5em;
+        border-bottom: 2px solid #4a4a4a;
+        padding-bottom: 10px;
+      }
+      h2 {
+        font-size: 1.2em;
+      }
+      .reservation-details {
+        background-color: #e6e6e6;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+      }
+      .footer {
+        text-align: center;
+        margin-top: 20px;
+        color: #666;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>ホテル予約キャンセル確認</h1>
+      <p>{{.GuestName}} 様</p>
+      <p>
+        この度は、当ホテルのご利用ご検討いただき、誠にありがとうございます。<br />
+        以下の内容でご予約のキャンセルを完了しましたので、お知らせいたします。<br />
+        またのご利用を心よりお待ちしております。
+      </p>
+
+      <div class="reservation-details">
+        <p>
+          <strong>予約番号:</strong> {{.ReservationNumber}}<br />
+          <strong>チェックイン日:</strong> {{.CheckInDate}}<br />
+          <strong>チェックアウト日:</strong> {{.CheckOutDate}}<br />
+          <strong>宿泊プラン:</strong> {{.ReservationPlan}}<br />
+          <strong>宿泊人数:</strong> {{.NumberOfGuests}}名様<br />
+          <strong>部屋数：</strong>{{.RoomCount}}部屋<br />
+          <strong>部屋タイプ：</strong>{{.RoomType}}
+        </p>
+      </div>
+
+      <p>
+        ご不明な点がございましたら、お気軽にお問い合わせください。<br />
+        お客様のまたのお越しをお待ちしております。
+      </p>
+
+      <p>敬具</p>
+
+      <div class="footer">
+        <p>
+          {{.HotelName}}<br />
+          {{.HotelAddress}}<br />
+          {{.HotelPhone}}<br />
+          <a href="{{.HotelURL}}">{{.HotelURL}}</a>
+        </p>
+      </div>
+    </div>
+  </body>
+</html>

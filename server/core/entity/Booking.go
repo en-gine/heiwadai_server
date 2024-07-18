@@ -170,7 +170,7 @@ func RegenBooking(
 	TlBookingNumber *string,
 ) *Booking {
 	return &Booking{
-		ID:              uuid.New(),
+		ID:              ID,
 		StayFrom:        stayFrom,
 		StayTo:          stayTo,
 		Adult:           adult,
