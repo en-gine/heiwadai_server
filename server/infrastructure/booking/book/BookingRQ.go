@@ -135,18 +135,18 @@ const (
 )
 
 type BasicRateInformation struct {
-	RoomRateOrPersonalRate                              RoomRateType       `xml:"RoomRateOrPersonalRate"`
-	TaxServiceFee                                       TaxServiceFeeType  `xml:"TaxServiceFee"`
-	Payment                                             string             `xml:"Payment"`
-	SettlementDiv                                       int                `xml:"SettlementDiv"`
-	TotalAccommodationCharge                            int                `xml:"TotalAccommodationCharge"`
-	TotalAccommodationConsumptionTax                    string             `xml:"TotalAccommodationConsumptionTax"`
-	TotalAccommodationHotSpringTax                      string             `xml:"TotalAccommodationHotSpringTax"`
-	TotalAccomodationServiceCharge                      string             `xml:"TotalAccomodationServiceCharge"`
-	TotalAccommodationDiscountPoints                    int                `xml:"TotalAccommodationDiscountPoints"`
-	TotalAccommodationConsumptionTaxAfterDiscountPoints string             `xml:"TotalAccommodationConsumptionTaxAfterDiscountPoints"`
-	AmountClaimed                                       int                `xml:"AmountClaimed"`
-	PointsDiscountList                                  PointsDiscountList `xml:"PointsDiscountList"`
+	RoomRateOrPersonalRate                              RoomRateType        `xml:"RoomRateOrPersonalRate"`
+	TaxServiceFee                                       TaxServiceFeeType   `xml:"TaxServiceFee"`
+	Payment                                             string              `xml:"Payment"`
+	SettlementDiv                                       int                 `xml:"SettlementDiv"`
+	TotalAccommodationCharge                            int                 `xml:"TotalAccommodationCharge"`
+	TotalAccommodationConsumptionTax                    string              `xml:"TotalAccommodationConsumptionTax"`
+	TotalAccommodationHotSpringTax                      string              `xml:"TotalAccommodationHotSpringTax"`
+	TotalAccomodationServiceCharge                      string              `xml:"TotalAccomodationServiceCharge"`
+	TotalAccommodationDiscountPoints                    int                 `xml:"TotalAccommodationDiscountPoints"`
+	TotalAccommodationConsumptionTaxAfterDiscountPoints string              `xml:"TotalAccommodationConsumptionTaxAfterDiscountPoints"`
+	AmountClaimed                                       int                 `xml:"AmountClaimed"`
+	PointsDiscountList                                  *PointsDiscountList `xml:"PointsDiscountList"`
 }
 
 type RoomRateType = string
@@ -167,9 +167,9 @@ const (
 )
 
 type PointsDiscountList struct {
-	PointsDiv          int    `xml:"PointsDiv"`
+	PointsDiv          *int   `xml:"PointsDiv"`
 	PointsDiscountName string `xml:"PointsDiscountName"`
-	PointsDiscount     int    `xml:"PointsDiscount"`
+	PointsDiscount     *int   `xml:"PointsDiscount"`
 }
 
 type MemberInformation struct {
@@ -192,7 +192,7 @@ type MemberInformation struct {
 	CurrentPoints               string `xml:"CurrentPoints"`
 	MailDemandDiv               string `xml:"MailDemandDiv"`
 	PamphletDemandDiv           string `xml:"PamphletDemandDiv"`
-	MemberID                    int    `xml:"MemberID"`
+	MemberID                    *int   `xml:"MemberID"`
 	MemberPhoneNumber           string `xml:"MemberPhoneNumber"`
 	MemberEmail                 string `xml:"MemberEmail"`
 	MemberPostalCode            string `xml:"MemberPostalCode"`

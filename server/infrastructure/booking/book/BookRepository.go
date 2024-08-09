@@ -225,10 +225,7 @@ func NewBookingRQ(bookData *entity.Booking, store *entity.StayableStore) *Envelo
 							Payment:                  "Cash", //客の宿泊施設に対する支払い方法　事前カード決済などの場合は省略
 							SettlementDiv:            0,      // 現地決済
 							TotalAccommodationCharge: int(bookData.TotalCost),
-							PointsDiscountList: PointsDiscountList{
-								PointsDiscount: 0, // ポイント値引き
-							},
-							AmountClaimed: int(bookData.TotalCost),
+							AmountClaimed:            int(bookData.TotalCost),
 						},
 						RoomInformationList: RoomInformationList{
 							RoomAndGuestList: RoomAndGuestList,
