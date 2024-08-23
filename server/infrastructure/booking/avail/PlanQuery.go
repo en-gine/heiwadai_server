@@ -53,7 +53,14 @@ func (p *PlanQuery) Search(
 		candidates *[]entity.PlanCandidate
 		err        error
 	}
-
+	nights := stayTo.Sub(stayFrom).Hours() / 24
+	if nights > 99 {
+		return nil, errors.New("99泊以上の予約はできません")
+	}
+	personTotal := adult + child
+	if personTotal > 99 {
+		return nil, errors.New("99名以上の予約はできません")
+	}
 	resultsCh := make(chan Result, len(roomTypes))
 
 	for _, roomType := range roomTypes {
@@ -83,7 +90,6 @@ func (p *PlanQuery) Search(
 				resultsCh <- Result{nil, errors.New(msg)}
 				return
 			}
-			nights := stayTo.Sub(stayFrom).Hours() / 24
 			guestCount := adult + child
 
 			candidates, err := p.AvailRSToCandidates(res, roomCount, guestCount, int(nights))

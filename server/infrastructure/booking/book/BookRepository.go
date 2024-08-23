@@ -130,7 +130,7 @@ func NewBookingRQ(bookData *entity.Booking, store *entity.StayableStore) *Envelo
 				RoomInformation: RoomInformation{
 					RoomTypeCode:    plan.TlBookingRoomTypeCode,
 					RoomTypeName:    plan.TlBookingRoomTypeName,
-					PerRoomPaxCount: (bookData.Adult + bookData.Child) / bookData.RoomCount, // 1部屋あたりの人数
+					PerRoomPaxCount: (bookData.Adult + bookData.Child), // 1部屋あたりの人数 API的には部屋数関係ない人数
 				},
 				RoomRateInformation: RoomRateInformation{
 					RoomDate:             util.DateToStrDate(dateInfo.StayDate),
@@ -209,8 +209,8 @@ func NewBookingRQ(bookData *entity.Booking, store *entity.StayableStore) *Envelo
 							CheckInTime:                string(bookData.CheckInTime),
 							Nights:                     uint(bookData.StayTo.Sub(bookData.StayFrom).Hours() / 24),
 							TotalRoomCount:             bookData.RoomCount,
-							GrandTotalPaxCount:         bookData.Adult + bookData.Child,
-							TotalPaxMaleCount:          bookData.Adult,
+							GrandTotalPaxCount:         (bookData.Adult + bookData.Child) * bookData.RoomCount,
+							TotalPaxMaleCount:          bookData.Adult * bookData.RoomCount,
 							TotalChildA70Count:         bookData.Child,
 							MealCondition:              mealCondition,
 							SpecificMealCondition:      specificMealCondition,
