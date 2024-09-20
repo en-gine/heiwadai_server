@@ -60,6 +60,8 @@ CREATE TABLE stayable_store_info (
     access_info      VARCHAR NOT NULL,
     rest_api_url     VARCHAR NOT NULL,
     booking_system_id VARCHAR NOT NULL,
+    booking_system_login_id VARCHAR,
+    booking_system_password VARCHAR,
     create_at TIMESTAMPTZ NOT NULL default now(),
     update_at TIMESTAMPTZ NOT NULL default now(),
     FOREIGN KEY (store_id) REFERENCES store (id)

@@ -92,6 +92,8 @@ func (ac *StoreController) Register(ctx context.Context, req *connect.Request[ad
 		&req.Msg.StayableInfo.AccessInfo,
 		&req.Msg.StayableInfo.RestAPIURL,
 		&req.Msg.StayableInfo.BookingSystemID,
+		&req.Msg.StayableInfo.BookingSystemLoginId,
+		&req.Msg.StayableInfo.BookingSystemPassword,
 	)
 	if domaiErr != nil {
 		return nil, controller.ErrorHandler(domaiErr)
@@ -130,6 +132,8 @@ func (ac *StoreController) Update(ctx context.Context, req *connect.Request[admi
 		&req.Msg.StayableInfo.AccessInfo,
 		&req.Msg.StayableInfo.RestAPIURL,
 		&req.Msg.StayableInfo.BookingSystemID,
+		&req.Msg.StayableInfo.BookingSystemLoginId,
+		&req.Msg.StayableInfo.BookingSystemPassword,
 		req.Msg.IsActive,
 		qrcode,
 		unlimitqrcode,

@@ -63,6 +63,8 @@ func (u *StoreUsecase) Create(
 	AccessInfo *string,
 	RestAPIURL *string,
 	BookingSystemID *string,
+	BookingSystemLoginID *string,
+	BookingSystemLoginPassword *string,
 ) (*entity.Store, *errors.DomainError) {
 	var stayableInfo *entity.StayableStoreInfo
 	if Stayable {
@@ -84,6 +86,12 @@ func (u *StoreUsecase) Create(
 		if BookingSystemID == nil {
 			return nil, errors.NewDomainError(errors.InvalidParameter, "BookingSystemIDは必須です。")
 		}
+		if BookingSystemLoginID == nil {
+			return nil, errors.NewDomainError(errors.InvalidParameter, "BookingSystemLoginIDは必須です。")
+		}
+		if BookingSystemLoginPassword == nil {
+			return nil, errors.NewDomainError(errors.InvalidParameter, "BookingSystemLoginPasswordは必須です。")
+		}
 		stayableInfo = entity.CreateStayableStoreInfo(
 			*Parking,
 			*Latitude,
@@ -91,6 +99,8 @@ func (u *StoreUsecase) Create(
 			*AccessInfo,
 			*RestAPIURL,
 			*BookingSystemID,
+			*BookingSystemLoginID,
+			*BookingSystemLoginPassword,
 		)
 	}
 
@@ -139,6 +149,8 @@ func (u *StoreUsecase) Update(
 	AccessInfo *string,
 	RestAPIURL *string,
 	BookingSystemID *string,
+	BookingSystemLoginID *string,
+	BookingSystemLoginPassword *string,
 	IsActive bool,
 	QRCode uuid.UUID,
 	UnLimitedQRCode uuid.UUID,
@@ -171,6 +183,12 @@ func (u *StoreUsecase) Update(
 		if BookingSystemID == nil {
 			return nil, errors.NewDomainError(errors.InvalidParameter, "BookingSystemIDは必須です。")
 		}
+		if BookingSystemLoginID == nil {
+			return nil, errors.NewDomainError(errors.InvalidParameter, "BookingSystemLoginIDは必須です。")
+		}
+		if BookingSystemLoginPassword == nil {
+			return nil, errors.NewDomainError(errors.InvalidParameter, "BookingSystemLoginPasswordは必須です。")
+		}
 		stayableInfo = entity.CreateStayableStoreInfo(
 			*Parking,
 			*Latitude,
@@ -178,6 +196,8 @@ func (u *StoreUsecase) Update(
 			*AccessInfo,
 			*RestAPIURL,
 			*BookingSystemID,
+			*BookingSystemLoginID,
+			*BookingSystemLoginPassword,
 		)
 	}
 	var StampImageURL *string

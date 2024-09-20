@@ -683,7 +683,7 @@ func testStayableStoreInfosSelect(t *testing.T) {
 }
 
 var (
-	stayableStoreInfoDBTypes = map[string]string{`StoreID`: `uuid`, `Parking`: `character varying`, `Latitude`: `double precision`, `Longitude`: `double precision`, `AccessInfo`: `character varying`, `RestAPIURL`: `character varying`, `BookingSystemID`: `character varying`, `CreateAt`: `timestamp with time zone`, `UpdateAt`: `timestamp with time zone`}
+	stayableStoreInfoDBTypes = map[string]string{`StoreID`: `uuid`, `Parking`: `character varying`, `Latitude`: `double precision`, `Longitude`: `double precision`, `AccessInfo`: `character varying`, `RestAPIURL`: `character varying`, `BookingSystemID`: `character varying`, `CreateAt`: `timestamp with time zone`, `UpdateAt`: `timestamp with time zone`, `BookingSystemLoginID`: `character varying`, `BookingSystemPassword`: `character varying`}
 	_                        = bytes.MinRead
 )
 

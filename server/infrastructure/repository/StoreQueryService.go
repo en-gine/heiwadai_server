@@ -216,6 +216,8 @@ func StayableInfoToEntity(info *models.StayableStoreInfo) *entity.StayableStoreI
 		info.AccessInfo,
 		info.RestAPIURL,
 		info.BookingSystemID,
+		info.BookingSystemLoginID.String,
+		info.BookingSystemPassword.String,
 	)
 }
 

@@ -27,7 +27,7 @@ func TestCreateStore(t *testing.T) {
 
 	t.Run("宿泊可能な店舗作成", func(t *testing.T) {
 		id := uuid.New()
-		stayableInfo := CreateStayableStoreInfo("Available", 35.6895, 139.6917, "Train", "http://api.example.com", "BOOKING123")
+		stayableInfo := CreateStayableStoreInfo("Available", 35.6895, 139.6917, "Train", "http://api.example.com", "BOOKING123", "BOOKING123", "BOOKING123")
 		store, err := CreateStore(id, "Stayable Store", nil, "123-4567", "Tokyo", "03-1234-5678", "http://example.com", "http://example.com/stamp.png", true, stayableInfo)
 
 		assert.Nil(t, err)
@@ -47,7 +47,7 @@ func TestCreateStore(t *testing.T) {
 }
 
 func TestCreateStayableStoreInfo(t *testing.T) {
-	info := CreateStayableStoreInfo("Available", 35.6895, 139.6917, "Train", "http://api.example.com", "BOOKING123")
+	info := CreateStayableStoreInfo("Available", 35.6895, 139.6917, "Train", "http://api.example.com", "BOOKING123", "BOOKING123", "BOOKING123")
 
 	assert.NotNil(t, info)
 	assert.Equal(t, "Available", info.Parking)
@@ -60,7 +60,7 @@ func TestCreateStayableStoreInfo(t *testing.T) {
 
 func TestCreateStayableStore(t *testing.T) {
 	t.Run("正常な宿泊可能店舗作成", func(t *testing.T) {
-		store, _ := CreateStore(uuid.New(), "Stayable Store", nil, "123-4567", "Tokyo", "03-1234-5678", "http://example.com", "http://example.com/stamp.png", true, CreateStayableStoreInfo("Available", 35.6895, 139.6917, "Train", "http://api.example.com", "BOOKING123"))
+		store, _ := CreateStore(uuid.New(), "Stayable Store", nil, "123-4567", "Tokyo", "03-1234-5678", "http://example.com", "http://example.com/stamp.png", true, CreateStayableStoreInfo("Available", 35.6895, 139.6917, "Train", "http://api.example.com", "BOOKING123", "BOOKING123", "BOOKING123"))
 		stayableStore, err := CreateStayableStore(store, store.StayableStoreInfo)
 
 		assert.Nil(t, err)
@@ -70,7 +70,7 @@ func TestCreateStayableStore(t *testing.T) {
 	})
 
 	t.Run("Storeがnilの場合", func(t *testing.T) {
-		stayableStore, err := CreateStayableStore(nil, CreateStayableStoreInfo("Available", 35.6895, 139.6917, "Train", "http://api.example.com", "BOOKING123"))
+		stayableStore, err := CreateStayableStore(nil, CreateStayableStoreInfo("Available", 35.6895, 139.6917, "Train", "http://api.example.com", "BOOKING123", "BOOKING123", "BOOKING123"))
 
 		assert.Nil(t, stayableStore)
 		assert.NotNil(t, err)
@@ -78,7 +78,7 @@ func TestCreateStayableStore(t *testing.T) {
 	})
 
 	t.Run("StayableInfoがnilの場合", func(t *testing.T) {
-		store, _ := CreateStore(uuid.New(), "Store", nil, "123-4567", "Tokyo", "03-1234-5678", "http://example.com", "http://example.com/stamp.png", true, CreateStayableStoreInfo("Available", 35.6895, 139.6917, "Train", "http://api.example.com", "BOOKING123"))
+		store, _ := CreateStore(uuid.New(), "Store", nil, "123-4567", "Tokyo", "03-1234-5678", "http://example.com", "http://example.com/stamp.png", true, CreateStayableStoreInfo("Available", 35.6895, 139.6917, "Train", "http://api.example.com", "BOOKING123", "BOOKING123", "BOOKING123"))
 		stayableStore, err := CreateStayableStore(store, nil)
 
 		assert.Nil(t, stayableStore)
@@ -88,7 +88,7 @@ func TestCreateStayableStore(t *testing.T) {
 
 	t.Run("Stayableがfalseの場合", func(t *testing.T) {
 		store, _ := CreateStore(uuid.New(), "Non-Stayable Store", nil, "123-4567", "Tokyo", "03-1234-5678", "http://example.com", "http://example.com/stamp.png", false, nil)
-		stayableStore, err := CreateStayableStore(store, CreateStayableStoreInfo("Available", 35.6895, 139.6917, "Train", "http://api.example.com", "BOOKING123"))
+		stayableStore, err := CreateStayableStore(store, CreateStayableStoreInfo("Available", 35.6895, 139.6917, "Train", "http://api.example.com", "BOOKING123", "BOOKING123", "BOOKING123"))
 
 		assert.Nil(t, stayableStore)
 		assert.NotNil(t, err)
@@ -101,7 +101,7 @@ func TestRegenStore(t *testing.T) {
 	qrCode := uuid.New()
 	unlimitedQRCode := uuid.New()
 	branchName := "Branch 1"
-	stayableInfo := CreateStayableStoreInfo("Available", 35.6895, 139.6917, "Train", "http://api.example.com", "BOOKING123")
+	stayableInfo := CreateStayableStoreInfo("Available", 35.6895, 139.6917, "Train", "http://api.example.com", "BOOKING123", "BOOKING123", "BOOKING123")
 
 	store := RegenStore(id, "Regen Store", &branchName, "123-4567", "Tokyo", "03-1234-5678", "http://example.com", "http://example.com/stamp.png", true, true, qrCode, unlimitedQRCode, stayableInfo)
 
@@ -122,7 +122,7 @@ func TestRegenStore(t *testing.T) {
 }
 
 func TestRegenStayableStoreInfo(t *testing.T) {
-	info := RegenStayableStoreInfo("Available", 35.6895, 139.6917, "Train", "http://api.example.com", "BOOKING123")
+	info := RegenStayableStoreInfo("Available", 35.6895, 139.6917, "Train", "http://api.example.com", "BOOKING123", "BOOKING123", "BOOKING123")
 
 	assert.NotNil(t, info)
 	assert.Equal(t, "Available", info.Parking)
@@ -135,7 +135,7 @@ func TestRegenStayableStoreInfo(t *testing.T) {
 
 func TestRegenStayableStore(t *testing.T) {
 	store := RegenStore(uuid.New(), "Regen Stayable Store", nil, "123-4567", "Tokyo", "03-1234-5678", "http://example.com", "http://example.com/stamp.png", true, true, uuid.New(), uuid.New(), nil)
-	stayableInfo := RegenStayableStoreInfo("Available", 35.6895, 139.6917, "Train", "http://api.example.com", "BOOKING123")
+	stayableInfo := RegenStayableStoreInfo("Available", 35.6895, 139.6917, "Train", "http://api.example.com", "BOOKING123", "BOOKING123", "BOOKING123")
 
 	stayableStore := RegenStayableStore(store, stayableInfo)
 

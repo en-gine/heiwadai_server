@@ -23,12 +23,14 @@ type Store struct {
 }
 
 type StayableStoreInfo struct {
-	Parking         string
-	Latitude        float64
-	Longitude       float64
-	AccessInfo      string
-	RestAPIURL      string
-	BookingSystemID string
+	Parking               string
+	Latitude              float64
+	Longitude             float64
+	AccessInfo            string
+	RestAPIURL            string
+	BookingSystemID       string //TLリンカーン施設ID
+	BookingSystemLoginID  string //TLリンカーン施設ログインID
+	BookingSystemPassword string //TLリンカーン施設パスワード
 }
 
 type StayableStore struct {
@@ -76,14 +78,18 @@ func CreateStayableStoreInfo(
 	AccessInfo string,
 	RestAPIURL string,
 	BookingSystemID string,
+	BookingSystemLoginID string,
+	BookingSystemPassword string,
 ) *StayableStoreInfo {
 	return &StayableStoreInfo{
-		Parking:         Parking,
-		Longitude:       Longitude,
-		Latitude:        Latitude,
-		AccessInfo:      AccessInfo,
-		RestAPIURL:      RestAPIURL,
-		BookingSystemID: BookingSystemID,
+		Parking:               Parking,
+		Longitude:             Longitude,
+		Latitude:              Latitude,
+		AccessInfo:            AccessInfo,
+		RestAPIURL:            RestAPIURL,
+		BookingSystemID:       BookingSystemID,
+		BookingSystemLoginID:  BookingSystemLoginID,
+		BookingSystemPassword: BookingSystemPassword,
 	}
 }
 
@@ -145,14 +151,18 @@ func RegenStayableStoreInfo(
 	AccessInfo string,
 	RestAPIURL string,
 	BookingSystemID string,
+	BookingSystemLoginId string,
+	BookingSystemPassword string,
 ) *StayableStoreInfo {
 	return &StayableStoreInfo{
-		Parking:         Parking,
-		Latitude:        Latitude,
-		Longitude:       Longitude,
-		AccessInfo:      AccessInfo,
-		RestAPIURL:      RestAPIURL,
-		BookingSystemID: BookingSystemID,
+		Parking:               Parking,
+		Latitude:              Latitude,
+		Longitude:             Longitude,
+		AccessInfo:            AccessInfo,
+		RestAPIURL:            RestAPIURL,
+		BookingSystemID:       BookingSystemID,
+		BookingSystemLoginID:  BookingSystemLoginId,
+		BookingSystemPassword: BookingSystemPassword,
 	}
 }
 

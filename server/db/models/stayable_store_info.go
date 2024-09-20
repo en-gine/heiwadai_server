@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/friendsofgo/errors"
+	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -23,62 +24,72 @@ import (
 
 // StayableStoreInfo is an object representing the database table.
 type StayableStoreInfo struct {
-	StoreID         string    `boil:"store_id" json:"store_id" toml:"store_id" yaml:"store_id"`
-	Parking         string    `boil:"parking" json:"parking" toml:"parking" yaml:"parking"`
-	Latitude        float64   `boil:"latitude" json:"latitude" toml:"latitude" yaml:"latitude"`
-	Longitude       float64   `boil:"longitude" json:"longitude" toml:"longitude" yaml:"longitude"`
-	AccessInfo      string    `boil:"access_info" json:"access_info" toml:"access_info" yaml:"access_info"`
-	RestAPIURL      string    `boil:"rest_api_url" json:"rest_api_url" toml:"rest_api_url" yaml:"rest_api_url"`
-	BookingSystemID string    `boil:"booking_system_id" json:"booking_system_id" toml:"booking_system_id" yaml:"booking_system_id"`
-	CreateAt        time.Time `boil:"create_at" json:"create_at" toml:"create_at" yaml:"create_at"`
-	UpdateAt        time.Time `boil:"update_at" json:"update_at" toml:"update_at" yaml:"update_at"`
+	StoreID               string      `boil:"store_id" json:"store_id" toml:"store_id" yaml:"store_id"`
+	Parking               string      `boil:"parking" json:"parking" toml:"parking" yaml:"parking"`
+	Latitude              float64     `boil:"latitude" json:"latitude" toml:"latitude" yaml:"latitude"`
+	Longitude             float64     `boil:"longitude" json:"longitude" toml:"longitude" yaml:"longitude"`
+	AccessInfo            string      `boil:"access_info" json:"access_info" toml:"access_info" yaml:"access_info"`
+	RestAPIURL            string      `boil:"rest_api_url" json:"rest_api_url" toml:"rest_api_url" yaml:"rest_api_url"`
+	BookingSystemID       string      `boil:"booking_system_id" json:"booking_system_id" toml:"booking_system_id" yaml:"booking_system_id"`
+	CreateAt              time.Time   `boil:"create_at" json:"create_at" toml:"create_at" yaml:"create_at"`
+	UpdateAt              time.Time   `boil:"update_at" json:"update_at" toml:"update_at" yaml:"update_at"`
+	BookingSystemLoginID  null.String `boil:"booking_system_login_id" json:"booking_system_login_id,omitempty" toml:"booking_system_login_id" yaml:"booking_system_login_id,omitempty"`
+	BookingSystemPassword null.String `boil:"booking_system_password" json:"booking_system_password,omitempty" toml:"booking_system_password" yaml:"booking_system_password,omitempty"`
 
 	R *stayableStoreInfoR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L stayableStoreInfoL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
 var StayableStoreInfoColumns = struct {
-	StoreID         string
-	Parking         string
-	Latitude        string
-	Longitude       string
-	AccessInfo      string
-	RestAPIURL      string
-	BookingSystemID string
-	CreateAt        string
-	UpdateAt        string
+	StoreID               string
+	Parking               string
+	Latitude              string
+	Longitude             string
+	AccessInfo            string
+	RestAPIURL            string
+	BookingSystemID       string
+	CreateAt              string
+	UpdateAt              string
+	BookingSystemLoginID  string
+	BookingSystemPassword string
 }{
-	StoreID:         "store_id",
-	Parking:         "parking",
-	Latitude:        "latitude",
-	Longitude:       "longitude",
-	AccessInfo:      "access_info",
-	RestAPIURL:      "rest_api_url",
-	BookingSystemID: "booking_system_id",
-	CreateAt:        "create_at",
-	UpdateAt:        "update_at",
+	StoreID:               "store_id",
+	Parking:               "parking",
+	Latitude:              "latitude",
+	Longitude:             "longitude",
+	AccessInfo:            "access_info",
+	RestAPIURL:            "rest_api_url",
+	BookingSystemID:       "booking_system_id",
+	CreateAt:              "create_at",
+	UpdateAt:              "update_at",
+	BookingSystemLoginID:  "booking_system_login_id",
+	BookingSystemPassword: "booking_system_password",
 }
 
 var StayableStoreInfoTableColumns = struct {
-	StoreID         string
-	Parking         string
-	Latitude        string
-	Longitude       string
-	AccessInfo      string
-	RestAPIURL      string
-	BookingSystemID string
-	CreateAt        string
-	UpdateAt        string
+	StoreID               string
+	Parking               string
+	Latitude              string
+	Longitude             string
+	AccessInfo            string
+	RestAPIURL            string
+	BookingSystemID       string
+	CreateAt              string
+	UpdateAt              string
+	BookingSystemLoginID  string
+	BookingSystemPassword string
 }{
-	StoreID:         "stayable_store_info.store_id",
-	Parking:         "stayable_store_info.parking",
-	Latitude:        "stayable_store_info.latitude",
-	Longitude:       "stayable_store_info.longitude",
-	AccessInfo:      "stayable_store_info.access_info",
-	RestAPIURL:      "stayable_store_info.rest_api_url",
-	BookingSystemID: "stayable_store_info.booking_system_id",
-	CreateAt:        "stayable_store_info.create_at",
-	UpdateAt:        "stayable_store_info.update_at",
+	StoreID:               "stayable_store_info.store_id",
+	Parking:               "stayable_store_info.parking",
+	Latitude:              "stayable_store_info.latitude",
+	Longitude:             "stayable_store_info.longitude",
+	AccessInfo:            "stayable_store_info.access_info",
+	RestAPIURL:            "stayable_store_info.rest_api_url",
+	BookingSystemID:       "stayable_store_info.booking_system_id",
+	CreateAt:              "stayable_store_info.create_at",
+	UpdateAt:              "stayable_store_info.update_at",
+	BookingSystemLoginID:  "stayable_store_info.booking_system_login_id",
+	BookingSystemPassword: "stayable_store_info.booking_system_password",
 }
 
 // Generated where
@@ -113,25 +124,29 @@ func (w whereHelperfloat64) NIN(slice []float64) qm.QueryMod {
 }
 
 var StayableStoreInfoWhere = struct {
-	StoreID         whereHelperstring
-	Parking         whereHelperstring
-	Latitude        whereHelperfloat64
-	Longitude       whereHelperfloat64
-	AccessInfo      whereHelperstring
-	RestAPIURL      whereHelperstring
-	BookingSystemID whereHelperstring
-	CreateAt        whereHelpertime_Time
-	UpdateAt        whereHelpertime_Time
+	StoreID               whereHelperstring
+	Parking               whereHelperstring
+	Latitude              whereHelperfloat64
+	Longitude             whereHelperfloat64
+	AccessInfo            whereHelperstring
+	RestAPIURL            whereHelperstring
+	BookingSystemID       whereHelperstring
+	CreateAt              whereHelpertime_Time
+	UpdateAt              whereHelpertime_Time
+	BookingSystemLoginID  whereHelpernull_String
+	BookingSystemPassword whereHelpernull_String
 }{
-	StoreID:         whereHelperstring{field: "\"stayable_store_info\".\"store_id\""},
-	Parking:         whereHelperstring{field: "\"stayable_store_info\".\"parking\""},
-	Latitude:        whereHelperfloat64{field: "\"stayable_store_info\".\"latitude\""},
-	Longitude:       whereHelperfloat64{field: "\"stayable_store_info\".\"longitude\""},
-	AccessInfo:      whereHelperstring{field: "\"stayable_store_info\".\"access_info\""},
-	RestAPIURL:      whereHelperstring{field: "\"stayable_store_info\".\"rest_api_url\""},
-	BookingSystemID: whereHelperstring{field: "\"stayable_store_info\".\"booking_system_id\""},
-	CreateAt:        whereHelpertime_Time{field: "\"stayable_store_info\".\"create_at\""},
-	UpdateAt:        whereHelpertime_Time{field: "\"stayable_store_info\".\"update_at\""},
+	StoreID:               whereHelperstring{field: "\"stayable_store_info\".\"store_id\""},
+	Parking:               whereHelperstring{field: "\"stayable_store_info\".\"parking\""},
+	Latitude:              whereHelperfloat64{field: "\"stayable_store_info\".\"latitude\""},
+	Longitude:             whereHelperfloat64{field: "\"stayable_store_info\".\"longitude\""},
+	AccessInfo:            whereHelperstring{field: "\"stayable_store_info\".\"access_info\""},
+	RestAPIURL:            whereHelperstring{field: "\"stayable_store_info\".\"rest_api_url\""},
+	BookingSystemID:       whereHelperstring{field: "\"stayable_store_info\".\"booking_system_id\""},
+	CreateAt:              whereHelpertime_Time{field: "\"stayable_store_info\".\"create_at\""},
+	UpdateAt:              whereHelpertime_Time{field: "\"stayable_store_info\".\"update_at\""},
+	BookingSystemLoginID:  whereHelpernull_String{field: "\"stayable_store_info\".\"booking_system_login_id\""},
+	BookingSystemPassword: whereHelpernull_String{field: "\"stayable_store_info\".\"booking_system_password\""},
 }
 
 // StayableStoreInfoRels is where relationship names are stored.
@@ -162,9 +177,9 @@ func (r *stayableStoreInfoR) GetStore() *Store {
 type stayableStoreInfoL struct{}
 
 var (
-	stayableStoreInfoAllColumns            = []string{"store_id", "parking", "latitude", "longitude", "access_info", "rest_api_url", "booking_system_id", "create_at", "update_at"}
+	stayableStoreInfoAllColumns            = []string{"store_id", "parking", "latitude", "longitude", "access_info", "rest_api_url", "booking_system_id", "create_at", "update_at", "booking_system_login_id", "booking_system_password"}
 	stayableStoreInfoColumnsWithoutDefault = []string{"store_id", "parking", "latitude", "longitude", "access_info", "rest_api_url", "booking_system_id"}
-	stayableStoreInfoColumnsWithDefault    = []string{"create_at", "update_at"}
+	stayableStoreInfoColumnsWithDefault    = []string{"create_at", "update_at", "booking_system_login_id", "booking_system_password"}
 	stayableStoreInfoPrimaryKeyColumns     = []string{"store_id"}
 	stayableStoreInfoGeneratedColumns      = []string{}
 )

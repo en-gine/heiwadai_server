@@ -16,6 +16,8 @@ func StoreSeeder() {
 	longitude := 130.3926853
 	accessInfo := "天神駅徒歩8分"
 	bookingSystemID := "BESS1"
+	bookingSystemLoginID := "BESS1"
+	bookingSystemPassword := "BESS1"
 	restAPIURL := "https://www.heiwadai-hotel.co.jp/tenjin/wp-json/wp/v2/posts?_embed"
 	store, error := storeUsecase.Create(
 		"平和台ホテル",
@@ -32,6 +34,8 @@ func StoreSeeder() {
 		&accessInfo,
 		&restAPIURL,
 		&bookingSystemID,
+		&bookingSystemLoginID,
+		&bookingSystemPassword,
 	)
 	if error != nil {
 		panic(error)
@@ -48,6 +52,8 @@ func StoreSeeder() {
 	accessInfo = "地下鉄唐人町駅すぐ"
 	restAPIURL = "https://www.heiwadai-hotel.co.jp/five/wp-json/wp/v2/posts?_embed"
 	bookingSystemID = "BESS1"
+	bookingSystemLoginID = "BESS1"
+	bookingSystemPassword = "BESS1"
 	store, error = storeUsecase.Create(
 		"平和台ホテル",
 		&branchname,
@@ -63,6 +69,8 @@ func StoreSeeder() {
 		&accessInfo,
 		&restAPIURL,
 		&bookingSystemID,
+		&bookingSystemLoginID,
+		&bookingSystemPassword,
 	)
 	if error != nil {
 		panic(error)
@@ -78,6 +86,9 @@ func StoreSeeder() {
 	accessInfo = "大濠公園駅徒歩約3分"
 	restAPIURL = "https://www.heiwadai-hotel.co.jp/arato/wp-json/wp/v2/posts?_embed"
 	bookingSystemID = "BESS1"
+	bookingSystemLoginID = "BESS1"
+	bookingSystemPassword = "BESS1"
+
 	store, error = storeUsecase.Create(
 		"平和台ホテル",
 		&branchname,
@@ -93,6 +104,8 @@ func StoreSeeder() {
 		&accessInfo,
 		&restAPIURL,
 		&bookingSystemID,
+		&bookingSystemLoginID,
+		&bookingSystemPassword,
 	)
 	if error != nil {
 		panic(error)
@@ -123,6 +136,8 @@ func StoreSeeder() {
 		&accessInfo,
 		&restAPIURL,
 		&bookingSystemID,
+		&bookingSystemLoginID,
+		&bookingSystemPassword,
 	)
 	if error != nil {
 		panic(error)

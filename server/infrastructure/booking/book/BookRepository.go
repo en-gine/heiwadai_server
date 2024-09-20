@@ -19,10 +19,8 @@ type BookRepository struct {
 
 var _ repository.IBookAPIRepository = &BookRepository{}
 var (
-	TLBookingUser = env.GetEnv(env.TlbookingUsername)
-	TLBookingPass = env.GetEnv(env.TlbookingPassword)
-	BookURL       = env.GetEnv(env.TlbookingBookingApiUrl)
-	CancelURL     = env.GetEnv(env.TlbookingCancelApiUrl)
+	BookURL   = env.GetEnv(env.TlbookingBookingApiUrl)
+	CancelURL = env.GetEnv(env.TlbookingCancelApiUrl)
 )
 
 func NewBookRepository(storeQuery queryservice.IStoreQueryService, bookQuery queryservice.IBookQueryService) *BookRepository {
@@ -168,8 +166,8 @@ func NewBookingRQ(bookData *entity.Booking, store *entity.StayableStore) *Envelo
 			EntryBooking: EntryBooking{
 				EntryBookingRequest: EntryBookingRequest{
 					CommonRequest: CommonRequest{
-						AgtID:       TLBookingUser,
-						AgtPassword: TLBookingPass,
+						AgtID:       store.BookingSystemLoginID,
+						AgtPassword: store.BookingSystemPassword,
 						SystemDate:  time.Now().Format("2006-01-02T15:04:05"),
 					},
 					ExtendLincoln: ExtendLincoln{
@@ -252,8 +250,8 @@ func NewCancelRQ(bookData *entity.Booking, store *entity.StayableStore, dataID s
 			DeleteBookingWithCP: DeleteBookingWithCP{
 				DeleteBookingWithCPRequest: DeleteBookingWithCPRequest{
 					CommonRequest: CommonRequest{
-						AgtID:       TLBookingUser,
-						AgtPassword: TLBookingPass,
+						AgtID:       store.BookingSystemLoginID,
+						AgtPassword: store.BookingSystemPassword,
 						SystemDate:  time.Now().Format("2006-01-02T15:04:05"),
 					},
 					BookingInfo: BookingInfo{
