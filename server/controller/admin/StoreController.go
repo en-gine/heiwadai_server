@@ -6,7 +6,6 @@ import (
 
 	"server/api/v1/admin"
 	adminv1connect "server/api/v1/admin/adminconnect"
-	"server/api/v1/shared"
 	"server/controller"
 	"server/core/entity"
 	usecase "server/core/usecase/admin"
@@ -28,7 +27,7 @@ func NewStoreController(storeUsecase *usecase.StoreUsecase) *StoreController {
 	}
 }
 
-func (ac *StoreController) GetByID(ctx context.Context, req *connect.Request[admin.StoreIDRequest]) (*connect.Response[shared.Store], error) {
+func (ac *StoreController) GetByID(ctx context.Context, req *connect.Request[admin.StoreIDRequest]) (*connect.Response[admin.Store], error) {
 	msg := req.Msg
 	storeID, err := uuid.Parse(msg.ID)
 	if err != nil {
@@ -44,10 +43,10 @@ func (ac *StoreController) GetByID(ctx context.Context, req *connect.Request[adm
 	return connect.NewResponse(resStore), nil
 }
 
-func (ac *StoreController) GetActiveAll(ctx context.Context, req *connect.Request[emptypb.Empty]) (*connect.Response[shared.Stores], error) {
+func (ac *StoreController) GetActiveAll(ctx context.Context, req *connect.Request[emptypb.Empty]) (*connect.Response[admin.Stores], error) {
 	stores, domaiErr := ac.storeUseCase.GetActiveList()
 
-	var resStores []*shared.Store
+	var resStores []*admin.Store
 	for _, store := range stores {
 		res := StoreToResponse(store)
 		resStores = append(resStores, res)
@@ -55,15 +54,15 @@ func (ac *StoreController) GetActiveAll(ctx context.Context, req *connect.Reques
 	if domaiErr != nil {
 		return nil, controller.ErrorHandler(domaiErr)
 	}
-	return connect.NewResponse(&shared.Stores{
+	return connect.NewResponse(&admin.Stores{
 		Stores: resStores,
 	}), nil
 }
 
-func (ac *StoreController) GetAll(ctx context.Context, req *connect.Request[emptypb.Empty]) (*connect.Response[shared.Stores], error) {
+func (ac *StoreController) GetAll(ctx context.Context, req *connect.Request[emptypb.Empty]) (*connect.Response[admin.Stores], error) {
 	stores, domaiErr := ac.storeUseCase.GetList()
 
-	var resStores []*shared.Store
+	var resStores []*admin.Store
 	for _, store := range stores {
 		res := StoreToResponse(store)
 		resStores = append(resStores, res)
@@ -71,12 +70,12 @@ func (ac *StoreController) GetAll(ctx context.Context, req *connect.Request[empt
 	if domaiErr != nil {
 		return nil, controller.ErrorHandler(domaiErr)
 	}
-	return connect.NewResponse(&shared.Stores{
+	return connect.NewResponse(&admin.Stores{
 		Stores: resStores,
 	}), nil
 }
 
-func (ac *StoreController) Register(ctx context.Context, req *connect.Request[admin.StoreRegisterRequest]) (*connect.Response[shared.Store], error) {
+func (ac *StoreController) Register(ctx context.Context, req *connect.Request[admin.StoreRegisterRequest]) (*connect.Response[admin.Store], error) {
 	store, domaiErr := ac.storeUseCase.Create(
 		req.Msg.Name,
 		req.Msg.BranchName,
@@ -102,7 +101,7 @@ func (ac *StoreController) Register(ctx context.Context, req *connect.Request[ad
 	return connect.NewResponse(resStore), nil
 }
 
-func (ac *StoreController) Update(ctx context.Context, req *connect.Request[admin.StoreUpdateRequest]) (*connect.Response[shared.Store], error) {
+func (ac *StoreController) Update(ctx context.Context, req *connect.Request[admin.StoreUpdateRequest]) (*connect.Response[admin.Store], error) {
 	msg := req.Msg
 	storeID, err := uuid.Parse(msg.ID)
 	if err != nil {
@@ -175,30 +174,30 @@ func (ac *StoreController) RegenUnlimitQRCode(ctx context.Context, req *connect.
 	}), nil
 }
 
-func StoreToResponse(store *entity.Store) *shared.Store {
-	var resInfo *shared.StayableStoreInfo = nil
+func StoreToResponse(store *entity.Store) *admin.Store {
+	var resInfo *admin.StayableStoreInfo = nil
 	if store.StayableStoreInfo != nil {
 		resInfo = StayableInfoToResponse(store.StayableStoreInfo)
 	}
-	return &shared.Store{
-		ID:                store.ID.String(),
-		Name:              store.Name,
-		BranchName:        store.BranchName,
-		ZipCode:           store.ZipCode,
-		Address:           store.Address,
-		Tel:               store.Tel,
-		SiteURL:           store.SiteURL,
-		StampImageURL:     store.StampImageURL,
-		Stayable:          store.Stayable,
-		IsActive:          store.IsActive,
-		QRCode:            store.QRCode.String(),
-		UnLimitedQRCode:   store.UnLimitedQRCode.String(),
-		StayableStoreInfo: resInfo,
+	return &admin.Store{
+		ID:              store.ID.String(),
+		Name:            store.Name,
+		BranchName:      store.BranchName,
+		ZipCode:         store.ZipCode,
+		Address:         store.Address,
+		Tel:             store.Tel,
+		SiteURL:         store.SiteURL,
+		StampImageURL:   store.StampImageURL,
+		Stayable:        store.Stayable,
+		IsActive:        store.IsActive,
+		QRCode:          store.QRCode.String(),
+		UnLimitedQRCode: store.UnLimitedQRCode.String(),
+		StayableInfo:    resInfo,
 	}
 }
 
-func StayableInfoToResponse(info *entity.StayableStoreInfo) *shared.StayableStoreInfo {
-	return &shared.StayableStoreInfo{
+func StayableInfoToResponse(info *entity.StayableStoreInfo) *admin.StayableStoreInfo {
+	return &admin.StayableStoreInfo{
 		Parking:         info.Parking,
 		Latitude:        info.Latitude,
 		Longitude:       info.Longitude,
