@@ -62,13 +62,15 @@ func (pr *StoreRepository) Save(updateStore *entity.Store, stayableInfo *entity.
 
 	if stayableInfo != nil {
 		StayableStoreInfo := &models.StayableStoreInfo{
-			StoreID:         updateStore.ID.String(),
-			Parking:         stayableInfo.Parking,
-			Latitude:        stayableInfo.Latitude,
-			Longitude:       stayableInfo.Longitude,
-			AccessInfo:      stayableInfo.AccessInfo,
-			RestAPIURL:      stayableInfo.RestAPIURL,
-			BookingSystemID: stayableInfo.BookingSystemID,
+			StoreID:               updateStore.ID.String(),
+			Parking:               stayableInfo.Parking,
+			Latitude:              stayableInfo.Latitude,
+			Longitude:             stayableInfo.Longitude,
+			AccessInfo:            stayableInfo.AccessInfo,
+			RestAPIURL:            stayableInfo.RestAPIURL,
+			BookingSystemID:       stayableInfo.BookingSystemID,
+			BookingSystemLoginID:  null.StringFrom(stayableInfo.BookingSystemLoginID),
+			BookingSystemPassword: null.StringFrom(stayableInfo.BookingSystemPassword),
 		}
 		err = StayableStoreInfo.Upsert(ctx, tran.Tran(), true, []string{"store_id"}, boil.Infer(), boil.Infer())
 		if err != nil {
