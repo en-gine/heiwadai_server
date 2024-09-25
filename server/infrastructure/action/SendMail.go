@@ -102,10 +102,14 @@ func (s *SendMailAction) SendMail(To string, Title string, Body string, BulkTo *
 
 	return nil
 }
+
 func quoteString(s string) string {
 	var buf bytes.Buffer
 	w := quotedprintable.NewWriter(&buf)
-	w.Write([]byte(s))
+	_, err := w.Write([]byte(s))
+	if err != nil {
+		logger.Errorf("quotedprintable error: %s", err)
+	}
 	w.Close()
 	return buf.String()
 }

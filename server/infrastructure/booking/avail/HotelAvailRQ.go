@@ -3,6 +3,7 @@ package avail
 import (
 	"encoding/xml"
 
+	"server/core/entity"
 	"server/infrastructure/booking/util"
 )
 
@@ -164,7 +165,7 @@ const (
 	AvailReqTypeBoth    AvailReqType = "Both"
 )
 
-func NewEnvelopeRQ(UserName string, Password string, AvailRequest *OTA_HotelAvailRQ) *EnvelopeRQ {
+func NewEnvelopeRQ(store entity.StayableStore, AvailRequest *OTA_HotelAvailRQ) *EnvelopeRQ {
 	return &EnvelopeRQ{
 		SoapEnv: "http://schemas.xmlsoap.org/soap/envelope/",
 		Head:    "http://www.seanuts.co.jp/ota/header",
@@ -174,8 +175,8 @@ func NewEnvelopeRQ(UserName string, Password string, AvailRequest *OTA_HotelAvai
 				PayloadInfo: PayloadInfo{
 					CommDescriptor: CommDescriptor{
 						Authentication: Authentication{
-							Username: UserName,
-							Password: Password,
+							Username: store.BookingSystemLoginID,
+							Password: store.BookingSystemPassword,
 						},
 					},
 				},

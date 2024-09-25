@@ -40,15 +40,6 @@ func (p *PlanQuery) Search(
 	mealType entity.MealType,
 	roomTypes []entity.RoomType,
 ) (*[]entity.PlanCandidate, error) {
-	bookingIDs := []string{}
-	for _, store := range stores {
-		bookingIDs = append(bookingIDs, store.BookingSystemID)
-	}
-
-	if env.GetEnv(env.TlbookingIsTest) == "true" {
-		bookingIDs = []string{"E69502"}
-	}
-
 	type Result struct {
 		candidates *[]entity.PlanCandidate
 		err        error
@@ -61,49 +52,57 @@ func (p *PlanQuery) Search(
 	if personTotal > 99 {
 		return nil, errors.New("99名以上の予約はできません")
 	}
-	resultsCh := make(chan Result, len(roomTypes))
+	chLength := len(stores) * len(roomTypes)
+	resultsCh := make(chan Result, chLength)
+	for _, store := range stores {
+		var bookingID string
+		if env.GetEnv(env.TlbookingIsTest) == "true" {
+			bookingID = "E69502"
+		} else {
+			bookingID = store.BookingSystemID
+		}
+		for _, roomType := range roomTypes {
+			go func(st *entity.StayableStore, rt entity.RoomType) {
+				reqBody := NewOTAHotelAvailRQ(
+					bookingID,
+					stayFrom,
+					stayTo,
+					adult,
+					child,
+					roomCount,
+					smokeTypes,
+					mealType,
+					rt,
+				)
+				request := NewEnvelopeRQ(*st, reqBody)
+				res, err := util.Request[EnvelopeRQ, EnvelopeRS](TLBookingSearchURL, request)
+				if err != nil {
+					resultsCh <- Result{nil, err}
+					return
+				}
 
-	for _, roomType := range roomTypes {
-		go func(rt entity.RoomType) {
-			reqBody := NewOTAHotelAvailRQ(
-				bookingIDs,
-				stayFrom,
-				stayTo,
-				adult,
-				child,
-				roomCount,
-				smokeTypes,
-				mealType,
-				rt,
-			)
-			request := NewEnvelopeRQ(TLBookingUser, TLBookingPass, reqBody)
-			res, err := util.Request[EnvelopeRQ, EnvelopeRS](TLBookingSearchURL, request)
-			if err != nil {
-				resultsCh <- Result{nil, err}
-				return
-			}
+				if res.Body.OTA_HotelAvailRS.Errors != nil {
+					errs := res.Body.OTA_HotelAvailRS.Errors
+					msg := errs.Error[0].ShortText
+					logger.Error(msg)
+					resultsCh <- Result{nil, errors.New(msg)}
+					return
+				}
+				guestCount := adult + child
 
-			if res.Body.OTA_HotelAvailRS.Errors != nil {
-				errs := res.Body.OTA_HotelAvailRS.Errors
-				msg := errs.Error[0].ShortText
-				logger.Error(msg)
-				resultsCh <- Result{nil, errors.New(msg)}
-				return
-			}
-			guestCount := adult + child
-
-			candidates, err := p.AvailRSToCandidates(res, roomCount, guestCount, int(nights))
-			if err != nil {
-				logger.Error(err.Error())
-				resultsCh <- Result{nil, err}
-				return
-			}
-			resultsCh <- Result{candidates, nil}
-		}(roomType)
+				candidates, err := p.AvailRSToCandidates(res, roomCount, guestCount, int(nights))
+				if err != nil {
+					logger.Error(err.Error())
+					resultsCh <- Result{nil, err}
+					return
+				}
+				resultsCh <- Result{candidates, nil}
+			}(store, roomType)
+		}
 	}
 
 	var allCandidates []entity.PlanCandidate
-	for i := 0; i < len(roomTypes); i++ {
+	for i := 0; i < chLength; i++ {
 		res := <-resultsCh
 		if res.err != nil {
 			return nil, res.err
@@ -140,7 +139,7 @@ func (p *PlanQuery) GetPlanDetailByID(
 		roomCount,
 		TlBookingRoomTypeCode,
 	)
-	request := NewEnvelopeRQ(TLBookingUser, TLBookingPass, reqBody)
+	request := NewEnvelopeRQ(*store, reqBody)
 	res, err := util.Request[EnvelopeRQ, EnvelopeRS](TLBookingSearchURL, request)
 	if err != nil {
 		logger.Error(err.Error())
@@ -350,7 +349,7 @@ func (p *PlanQuery) AvailDetailRSToPlanDetail(res *EnvelopeRS, roomCount int, gu
 }
 
 func NewOTAHotelAvailRQ(
-	hotelCodes []string,
+	hotelCode string,
 	stayFrom time.Time,
 	stayTo time.Time,
 	adult int,
@@ -366,9 +365,7 @@ func NewOTAHotelAvailRQ(
 
 	// ホテルコード
 	var hotelRef []HotelRef
-	for _, hotelCode := range hotelCodes {
-		hotelRef = append(hotelRef, HotelRef{HotelCode: hotelCode})
-	}
+	hotelRef = append(hotelRef, HotelRef{HotelCode: hotelCode})
 	mealsIncluded := MealTypeToQuery(mealType)
 	bedTypeCode := RoomTypeToBedType(roomType)
 	roomStayCandidate := NewRoomStayCandidate(
