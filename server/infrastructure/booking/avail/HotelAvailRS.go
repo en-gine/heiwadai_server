@@ -250,7 +250,15 @@ type Total struct {
 }
 
 type Criteria struct {
-	Criterion Criterion `xml:"Criterion"`
+	Criterion RSCriterion `xml:"Criterion"`
+}
+
+type RSCriterion struct {
+	HotelRef           HotelRef            `xml:"HotelRef"`           // ホテルコード
+	StayDateRange      *StayDateRange      `xml:"StayDateRange"`      // 宿泊期間
+	RateRange          *RateRange          `xml:"RateRange"`          // 価格帯
+	RatePlanCandidates *RatePlanCandidates `xml:"RatePlanCandidates"` // プラン検索条件
+	RoomStayCandidates *RoomStayCandidates `xml:"RoomStayCandidates"` // 部屋検索条件
 }
 
 type Errors struct {

@@ -241,9 +241,8 @@ func (p *PlanQuery) AvailDetailRSToPlanDetail(res *EnvelopeRS, roomCount int, gu
 	var plans []entity.Plan
 	body := res.Body.OTA_HotelAvailRS
 	var planStayDateInfos []entity.StayDateInfo
-
+	hotelCode := body.Criteria.Criterion.HotelRef.HotelCode
 	for _, roomStay := range body.RoomStays.RoomStay {
-		hotelCode := roomStay.RPH
 		var stayable *entity.StayableStore
 		var err error
 		if env.GetEnv(env.TlbookingIsTest) == "true" {
@@ -364,8 +363,7 @@ func NewOTAHotelAvailRQ(
 	end := util.DateToYYYYMMDD(stayTo)
 
 	// ホテルコード
-	var hotelRef []HotelRef
-	hotelRef = append(hotelRef, HotelRef{HotelCode: hotelCode})
+	var hotelRef HotelRef = HotelRef{HotelCode: hotelCode}
 	mealsIncluded := MealTypeToQuery(mealType)
 	bedTypeCode := RoomTypeToBedType(roomType)
 	roomStayCandidate := NewRoomStayCandidate(
@@ -450,9 +448,7 @@ func NewOTAHotelPlanDetailRQ(
 			AvailRequestSegment: AvailRequestSegment{
 				HotelSearchCriteria: HotelSearchCriteria{
 					Criterion: Criterion{
-						HotelRef: []HotelRef{
-							hotelRef,
-						},
+						HotelRef: hotelRef,
 						StayDateRange: &StayDateRange{
 							Start: &start,
 							End:   &end,

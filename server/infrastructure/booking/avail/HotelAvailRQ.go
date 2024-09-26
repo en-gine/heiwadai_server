@@ -77,7 +77,7 @@ type HotelSearchCriteria struct {
 }
 
 type Criterion struct {
-	HotelRef           []HotelRef          `xml:"ns:HotelRef"`           // ホテルコード
+	HotelRef           HotelRef            `xml:"ns:HotelRef"`           // ホテルコード
 	StayDateRange      *StayDateRange      `xml:"ns:StayDateRange"`      // 宿泊期間
 	RateRange          *RateRange          `xml:"ns:RateRange"`          // 価格帯
 	RatePlanCandidates *RatePlanCandidates `xml:"ns:RatePlanCandidates"` // プラン検索条件
