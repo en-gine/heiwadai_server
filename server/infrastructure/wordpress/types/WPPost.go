@@ -21,11 +21,19 @@ type WPPost struct {
 	Sticky        bool     `json:"sticky"`
 	Template      string   `json:"template"`
 	Format        string   `json:"format"`
-	Meta          []string `json:"meta"`
+	Meta          Meta     `json:"meta"` // Changed from []string to Meta struct
 	Categories    []int    `json:"categories"`
 	Tags          []int    `json:"tags"`
+	ACF           []any    `json:"acf"`             // Added ACF field
+	YoastHead     string   `json:"yoast_head"`      // Added YoastHead field
+	YoastHeadJSON any      `json:"yoast_head_json"` // Added YoastHeadJSON field
 	Links         Links    `json:"_links"`
 	Embedded      Embedded `json:"_embedded"`
+}
+
+// New struct for Meta
+type Meta struct {
+	Footnotes string `json:"footnotes"`
 }
 
 type GUID struct {
@@ -42,19 +50,37 @@ type Content struct {
 }
 
 type Links struct {
-	Self               []HrefLink   `json:"self"`
-	Collection         []HrefLink   `json:"collection"`
-	About              []HrefLink   `json:"about"`
-	Author             []HrefLink   `json:"author"`
-	Replies            []HrefLink   `json:"replies"`
-	VersionHistory     []HrefLink   `json:"version-history"`
-	PredecessorVersion []HrefLink   `json:"predecessor-version"`
-	WPAttachment       []HrefLink   `json:"wp:attachment"`
-	WPTerm             []WPTermLink `json:"wp:term"`
-	Curies             []Curies     `json:"curies"`
+	Self               []HrefLink           `json:"self"`
+	Collection         []HrefLink           `json:"collection"`
+	About              []HrefLink           `json:"about"`
+	Author             []AuthorLink         `json:"author"`              // Changed to AuthorLink
+	Replies            []AuthorLink         `json:"replies"`             // Changed to AuthorLink
+	VersionHistory     []VersionLink        `json:"version-history"`     // Changed to VersionLink
+	PredecessorVersion []PredecessorVersion `json:"predecessor-version"` // Changed to PredecessorVersion
+	WPAttachment       []HrefLink           `json:"wp:attachment"`
+	WPTerm             []WPTermLink         `json:"wp:term"`
+	Curies             []Curies             `json:"curies"`
 }
 
 type HrefLink struct {
+	Href string `json:"href"`
+}
+
+// New struct for Author Link
+type AuthorLink struct {
+	Embeddable bool   `json:"embeddable"`
+	Href       string `json:"href"`
+}
+
+// New struct for Version Link
+type VersionLink struct {
+	Count int    `json:"count"`
+	Href  string `json:"href"`
+}
+
+// New struct for Predecessor Version
+type PredecessorVersion struct {
+	ID   int    `json:"id"`
 	Href string `json:"href"`
 }
 
@@ -76,21 +102,27 @@ type Embedded struct {
 }
 
 type Author struct {
-	ID          int               `json:"id"`
-	Name        string            `json:"name"`
-	URL         string            `json:"url"`
-	Description string            `json:"description"`
-	Link        string            `json:"link"`
-	Slug        string            `json:"slug"`
-	AvatarUrls  map[string]string `json:"avatar_urls"`
-	Links       Links             `json:"_links"`
+	ID            int               `json:"id"`
+	Name          string            `json:"name"`
+	URL           string            `json:"url"`
+	Description   string            `json:"description"`
+	Link          string            `json:"link"`
+	Slug          string            `json:"slug"`
+	AvatarUrls    map[string]string `json:"avatar_urls"`
+	YoastHead     string            `json:"yoast_head"`      // Added YoastHead field
+	YoastHeadJSON any               `json:"yoast_head_json"` // Added YoastHeadJSON field
+	ACF           []any             `json:"acf"`             // Added ACF field
+	Links         Links             `json:"_links"`
 }
 
 type Term struct {
-	ID       int    `json:"id"`
-	Link     string `json:"link"`
-	Name     string `json:"name"`
-	Slug     string `json:"slug"`
-	Taxonomy string `json:"taxonomy"`
-	Links    Links  `json:"_links"`
+	ID            int    `json:"id"`
+	Link          string `json:"link"`
+	Name          string `json:"name"`
+	Slug          string `json:"slug"`
+	Taxonomy      string `json:"taxonomy"`
+	YoastHead     string `json:"yoast_head"`      // Added YoastHead field
+	YoastHeadJSON any    `json:"yoast_head_json"` // Added YoastHeadJSON field
+	ACF           []any  `json:"acf"`             // Added ACF field
+	Links         Links  `json:"_links"`
 }

@@ -2,11 +2,11 @@ package api
 
 import (
 	"encoding/json"
-	"errors"
 	"io"
 	"net/http"
 	"time"
 
+	"server/infrastructure/logger"
 	"server/infrastructure/redis"
 )
 
@@ -23,7 +23,9 @@ func FetchJSONData[T any](APIURL string) (*T, error) {
 		return nil, err
 	}
 	if res.StatusCode != 200 {
-		return nil, errors.New("Failed to fetch data : " + string(body))
+		// 外部APIからデータを取得できなかった場合エラーだとアプリケーションが停止するため空を返す
+		logger.Warn("Failed to fetch data : " + string(body))
+		return nil, nil
 	}
 
 	var data T

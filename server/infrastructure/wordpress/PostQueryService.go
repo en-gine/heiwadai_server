@@ -34,6 +34,9 @@ func (pq *PostQueryService) GetAll() ([]*entity.Post, error) {
 		return nil, err
 	}
 	var entities []*entity.Post
+	if wpposts == nil {
+		return entities, nil
+	}
 	for _, wppost := range *wpposts {
 		entities = append(entities, WPPostToEntity(&wppost))
 	}

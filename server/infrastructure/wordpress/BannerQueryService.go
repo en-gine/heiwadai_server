@@ -25,6 +25,9 @@ func (pq *BannerQueryService) GetAll() ([]*entity.Banner, error) {
 		return nil, err
 	}
 	var entities []*entity.Banner
+	if banners == nil {
+		return entities, nil
+	}
 	for _, wpbanner := range *banners {
 		entities = append(entities, WPBannerToEntity(&wpbanner))
 	}
