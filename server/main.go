@@ -27,7 +27,11 @@ func main() {
 
 	mux := http.NewServeMux()
 	os.Setenv("TZ", "Asia/Tokyo")
-
+	location, err := time.LoadLocation("Asia/Tokyo")
+	if err != nil {
+		log.Fatal(err)
+	}
+	time.Local = location
 	userRouter.NewUserServer(mux)
 	adminRouter.NewAdminServer(mux)
 	cronRouter.NewCronServer(mux)

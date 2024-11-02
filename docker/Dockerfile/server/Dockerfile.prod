@@ -1,4 +1,4 @@
-FROM golang:1.20.5-alpine as builder
+FROM golang:1.20.5 as builder
 RUN mkdir server
 WORKDIR /server
 ENV CGO_ENABLED=0 GOOS=linux GOARCH=amd64
@@ -12,5 +12,10 @@ RUN go build -o main .
 FROM alpine:3.18
 COPY --from=builder /server/main /app/main
 RUN chmod +x /app/main
+
+# copy zoneinfo.zip
+COPY --from=builder /usr/local/go/lib/time/zoneinfo.zip /
+ENV ZONEINFO=/zoneinfo.zip
+
 EXPOSE 3000
 CMD ["/app/main"] 
