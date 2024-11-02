@@ -2,6 +2,7 @@ package user
 
 import (
 	"bytes"
+	_ "embed"
 	"fmt"
 	"html/template"
 	"strconv"
@@ -17,6 +18,12 @@ import (
 
 	"github.com/google/uuid"
 )
+
+//go:embed template/ReserveMail.html
+var reserveMailTemplate string
+
+//go:embed template/CancelMail.html
+var cancelMailTemplate string
 
 type BookUsecase struct {
 	bookQuery  queryservice.IBookQueryService
@@ -87,7 +94,7 @@ func (u *BookUsecase) Cancel(bookID uuid.UUID) *errors.DomainError {
 		return errors.NewDomainError(errors.QueryError, err.Error())
 	}
 
-	tmpl, err := template.ParseFiles("core/usecase/template/CancelMail.html")
+	tmpl, err := template.ParseFiles(cancelMailTemplate)
 	if err != nil {
 		return errors.NewDomainError(errors.CancelButNeedFeedBack, "予約はキャンセルしましたが、メールテンプレートの取得に失敗しました。")
 	}
@@ -131,7 +138,6 @@ func (u *BookUsecase) Reserve(
 	BookUserID uuid.UUID,
 	Note string,
 ) *errors.DomainError {
-
 	store, err := u.storeQuery.GetStayableByID(BookPlan.Plan.StoreID)
 	if err != nil {
 		return errors.NewDomainError(errors.QueryError, err.Error())
@@ -185,7 +191,7 @@ func (u *BookUsecase) Reserve(
 	}
 
 	// 予約完了メールの内容を取得
-	tmpl, err := template.ParseFiles("core/usecase/template/ReserveMail.html")
+	tmpl, err := template.ParseFiles(reserveMailTemplate)
 	if err != nil {
 		return errors.NewDomainError(errors.CancelButNeedFeedBack, "予約は完了しましたが、メールテンプレートの取得に失敗しました。")
 	}
@@ -204,7 +210,6 @@ func (u *BookUsecase) Reserve(
 
 func (u *BookUsecase) GetIsBookingUnderMaintenance() *entity.MaintenanceInfo {
 	return entity.GetBookingUnderMaintenance()
-
 }
 
 func reserveMailContent(
@@ -212,7 +217,6 @@ func reserveMailContent(
 	bookinfo *entity.Booking,
 	store *entity.StayableStore,
 ) (*string, error) {
-
 	// メールのデータを定義（実際のデータはアプリケーションから取得）
 	var people string
 	if bookinfo.Child > 0 {
@@ -295,7 +299,6 @@ func cancelMailContent(
 }
 
 func analyzeTemplate(templateContent *template.Template, dataMap map[string]string) (*string, error) {
-
 	// テンプレートに値を埋め込む
 	var content bytes.Buffer
 	err := templateContent.Execute(&content, dataMap)

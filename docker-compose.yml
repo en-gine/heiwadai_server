@@ -22,14 +22,3 @@ services:
       REDIS_ARGS: --save 5 30 --appendonly yes
     volumes:
       - ./docker/data/redis/data:/data:Z
-  envoy:
-    container_name: heiwadai-envoy
-    image: envoyproxy/envoy:v1.20.0
-    restart: unless-stopped
-    volumes:
-      - ./docker/envoy/envoy.yaml:/etc/envoy/envoy.yaml:Z
-    ports:
-      - 9000:9000
-      - 9901:9901
-    depends_on:
-      - server
