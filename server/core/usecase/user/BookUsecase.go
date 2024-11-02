@@ -94,7 +94,7 @@ func (u *BookUsecase) Cancel(bookID uuid.UUID) *errors.DomainError {
 		return errors.NewDomainError(errors.QueryError, err.Error())
 	}
 
-	tmpl, err := template.ParseFiles(cancelMailTemplate)
+	tmpl, err := template.New("cancel").Parse(cancelMailTemplate)
 	if err != nil {
 		return errors.NewDomainError(errors.CancelButNeedFeedBack, "予約はキャンセルしましたが、メールテンプレートの取得に失敗しました。")
 	}
@@ -191,7 +191,7 @@ func (u *BookUsecase) Reserve(
 	}
 
 	// 予約完了メールの内容を取得
-	tmpl, err := template.ParseFiles(reserveMailTemplate)
+	tmpl, err := template.New("reserve").Parse(reserveMailTemplate)
 	if err != nil {
 		return errors.NewDomainError(errors.CancelButNeedFeedBack, "予約は完了しましたが、メールテンプレートの取得に失敗しました。")
 	}

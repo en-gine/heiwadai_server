@@ -55,7 +55,7 @@ func (pq *MailMagazineRepository) Save(mailMagazine *entity.MailMagazine) error 
 
 	err := mgz.Upsert(context.Background(), pq.db, true, []string{"id"}, boil.Infer(), boil.Infer())
 	if err != nil {
-		logger.Errorf(err.Error())
+		logger.Error(err.Error())
 		return err
 	}
 	return nil
@@ -67,7 +67,7 @@ func (pq *MailMagazineRepository) Delete(magazineID uuid.UUID) error {
 	}
 	_, err := mgz.Delete(context.Background(), pq.db)
 	if err != nil {
-		logger.Errorf(err.Error())
+		logger.Error(err.Error())
 		return err
 	}
 	return nil
