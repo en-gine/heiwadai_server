@@ -70,6 +70,10 @@ const (
 
 	CronAccessKey    EnvKey = "CRON_ACCESS_KEY"
 	CronAccessSecret EnvKey = "CRON_ACCESS_SECRET"
+	S3Region         EnvKey = "S3_REGION"
+	S3Bucket         EnvKey = "S3_BUCKET"
+	S3AccessKey      EnvKey = "S3_ACCESS_KEY"
+	S3SecretKey      EnvKey = "S3_SECRET_KEY"
 )
 
 func InitEnv() {
@@ -123,6 +127,11 @@ func InitEnv() {
 
 			CronAccessKey:    os.Getenv(string(CronAccessKey)),
 			CronAccessSecret: os.Getenv(string(CronAccessSecret)),
+
+			S3Region:    os.Getenv(string(S3Region)),
+			S3Bucket:    os.Getenv(string(S3Bucket)),
+			S3AccessKey: os.Getenv(string(S3AccessKey)),
+			S3SecretKey: os.Getenv(string(S3SecretKey)),
 		}
 	})
 	env := *Env
