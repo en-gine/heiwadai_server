@@ -8,6 +8,8 @@ import (
 	domainErrors "server/core/errors"
 	"server/core/infra/action"
 	queryservice "server/core/infra/queryService"
+	"server/core/infra/repository"
+	inmemcache "server/infrastructure/cache"
 	"server/infrastructure/env"
 	"server/infrastructure/logger"
 	"server/infrastructure/redis"
@@ -37,9 +39,26 @@ var (
 	TokenKey     keyType = "token"
 )
 
-var cache = redis.NewMemoryRepository()
+var cache repository.IMemoryRepository
 
 type Authentificatable struct{}
+
+func init() {
+	// 環境変数でキャッシュタイプを切り替え
+	cacheType := env.GetEnv("CACHE_TYPE")
+	if cacheType == "" {
+		cacheType = "memory" // デフォルトはインメモリ
+	}
+	
+	switch cacheType {
+	case "redis":
+		cache = redis.NewMemoryRepository()
+	case "memory":
+		cache = inmemcache.NewMemoryRepository()
+	default:
+		cache = inmemcache.NewMemoryRepository()
+	}
+}
 
 func NewAuthentificatable(AuthClient action.IAuthAction, UserDataQuery queryservice.IUserQueryService, AdminDataQuery queryservice.IAdminQueryService, AuthType AuthType) connect.Option {
 	interceptor := func(next connect.UnaryFunc) connect.UnaryFunc {

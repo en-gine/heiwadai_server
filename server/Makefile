@@ -40,12 +40,6 @@ install-buf:
 	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest & \
 	export PATH="$(go env GOBIN):${PATH}" && export PATH="$(go env GOPATH)/bin:${PATH}"
 
-install-node: #openapi-mergeを使うために
-	volta install node
-	npm install -g openapi-merge
-	npm install -g openapi-merge-cli
-	npm install -g api-spec-converter
-
 migrate-create: # ex: TABLE_NAME=users
 ifndef TABLE_NAME
 	$(error コマンド引数に TABLE_NAME=テーブル名 をセットしてください。)
@@ -74,9 +68,6 @@ install-sqlboiler:
 
 swagger-merge:
 	npx swagger-merge -v "1.0.0" -t "Heiwadai Api" -d "Heiwadai description" -p "./api/v1/" -o "./api/v1/merged-swagger.json" $(find ./api/v1/ -type f -name "*.json" | tr '\n' ' ')
-
-openapi-merge:
-	npx openapi-merge-cli --config ./openapi-merge.json
 
 sqlboiler:#sqlboilerでmodelを自動生成
 	sqlboiler psql --wipe
