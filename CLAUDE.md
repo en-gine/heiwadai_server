@@ -94,6 +94,31 @@ cd server && make install-sqlboiler
 cd server && make install-node
 ```
 
+### AWS Lambda Deployment
+```bash
+# Deploy birthday coupon Lambda function (one-time setup)
+export CRON_ACCESS_ENDPOINT="your-endpoint-url"
+export CRON_ACCESS_SECRET="your-secret"
+export CRON_ACCESS_KEY="your-key"
+export AWS_PROFILE="your-aws-profile"  # Optional, defaults to 'default'
+make deploy-birthday-coupon
+
+# Update Lambda function only
+make deploy-lambda
+
+# Test Lambda function manually
+make lambda-test
+
+# Delete Lambda resources
+make delete-birthday-coupon
+
+# Show Lambda help
+make help-lambda
+
+# Use specific AWS profile
+AWS_PROFILE=production make deploy-birthday-coupon
+```
+
 ## Tech Stack
 
 - **Backend**: Go 1.20

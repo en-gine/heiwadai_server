@@ -1,54 +1,57 @@
-include .env.makefile # Makefile用環境変数を読み込む
+# Heiwadai プロジェクト Makefile
+# Makefile用環境変数を読み込む
+include .env.makefile
 
-up:
-	docker compose up -d
+# 分割したMakefileを読み込む
+include makefiles/docker.mk
+include makefiles/server.mk
+include makefiles/deployment.mk
+include makefiles/lambda.mk
 
-bash:
-	docker compose exec server bash
+# デフォルトターゲット
+.DEFAULT_GOAL := help
 
-stop:
-	docker compose stop
+# プロジェクト共通のヘルプ
+help:
+	@echo "Heiwadai Project Commands:"
+	@echo ""
+	@echo "Docker Operations:"
+	@echo "  up                     - Start all containers"
+	@echo "  down                   - Stop and remove containers"
+	@echo "  restart                - Restart all containers"
+	@echo "  bash                   - Access server container shell"
+	@echo "  logs                   - Show container logs"
+	@echo ""
+	@echo "Development:"
+	@echo "  dev                    - Start development server with hot reload"
+	@echo "  run                    - Run server"
+	@echo "  buf                    - Generate protobuf code"
+	@echo "  lint                   - Run linter"
+	@echo "  test                   - Run all tests"
+	@echo ""
+	@echo "Database:"
+	@echo "  migrate-up             - Run database migrations"
+	@echo "  migrate-down           - Rollback migrations"
+	@echo "  init-db                - Initialize database"
+	@echo "  sqlboiler              - Generate ORM models"
+	@echo ""
+	@echo "Deployment:"
+	@echo "  deploy-server          - Build and push server image to ECR"
+	@echo "  deploy-birthday-coupon - Deploy Lambda birthday coupon function"
+	@echo ""
+	@echo "For detailed help on specific categories:"
+	@echo "  make help-lambda       - Lambda deployment help"
+	@echo ""
+	@echo "Environment variables required for Lambda:"
+	@echo "  CRON_ACCESS_ENDPOINT, CRON_ACCESS_SECRET, CRON_ACCESS_KEY"
+	@echo "  AWS_PROFILE (optional, default: default)"
 
-restart:
-	docker compose restart
+# 全体初期化コマンド
+init: up init-db
+	@echo "Project initialized successfully!"
 
-run: 
-	docker compose exec server go run .
+# 開発環境セットアップ
+setup-dev: up buf sqlboiler
+	@echo "Development environment setup complete!"
 
-dev:
-	docker compose exec server air
-
-buf: 
-	docker compose exec server buf generate
-
-sqlboiler: 
-	docker compose exec server make sqlboiler
-
-reload-env:
-	docker-compose --env-file .env up -d
-
-build:
-	docker build -t ${AWS_ID}.dkr.ecr.ap-northeast-1.amazonaws.com/heiwadai-server:latest -f ./docker/Dockerfile/server/Dockerfile.prod .
-
-push:
-	docker push ${AWS_ID}.dkr.ecr.ap-northeast-1.amazonaws.com/heiwadai-server:latest
-
-login:
-	aws ecr get-login-password --region ap-northeast-1 | docker login --username AWS --password-stdin https://${AWS_ID}.dkr.ecr.ap-northeast-1.amazonaws.com
-
-
-# build:
-# 	docker build -t asia-northeast2-docker.pkg.dev/heiwadai/server/heiwadai-server -f ./docker/Dockerfile/server/Dockerfile.prod .
-
-# push:
-# 	@make build
-# 	docker push asia-northeast2-docker.pkg.dev/heiwadai/server/heiwadai-server
-
-# deploy:
-# 	gcloud beta run deploy heiwadai-server --project heiwadai --region asia-northeast2 --platform managed --source .
-
-init-proto:
-	git submodule add git@github.com:en-gine/heiwadai_proto.git server/v1
-	
-update-proto:
-	git submodule update --remote
+.PHONY: help init setup-dev

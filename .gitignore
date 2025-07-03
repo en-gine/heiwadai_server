@@ -10,3 +10,4 @@ node_modules
 /server/log
 /server/tmp
 __debug_bin
+.zip
