@@ -67,24 +67,91 @@ lambda-create-role:
 		--role-name $(LAMBDA_ROLE_NAME) \
 		--policy-arn arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole \
 		--region $(AWS_REGION) || true
+	@echo "Attaching VPC access policy..."
+	$(AWS_CMD) iam attach-role-policy \
+		--role-name $(LAMBDA_ROLE_NAME) \
+		--policy-arn arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole \
+		--region $(AWS_REGION) || true
 
-# Lambda関数の作成
+# Lambda VPC設定用のセキュリティグループ作成
+lambda-create-vpc-security-group:
+	@echo "Creating security group for Lambda VPC access..."
+	@if [ -f /tmp/vpc-resources.env ]; then \
+		. /tmp/vpc-resources.env; \
+		SG_ID=$$($(AWS_CMD) ec2 create-security-group \
+			--group-name heiwadai-lambda-sg \
+			--description "Security group for Lambda functions in VPC" \
+			--vpc-id $$VPC_ID \
+			--query GroupId \
+			--output text \
+			--region $(AWS_REGION) 2>/dev/null || \
+			$(AWS_CMD) ec2 describe-security-groups \
+				--filters "Name=group-name,Values=heiwadai-lambda-sg" "Name=vpc-id,Values=$$VPC_ID" \
+				--query "SecurityGroups[0].GroupId" \
+				--output text \
+				--region $(AWS_REGION)); \
+		echo "Security Group ID: $$SG_ID"; \
+		echo "Adding outbound rules for Lambda..."; \
+		$(AWS_CMD) ec2 authorize-security-group-egress \
+			--group-id $$SG_ID \
+			--protocol tcp \
+			--port 443 \
+			--cidr 0.0.0.0/0 \
+			--region $(AWS_REGION) 2>/dev/null || true; \
+		$(AWS_CMD) ec2 authorize-security-group-egress \
+			--group-id $$SG_ID \
+			--protocol tcp \
+			--port 80 \
+			--cidr 0.0.0.0/0 \
+			--region $(AWS_REGION) 2>/dev/null || true; \
+		$(AWS_CMD) ec2 authorize-security-group-egress \
+			--group-id $$SG_ID \
+			--protocol tcp \
+			--port 587 \
+			--cidr 0.0.0.0/0 \
+			--region $(AWS_REGION) 2>/dev/null || true; \
+		echo "LAMBDA_SECURITY_GROUP_ID=$$SG_ID" >> /tmp/vpc-resources.env; \
+	else \
+		echo "❌ VPC resources not found. Please run 'make setup-vpc-for-apprunner' first."; \
+		exit 1; \
+	fi
+
+# Lambda関数の作成（VPC対応）
 lambda-create:
-	@echo "Creating Lambda function..."
+	@echo "Creating Lambda function with VPC configuration..."
 	$(eval ACCOUNT_ID := $(shell $(AWS_CMD) sts get-caller-identity --query Account --output text))
-	$(AWS_CMD) lambda create-function \
-		--function-name $(LAMBDA_FUNCTION_NAME) \
-		--runtime nodejs18.x \
-		--role arn:aws:iam::$(ACCOUNT_ID):role/$(LAMBDA_ROLE_NAME) \
-		--handler index.handler \
-		--zip-file fileb://$(LAMBDA_DIR)/function.zip \
-		--timeout 60 \
-		--memory-size 128 \
-		--region $(AWS_REGION) || \
-	$(AWS_CMD) lambda update-function-code \
-		--function-name $(LAMBDA_FUNCTION_NAME) \
-		--zip-file fileb://$(LAMBDA_DIR)/function.zip \
-		--region $(AWS_REGION)
+	@if [ -f /tmp/vpc-resources.env ]; then \
+		. /tmp/vpc-resources.env; \
+		$(AWS_CMD) lambda create-function \
+			--function-name $(LAMBDA_FUNCTION_NAME) \
+			--runtime nodejs18.x \
+			--role arn:aws:iam::$(ACCOUNT_ID):role/$(LAMBDA_ROLE_NAME) \
+			--handler index.handler \
+			--zip-file fileb://$(LAMBDA_DIR)/function.zip \
+			--timeout 60 \
+			--memory-size 256 \
+			--vpc-config SubnetIds=$$PRIVATE_SUBNET_ID,SecurityGroupIds=$$LAMBDA_SECURITY_GROUP_ID \
+			--region $(AWS_REGION) 2>/dev/null || \
+		$(AWS_CMD) lambda update-function-code \
+			--function-name $(LAMBDA_FUNCTION_NAME) \
+			--zip-file fileb://$(LAMBDA_DIR)/function.zip \
+			--region $(AWS_REGION); \
+	else \
+		echo "❌ VPC resources not found. Creating function without VPC..."; \
+		$(AWS_CMD) lambda create-function \
+			--function-name $(LAMBDA_FUNCTION_NAME) \
+			--runtime nodejs18.x \
+			--role arn:aws:iam::$(ACCOUNT_ID):role/$(LAMBDA_ROLE_NAME) \
+			--handler index.handler \
+			--zip-file fileb://$(LAMBDA_DIR)/function.zip \
+			--timeout 60 \
+			--memory-size 256 \
+			--region $(AWS_REGION) || \
+		$(AWS_CMD) lambda update-function-code \
+			--function-name $(LAMBDA_FUNCTION_NAME) \
+			--zip-file fileb://$(LAMBDA_DIR)/function.zip \
+			--region $(AWS_REGION); \
+	fi
 
 # Lambda環境変数の更新
 lambda-update-env:
@@ -98,7 +165,14 @@ ifndef CRON_ACCESS_KEY
 	$(error CRON_ACCESS_KEY is not set. Please set environment variables)
 endif
 	@echo "Updating Lambda environment variables..."
-	@echo '{"Variables":{"CRON_ACCESS_ENDPOINT":"$(CRON_ACCESS_ENDPOINT)","CRON_ACCESS_SECRET":"$(CRON_ACCESS_SECRET)","CRON_ACCESS_KEY":"$(CRON_ACCESS_KEY)"}}' > /tmp/lambda-env.json
+	@echo '{"Variables":{' > /tmp/lambda-env.json
+	@echo '"CRON_ACCESS_ENDPOINT":"$(CRON_ACCESS_ENDPOINT)",' >> /tmp/lambda-env.json
+	@echo '"CRON_ACCESS_SECRET":"$(CRON_ACCESS_SECRET)",' >> /tmp/lambda-env.json
+	@echo '"CRON_ACCESS_KEY":"$(CRON_ACCESS_KEY)",' >> /tmp/lambda-env.json
+	@echo '"SENDGRID_API_KEY":"$(SENDGRID_API_KEY)",' >> /tmp/lambda-env.json
+	@echo '"NOTIFICATION_EMAIL":"$(NOTIFICATION_EMAIL)",' >> /tmp/lambda-env.json
+	@echo '"MAIL_FROM":"$(MAIL_FROM)"' >> /tmp/lambda-env.json
+	@echo '}}' >> /tmp/lambda-env.json
 	$(AWS_CMD) lambda update-function-configuration \
 		--function-name $(LAMBDA_FUNCTION_NAME) \
 		--environment file:///tmp/lambda-env.json \
@@ -138,8 +212,8 @@ eventbridge-add-target:
 # EventBridge完全セットアップ
 deploy-eventbridge: eventbridge-create-rule eventbridge-add-permission eventbridge-add-target
 
-# 完全デプロイ（初回用）
-deploy-birthday-coupon: lambda-create-role deploy-lambda deploy-eventbridge
+# 完全デプロイ（初回用、VPC対応）
+deploy-birthday-coupon: lambda-create-role lambda-create-vpc-security-group deploy-lambda deploy-eventbridge
 	@echo "Birthday coupon Lambda and EventBridge deployed successfully!"
 	@echo "Schedule: Every 1st day of the month at 00:00 UTC (09:00 JST)"
 
@@ -199,8 +273,8 @@ help-lambda:
 	@echo "  AWS_PROFILE           - AWS CLI profile (default: default)"
 	@echo "  LAMBDA_FUNCTION_NAME  - Lambda function name"
 
-.PHONY: deploy-lambda lambda-package lambda-create-role lambda-create lambda-update-env \
-        eventbridge-create-rule eventbridge-add-permission eventbridge-add-target \
-        deploy-eventbridge deploy-birthday-coupon lambda-test lambda-delete \
-        eventbridge-delete delete-birthday-coupon help-lambda \
+.PHONY: deploy-lambda lambda-package lambda-create-role lambda-create-vpc-security-group \
+        lambda-create lambda-update-env eventbridge-create-rule eventbridge-add-permission \
+        eventbridge-add-target deploy-eventbridge deploy-birthday-coupon lambda-test \
+        lambda-delete eventbridge-delete delete-birthday-coupon help-lambda \
         aws-check aws-sso-login

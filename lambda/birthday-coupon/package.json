@@ -4,9 +4,15 @@
   "description": "Lambda function to issue birthday coupons monthly",
   "main": "index.js",
   "dependencies": {
+    "@sendgrid/mail": "^8.1.5",
     "axios": "^1.6.0"
   },
-  "keywords": ["aws", "lambda", "coupon", "cron"],
+  "keywords": [
+    "aws",
+    "lambda",
+    "coupon",
+    "cron"
+  ],
   "author": "Heiwadai Team",
   "license": "ISC"
 }

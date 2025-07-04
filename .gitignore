@@ -11,3 +11,9 @@ node_modules
 /server/tmp
 __debug_bin
 .zip
+
+# Lambda environment files
+lambda/**/.env
+lambda/**/function.zip
+lambda/**/node_modules
+lambda/**/response.json
