@@ -6,10 +6,24 @@
 
 GitHub リポジトリの Settings > Secrets and variables > Actions で以下のSecretsを設定してください：
 
-### AWS認証情報（最小限の設定）
+### AWS認証情報（ECR専用IAMユーザー）
 ```
-AWS_ACCESS_KEY_ID=<AWS Access Key ID>
-AWS_SECRET_ACCESS_KEY=<AWS Secret Access Key>
+AWS_ACCESS_KEY_ID=<Your AWS Access Key ID>
+AWS_SECRET_ACCESS_KEY=<Your AWS Secret Access Key>
+```
+
+**IAMユーザー情報**:
+- ユーザー名: `github-actions-ecr-user`
+- 権限: ECRリポジトリ `heiwadai-server` への読み書きのみ
+- 特徴: 永続的なアクセスキー（SSO認証不要）
+
+**実際の認証情報の取得方法**:
+```bash
+# IAMユーザーが既に作成済みの場合、新しいアクセスキーを生成
+make create-github-actions-access-key
+
+# または現在のアクセスキーを確認
+make list-github-actions-access-keys
 ```
 
 ## 仕組み

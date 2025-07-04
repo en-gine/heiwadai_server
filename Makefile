@@ -8,6 +8,7 @@ include makefiles/server.mk
 include makefiles/deployment.mk
 include makefiles/lambda.mk
 include makefiles/apprunner.mk
+include makefiles/iam.mk
 
 # デフォルトターゲット
 .DEFAULT_GOAL := help
@@ -45,6 +46,7 @@ help:
 	@echo "For detailed help on specific categories:"
 	@echo "  make help-lambda       - Lambda deployment help"
 	@echo "  make help-apprunner    - App Runner deployment help"
+	@echo "  make help-iam          - IAM management help"
 	@echo ""
 	@echo "Environment variables required for Lambda:"
 	@echo "  CRON_ACCESS_ENDPOINT, CRON_ACCESS_SECRET, CRON_ACCESS_KEY"

@@ -150,6 +150,26 @@ Automatic deployment is configured using App Runner's auto-deployment feature:
   - GitHub Actions: Build and push status
   - App Runner Console: Deployment progress
 
+### IAM Management for GitHub Actions
+```bash
+# Create dedicated IAM user for GitHub Actions (one-time setup)
+make create-github-actions-user
+make create-github-actions-access-key
+
+# Test credentials
+make test-github-actions-credentials AWS_ACCESS_KEY_ID=... AWS_SECRET_ACCESS_KEY=...
+
+# Manage access keys
+make list-github-actions-access-keys
+make delete-github-actions-access-key ACCESS_KEY_ID=...
+
+# Show current status
+make show-github-actions-user
+
+# Get help
+make help-iam
+```
+
 ## Tech Stack
 
 - **Backend**: Go 1.20
