@@ -25,9 +25,6 @@ const (
 const (
 	EnvMode EnvKey = "ENV_MODE"
 
-	// AdminClientIps EnvKey = "ADMIN_CLIENT_IPs"
-	// ClonClientIps  EnvKey = "CRON_CLIENT_IPs"
-
 	ServerPort EnvKey = "PORT"
 
 	PsqlDbname EnvKey = "PSQL_DBNAME"

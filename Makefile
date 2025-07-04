@@ -7,6 +7,7 @@ include makefiles/docker.mk
 include makefiles/server.mk
 include makefiles/deployment.mk
 include makefiles/lambda.mk
+include makefiles/apprunner.mk
 
 # デフォルトターゲット
 .DEFAULT_GOAL := help
@@ -38,9 +39,12 @@ help:
 	@echo "Deployment:"
 	@echo "  deploy-server          - Build and push server image to ECR"
 	@echo "  deploy-birthday-coupon - Deploy Lambda birthday coupon function"
+	@echo "  deploy-apprunner       - Deploy to AWS App Runner (first time)"
+	@echo "  deploy-apprunner-update - Update App Runner with new image"
 	@echo ""
 	@echo "For detailed help on specific categories:"
 	@echo "  make help-lambda       - Lambda deployment help"
+	@echo "  make help-apprunner    - App Runner deployment help"
 	@echo ""
 	@echo "Environment variables required for Lambda:"
 	@echo "  CRON_ACCESS_ENDPOINT, CRON_ACCESS_SECRET, CRON_ACCESS_KEY"
