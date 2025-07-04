@@ -119,6 +119,37 @@ make help-lambda
 AWS_PROFILE=production make deploy-birthday-coupon
 ```
 
+### AWS App Runner Deployment
+```bash
+# Manual deployment to App Runner
+make create-apprunner-service
+
+# Check service status
+make check-apprunner-status
+
+# Update service with new image
+make update-apprunner-service
+
+# Delete service
+make delete-apprunner-service
+
+# Deploy with fixed IP (VPC setup)
+make deploy-apprunner-with-fixed-ip
+```
+
+### CI/CD with GitHub Actions
+Automatic deployment is configured using App Runner's auto-deployment feature:
+
+- **Trigger**: Push to master branch or manual dispatch
+- **Process**: 
+  1. GitHub Actions: Build Docker image → Push to ECR
+  2. App Runner: Auto-detect new ECR image → Deploy automatically
+- **Setup**: Only AWS ECR credentials needed (see `.github/README-SECRETS.md`)
+- **Security**: Environment variables stored securely in App Runner, not in Git
+- **Status**: 
+  - GitHub Actions: Build and push status
+  - App Runner Console: Deployment progress
+
 ## Tech Stack
 
 - **Backend**: Go 1.20
