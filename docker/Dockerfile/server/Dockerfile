@@ -1,16 +1,16 @@
-FROM golang:1.23.2-bullseye
+FROM golang:1.24-bullseye
 RUN mkdir server
 WORKDIR /server
 
 RUN apt-get update && apt-get install -y git
 COPY ./server .
 
-## Install build dependencies
-RUN apt-get install -y build-essential curl file
+## Install build tools
+RUN apt-get install -y build-essential curl file git gcc
 
-### connnect buf https://github.com/bufbuild/connect-go
+### connect buf https://github.com/bufbuild/connect-go
 RUN go mod tidy && \
-  go install github.com/bufbuild/buf/cmd/buf@v1.28.1 && \
+  go install github.com/bufbuild/buf/cmd/buf@latest && \
   go install github.com/fullstorydev/grpcurl/cmd/grpcurl@latest && \
   go install google.golang.org/protobuf/cmd/protoc-gen-go@latest && \
   go install github.com/bufbuild/connect-go/cmd/protoc-gen-connect-go@latest && \
@@ -20,8 +20,8 @@ RUN go mod tidy && \
 RUN go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
 
 ### sqlboiler
-RUN go install github.com/volatiletech/sqlboiler/v4@v4.14.2 && \
-  go install github.com/volatiletech/sqlboiler/v4/drivers/sqlboiler-psql@v4.14.2
+RUN go install github.com/aarondl/sqlboiler/v4@latest && \
+  go install github.com/aarondl/sqlboiler/v4/drivers/sqlboiler-psql@latest
 
 ### For development
 RUN go mod tidy && \
