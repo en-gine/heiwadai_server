@@ -25,7 +25,7 @@ run:
 	docker compose exec server go run .
 
 dev:
-	docker compose exec server air
+	docker compose -f docker-compose.dev.yml exec server air
 
 # .envファイルを再読み込みして起動
 reload-env:
