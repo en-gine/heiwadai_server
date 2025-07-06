@@ -1,6 +1,6 @@
 # AWS App Runner関連のコマンド
 AWS_REGION ?= ap-northeast-1
-AWS_PROFILE ?= default
+AWS_PROFILE ?= heiwadai
 AWS_CMD = aws --profile $(AWS_PROFILE)
 
 # App Runner設定
@@ -32,18 +32,7 @@ create-apprunner-ecr-role:
 	@echo "Creating App Runner ECR access role..."
 	$(AWS_CMD) iam create-role \
 		--role-name $(APP_RUNNER_ECR_ROLE) \
-		--assume-role-policy-document '{ \
-			"Version": "2012-10-17", \
-			"Statement": [ \
-				{ \
-					"Effect": "Allow", \
-					"Principal": { \
-						"Service": "build.apprunner.amazonaws.com" \
-					}, \
-					"Action": "sts:AssumeRole" \
-				} \
-			] \
-		}' \
+		--assume-role-policy-document '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"Service":"build.apprunner.amazonaws.com"},"Action":"sts:AssumeRole"}]}' \
 		--region $(AWS_REGION) || true
 	@echo "Attaching ECR access policy..."
 	$(AWS_CMD) iam attach-role-policy \
@@ -86,18 +75,7 @@ create-apprunner-instance-role:
 	@echo "Creating App Runner instance role..."
 	$(AWS_CMD) iam create-role \
 		--role-name $(APP_RUNNER_INSTANCE_ROLE) \
-		--assume-role-policy-document '{ \
-			"Version": "2012-10-17", \
-			"Statement": [ \
-				{ \
-					"Effect": "Allow", \
-					"Principal": { \
-						"Service": "tasks.apprunner.amazonaws.com" \
-					}, \
-					"Action": "sts:AssumeRole" \
-				} \
-			] \
-		}' \
+		--assume-role-policy-document '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"Service":"tasks.apprunner.amazonaws.com"},"Action":"sts:AssumeRole"}]}' \
 		--region $(AWS_REGION) || true
 	@echo "Note: Add any required policies for your app (e.g., S3, RDS access)"
 
@@ -527,6 +505,24 @@ apply-vpc-connector:
 		--region $(AWS_REGION)
 	@echo "VPC connector applied successfully"
 
+# App RunnerサービスからVPCコネクタを削除
+remove-vpc-connector-from-apprunner:
+	@echo "Removing VPC connector from App Runner service..."
+	$(eval SERVICE_ARN := $(shell $(AWS_CMD) apprunner list-services --query "ServiceSummaryList[?ServiceName=='$(APP_RUNNER_SERVICE_NAME)'].ServiceArn" --output text))
+	@if [ -n "$(SERVICE_ARN)" ]; then \
+		$(AWS_CMD) apprunner update-service \
+			--service-arn $(SERVICE_ARN) \
+			--network-configuration '{ \
+				"EgressConfiguration": { \
+					"EgressType": "DEFAULT" \
+				} \
+			}' \
+			--region $(AWS_REGION); \
+		echo "VPC connector removed from App Runner. Service will use default internet access."; \
+	else \
+		echo "App Runner service not found"; \
+	fi
+
 # VPCリソースの削除
 delete-vpc-resources:
 	@echo "Deleting VPC resources..."
@@ -536,12 +532,14 @@ delete-vpc-resources:
 		if [ -n "$$VPC_CONNECTOR_ARN" ]; then \
 			echo "Deleting VPC Connector..."; \
 			$(AWS_CMD) apprunner delete-vpc-connector --vpc-connector-arn $$VPC_CONNECTOR_ARN --region $(AWS_REGION) || true; \
+			echo "Waiting for VPC Connector deletion..."; \
+			sleep 30; \
 		fi; \
 		if [ -n "$$NAT_GATEWAY_ID" ]; then \
 			echo "Deleting NAT Gateway..."; \
 			$(AWS_CMD) ec2 delete-nat-gateway --nat-gateway-id $$NAT_GATEWAY_ID --region $(AWS_REGION) || true; \
-			echo "Waiting for NAT Gateway deletion..."; \
-			sleep 60; \
+			echo "Waiting for NAT Gateway deletion (this may take a few minutes)..."; \
+			sleep 120; \
 		fi; \
 		if [ -n "$$EIP_ALLOC_ID" ]; then \
 			echo "Releasing Elastic IP..."; \
@@ -561,14 +559,58 @@ delete-vpc-resources:
 			echo "Deleting private subnet..."; \
 			$(AWS_CMD) ec2 delete-subnet --subnet-id $$PRIVATE_SUBNET_ID --region $(AWS_REGION) || true; \
 		fi; \
+		if [ -n "$$LAMBDA_SECURITY_GROUP_ID" ]; then \
+			echo "Deleting Lambda security group..."; \
+			$(AWS_CMD) ec2 delete-security-group --group-id $$LAMBDA_SECURITY_GROUP_ID --region $(AWS_REGION) || true; \
+		fi; \
+		echo "Waiting before VPC deletion..."; \
+		sleep 30; \
 		if [ -n "$$VPC_ID" ]; then \
 			echo "Deleting VPC..."; \
 			$(AWS_CMD) ec2 delete-vpc --vpc-id $$VPC_ID --region $(AWS_REGION) || true; \
 		fi; \
 		rm -f /tmp/vpc-resources.env; \
+		echo "VPC resources deletion completed"; \
 	else \
 		echo "No VPC resources file found"; \
 	fi
+
+# NAT Gatewayのみ削除（Lambda用VPCは保持）
+delete-nat-gateway-only:
+	@echo "Deleting NAT Gateway only (keeping VPC for Lambda)..."
+	@if [ -f /tmp/vpc-resources.env ]; then \
+		echo "Loading resource IDs..."; \
+		. /tmp/vpc-resources.env; \
+		if [ -n "$$VPC_CONNECTOR_ARN" ]; then \
+			echo "Deleting VPC Connector..."; \
+			$(AWS_CMD) apprunner delete-vpc-connector --vpc-connector-arn $$VPC_CONNECTOR_ARN --region $(AWS_REGION) || true; \
+			echo "Waiting for VPC Connector deletion..."; \
+			sleep 30; \
+		fi; \
+		if [ -n "$$NAT_GATEWAY_ID" ]; then \
+			echo "Deleting NAT Gateway..."; \
+			$(AWS_CMD) ec2 delete-nat-gateway --nat-gateway-id $$NAT_GATEWAY_ID --region $(AWS_REGION) || true; \
+			echo "Waiting for NAT Gateway deletion (this may take a few minutes)..."; \
+			sleep 120; \
+		fi; \
+		if [ -n "$$EIP_ALLOC_ID" ]; then \
+			echo "Releasing Elastic IP for NAT Gateway..."; \
+			$(AWS_CMD) ec2 release-address --allocation-id $$EIP_ALLOC_ID --region $(AWS_REGION) || true; \
+		fi; \
+		echo "NAT Gateway deletion completed"; \
+		echo "VPC, subnets, and security groups are kept for Lambda function"; \
+		echo "Birthday Coupon Lambda can continue to work in the VPC"; \
+	else \
+		echo "No VPC resources file found"; \
+	fi
+
+# App Runner削除 + NAT Gateway削除（VPCは保持）
+cleanup-apprunner-only: remove-vpc-connector-from-apprunner delete-apprunner-service delete-nat-gateway-only
+	@echo "App Runner cleanup completed! VPC and Lambda are preserved."
+
+# 完全クリーンアップ（App Runner + VPC）
+cleanup-apprunner-and-vpc: remove-vpc-connector-from-apprunner delete-apprunner-service delete-vpc-resources
+	@echo "App Runner and VPC cleanup completed!"
 
 # 固定IPを使用したApp Runnerデプロイ（初回）
 deploy-apprunner-with-fixed-ip: setup-vpc-for-apprunner deploy-apprunner apply-vpc-connector
@@ -582,4 +624,5 @@ deploy-apprunner-with-fixed-ip: setup-vpc-for-apprunner deploy-apprunner apply-v
         deploy-apprunner deploy-apprunner-update help-apprunner \
         create-vpc create-public-subnet create-private-subnet create-internet-gateway \
         create-elastic-ip create-nat-gateway configure-route-tables create-vpc-connector \
-        setup-vpc-for-apprunner apply-vpc-connector delete-vpc-resources deploy-apprunner-with-fixed-ip
+        setup-vpc-for-apprunner apply-vpc-connector delete-vpc-resources deploy-apprunner-with-fixed-ip \
+        remove-vpc-connector-from-apprunner cleanup-apprunner-and-vpc delete-nat-gateway-only cleanup-apprunner-only

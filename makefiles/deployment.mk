@@ -1,5 +1,5 @@
 # デプロイメント関連のコマンド
-AWS_PROFILE ?= default
+AWS_PROFILE ?= heiwadai
 AWS_CMD = aws --profile $(AWS_PROFILE)
 
 # ECR関連

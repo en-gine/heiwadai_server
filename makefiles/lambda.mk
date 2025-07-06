@@ -1,6 +1,6 @@
 # AWS Lambda関連のコマンド
 AWS_REGION ?= ap-northeast-1
-AWS_PROFILE ?= default
+AWS_PROFILE ?= heiwadai
 LAMBDA_FUNCTION_NAME ?= heiwadai-birthday-coupon-issuer
 LAMBDA_ROLE_NAME ?= heiwadai-lambda-execution-role
 EVENTBRIDGE_RULE_NAME ?= heiwadai-birthday-coupon-schedule
@@ -34,7 +34,7 @@ aws-sso-login:
 	@echo "Testing authentication..."
 	@$(MAKE) aws-check
 
-include ./lambda/birthday-coupon/.env
+# include ./lambda/birthday-coupon/.env
 
 # Lambda関数のデプロイ
 deploy-lambda: lambda-package lambda-create lambda-update-env
@@ -51,16 +51,7 @@ lambda-create-role:
 	@echo "Creating Lambda execution role..."
 	$(AWS_CMD) iam create-role \
 		--role-name $(LAMBDA_ROLE_NAME) \
-		--assume-role-policy-document '{ \
-			"Version": "2012-10-17", \
-			"Statement": [ \
-				{ \
-					"Effect": "Allow", \
-					"Principal": { "Service": "lambda.amazonaws.com" }, \
-					"Action": "sts:AssumeRole" \
-				} \
-			] \
-		}' \
+		--assume-role-policy-document '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"Service":"lambda.amazonaws.com"},"Action":"sts:AssumeRole"}]}' \
 		--region $(AWS_REGION) || true
 	@echo "Attaching basic execution policy..."
 	$(AWS_CMD) iam attach-role-policy \
@@ -153,7 +144,7 @@ lambda-create:
 			--region $(AWS_REGION); \
 	fi
 
-# Lambda環境変数の更新
+# Lambda環境変数の更新（Discord Webhook対応）
 lambda-update-env:
 ifndef CRON_ACCESS_ENDPOINT
 	$(error CRON_ACCESS_ENDPOINT is not set. Please set environment variables)
@@ -164,20 +155,19 @@ endif
 ifndef CRON_ACCESS_KEY
 	$(error CRON_ACCESS_KEY is not set. Please set environment variables)
 endif
-	@echo "Updating Lambda environment variables..."
+	@echo "Updating Lambda environment variables with Discord Webhook..."
 	@echo '{"Variables":{' > /tmp/lambda-env.json
 	@echo '"CRON_ACCESS_ENDPOINT":"$(CRON_ACCESS_ENDPOINT)",' >> /tmp/lambda-env.json
 	@echo '"CRON_ACCESS_SECRET":"$(CRON_ACCESS_SECRET)",' >> /tmp/lambda-env.json
 	@echo '"CRON_ACCESS_KEY":"$(CRON_ACCESS_KEY)",' >> /tmp/lambda-env.json
-	@echo '"SENDGRID_API_KEY":"$(SENDGRID_API_KEY)",' >> /tmp/lambda-env.json
-	@echo '"NOTIFICATION_EMAIL":"$(NOTIFICATION_EMAIL)",' >> /tmp/lambda-env.json
-	@echo '"MAIL_FROM":"$(MAIL_FROM)"' >> /tmp/lambda-env.json
+	@echo '"WEBHOOK_URL":"https://discord.com/api/webhooks/1391258342978093056/qKhwsFxWqr21Uvp-SjqqYW0dSFCpfy2CCIANEGnexY9Tmhlii7Srj8V7K8q-7rssWGKD"' >> /tmp/lambda-env.json
 	@echo '}}' >> /tmp/lambda-env.json
 	$(AWS_CMD) lambda update-function-configuration \
 		--function-name $(LAMBDA_FUNCTION_NAME) \
 		--environment file:///tmp/lambda-env.json \
 		--region $(AWS_REGION)
 	@rm -f /tmp/lambda-env.json
+	@echo "Discord Webhook configured successfully!"
 
 # EventBridgeルールの作成（毎月1日午前9時JST = 午前0時UTC）
 eventbridge-create-rule: aws-check
