@@ -160,12 +160,16 @@ func GetMailUserWhereSQL(prefectures *[]entity.Prefecture) string {
 
 func (pq *UserQueryService) GetList(query *types.UserQuery, pager *types.PageQuery) ([]*entity.UserWichLastCheckin, *types.PageResponse, error) {
 	userFilterMods := GetUserListFilterMods(query)
+	
 	userListMods := []qm.QueryMod{
 		qm.Load(models.UserDatumRels.User),
 		qm.Load(models.UserDatumRels.UserCheckins,
 			qm.OrderBy("create_at DESC"),
 			qm.Limit(1)),
 	}
+	
+
+	
 	userdata, err := models.UserData(
 		append(userFilterMods, userListMods...)...,
 	).All(context.Background(), pq.db)
@@ -238,19 +242,19 @@ func GetUserListFilterMods(query *types.UserQuery) []qm.QueryMod {
 
 	if query != nil {
 		if query.FirstName != nil {
-			firstNameQuery = models.UserDatumWhere.FirstName.EQ("%" + *query.FirstName + "%")
+			firstNameQuery = qm.Where("first_name ILIKE ?", "%"+*query.FirstName+"%")
 			qmMods = append(qmMods, firstNameQuery)
 		}
 		if query.LastName != nil {
-			lastNameQuery = models.UserDatumWhere.LastName.EQ("%" + *query.LastName + "%")
+			lastNameQuery = qm.Where("last_name ILIKE ?", "%"+*query.LastName+"%")
 			qmMods = append(qmMods, lastNameQuery)
 		}
 		if query.FirstNameKana != nil {
-			firstNameKanaQuery = models.UserDatumWhere.FirstNameKana.EQ("%" + *query.FirstNameKana + "%")
+			firstNameKanaQuery = qm.Where("first_name_kana ILIKE ?", "%"+*query.FirstNameKana+"%")
 			qmMods = append(qmMods, firstNameKanaQuery)
 		}
 		if query.LastNameKana != nil {
-			lastNameKanaQuery = models.UserDatumWhere.LastNameKana.EQ("%" + *query.LastNameKana + "%")
+			lastNameKanaQuery = qm.Where("last_name_kana ILIKE ?", "%"+*query.LastNameKana+"%")
 			qmMods = append(qmMods, lastNameKanaQuery)
 		}
 		if query.Prefecture != nil {

@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"runtime"
@@ -102,7 +103,14 @@ func Debug(message string) {
 func DebugPrint(object interface{}) {
 	if env.GetEnv(env.EnvMode) == "dev" {
 		fmt.Print("============================\n")
-		fmt.Printf("(%%) %#v\n", object)
+		fmt.Printf("Type: %T\n", object)
+		fmt.Printf("Value: %+v\n", object)
+		
+		// JSON形式での出力も試みる
+		if jsonBytes, err := json.MarshalIndent(object, "", "  "); err == nil {
+			fmt.Printf("JSON:\n%s\n", string(jsonBytes))
+		}
+		fmt.Print("============================\n")
 	}
 }
 
