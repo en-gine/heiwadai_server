@@ -15,12 +15,15 @@ type Password string
 func NewPassword(password string) (*Password, *errors.DomainError) {
 	v := validator.PasswordValidator{}
 
-	_, err := v.IsValid(password)
+	pass := Password(password)
+	decrypted, err := pass.DecriptedString()
 	if err != nil {
 		return nil, errors.NewDomainError(errors.InvalidParameter, err.Error())
 	}
-
-	pass := Password(password)
+	_, err = v.IsValid(decrypted)
+	if err != nil {
+		return nil, errors.NewDomainError(errors.InvalidParameter, err.Error())
+	}
 	return &pass, nil
 }
 
