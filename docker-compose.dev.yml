@@ -1,11 +1,11 @@
-version: '3.8'
+version: "3.8"
 
 services:
   server:
     container_name: heiwadai-server-dev
     image: golang:1.24-bullseye
     tty: true
-    env_file: ./.env.development
+    env_file: ./.env
     working_dir: /server
     volumes:
       - ./server:/server

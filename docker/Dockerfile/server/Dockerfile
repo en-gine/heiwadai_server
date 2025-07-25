@@ -19,6 +19,13 @@ RUN go mod tidy && \
 ### migrate https://github.com/golang-migrate/migrate
 RUN go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
 
+RUN curl https://get.volta.sh | bash
+ENV VOLTA_HOME=/root/.volta
+ENV PATH="$VOLTA_HOME/bin:$PATH"
+RUN volta install node@lts && \
+  npm install -g @anthropic-ai/claude-code
+
+
 ### sqlboiler
 RUN go install github.com/aarondl/sqlboiler/v4@latest && \
   go install github.com/aarondl/sqlboiler/v4/drivers/sqlboiler-psql@latest
