@@ -79,6 +79,7 @@ func (au *AuthClient) SignUp(email entity.Mail, password entity.Password) (*uuid
 func (au *AuthClient) SignIn(email entity.Mail, password entity.Password) (*types.Token, *domainErr.DomainError, error) {
 	ctx := context.Background()
 	pass, err := password.DecriptedString()
+
 	if err != nil {
 		return nil, nil, err
 	}
@@ -86,11 +87,9 @@ func (au *AuthClient) SignIn(email entity.Mail, password entity.Password) (*type
 		Email:    email.String(),
 		Password: pass,
 	})
-	if err != nil {
-		if err.Error() == "invalid_grant: Invalid login credentials" {
-			return nil, domainErr.NewDomainError(domainErr.InvalidParameter, "メールアドレスまたはパスワードが間違っています"), nil
-		}
-		return nil, nil, err
+
+	if err != nil || auth == nil {
+		return nil, domainErr.NewDomainError(domainErr.InvalidParameter, "メールアドレスまたはパスワードが間違っています"), nil
 	}
 
 	return &types.Token{
