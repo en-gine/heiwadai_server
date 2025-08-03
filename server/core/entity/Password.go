@@ -12,10 +12,10 @@ import (
 
 type Password string
 
-func NewPassword(password string) (*Password, *errors.DomainError) {
+func NewPassword(encryptedPassword string) (*Password, *errors.DomainError) {
 	v := validator.PasswordValidator{}
 
-	pass := Password(password)
+	pass := Password(encryptedPassword)
 	decrypted, err := pass.DecriptedString()
 	if err != nil {
 		return nil, errors.NewDomainError(errors.InvalidParameter, err.Error())
@@ -69,14 +69,13 @@ func GenerateRandomPassword() (*Password, *errors.DomainError) {
 		password.WriteString(string(charSet[rand.Intn(len(charSet))]))
 	}
 
-	pass, domaiErr := NewPassword(password.String())
-	if domaiErr != nil {
-		return nil, domaiErr
-	}
+	pass := Password(password.String())
+
 	logger.Debugf("Generated password: %s", pass.string())
 	encryptedPass, err := pass.EncriptedString()
 	if err != nil {
-		return nil, errors.NewDomainError(errors.InternalError, err.Error())
+		logger.Error(err.Error())
+		return nil, errors.NewDomainError(errors.InvalidParameter, err.Error())
 	}
 	return encryptedPass, nil
 }
