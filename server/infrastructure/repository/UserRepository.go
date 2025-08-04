@@ -94,35 +94,46 @@ func (ur *UserRepository) Delete(userID uuid.UUID) error {
 	}
 	deleteUserManager, err := models.FindUserManager(ctx, tran.Tran(), userID.String())
 	if err != nil {
-		tran.Rollback()
-		return err
-	}
-	_, err = deleteUserManager.Delete(ctx, tran.Tran())
-	if err != nil {
-		tran.Rollback()
-		return err
+		if err != sql.ErrNoRows {
+			tran.Rollback()
+			return err
+		}
+	} else {
+		_, err = deleteUserManager.Delete(ctx, tran.Tran())
+		if err != nil {
+			tran.Rollback()
+			return err
+		}
 	}
 
 	deleteUserData, err := models.FindUserDatum(ctx, tran.Tran(), userID.String())
 	if err != nil {
-		tran.Rollback()
-		return err
+		if err != sql.ErrNoRows {
+			tran.Rollback()
+			return err
+		}
+	} else {
+		_, err = deleteUserData.Delete(ctx, tran.Tran())
+		if err != nil {
+			tran.Rollback()
+			return err
+		}
 	}
-	_, err = deleteUserData.Delete(ctx, tran.Tran())
-	if err != nil {
-		tran.Rollback()
-		return err
-	}
+	
 	deleteUserOption, err := models.FindUserOption(ctx, tran.Tran(), userID.String())
 	if err != nil {
-		tran.Rollback()
-		return err
+		if err != sql.ErrNoRows {
+			tran.Rollback()
+			return err
+		}
+	} else {
+		_, err = deleteUserOption.Delete(ctx, tran.Tran())
+		if err != nil {
+			tran.Rollback()
+			return err
+		}
 	}
-	_, err = deleteUserOption.Delete(ctx, tran.Tran())
-	if err != nil {
-		tran.Rollback()
-		return err
-	}
+	
 	err = tran.Commit()
 	if err != nil {
 		tran.Rollback()
