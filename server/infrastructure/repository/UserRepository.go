@@ -36,7 +36,7 @@ func (ur *UserRepository) Save(updateUser *entity.User, updateUserOption *entity
 	if err != nil {
 		return err
 	}
-	
+
 	// First, ensure user_manager record exists (handle race condition with trigger)
 	userManager := models.UserManager{
 		ID:      updateUser.ID.String(),
@@ -48,7 +48,7 @@ func (ur *UserRepository) Save(updateUser *entity.User, updateUserOption *entity
 		tran.Rollback()
 		return fmt.Errorf("failed to upsert user_manager: %w", err)
 	}
-	
+
 	user := models.UserDatum{
 		UserID:        updateUser.ID.String(),
 		FirstName:     updateUser.FirstName,
@@ -132,7 +132,7 @@ func (ur *UserRepository) Delete(userID uuid.UUID) error {
 			return err
 		}
 	}
-	
+
 	deleteUserOption, err := models.FindUserOption(ctx, tran.Tran(), userID.String())
 	if err != nil {
 		if err != sql.ErrNoRows {
@@ -146,18 +146,7 @@ func (ur *UserRepository) Delete(userID uuid.UUID) error {
 			return err
 		}
 	}
-	
-	err = tran.Commit()
-	if err != nil {
-		tran.Rollback()
-		return err
-	}
-
-	return nil
-}
-
-func (ur *UserRepository) DeleteUnderRegisterUser(userID uuid.UUID) error {
-	_, err := ur.db.Exec(fmt.Sprintf("DELETE FROM auth.users WHERE id = '%s'", userID.String()))
+	_, err = tran.Exec(fmt.Sprintf("DELETE FROM auth.users WHERE id = '%s'", userID.String()))
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil
@@ -165,5 +154,11 @@ func (ur *UserRepository) DeleteUnderRegisterUser(userID uuid.UUID) error {
 		logger.Error(err.Error())
 		return err
 	}
+	err = tran.Commit()
+	if err != nil {
+		tran.Rollback()
+		return err
+	}
+
 	return nil
 }
