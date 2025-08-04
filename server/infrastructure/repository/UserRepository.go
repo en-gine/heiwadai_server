@@ -162,3 +162,15 @@ func (ur *UserRepository) Delete(userID uuid.UUID) error {
 
 	return nil
 }
+
+func (ur *UserRepository) DeleteUnderRegisterUser(userID uuid.UUID) error {
+	_, err := ur.db.Exec(fmt.Sprintf("DELETE FROM auth.users WHERE id = '%s'", userID.String()))
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil
+		}
+		logger.Error(err.Error())
+		return err
+	}
+	return nil
+}
