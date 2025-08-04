@@ -36,6 +36,19 @@ func (ur *UserRepository) Save(updateUser *entity.User, updateUserOption *entity
 	if err != nil {
 		return err
 	}
+	
+	// First, ensure user_manager record exists (handle race condition with trigger)
+	userManager := models.UserManager{
+		ID:      updateUser.ID.String(),
+		Email:   updateUser.Mail,
+		IsAdmin: false,
+	}
+	err = userManager.Upsert(ctx, tran.Tran(), true, []string{"id"}, boil.Whitelist("email", "update_at"), boil.Infer())
+	if err != nil {
+		tran.Rollback()
+		return fmt.Errorf("failed to upsert user_manager: %w", err)
+	}
+	
 	user := models.UserDatum{
 		UserID:        updateUser.ID.String(),
 		FirstName:     updateUser.FirstName,
