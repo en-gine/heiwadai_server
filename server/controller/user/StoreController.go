@@ -126,11 +126,13 @@ func StayableInfoToResponse(info *entity.StayableStoreInfo) *shared.StayableStor
 		return &shared.StayableStoreInfo{}
 	}
 	return &shared.StayableStoreInfo{
-		Parking:         info.Parking,
-		Latitude:        info.Latitude,
-		Longitude:       info.Longitude,
-		AccessInfo:      info.AccessInfo,
-		RestAPIURL:      info.RestAPIURL,
-		BookingSystemID: info.BookingSystemID,
+		Parking:               info.Parking,
+		Latitude:              info.Latitude,
+		Longitude:             info.Longitude,
+		AccessInfo:            info.AccessInfo,
+		RestAPIURL:            info.RestAPIURL,
+		BookingSystemID:       info.BookingSystemID,
+		BookingSystemLoginID:  info.BookingSystemLoginID,
+		BookingSystemPassword: info.BookingSystemPassword,
 	}
 }
