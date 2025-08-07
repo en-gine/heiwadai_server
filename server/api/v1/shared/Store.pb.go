@@ -206,17 +206,15 @@ func (x *Stores) GetStores() []*Store {
 }
 
 type StayableStoreInfo struct {
-	state                 protoimpl.MessageState `protogen:"open.v1"`
-	Parking               string                 `protobuf:"bytes,1,opt,name=Parking,proto3" json:"Parking,omitempty"`
-	Latitude              float64                `protobuf:"fixed64,2,opt,name=Latitude,proto3" json:"Latitude,omitempty"`
-	Longitude             float64                `protobuf:"fixed64,3,opt,name=Longitude,proto3" json:"Longitude,omitempty"`
-	AccessInfo            string                 `protobuf:"bytes,4,opt,name=AccessInfo,proto3" json:"AccessInfo,omitempty"`
-	RestAPIURL            string                 `protobuf:"bytes,5,opt,name=RestAPIURL,proto3" json:"RestAPIURL,omitempty"`
-	BookingSystemID       string                 `protobuf:"bytes,6,opt,name=BookingSystemID,proto3" json:"BookingSystemID,omitempty"`
-	BookingSystemLoginID  string                 `protobuf:"bytes,7,opt,name=BookingSystemLoginID,proto3" json:"BookingSystemLoginID,omitempty"`
-	BookingSystemPassword string                 `protobuf:"bytes,8,opt,name=BookingSystemPassword,proto3" json:"BookingSystemPassword,omitempty"`
-	unknownFields         protoimpl.UnknownFields
-	sizeCache             protoimpl.SizeCache
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	Parking         string                 `protobuf:"bytes,1,opt,name=Parking,proto3" json:"Parking,omitempty"`
+	Latitude        float64                `protobuf:"fixed64,2,opt,name=Latitude,proto3" json:"Latitude,omitempty"`
+	Longitude       float64                `protobuf:"fixed64,3,opt,name=Longitude,proto3" json:"Longitude,omitempty"`
+	AccessInfo      string                 `protobuf:"bytes,4,opt,name=AccessInfo,proto3" json:"AccessInfo,omitempty"`
+	RestAPIURL      string                 `protobuf:"bytes,5,opt,name=RestAPIURL,proto3" json:"RestAPIURL,omitempty"`
+	BookingSystemID string                 `protobuf:"bytes,6,opt,name=BookingSystemID,proto3" json:"BookingSystemID,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *StayableStoreInfo) Reset() {
@@ -287,20 +285,6 @@ func (x *StayableStoreInfo) GetRestAPIURL() string {
 func (x *StayableStoreInfo) GetBookingSystemID() string {
 	if x != nil {
 		return x.BookingSystemID
-	}
-	return ""
-}
-
-func (x *StayableStoreInfo) GetBookingSystemLoginID() string {
-	if x != nil {
-		return x.BookingSystemLoginID
-	}
-	return ""
-}
-
-func (x *StayableStoreInfo) GetBookingSystemPassword() string {
-	if x != nil {
-		return x.BookingSystemPassword
 	}
 	return ""
 }
@@ -426,7 +410,7 @@ const file_v1_shared_Store_proto_rawDesc = "" +
 	"\v_BranchNameB\x14\n" +
 	"\x12_StayableStoreInfo\"6\n" +
 	"\x06Stores\x12,\n" +
-	"\x06Stores\x18\x01 \x03(\v2\x14.server.shared.StoreR\x06Stores\"\xbb\x02\n" +
+	"\x06Stores\x18\x01 \x03(\v2\x14.server.shared.StoreR\x06Stores\"\xd1\x01\n" +
 	"\x11StayableStoreInfo\x12\x18\n" +
 	"\aParking\x18\x01 \x01(\tR\aParking\x12\x1a\n" +
 	"\bLatitude\x18\x02 \x01(\x01R\bLatitude\x12\x1c\n" +
@@ -437,9 +421,7 @@ const file_v1_shared_Store_proto_rawDesc = "" +
 	"\n" +
 	"RestAPIURL\x18\x05 \x01(\tR\n" +
 	"RestAPIURL\x12(\n" +
-	"\x0fBookingSystemID\x18\x06 \x01(\tR\x0fBookingSystemID\x122\n" +
-	"\x14BookingSystemLoginID\x18\a \x01(\tR\x14BookingSystemLoginID\x124\n" +
-	"\x15BookingSystemPassword\x18\b \x01(\tR\x15BookingSystemPassword\"\x7f\n" +
+	"\x0fBookingSystemID\x18\x06 \x01(\tR\x0fBookingSystemID\"\x7f\n" +
 	"\rStayableStore\x12*\n" +
 	"\x05Store\x18\x01 \x01(\v2\x14.server.shared.StoreR\x05Store\x129\n" +
 	"\x04Info\x18\x02 \x01(\v2 .server.shared.StayableStoreInfoH\x00R\x04Info\x88\x01\x01B\a\n" +

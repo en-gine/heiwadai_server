@@ -198,11 +198,13 @@ func StoreToResponse(store *entity.Store) *admin.Store {
 
 func StayableInfoToResponse(info *entity.StayableStoreInfo) *admin.StayableStoreInfo {
 	return &admin.StayableStoreInfo{
-		Parking:         info.Parking,
-		Latitude:        info.Latitude,
-		Longitude:       info.Longitude,
-		AccessInfo:      info.AccessInfo,
-		RestAPIURL:      info.RestAPIURL,
-		BookingSystemID: info.BookingSystemID,
+		Parking:               info.Parking,
+		Latitude:              info.Latitude,
+		Longitude:             info.Longitude,
+		AccessInfo:            info.AccessInfo,
+		RestAPIURL:            info.RestAPIURL,
+		BookingSystemID:       info.BookingSystemID,
+		BookingSystemLoginId:  info.BookingSystemLoginID,
+		BookingSystemPassword: info.BookingSystemPassword,
 	}
 }
