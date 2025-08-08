@@ -41,3 +41,15 @@ func (mr *MemoryRepository) Set(key string, value []byte, expire time.Duration) 
 func (mr *MemoryRepository) Delete(key string) {
 	mr.db.Delete(key)
 }
+
+func (mr *MemoryRepository) SetNX(key string, value []byte, expire time.Duration) bool {
+	// SetNX: Set if Not eXists - only set the value if the key doesn't already exist
+	// This provides atomic "set if not exists" functionality for the in-memory cache
+	
+	// Try to add the item, which will fail if it already exists
+	err := mr.db.Add(key, value, expire)
+	
+	// If err is nil, the key was successfully added (didn't exist before)
+	// If err is not nil, the key already existed
+	return err == nil
+}

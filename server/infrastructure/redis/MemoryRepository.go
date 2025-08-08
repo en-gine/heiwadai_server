@@ -48,3 +48,8 @@ func (mr *MemoryRepository) Set(key string, value []byte, expire time.Duration) 
 func (mr *MemoryRepository) Delete(key string) {
 	mr.db.Del(ctx, key)
 }
+
+func (mr *MemoryRepository) SetNX(key string, value []byte, expire time.Duration) bool {
+	result := mr.db.SetNX(ctx, key, value, expire)
+	return result.Val()
+}

@@ -3,10 +3,13 @@ package main
 //go:generate go run linter/main.go .
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"server/infrastructure/env"
@@ -44,8 +47,42 @@ func main() {
 	fmt.Println(CheckDBStatus())
 	fmt.Println("サーバー時刻:", time.Now())
 	port := env.GetEnv(env.ServerPort)
-	// adminに対する各種IP制限はインターセプタの中で行っています。
-	log.Fatal(http.ListenAndServe(":"+port, AllowCors().Handler(h2c.NewHandler(mux, &http2.Server{})))) // リフレクションを有効にする
+	
+	// Setup graceful shutdown
+	srv := &http.Server{
+		Addr:    ":" + port,
+		Handler: AllowCors().Handler(h2c.NewHandler(mux, &http2.Server{})),
+	}
+	
+	// Start server in a goroutine
+	go func() {
+		// adminに対する各種IP制限はインターセプタの中で行っています。
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("Server failed to start: %v", err)
+		}
+	}()
+	
+	// Wait for interrupt signal to gracefully shutdown the server
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
+	<-sigChan
+	
+	fmt.Println("\nShutting down server...")
+	
+	// Shutdown context with timeout
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	
+	// Shutdown HTTP server
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Printf("Server forced to shutdown: %v", err)
+	}
+	
+	// Close database connection
+	// InitDB() returns the connection, so we need to manage it properly
+	fmt.Println("Database connection will be closed by connection pool timeout")
+	
+	fmt.Println("Server gracefully stopped")
 }
 
 func AllowCors() *cors.Cors {

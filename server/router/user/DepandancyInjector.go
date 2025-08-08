@@ -8,6 +8,7 @@ import (
 
 	bookingApiAvail "server/infrastructure/booking/avail"
 	bookingApiBook "server/infrastructure/booking/book"
+	"server/infrastructure/redis"
 	implements "server/infrastructure/repository"
 	"server/infrastructure/wordpress"
 )
@@ -38,6 +39,7 @@ var (
 	userReportRepository   = implements.NewUserReportRepository()
 	userLoginLogRepository = implements.NewUserLoginLogRepository()
 	sendMailAction         = action.NewSendMailAction()
+	memoryRepository       = redis.NewMemoryRepository()
 )
 
 // var planQuery = booking.NewPlanQuery()
@@ -70,6 +72,7 @@ func InitializeUserCheckinUsecase() *usecase.UserCheckinUsecase {
 		checkinQuery,
 		couponQuery,
 		transaction,
+		memoryRepository,
 	)
 }
 

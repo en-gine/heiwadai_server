@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"time"
 
 	"server/core/infra/repository"
 	"server/infrastructure/logger"
@@ -11,9 +12,10 @@ import (
 var _ repository.ITransaction = &Transaction{}
 
 type Transaction struct {
-	db  *sql.DB
-	ctx *context.Context
-	Tx  *sql.Tx
+	db         *sql.DB
+	ctx        *context.Context
+	ctxCancel  context.CancelFunc
+	Tx         *sql.Tx
 }
 
 func NewTransaction() *Transaction {
@@ -25,8 +27,12 @@ func NewTransaction() *Transaction {
 }
 
 func (r *Transaction) Begin(ctx context.Context) error {
-	r.ctx = &ctx
-	tx, err := r.db.BeginTx(ctx, nil)
+	// Create context with timeout to prevent long-running transactions
+	timeoutCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
+	r.ctx = &timeoutCtx
+	r.ctxCancel = cancel
+	
+	tx, err := r.db.BeginTx(timeoutCtx, nil)
 	if err != nil {
 		logger.Errorf("begin transaction error: %v", err)
 		return err
@@ -41,6 +47,10 @@ func (r *Transaction) Commit() error {
 		logger.Errorf("commit error: %v", err)
 		return err
 	}
+	// Cancel context after successful commit
+	if r.ctxCancel != nil {
+		r.ctxCancel()
+	}
 	return nil
 }
 
@@ -48,6 +58,10 @@ func (r *Transaction) Rollback() {
 	err := r.Tx.Rollback()
 	if err != nil {
 		logger.Errorf("rollback error: %v", err)
+	}
+	// Cancel context after rollback
+	if r.ctxCancel != nil {
+		r.ctxCancel()
 	}
 }
 

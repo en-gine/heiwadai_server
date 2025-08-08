@@ -320,7 +320,6 @@ func (au *AuthClient) reinviteUserByEmailWithRedirect(ctx context.Context, email
 	if err != nil {
 		return nil, err
 	}
-
 	au.injectAuthorizationHeader(req, authKey)
 	req.Header.Set("Content-Type", "application/json")
 	res := supa.User{}

@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"fmt"
 	"reflect"
 	"time"
 
@@ -24,6 +25,7 @@ type UserCheckinUsecase struct {
 	checkinQuery         queryService.ICheckinQueryService
 	couponQuery          queryService.ICouponQueryService
 	transaction          repository.ITransaction
+	memoryRepository     repository.IMemoryRepository
 }
 
 func NewUserCheckinUsecase(
@@ -37,6 +39,7 @@ func NewUserCheckinUsecase(
 	checkinQuery queryService.ICheckinQueryService,
 	couponQuery queryService.ICouponQueryService,
 	transaction repository.ITransaction,
+	memoryRepository repository.IMemoryRepository,
 ) *UserCheckinUsecase {
 	return &UserCheckinUsecase{
 		userQuery:            userQuery,
@@ -49,6 +52,7 @@ func NewUserCheckinUsecase(
 		checkinQuery:         checkinQuery,
 		couponQuery:          couponQuery,
 		transaction:          transaction,
+		memoryRepository:     memoryRepository,
 	}
 }
 
@@ -62,6 +66,21 @@ func (u *UserCheckinUsecase) GetStampCard(authID uuid.UUID) (*entity.StampCard, 
 
 func (u *UserCheckinUsecase) Checkin(authID uuid.UUID, QrHash uuid.UUID) (*entity.StampCard, *entity.UserAttachedCoupon, *errors.DomainError) {
 	// チェックインによってクーポンが付与された場合クーポンを返す
+
+	// Idempotency check using Redis to prevent duplicate check-ins
+	idempotencyKey := fmt.Sprintf("checkin:%s:%s", authID.String(), QrHash.String())
+	idempotencyValue := []byte("processing")
+	lockExpiration := 10 * time.Second
+
+	// Try to acquire lock for this check-in operation
+	if !u.memoryRepository.SetNX(idempotencyKey, idempotencyValue, lockExpiration) {
+		// Another request is already processing this check-in
+		return nil, nil, errors.NewDomainError(errors.UnPemitedOperation, "チェックイン処理中です。しばらくお待ちください。")
+	}
+
+	// Ensure lock is released after operation
+	defer u.memoryRepository.Delete(idempotencyKey)
+
 	AuthUser, err := u.userQuery.GetByID(authID)
 	if err != nil {
 		return nil, nil, errors.NewDomainError(errors.QueryError, err.Error())
@@ -116,19 +135,24 @@ func (u *UserCheckinUsecase) Checkin(authID uuid.UUID, QrHash uuid.UUID) (*entit
 	ctx := context.Background()
 	err = u.transaction.Begin(ctx)
 	if err != nil {
-		u.transaction.Rollback()
 		return nil, nil, errors.NewDomainError(errors.RepositoryError, err.Error())
 	}
+
+	// Track transaction state to prevent double commit/rollback
+	transactionCommitted := false
+	defer func() {
+		if !transactionCommitted && u.transaction.Tran() != nil {
+			u.transaction.Rollback()
+		}
+	}()
 
 	newCheckin := entity.CreateCheckin(*checkInStore, *AuthUser)
 	myCheckins, err := u.checkinQuery.GetMyActiveCheckin(authID)
 	if err != nil {
-		u.transaction.Rollback()
 		return nil, nil, errors.NewDomainError(errors.QueryError, err.Error())
 	}
 	err = u.checkInRepository.Save(u.transaction, newCheckin)
 	if err != nil {
-		u.transaction.Rollback()
 		return nil, nil, errors.NewDomainError(errors.RepositoryError, err.Error())
 	}
 
@@ -136,18 +160,15 @@ func (u *UserCheckinUsecase) Checkin(authID uuid.UUID, QrHash uuid.UUID) (*entit
 	if len(myCheckins)+1 >= 5 {
 		allStores, err := u.storeQuery.GetActiveAll()
 		if err != nil {
-			u.transaction.Rollback()
 			return nil, nil, errors.NewDomainError(errors.QueryError, err.Error())
 		}
 		standardCoupon, domainErr := entity.CreateStandardCoupon(allStores)
 		if domainErr != nil {
-			u.transaction.Rollback()
 			return nil, nil, domainErr
 		}
 
 		err = u.couponRepository.Save(u.transaction, standardCoupon)
 		if err != nil {
-			u.transaction.Rollback()
 			return nil, nil, errors.NewDomainError(errors.QueryError, err.Error())
 		}
 
@@ -155,20 +176,17 @@ func (u *UserCheckinUsecase) Checkin(authID uuid.UUID, QrHash uuid.UUID) (*entit
 
 		err = u.usercouponRepository.Save(u.transaction, userAttachedCoupon)
 		if err != nil {
-			u.transaction.Rollback()
 			return nil, nil, errors.NewDomainError(errors.RepositoryError, err.Error())
 		}
 		var count int = 1
 		issuedCoupon := entity.CreateIssuedCoupon(standardCoupon, &count)
 		err = u.couponRepository.Save(u.transaction, issuedCoupon)
 		if err != nil {
-			u.transaction.Rollback()
 			return nil, nil, errors.NewDomainError(errors.RepositoryError, err.Error())
 		}
 
 		err = u.checkInRepository.BulkArchive(u.transaction, authID)
 		if err != nil {
-			u.transaction.Rollback()
 			return nil, nil, errors.NewDomainError(errors.RepositoryError, err.Error())
 		}
 	}
@@ -177,6 +195,7 @@ func (u *UserCheckinUsecase) Checkin(authID uuid.UUID, QrHash uuid.UUID) (*entit
 	if err != nil {
 		return nil, nil, errors.NewDomainError(errors.RepositoryError, err.Error())
 	}
+	transactionCommitted = true
 
 	NewStampCard, domainErr := u.GetStampCard(authID)
 	if domainErr != nil {
