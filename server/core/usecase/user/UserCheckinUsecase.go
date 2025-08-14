@@ -69,14 +69,6 @@ func (u *UserCheckinUsecase) Checkin(authID uuid.UUID, QrHash uuid.UUID) (*entit
 
 	// Idempotency check using Redis to prevent duplicate check-ins
 	idempotencyKey := fmt.Sprintf("checkin:%s:%s", authID.String(), QrHash.String())
-	idempotencyValue := []byte("processing")
-	lockExpiration := 5 * time.Second
-
-	// Try to acquire lock for this check-in operation
-	if !u.memoryRepository.SetNX(idempotencyKey, idempotencyValue, lockExpiration) {
-		// Another request is already processing this check-in
-		return nil, nil, errors.NewDomainError(errors.UnPemitedOperation, "チェックイン処理中です。しばらくお待ちください。")
-	}
 
 	// Ensure lock is released after operation
 	defer func() {
