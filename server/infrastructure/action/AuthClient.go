@@ -103,6 +103,12 @@ func (au *AuthClient) SignOut(token string) error {
 	ctx := context.Background()
 	err := au.client.Auth.SignOut(ctx, token)
 	if err != nil {
+		// セッションが見つからない場合のエラーは無視
+		if strings.Contains(err.Error(), "Session from session_id claim in JWT does not exist") ||
+			strings.Contains(err.Error(), "invalid JWT") ||
+			strings.Contains(err.Error(), "token is expired") {
+			return nil
+		}
 		return err
 	}
 

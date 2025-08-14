@@ -8,6 +8,7 @@ import (
 	userv1connect "server/api/v1/user/userconnect"
 	"server/controller"
 	"server/controller/util"
+	domainErrors "server/core/errors"
 	usecase "server/core/usecase/user"
 	"server/router"
 
@@ -59,10 +60,14 @@ func (ac *AuthController) SignOut(ctx context.Context, req *connect.Request[empt
 	}
 	token := ctx.Value(router.TokenKey).(string)
 	if token == "" {
-		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("ログインが必要です。"))
+		return connect.NewResponse(&emptypb.Empty{}), nil
 	}
 	domainErr := ac.authUseCase.SignOut(token)
 	if domainErr != nil {
+		// セッションが既に無効の場合もサインアウト成功として扱う
+		if domainErr.GetType() == domainErrors.QueryDataNotFoundError {
+			return connect.NewResponse(&emptypb.Empty{}), nil
+		}
 		return nil, controller.ErrorHandler(domainErr)
 	}
 	return connect.NewResponse(&emptypb.Empty{}), nil
