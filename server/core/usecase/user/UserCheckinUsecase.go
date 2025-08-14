@@ -70,7 +70,7 @@ func (u *UserCheckinUsecase) Checkin(authID uuid.UUID, QrHash uuid.UUID) (*entit
 	// Idempotency check using Redis to prevent duplicate check-ins
 	idempotencyKey := fmt.Sprintf("checkin:%s:%s", authID.String(), QrHash.String())
 	idempotencyValue := []byte("processing")
-	lockExpiration := 10 * time.Second
+	lockExpiration := 5 * time.Second
 
 	// Try to acquire lock for this check-in operation
 	if !u.memoryRepository.SetNX(idempotencyKey, idempotencyValue, lockExpiration) {
@@ -79,7 +79,9 @@ func (u *UserCheckinUsecase) Checkin(authID uuid.UUID, QrHash uuid.UUID) (*entit
 	}
 
 	// Ensure lock is released after operation
-	defer u.memoryRepository.Delete(idempotencyKey)
+	defer func() {
+		u.memoryRepository.Delete(idempotencyKey)
+	}()
 
 	AuthUser, err := u.userQuery.GetByID(authID)
 	if err != nil {
