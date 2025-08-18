@@ -10,7 +10,7 @@ import (
 	"server/db/models"
 
 	"github.com/google/uuid"
-	"github.com/volatiletech/sqlboiler/v4/queries/qm"
+	"github.com/aarondl/sqlboiler/v4/queries/qm"
 )
 
 var _ queryservice.IUserLoginLogQueryService = &UserLoginLogQueryService{}

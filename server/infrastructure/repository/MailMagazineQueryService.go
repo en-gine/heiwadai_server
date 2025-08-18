@@ -11,7 +11,7 @@ import (
 	"server/infrastructure/logger"
 
 	"github.com/google/uuid"
-	"github.com/volatiletech/sqlboiler/v4/queries/qm"
+	"github.com/aarondl/sqlboiler/v4/queries/qm"
 )
 
 var _ queryservice.IMailMagazineQueryService = &MailMagazineQueryService{}

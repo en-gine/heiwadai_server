@@ -14,7 +14,8 @@ func (s YYYYMMDD) ToString() string {
 
 func DateToYYYYMMDD(date time.Time) YYYYMMDD {
 	// date型を受け取ってYYYY-MM-DDの形式の文字列に変換する
-	return YYYYMMDD(date.Format("2006-01-02"))
+	// time.Localを使用してシステムのタイムゾーン（JST）でフォーマットする
+	return YYYYMMDD(date.In(time.Local).Format("2006-01-02"))
 }
 
 func StringToYYYYMMDD(dateStr string) (*YYYYMMDD, error) {
@@ -45,5 +46,6 @@ func (s StrDate) ToString() string {
 
 func DateToStrDate(date time.Time) StrDate {
 	// date型を受け取ってYYYY-MM-DDの形式の文字列に変換する
-	return StrDate(date.Format("2006-01-02"))
+	// time.Localを使用してシステムのタイムゾーン（JST）でフォーマットする
+	return StrDate(date.In(time.Local).Format("2006-01-02"))
 }

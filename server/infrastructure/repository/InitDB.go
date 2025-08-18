@@ -36,7 +36,7 @@ func InitDB() *sql.DB {
 
 		mu.Lock()
 		conn, err = sql.Open("postgres",
-			fmt.Sprintf("user=%s password=%s host=%s port=%s dbname=%s sslmode=disable", user, password, host, port, database))
+			fmt.Sprintf("user=%s password=%s host=%s port=%s dbname=%s sslmode=disable TimeZone=Asia/Tokyo", user, password, host, port, database))
 		mu.Unlock()
 		
 		if err != nil {

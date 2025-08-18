@@ -6,7 +6,7 @@ import (
 	"server/core/infra/repository"
 	"server/db/models"
 
-	"github.com/volatiletech/sqlboiler/v4/boil"
+	"github.com/aarondl/sqlboiler/v4/boil"
 )
 
 var _ repository.ICronIssueLogRepository = &CronIssueLogRepository{}

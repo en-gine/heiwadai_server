@@ -9,8 +9,8 @@ import (
 	"server/db/models"
 
 	"github.com/google/uuid"
-	"github.com/volatiletech/null/v8"
-	"github.com/volatiletech/sqlboiler/v4/boil"
+	"github.com/aarondl/null/v8"
+	"github.com/aarondl/sqlboiler/v4/boil"
 )
 
 var _ repository.IStoreRepository = &StoreRepository{}
