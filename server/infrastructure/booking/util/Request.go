@@ -78,6 +78,7 @@ func Request[TRequestType any, TResultType any](url string, reqBody *TRequestTyp
 		fmt.Println("\n------------XML RESPONSE-------------------")
 		fmt.Println(x)
 		fmt.Println("-------------------------------")
+		// logger.LogToFilef(x)
 	}
 
 	if res.StatusCode != http.StatusOK {

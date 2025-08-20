@@ -178,39 +178,65 @@ func (p *PlanQuery) AvailRSToCandidates(res *EnvelopeRS, roomCount int, guestCou
 			return &[]entity.PlanCandidate{}, nil
 		}
 
-		RoomTypeObject := roomStay.RoomTypes.RoomType[0]
-		apiRoomTypeCode := RoomTypeObject.RoomTypeCode
-		apiRoomTypeName := RoomTypeObject.RoomDescription.Name
-		entityRoomType := BedTypeCodeToRoomType(RoomTypeObject.BedTypeCode)
-		smokeType := IsNonSmokingToSmokeType(RoomTypeObject.NonSmoking) // true false nil
-
-		for index, plan := range roomStay.RatePlans.RatePlan {
-			// 一泊毎や人数ごとの追加料金
-			tmpAmount := roomStay.RoomRates.RoomRate[index].Total.AmountAfterTax
-			var planPrice uint64
-			roomPrice, _ := strconv.ParseUint(tmpAmount, 10, 64)
-
-			planPrice = roomPrice * uint64(roomCount)
-			availStatus := AvailabilityStatus(roomStay.RoomRates.RoomRate[index].AvailabilityStatus)
+		// RoomRatesをベースにループし、各RoomRateに対応するRoomTypeとRatePlanを取得
+		for _, roomRate := range roomStay.RoomRates.RoomRate {
+			availStatus := AvailabilityStatus(roomRate.AvailabilityStatus)
 			if availStatus == AvailableClosedOut {
 				//　売り切れ
 				continue
 			}
-			planID := plan.RatePlanCode
-			planName := plan.RatePlanName
+
+			// 該当するRoomTypeを検索
+			var targetRoomType *RoomType
+			for _, rt := range roomStay.RoomTypes.RoomType {
+				if rt.RoomTypeCode == roomRate.RoomTypeCode {
+					targetRoomType = &rt
+					break
+				}
+			}
+			if targetRoomType == nil {
+				continue // 対応するRoomTypeが見つからない場合はスキップ
+			}
+
+			// 該当するRatePlanを検索
+			var targetRatePlan *RatePlan
+			for _, rp := range roomStay.RatePlans.RatePlan {
+				if rp.RatePlanCode == roomRate.RatePlanCode {
+					targetRatePlan = &rp
+					break
+				}
+			}
+			if targetRatePlan == nil {
+				continue // 対応するRatePlanが見つからない場合はスキップ
+			}
+
+			// 価格の計算
+			tmpAmount := roomRate.Total.AmountAfterTax
+			roomPrice, _ := strconv.ParseUint(tmpAmount, 10, 64)
+			planPrice := roomPrice * uint64(roomCount)
+
+			// RoomTypeの情報を使用
+			apiRoomTypeCode := targetRoomType.RoomTypeCode
+			apiRoomTypeName := targetRoomType.RoomDescription.Name
+			entityRoomType := BedTypeCodeToRoomType(targetRoomType.BedTypeCode)
+			smokeType := IsNonSmokingToSmokeType(targetRoomType.NonSmoking)
+
+			// RatePlanの情報を使用
+			planID := targetRatePlan.RatePlanCode
+			planName := targetRatePlan.RatePlanName
 
 			var planImageURL string = ""
-			if len(plan.RatePlanDescription.URL.Value) > 0 {
-				planImageURL = plan.RatePlanDescription.URL.Value
+			if len(targetRatePlan.RatePlanDescription.URL.Value) > 0 {
+				planImageURL = targetRatePlan.RatePlanDescription.URL.Value
 			}
 
 			var planOverView string = ""
-			if len(plan.RatePlanDescription.Text.Value) > 0 {
-				planOverView = plan.RatePlanDescription.Text.Value
+			if len(targetRatePlan.RatePlanDescription.Text.Value) > 0 {
+				planOverView = targetRatePlan.RatePlanDescription.Text.Value
 			}
 
-			var IncludeBreakfast bool = *plan.MealsIncluded.Breakfast
-			var IncludeDinner bool = *plan.MealsIncluded.Dinner
+			var IncludeBreakfast bool = *targetRatePlan.MealsIncluded.Breakfast
+			var IncludeDinner bool = *targetRatePlan.MealsIncluded.Dinner
 
 			plan := entity.RegenPlan(
 				planID,
@@ -261,10 +287,10 @@ func (p *PlanQuery) AvailDetailRSToPlanDetail(res *EnvelopeRS, roomCount int, gu
 			return &entity.PlanStayDetail{}, nil
 		}
 
-		roomTypeObject := roomStay.RoomTypes.RoomType[0]
-		entityRoomType := BedTypeCodeToRoomType(roomTypeObject.BedTypeCode)
+		// roomTypeObject := roomStay.RoomTypes.RoomType[0]
+		// entityRoomType := BedTypeCodeToRoomType(roomTypeObject.BedTypeCode)
 
-		smokeType := IsNonSmokingToSmokeType(roomTypeObject.NonSmoking) // true false nil
+		// smokeType := IsNonSmokingToSmokeType(roomTypeObject.NonSmoking) // true false nil
 
 		availStatus := AvailabilityStatus(roomStay.RoomRates.RoomRate[0].AvailabilityStatus)
 		if availStatus == AvailableClosedOut {
@@ -272,50 +298,85 @@ func (p *PlanQuery) AvailDetailRSToPlanDetail(res *EnvelopeRS, roomCount int, gu
 			continue
 		}
 
-		var planTotalPrice uint
-		// 合計金額の計算
-		for _, room := range roomStay.RoomRates.RoomRate {
-			// 一泊毎や人数ごとの追加料金
-			var planStayDateInfo entity.StayDateInfo
-			stayDate, err := room.EffectiveDate.ToDate()
-			if err != nil {
-				return nil, errors.New("EffectiveDateの変換に失敗しました")
-			}
-			planStayDateInfo.StayDate = stayDate
-
-			roomPrice, _ := strconv.ParseUint(room.Total.AmountAfterTax, 10, 64)
-			dayTotalPrice := (uint(roomPrice) * uint(roomCount))
-			planStayDateInfo = entity.StayDateInfo{
-				StayDate:           stayDate,
-				StayDateTotalPrice: dayTotalPrice,
-			}
-
-			planTotalPrice = planTotalPrice + dayTotalPrice
-			planStayDateInfos = append(planStayDateInfos, planStayDateInfo)
-		}
-
-		for index, plan := range roomStay.RatePlans.RatePlan {
-
-			availStatus := AvailabilityStatus(roomStay.RoomRates.RoomRate[index].AvailabilityStatus)
+		// RoomRatesをベースにループし、各RoomRateに対応するRoomTypeとRatePlanを取得
+		for _, roomRate := range roomStay.RoomRates.RoomRate {
+			availStatus := AvailabilityStatus(roomRate.AvailabilityStatus)
 			if availStatus == AvailableClosedOut {
 				//　売り切れ
-				return &entity.PlanStayDetail{}, nil
+				continue
 			}
-			planID := plan.RatePlanCode
-			planName := plan.RatePlanName
+
+			// 該当するRoomTypeを検索
+			var targetRoomType *RoomType
+			for _, rt := range roomStay.RoomTypes.RoomType {
+				if rt.RoomTypeCode == roomRate.RoomTypeCode {
+					targetRoomType = &rt
+					break
+				}
+			}
+			if targetRoomType == nil {
+				continue // 対応するRoomTypeが見つからない場合はスキップ
+			}
+
+			// 該当するRatePlanを検索
+			var targetRatePlan *RatePlan
+			for _, rp := range roomStay.RatePlans.RatePlan {
+				if rp.RatePlanCode == roomRate.RatePlanCode {
+					targetRatePlan = &rp
+					break
+				}
+			}
+			if targetRatePlan == nil {
+				continue // 対応するRatePlanが見つからない場合はスキップ
+			}
+
+			// 合計金額の計算
+			var planTotalPrice uint
+			var planStayDateInfos []entity.StayDateInfo
+			
+			// EffectiveDateがある場合の処理
+			if roomRate.EffectiveDate != "" {
+				stayDate, err := roomRate.EffectiveDate.ToDate()
+				if err != nil {
+					return nil, errors.New("EffectiveDateの変換に失敗しました")
+				}
+				
+				roomPrice, _ := strconv.ParseUint(roomRate.Total.AmountAfterTax, 10, 64)
+				dayTotalPrice := (uint(roomPrice) * uint(roomCount))
+				planStayDateInfo := entity.StayDateInfo{
+					StayDate:           stayDate,
+					StayDateTotalPrice: dayTotalPrice,
+				}
+				
+				planTotalPrice = dayTotalPrice
+				planStayDateInfos = append(planStayDateInfos, planStayDateInfo)
+			} else {
+				// EffectiveDateがない場合は単純に金額を設定
+				roomPrice, _ := strconv.ParseUint(roomRate.Total.AmountAfterTax, 10, 64)
+				planTotalPrice = uint(roomPrice) * uint(roomCount)
+			}
+
+			// プラン情報の取得
+			planID := targetRatePlan.RatePlanCode
+			planName := targetRatePlan.RatePlanName
 
 			var planImageURL string = ""
-			if len(plan.RatePlanDescription.URL.Value) > 0 {
-				planImageURL = plan.RatePlanDescription.URL.Value
+			if len(targetRatePlan.RatePlanDescription.URL.Value) > 0 {
+				planImageURL = targetRatePlan.RatePlanDescription.URL.Value
 			}
 
 			var planOverView string = ""
-			if len(plan.RatePlanDescription.Text.Value) > 0 {
-				planOverView = plan.RatePlanDescription.Text.Value
+			if len(targetRatePlan.RatePlanDescription.Text.Value) > 0 {
+				planOverView = targetRatePlan.RatePlanDescription.Text.Value
 			}
 
-			var IncludeBreakfast bool = *plan.MealsIncluded.Breakfast
-			var IncludeDinner bool = *plan.MealsIncluded.Dinner
+			var IncludeBreakfast bool = *targetRatePlan.MealsIncluded.Breakfast
+			var IncludeDinner bool = *targetRatePlan.MealsIncluded.Dinner
+
+			// RoomTypeの情報を使用
+			roomTypeObject := *targetRoomType
+			entityRoomType := BedTypeCodeToRoomType(roomTypeObject.BedTypeCode)
+			smokeType := IsNonSmokingToSmokeType(roomTypeObject.NonSmoking)
 
 			plan := entity.RegenPlan(
 				planID,
@@ -558,6 +619,14 @@ func RoomTypeToBedType(rt entity.RoomType) *BedTypeCode {
 		code = BedTypeDouble
 	case entity.RoomTypeFourth:
 		code = BedTypeFour
+	case entity.RoomTypeTatami:
+		code = BedTypeTatami
+	case entity.RoomTypeTatamiAndBed:
+		code = BedTypeTatamiAndBed
+	case entity.RoomTypeTriple:
+		code = BedTypeTriple
+	case entity.RoomTypeOther:
+		code = BedTypeOther
 	case entity.RoomTypeUnknown:
 		return nil
 	}
@@ -578,10 +647,13 @@ func BedTypeCodeToRoomType(bt BedTypeCode) entity.RoomType {
 	case BedTypeSemiDouble:
 		roomType = entity.RoomTypeSemiDouble
 	case BedTypeTatami:
-		fallthrough
+		roomType = entity.RoomTypeTatami
+	case BedTypeTatamiAndBed:
+		roomType = entity.RoomTypeTatamiAndBed
 	case BedTypeTriple:
-		fallthrough
+		roomType = entity.RoomTypeTriple
 	case BedTypeOther:
+		roomType = entity.RoomTypeOther
 	default:
 		roomType = entity.RoomTypeUnknown
 	}

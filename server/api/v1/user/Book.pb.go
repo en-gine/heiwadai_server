@@ -122,12 +122,16 @@ func (MealType) EnumDescriptor() ([]byte, []int) {
 type RoomType int32
 
 const (
-	RoomType_RoomTypeUnknown    RoomType = 0
-	RoomType_RoomTypeSingle     RoomType = 1 //予約システムの都合で１から
-	RoomType_RoomTypeSemiDouble RoomType = 2
-	RoomType_RoomTypeDouble     RoomType = 3
-	RoomType_RoomTypeTwin       RoomType = 4
-	RoomType_RoomTypeFourth     RoomType = 5
+	RoomType_RoomTypeUnknown      RoomType = 0
+	RoomType_RoomTypeSingle       RoomType = 1 //予約システムの都合で１から
+	RoomType_RoomTypeSemiDouble   RoomType = 2
+	RoomType_RoomTypeDouble       RoomType = 3
+	RoomType_RoomTypeTwin         RoomType = 4
+	RoomType_RoomTypeFourth       RoomType = 5
+	RoomType_RoomTypeTatami       RoomType = 6
+	RoomType_RoomTypeTatamiAndBed RoomType = 7
+	RoomType_RoomTypeTriple       RoomType = 8
+	RoomType_RoomTypeOther        RoomType = 9
 )
 
 // Enum value maps for RoomType.
@@ -139,14 +143,22 @@ var (
 		3: "RoomTypeDouble",
 		4: "RoomTypeTwin",
 		5: "RoomTypeFourth",
+		6: "RoomTypeTatami",
+		7: "RoomTypeTatamiAndBed",
+		8: "RoomTypeTriple",
+		9: "RoomTypeOther",
 	}
 	RoomType_value = map[string]int32{
-		"RoomTypeUnknown":    0,
-		"RoomTypeSingle":     1,
-		"RoomTypeSemiDouble": 2,
-		"RoomTypeDouble":     3,
-		"RoomTypeTwin":       4,
-		"RoomTypeFourth":     5,
+		"RoomTypeUnknown":      0,
+		"RoomTypeSingle":       1,
+		"RoomTypeSemiDouble":   2,
+		"RoomTypeDouble":       3,
+		"RoomTypeTwin":         4,
+		"RoomTypeFourth":       5,
+		"RoomTypeTatami":       6,
+		"RoomTypeTatamiAndBed": 7,
+		"RoomTypeTriple":       8,
+		"RoomTypeOther":        9,
 	}
 )
 
@@ -1649,14 +1661,18 @@ const file_v1_user_Book_proto_rawDesc = "" +
 	"\bMealType\x12\v\n" +
 	"\aMorning\x10\x00\x12\n" +
 	"\n" +
-	"\x06Dinner\x10\x01*\x85\x01\n" +
+	"\x06Dinner\x10\x01*\xda\x01\n" +
 	"\bRoomType\x12\x13\n" +
 	"\x0fRoomTypeUnknown\x10\x00\x12\x12\n" +
 	"\x0eRoomTypeSingle\x10\x01\x12\x16\n" +
 	"\x12RoomTypeSemiDouble\x10\x02\x12\x12\n" +
 	"\x0eRoomTypeDouble\x10\x03\x12\x10\n" +
 	"\fRoomTypeTwin\x10\x04\x12\x12\n" +
-	"\x0eRoomTypeFourth\x10\x05*P\n" +
+	"\x0eRoomTypeFourth\x10\x05\x12\x12\n" +
+	"\x0eRoomTypeTatami\x10\x06\x12\x18\n" +
+	"\x14RoomTypeTatamiAndBed\x10\a\x12\x12\n" +
+	"\x0eRoomTypeTriple\x10\b\x12\x11\n" +
+	"\rRoomTypeOther\x10\t*P\n" +
 	"\tSmokeType\x12\x17\n" +
 	"\x13SmokeTypeNonSmoking\x10\x00\x12\x14\n" +
 	"\x10SmokeTypeSmoking\x10\x01\x12\x14\n" +

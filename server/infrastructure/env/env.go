@@ -20,6 +20,7 @@ const (
 	ModeDev   Mode = "dev"
 	ModeProd  Mode = "prod"
 	ModeDebug Mode = "debug"
+	ModeTest Mode = "test"
 )
 
 const (
@@ -132,7 +133,7 @@ func InitEnv() {
 		}
 	})
 	env := *Env
-	if env[EnvMode] != string(ModeDev) && env[EnvMode] != string(ModeProd) && env[EnvMode] != string(ModeDebug) {
+	if env[EnvMode] != string(ModeDev) && env[EnvMode] != string(ModeProd) && env[EnvMode] != string(ModeDebug) && env[EnvMode] != string(ModeTest){
 		panic("Env " + string(EnvMode) + " is invalid. EnvMode must be dev or prod or debug.")
 	}
 

@@ -129,3 +129,59 @@ func Warn(message string) {
 func Warnf(format string, a ...interface{}) {
 	Log(LevelWarn, fmt.Sprintf(format, a...))
 }
+
+// ログディレクトリを作成
+func ensureLogDir() error {
+	logDir := "./log"
+	if _, err := os.Stat(logDir); os.IsNotExist(err) {
+		return os.MkdirAll(logDir, 0755)
+	}
+	return nil
+}
+
+// 単純にテキストをログファイルに出力（コンソールと同じ内容）
+func LogToFile(content string) error {
+	if err := ensureLogDir(); err != nil {
+		return fmt.Errorf("failed to create log directory: %w", err)
+	}
+
+	filename := fmt.Sprintf("%d.log", time.Now().UnixMilli())
+	logPath := fmt.Sprintf("./log/%s", filename)
+	
+	f, err := os.OpenFile(logPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	if err != nil {
+		return fmt.Errorf("failed to open log file: %w", err)
+	}
+	defer f.Close()
+
+	timestamp := time.Now().Format("2006-01-02 15:04:05")
+	if _, err := f.WriteString(fmt.Sprintf("[%s]\n%s\n", timestamp, content)); err != nil {
+		return fmt.Errorf("failed to write to log file: %w", err)
+	}
+
+	if env.GetEnv(env.EnvMode) == "dev" {
+		fmt.Printf("Log written to: %s\n", logPath)
+	}
+
+	return nil
+}
+
+// フォーマット付きでログファイルに出力
+func LogToFilef(format string, a ...interface{}) error {
+	return LogToFile(fmt.Sprintf(format, a...))
+}
+
+// 複数行のテキストをログファイルに出力
+func LogLinesToFile(lines []string) error {
+	return LogToFile(strings.Join(lines, "\n"))
+}
+
+// Println相当（改行付き）でログファイルに出力
+func Println(a ...interface{}) error {
+	return LogToFile(fmt.Sprintln(a...))
+}
+
+// Printf相当でログファイルに出力  
+func Printf(format string, a ...interface{}) error {
+	return LogToFile(fmt.Sprintf(format, a...))
+}

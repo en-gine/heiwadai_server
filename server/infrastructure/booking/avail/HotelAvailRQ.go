@@ -147,6 +147,7 @@ const (
 	BedTypeSemiDouble BedTypeCode = "14"
 	BedTypeTriple     BedTypeCode = "15"
 	BedTypeFour       BedTypeCode = "16"
+	BedTypeTatamiAndBed BedTypeCode = "17"
 	BedTypeOther      BedTypeCode = "18"
 )
 

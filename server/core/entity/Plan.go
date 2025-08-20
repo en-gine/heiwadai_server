@@ -100,6 +100,10 @@ const (
 	RoomTypeDouble
 	RoomTypeTwin
 	RoomTypeFourth
+	RoomTypeTatami
+	RoomTypeTriple
+	RoomTypeTatamiAndBed
+	RoomTypeOther
 )
 
 var RoomTypeAll = []RoomType{
@@ -108,6 +112,10 @@ var RoomTypeAll = []RoomType{
 	RoomTypeDouble,
 	RoomTypeTwin,
 	RoomTypeFourth,
+	RoomTypeTatami,
+	RoomTypeTriple,
+	RoomTypeTatamiAndBed,
+	RoomTypeOther,
 }
 
 func (s RoomType) String() string {
@@ -122,6 +130,14 @@ func (s RoomType) String() string {
 		return "ツイン"
 	case RoomTypeFourth:
 		return "フォース"
+	case RoomTypeTatami:
+		return "和室"
+	case RoomTypeTriple:
+		return "トリプル"
+	case RoomTypeTatamiAndBed:
+		return "和洋室"
+	case RoomTypeOther:
+		return "その他"
 	case RoomTypeUnknown:
 		fallthrough
 	default:
@@ -141,6 +157,14 @@ func (s RoomType) Code() string {
 		return "Twin"
 	case RoomTypeFourth:
 		return "Fourth"
+	case RoomTypeTriple:
+		return "Triple"
+	case RoomTypeTatami:
+		return "Tatami"
+	case RoomTypeTatamiAndBed:
+		return "TatamiAndBed"
+	case RoomTypeOther:
+		return "Other"
 	case RoomTypeUnknown:
 		fallthrough
 	default:
