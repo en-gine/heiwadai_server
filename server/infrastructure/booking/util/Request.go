@@ -29,6 +29,7 @@ func Request[TRequestType any, TResultType any](url string, reqBody *TRequestTyp
 	if envMode == "dev" {
 		fmt.Println("\n------------XML REQUEST-------------------")
 		fmt.Println(string(out))
+		// logger.LogToFilef(string(out))
 		fmt.Println("-------------------------------")
 	}
 

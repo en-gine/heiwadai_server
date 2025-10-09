@@ -12,6 +12,7 @@ node_modules
 /server/tmp
 __debug_bin
 .zip
+.DS_Store
 
 # Lambda environment files
 lambda/**/.env

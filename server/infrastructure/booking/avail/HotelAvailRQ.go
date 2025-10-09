@@ -64,11 +64,11 @@ const (
 )
 
 type AvailRequestSegments struct {
-	AvailReqType        *AvailReqType       `xml:"AvailReqType,attr"`
 	AvailRequestSegment AvailRequestSegment `xml:"ns:AvailRequestSegment"`
 }
 
 type AvailRequestSegment struct {
+	AvailReqType        *AvailReqType       `xml:"AvailReqType,attr"`
 	HotelSearchCriteria HotelSearchCriteria `xml:"ns:HotelSearchCriteria"`
 }
 
