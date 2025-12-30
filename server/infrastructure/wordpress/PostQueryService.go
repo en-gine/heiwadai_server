@@ -38,7 +38,7 @@ func (pq *PostQueryService) GetAll() ([]*entity.Post, error) {
 		return entities, nil
 	}
 	for _, wppost := range *wpposts {
-		entities = append(entities, WPPostToEntity(&wppost))
+		entities = append(entities, WPALLPostToEntity(&wppost))
 	}
 	return entities, nil
 }
@@ -50,6 +50,17 @@ func WPPostToEntity(wppost *types.WPPost) (entitie *entity.Post) {
 		Title:    wppost.Title.Rendered,
 		Content:  wppost.Content.Rendered,
 		Author:   wppost.Embedded.Author[0].Name,
+		PostDate: postDate,
+	}
+	return entity
+}
+
+func WPALLPostToEntity(wppost *types.WPALLPost) (entitie *entity.Post) {
+	postDate, _ := time.Parse("2006-01-02T15:04:05", wppost.Date)
+	entity := &entity.Post{
+		ID:       wppost.PostID,
+		Title:    wppost.PostTitle,
+		Content:  wppost.PostContent,
 		PostDate: postDate,
 	}
 	return entity

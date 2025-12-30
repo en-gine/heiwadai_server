@@ -10,12 +10,12 @@ import (
 
 var WPPOSTURL = "https://www.heiwadai-hotel.co.jp/wp-json/app/v1/all_posts/"
 
-func GetWPPosts() (*[]types.WPPost, error) {
+func GetWPPosts() (*[]types.WPALLPost, error) {
 	CacheKey := "wp_posts_cache"
 	APIURL := WPPOSTURL + "?_embed"
 	CacheExpiry := 60 * time.Minute
 
-	posts, err := Request[[]types.WPPost](APIURL, CacheKey, CacheExpiry)
+	posts, err := Request[[]types.WPALLPost](APIURL, CacheKey, CacheExpiry)
 	if err != nil {
 		return nil, err
 	}

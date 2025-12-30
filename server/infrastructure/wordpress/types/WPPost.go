@@ -1,5 +1,13 @@
 package types
 
+type WPALLPost struct {
+	BlogID      int    `json:"blog_id"`
+	PostID      int    `json:"post_id"`
+	Date        string `json:"date"`
+	PostTitle   string `json:"post_title"`
+	PostContent string `json:"post_content"`
+}
+
 type WPPost struct {
 	ID            int      `json:"id"`
 	Date          string   `json:"date"`
