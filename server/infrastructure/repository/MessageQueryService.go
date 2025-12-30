@@ -50,13 +50,13 @@ func (pq *MessageQueryService) GetMessagesAfter(ID *uuid.UUID) ([]*entity.Messag
 	var lastCreateAt *time.Time = nil
 
 	if ID != nil {
-		msg, err := models.FindMessage(context.Background(), pq.db, ID.String())
-		if err != nil {
-			if err == sql.ErrNoRows {
+		msg, findErr := models.FindMessage(context.Background(), pq.db, ID.String())
+		if findErr != nil {
+			if findErr == sql.ErrNoRows {
 				return nil, nil
 			}
-			logger.Error(err.Error())
-			return nil, err
+			logger.Error(findErr.Error())
+			return nil, findErr
 		}
 		if msg != nil {
 			lastCreateAt = &msg.CreateAt

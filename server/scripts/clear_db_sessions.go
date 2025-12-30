@@ -46,9 +46,9 @@ func main() {
 		var appName, clientAddr, state sql.NullString
 		var queryStart, stateChange sql.NullTime
 		
-		err := rows.Scan(&pid, &appName, &clientAddr, &state, &queryStart, &stateChange)
-		if err != nil {
-			log.Printf("Scan error: %v", err)
+		scanErr := rows.Scan(&pid, &appName, &clientAddr, &state, &queryStart, &stateChange)
+		if scanErr != nil {
+			log.Printf("Scan error: %v", scanErr)
 			continue
 		}
 		

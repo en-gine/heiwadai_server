@@ -152,9 +152,9 @@ func (u *UserCheckinUsecase) Checkin(authID uuid.UUID, QrHash uuid.UUID) (*entit
 
 	var userAttachedCoupon *entity.UserAttachedCoupon
 	if len(myCheckins)+1 >= 5 {
-		allStores, err := u.storeQuery.GetActiveAll()
-		if err != nil {
-			return nil, nil, errors.NewDomainError(errors.QueryError, err.Error())
+		allStores, storeErr := u.storeQuery.GetActiveAll()
+		if storeErr != nil {
+			return nil, nil, errors.NewDomainError(errors.QueryError, storeErr.Error())
 		}
 		standardCoupon, domainErr := entity.CreateStandardCoupon(allStores)
 		if domainErr != nil {

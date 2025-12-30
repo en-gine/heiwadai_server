@@ -4,3 +4,9 @@ run:
 linters:
   enable:
     - exhaustive
+    - govet  # go vet を有効化（shadowチェック含む）
+
+linters-settings:
+  govet:
+    enable:
+      - shadow  # 変数のシャドーイングを検出

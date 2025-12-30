@@ -278,7 +278,7 @@ func (p *PlanQuery) AvailDetailRSToPlanDetail(res *EnvelopeRS, roomCount int, gu
 	hotelCode := body.Criteria.Criterion.HotelRef.HotelCode
 	for _, roomStay := range body.RoomStays.RoomStay {
 		var stayable *entity.StayableStore
-		var err error
+		var stayableErr error
 		if env.GetEnv(env.TlbookingIsTest) == "true" {
 			stayables, err := p.storeQuery.GetStayables()
 			if err != nil {
@@ -286,10 +286,10 @@ func (p *PlanQuery) AvailDetailRSToPlanDetail(res *EnvelopeRS, roomCount int, gu
 			}
 			stayable = stayables[0]
 		} else {
-			stayable, err = p.storeQuery.GetStayableByBookingID(hotelCode)
+			stayable, stayableErr = p.storeQuery.GetStayableByBookingID(hotelCode)
 		}
-		if err != nil {
-			return nil, err
+		if stayableErr != nil {
+			return nil, stayableErr
 		}
 		logger.Info("(roomStay.RoomTypes.RoomType: " + strconv.Itoa(len(roomStay.RoomTypes.RoomType)))
 

@@ -196,16 +196,16 @@ func (u *MailMagazineUsecase) Send(mailMagazineID uuid.UUID) *errors.DomainError
 
 		prevSend := (page - 1) * 1000 // 一つ前のループまでの送信完了数
 
-		unsentMails, err := u.mailMagazineLogQuery.GetUnsentTargetMails(mailMagazineID, *pager)
-		if err != nil {
+		unsentMails, mailErr := u.mailMagazineLogQuery.GetUnsentTargetMails(mailMagazineID, *pager)
+		if mailErr != nil {
 			u.saveUncompleteMailMagazine(mgz, atFirstUnsent-prevSend, prevSend)
-			return errors.NewDomainError(errors.QueryError, err.Error())
+			return errors.NewDomainError(errors.QueryError, mailErr.Error())
 		}
 		// 送信処理
-		err = u.mailSendAction.SendAll(unsentMails, mgz.Title, mgz.Content)
-		if err != nil {
+		mailErr = u.mailSendAction.SendAll(unsentMails, mgz.Title, mgz.Content)
+		if mailErr != nil {
 			u.saveUncompleteMailMagazine(mgz, atFirstUnsent-prevSend, prevSend)
-			return errors.NewDomainError(errors.RepositoryError, err.Error())
+			return errors.NewDomainError(errors.RepositoryError, mailErr.Error())
 		}
 		// 送信済みに更新
 		err = u.mailMagazineLogRepository.BulkMarkAsSent(mailMagazineID, *pager)
