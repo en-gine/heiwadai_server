@@ -8,7 +8,7 @@ import (
 	"server/infrastructure/wordpress/types"
 )
 
-var WPPOSTURL = "https://www.heiwadai-hotel.co.jp/wp-json/wp/v2/posts/"
+var WPPOSTURL = "https://www.heiwadai-hotel.co.jp/wp-json/app/v1/all_posts/"
 
 func GetWPPosts() (*[]types.WPPost, error) {
 	CacheKey := "wp_posts_cache"
