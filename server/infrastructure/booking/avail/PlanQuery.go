@@ -45,6 +45,13 @@ func (p *PlanQuery) Search(
 		candidates *[]entity.PlanCandidate
 		err        error
 	}
+
+	// BookingSystemIDをキーとするマップを事前に作成（DB接続の節約）
+	stayablesMap := make(map[string]*entity.StayableStore)
+	for _, store := range stores {
+		stayablesMap[store.BookingSystemID] = store
+	}
+
 	nights := stayTo.Sub(stayFrom).Hours() / 24
 	if nights > 99 {
 		return nil, errors.New("99泊以上の予約はできません")
@@ -91,7 +98,7 @@ func (p *PlanQuery) Search(
 				}
 				guestCount := adult + child
 
-				candidates, err := p.AvailRSToCandidates(res, roomCount, guestCount, int(nights))
+				candidates, err := p.AvailRSToCandidates(res, roomCount, guestCount, int(nights), stayablesMap)
 				if err != nil {
 					logger.Error(err.Error())
 					resultsCh <- Result{nil, err}
@@ -155,25 +162,25 @@ func (p *PlanQuery) GetPlanDetailByID(
 	return plan, nil
 }
 
-func (p *PlanQuery) AvailRSToCandidates(res *EnvelopeRS, roomCount int, guestCount int, nights int) (*[]entity.PlanCandidate, error) {
+func (p *PlanQuery) AvailRSToCandidates(res *EnvelopeRS, roomCount int, guestCount int, nights int, stayablesMap map[string]*entity.StayableStore) (*[]entity.PlanCandidate, error) {
 	var candidates []entity.PlanCandidate
 	body := res.Body.OTA_HotelAvailRS
 
 	for _, roomStay := range body.RoomStays.RoomStay {
 		hotelCode := roomStay.RPH
 		var stayable *entity.StayableStore
-		var err error
+		var ok bool
 		if env.GetEnv(env.TlbookingIsTest) == "true" {
-			stayables, err := p.storeQuery.GetStayables()
-			if err != nil {
-				return nil, err
+			// テストモードでは最初のストアを使用
+			for _, s := range stayablesMap {
+				stayable = s
+				break
 			}
-			stayable = stayables[0]
 		} else {
-			stayable, err = p.storeQuery.GetStayableByBookingID(hotelCode)
-		}
-		if err != nil {
-			return nil, err
+			stayable, ok = stayablesMap[hotelCode]
+			if !ok {
+				return nil, errors.New("該当のStayableStoreがBookingIDから見つけることが出来ません。")
+			}
 		}
 		if len(roomStay.RoomTypes.RoomType) == 0 { // room not found
 			return &[]entity.PlanCandidate{}, nil
@@ -284,6 +291,8 @@ func (p *PlanQuery) AvailDetailRSToPlanDetail(res *EnvelopeRS, roomCount int, gu
 		if err != nil {
 			return nil, err
 		}
+		logger.Info("(roomStay.RoomTypes.RoomType: " + strconv.Itoa(len(roomStay.RoomTypes.RoomType)))
+
 		if len(roomStay.RoomTypes.RoomType) == 0 { // room not found
 			return &entity.PlanStayDetail{}, nil
 		}
@@ -333,22 +342,21 @@ func (p *PlanQuery) AvailDetailRSToPlanDetail(res *EnvelopeRS, roomCount int, gu
 
 			// 合計金額の計算
 			var planTotalPrice uint
-			var planStayDateInfos []entity.StayDateInfo
-			
+
 			// EffectiveDateがある場合の処理
 			if roomRate.EffectiveDate != "" {
 				stayDate, err := roomRate.EffectiveDate.ToDate()
 				if err != nil {
 					return nil, errors.New("EffectiveDateの変換に失敗しました")
 				}
-				
+
 				roomPrice, _ := strconv.ParseUint(roomRate.Total.AmountAfterTax, 10, 64)
 				dayTotalPrice := (uint(roomPrice) * uint(roomCount))
 				planStayDateInfo := entity.StayDateInfo{
 					StayDate:           stayDate,
 					StayDateTotalPrice: dayTotalPrice,
 				}
-				
+
 				planTotalPrice = dayTotalPrice
 				planStayDateInfos = append(planStayDateInfos, planStayDateInfo)
 			} else {

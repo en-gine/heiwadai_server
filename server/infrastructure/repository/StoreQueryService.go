@@ -10,8 +10,8 @@ import (
 	"server/db/models"
 	"server/infrastructure/logger"
 
-	"github.com/google/uuid"
 	"github.com/aarondl/sqlboiler/v4/queries/qm"
+	"github.com/google/uuid"
 )
 
 var _ queryservice.IStoreQueryService = &StoreQueryService{}
@@ -110,7 +110,11 @@ func (pq *StoreQueryService) GetStayables() ([]*entity.StayableStore, error) {
 	}
 	var result []*entity.StayableStore
 	for _, store := range stores {
-		infoModel, _ := store.StayableStoreInfo().One(context.Background(), InitDB())
+		infoModel, err := store.StayableStoreInfo().One(context.Background(), pq.db)
+		if err != nil || infoModel == nil {
+			// StayableStoreInfoがないストアはスキップ
+			continue
+		}
 		stayable := StayableStoreToEntity(store, infoModel)
 		result = append(result, stayable)
 	}
@@ -145,6 +149,7 @@ func (pq *StoreQueryService) GetStayableByBookingID(bookingID string) (*entity.S
 		logger.Error(err.Error())
 		return nil, nil
 	}
+
 	for _, stayable := range stayables {
 		if stayable.BookingSystemID == bookingID {
 			return stayable, nil
