@@ -56,7 +56,7 @@ func WPPostToEntity(wppost *types.WPPost) (entitie *entity.Post) {
 }
 
 func WPALLPostToEntity(wppost *types.WPALLPost) (entitie *entity.Post) {
-	postDate, _ := time.Parse("2006-01-02T15:04:05", wppost.Date)
+	postDate, _ := time.Parse("2006-01-02 15:04:05", wppost.Date)
 	entity := &entity.Post{
 		ID:       wppost.PostID,
 		Title:    wppost.PostTitle,
