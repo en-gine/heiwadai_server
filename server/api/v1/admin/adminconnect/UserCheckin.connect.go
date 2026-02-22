@@ -7,7 +7,7 @@ package adminconnect
 import (
 	context "context"
 	errors "errors"
-	connect_go "github.com/bufbuild/connect-go"
+	connect_go "connectrpc.com/connect"
 	http "net/http"
 	admin "server/api/v1/admin"
 	strings "strings"

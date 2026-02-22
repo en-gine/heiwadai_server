@@ -7,7 +7,7 @@ package userconnect
 import (
 	context "context"
 	errors "errors"
-	connect_go "github.com/bufbuild/connect-go"
+	connect_go "connectrpc.com/connect"
 	http "net/http"
 	user "server/api/v1/user"
 	strings "strings"

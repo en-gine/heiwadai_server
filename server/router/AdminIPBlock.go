@@ -3,7 +3,7 @@ package router
 import (
 	"context"
 
-	"github.com/bufbuild/connect-go"
+	"connectrpc.com/connect"
 )
 
 type AdminClientIPFilter struct{}

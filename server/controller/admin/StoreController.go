@@ -10,7 +10,7 @@ import (
 	"server/core/entity"
 	usecase "server/core/usecase/admin"
 
-	"github.com/bufbuild/connect-go"
+	"connectrpc.com/connect"
 	"github.com/google/uuid"
 	"google.golang.org/protobuf/types/known/emptypb"
 )

@@ -7,7 +7,7 @@ import (
 	"server/infrastructure/env"
 	"server/infrastructure/logger"
 
-	"github.com/bufbuild/connect-go"
+	"connectrpc.com/connect"
 )
 
 type AuthCronHeader struct{}

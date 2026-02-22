@@ -14,7 +14,7 @@ import (
 	"server/core/infra/queryService/types"
 	usecase "server/core/usecase/admin"
 
-	connect "github.com/bufbuild/connect-go"
+	connect "connectrpc.com/connect"
 	"github.com/google/uuid"
 )
 

@@ -4,7 +4,7 @@ import (
 	"server/core/errors"
 	"server/infrastructure/logger"
 
-	"github.com/bufbuild/connect-go"
+	"connectrpc.com/connect"
 )
 
 func ErrorHandler(domainErr *errors.DomainError) *connect.Error {

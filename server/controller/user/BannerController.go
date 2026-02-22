@@ -7,7 +7,7 @@ import (
 	"server/controller"
 	usecase "server/core/usecase/user"
 
-	"github.com/bufbuild/connect-go"
+	"connectrpc.com/connect"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 

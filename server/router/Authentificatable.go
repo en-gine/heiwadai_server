@@ -17,7 +17,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bufbuild/connect-go"
+	"connectrpc.com/connect"
 )
 
 type keyType string

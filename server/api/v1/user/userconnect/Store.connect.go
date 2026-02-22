@@ -7,7 +7,7 @@ package userconnect
 import (
 	context "context"
 	errors "errors"
-	connect_go "github.com/bufbuild/connect-go"
+	connect_go "connectrpc.com/connect"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	http "net/http"
 	shared "server/api/v1/shared"

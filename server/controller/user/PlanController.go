@@ -10,7 +10,7 @@ import (
 	"server/core/entity"
 	usecase "server/core/usecase/user"
 
-	connect "github.com/bufbuild/connect-go"
+	connect "connectrpc.com/connect"
 	"github.com/google/uuid"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )

@@ -19,7 +19,7 @@ import (
 	cronRouter "server/router/cron"
 	userRouter "server/router/user"
 
-	grpcreflect "github.com/bufbuild/connect-grpcreflect-go"
+	grpcreflect "connectrpc.com/grpcreflect"
 	"github.com/rs/cors"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"

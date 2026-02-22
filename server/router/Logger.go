@@ -6,7 +6,7 @@ import (
 
 	"server/infrastructure/env"
 
-	"github.com/bufbuild/connect-go"
+	"connectrpc.com/connect"
 )
 
 func NewLogger() connect.Option {
