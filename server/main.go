@@ -162,6 +162,10 @@ func Index(w http.ResponseWriter, r *http.Request) {
 }
 
 func CheckRedisStatus() string {
+	cacheType := env.GetEnv("CACHE_TYPE")
+	if cacheType != "redis" {
+		return "cache: in-memory (redis disabled)"
+	}
 	rdb := redis.NewMemoryRepository()             // redis接続
 	rdb.Set("key", []byte("test"), time.Second*10) // redisにデータを保存
 	data := rdb.Get("key")                         // redisからデータを取得

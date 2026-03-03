@@ -6,8 +6,12 @@ import (
 	Iaction "server/core/infra/action"
 	action "server/infrastructure/action"
 
+	"server/core/infra/repository"
+
 	bookingApiAvail "server/infrastructure/booking/avail"
 	bookingApiBook "server/infrastructure/booking/book"
+	inmemcache "server/infrastructure/cache"
+	"server/infrastructure/env"
 	"server/infrastructure/redis"
 	implements "server/infrastructure/repository"
 	"server/infrastructure/wordpress"
@@ -39,8 +43,16 @@ var (
 	userReportRepository   = implements.NewUserReportRepository()
 	userLoginLogRepository = implements.NewUserLoginLogRepository()
 	sendMailAction         = action.NewSendMailAction()
-	memoryRepository       = redis.NewMemoryRepository()
+	memoryRepository = newMemoryRepository()
 )
+
+func newMemoryRepository() repository.IMemoryRepository {
+	cacheType := env.GetEnv("CACHE_TYPE")
+	if cacheType == "redis" {
+		return redis.NewMemoryRepository()
+	}
+	return inmemcache.NewMemoryRepository()
+}
 
 // var planQuery = booking.NewPlanQuery()
 

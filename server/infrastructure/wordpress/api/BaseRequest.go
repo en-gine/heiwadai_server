@@ -6,11 +6,22 @@ import (
 	"net/http"
 	"time"
 
+	"server/core/infra/repository"
+	inmemcache "server/infrastructure/cache"
+	"server/infrastructure/env"
 	"server/infrastructure/logger"
 	"server/infrastructure/redis"
 )
 
-var memory = redis.NewMemoryRepository()
+var memory = newMemoryRepository()
+
+func newMemoryRepository() repository.IMemoryRepository {
+	cacheType := env.GetEnv("CACHE_TYPE")
+	if cacheType == "redis" {
+		return redis.NewMemoryRepository()
+	}
+	return inmemcache.NewMemoryRepository()
+}
 
 func FetchJSONData[T any](APIURL string) (*T, error) {
 	res, err := http.Get(APIURL)
