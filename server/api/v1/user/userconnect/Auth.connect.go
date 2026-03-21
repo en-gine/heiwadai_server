@@ -5,9 +5,9 @@
 package userconnect
 
 import (
+	connect "connectrpc.com/connect"
 	context "context"
 	errors "errors"
-	connect_go "connectrpc.com/connect"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	http "net/http"
 	user "server/api/v1/user"
@@ -19,7 +19,7 @@ import (
 // generated with a version of connect newer than the one compiled into your binary. You can fix the
 // problem by either regenerating this code with an older version of connect or updating the connect
 // version compiled into your binary.
-const _ = connect_go.IsAtLeastVersion0_1_0
+const _ = connect.IsAtLeastVersion1_13_0
 
 const (
 	// AuthControllerName is the fully-qualified name of the AuthController service.
@@ -44,18 +44,23 @@ const (
 	// AuthControllerUpdateEmailProcedure is the fully-qualified name of the AuthController's
 	// UpdateEmail RPC.
 	AuthControllerUpdateEmailProcedure = "/server.user.AuthController/UpdateEmail"
+	// AuthControllerDeleteAccountProcedure is the fully-qualified name of the AuthController's
+	// DeleteAccount RPC.
+	AuthControllerDeleteAccountProcedure = "/server.user.AuthController/DeleteAccount"
 )
 
 // AuthControllerClient is a client for the server.user.AuthController service.
 type AuthControllerClient interface {
 	// ログアウト
-	SignOut(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[emptypb.Empty], error)
+	SignOut(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[emptypb.Empty], error)
 	// リフレッシュトークンを使ってアクセストークンを更新する（通常は通信ヘッダーを用いて自動でリフレッシュしている）
-	Refresh(context.Context, *connect_go.Request[user.RefreshTokenRequest]) (*connect_go.Response[user.UserAuthTokenResponse], error)
+	Refresh(context.Context, *connect.Request[user.RefreshTokenRequest]) (*connect.Response[user.UserAuthTokenResponse], error)
 	// パスワードアップデート
-	UpdatePassword(context.Context, *connect_go.Request[user.UpdatePasswordRequest]) (*connect_go.Response[emptypb.Empty], error)
+	UpdatePassword(context.Context, *connect.Request[user.UpdatePasswordRequest]) (*connect.Response[emptypb.Empty], error)
 	// メールアドレス更新（認証メールが飛ぶ）
-	UpdateEmail(context.Context, *connect_go.Request[user.UpdateEmailRequest]) (*connect_go.Response[emptypb.Empty], error)
+	UpdateEmail(context.Context, *connect.Request[user.UpdateEmailRequest]) (*connect.Response[emptypb.Empty], error)
+	// アカウント削除
+	DeleteAccount(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[emptypb.Empty], error)
 }
 
 // NewAuthControllerClient constructs a client for the server.user.AuthController service. By
@@ -65,70 +70,89 @@ type AuthControllerClient interface {
 //
 // The URL supplied here should be the base URL for the Connect or gRPC server (for example,
 // http://api.acme.com or https://acme.com/grpc).
-func NewAuthControllerClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) AuthControllerClient {
+func NewAuthControllerClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) AuthControllerClient {
 	baseURL = strings.TrimRight(baseURL, "/")
+	authControllerMethods := user.File_v1_user_Auth_proto.Services().ByName("AuthController").Methods()
 	return &authControllerClient{
-		signOut: connect_go.NewClient[emptypb.Empty, emptypb.Empty](
+		signOut: connect.NewClient[emptypb.Empty, emptypb.Empty](
 			httpClient,
 			baseURL+AuthControllerSignOutProcedure,
-			opts...,
+			connect.WithSchema(authControllerMethods.ByName("SignOut")),
+			connect.WithClientOptions(opts...),
 		),
-		refresh: connect_go.NewClient[user.RefreshTokenRequest, user.UserAuthTokenResponse](
+		refresh: connect.NewClient[user.RefreshTokenRequest, user.UserAuthTokenResponse](
 			httpClient,
 			baseURL+AuthControllerRefreshProcedure,
-			opts...,
+			connect.WithSchema(authControllerMethods.ByName("Refresh")),
+			connect.WithClientOptions(opts...),
 		),
-		updatePassword: connect_go.NewClient[user.UpdatePasswordRequest, emptypb.Empty](
+		updatePassword: connect.NewClient[user.UpdatePasswordRequest, emptypb.Empty](
 			httpClient,
 			baseURL+AuthControllerUpdatePasswordProcedure,
-			opts...,
+			connect.WithSchema(authControllerMethods.ByName("UpdatePassword")),
+			connect.WithClientOptions(opts...),
 		),
-		updateEmail: connect_go.NewClient[user.UpdateEmailRequest, emptypb.Empty](
+		updateEmail: connect.NewClient[user.UpdateEmailRequest, emptypb.Empty](
 			httpClient,
 			baseURL+AuthControllerUpdateEmailProcedure,
-			opts...,
+			connect.WithSchema(authControllerMethods.ByName("UpdateEmail")),
+			connect.WithClientOptions(opts...),
+		),
+		deleteAccount: connect.NewClient[emptypb.Empty, emptypb.Empty](
+			httpClient,
+			baseURL+AuthControllerDeleteAccountProcedure,
+			connect.WithSchema(authControllerMethods.ByName("DeleteAccount")),
+			connect.WithClientOptions(opts...),
 		),
 	}
 }
 
 // authControllerClient implements AuthControllerClient.
 type authControllerClient struct {
-	signOut        *connect_go.Client[emptypb.Empty, emptypb.Empty]
-	refresh        *connect_go.Client[user.RefreshTokenRequest, user.UserAuthTokenResponse]
-	updatePassword *connect_go.Client[user.UpdatePasswordRequest, emptypb.Empty]
-	updateEmail    *connect_go.Client[user.UpdateEmailRequest, emptypb.Empty]
+	signOut        *connect.Client[emptypb.Empty, emptypb.Empty]
+	refresh        *connect.Client[user.RefreshTokenRequest, user.UserAuthTokenResponse]
+	updatePassword *connect.Client[user.UpdatePasswordRequest, emptypb.Empty]
+	updateEmail    *connect.Client[user.UpdateEmailRequest, emptypb.Empty]
+	deleteAccount  *connect.Client[emptypb.Empty, emptypb.Empty]
 }
 
 // SignOut calls server.user.AuthController.SignOut.
-func (c *authControllerClient) SignOut(ctx context.Context, req *connect_go.Request[emptypb.Empty]) (*connect_go.Response[emptypb.Empty], error) {
+func (c *authControllerClient) SignOut(ctx context.Context, req *connect.Request[emptypb.Empty]) (*connect.Response[emptypb.Empty], error) {
 	return c.signOut.CallUnary(ctx, req)
 }
 
 // Refresh calls server.user.AuthController.Refresh.
-func (c *authControllerClient) Refresh(ctx context.Context, req *connect_go.Request[user.RefreshTokenRequest]) (*connect_go.Response[user.UserAuthTokenResponse], error) {
+func (c *authControllerClient) Refresh(ctx context.Context, req *connect.Request[user.RefreshTokenRequest]) (*connect.Response[user.UserAuthTokenResponse], error) {
 	return c.refresh.CallUnary(ctx, req)
 }
 
 // UpdatePassword calls server.user.AuthController.UpdatePassword.
-func (c *authControllerClient) UpdatePassword(ctx context.Context, req *connect_go.Request[user.UpdatePasswordRequest]) (*connect_go.Response[emptypb.Empty], error) {
+func (c *authControllerClient) UpdatePassword(ctx context.Context, req *connect.Request[user.UpdatePasswordRequest]) (*connect.Response[emptypb.Empty], error) {
 	return c.updatePassword.CallUnary(ctx, req)
 }
 
 // UpdateEmail calls server.user.AuthController.UpdateEmail.
-func (c *authControllerClient) UpdateEmail(ctx context.Context, req *connect_go.Request[user.UpdateEmailRequest]) (*connect_go.Response[emptypb.Empty], error) {
+func (c *authControllerClient) UpdateEmail(ctx context.Context, req *connect.Request[user.UpdateEmailRequest]) (*connect.Response[emptypb.Empty], error) {
 	return c.updateEmail.CallUnary(ctx, req)
+}
+
+// DeleteAccount calls server.user.AuthController.DeleteAccount.
+func (c *authControllerClient) DeleteAccount(ctx context.Context, req *connect.Request[emptypb.Empty]) (*connect.Response[emptypb.Empty], error) {
+	return c.deleteAccount.CallUnary(ctx, req)
 }
 
 // AuthControllerHandler is an implementation of the server.user.AuthController service.
 type AuthControllerHandler interface {
 	// ログアウト
-	SignOut(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[emptypb.Empty], error)
+	SignOut(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[emptypb.Empty], error)
 	// リフレッシュトークンを使ってアクセストークンを更新する（通常は通信ヘッダーを用いて自動でリフレッシュしている）
-	Refresh(context.Context, *connect_go.Request[user.RefreshTokenRequest]) (*connect_go.Response[user.UserAuthTokenResponse], error)
+	Refresh(context.Context, *connect.Request[user.RefreshTokenRequest]) (*connect.Response[user.UserAuthTokenResponse], error)
 	// パスワードアップデート
-	UpdatePassword(context.Context, *connect_go.Request[user.UpdatePasswordRequest]) (*connect_go.Response[emptypb.Empty], error)
+	UpdatePassword(context.Context, *connect.Request[user.UpdatePasswordRequest]) (*connect.Response[emptypb.Empty], error)
 	// メールアドレス更新（認証メールが飛ぶ）
-	UpdateEmail(context.Context, *connect_go.Request[user.UpdateEmailRequest]) (*connect_go.Response[emptypb.Empty], error)
+	UpdateEmail(context.Context, *connect.Request[user.UpdateEmailRequest]) (*connect.Response[emptypb.Empty], error)
+	// アカウント削除
+	DeleteAccount(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[emptypb.Empty], error)
 }
 
 // NewAuthControllerHandler builds an HTTP handler from the service implementation. It returns the
@@ -136,26 +160,37 @@ type AuthControllerHandler interface {
 //
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
-func NewAuthControllerHandler(svc AuthControllerHandler, opts ...connect_go.HandlerOption) (string, http.Handler) {
-	authControllerSignOutHandler := connect_go.NewUnaryHandler(
+func NewAuthControllerHandler(svc AuthControllerHandler, opts ...connect.HandlerOption) (string, http.Handler) {
+	authControllerMethods := user.File_v1_user_Auth_proto.Services().ByName("AuthController").Methods()
+	authControllerSignOutHandler := connect.NewUnaryHandler(
 		AuthControllerSignOutProcedure,
 		svc.SignOut,
-		opts...,
+		connect.WithSchema(authControllerMethods.ByName("SignOut")),
+		connect.WithHandlerOptions(opts...),
 	)
-	authControllerRefreshHandler := connect_go.NewUnaryHandler(
+	authControllerRefreshHandler := connect.NewUnaryHandler(
 		AuthControllerRefreshProcedure,
 		svc.Refresh,
-		opts...,
+		connect.WithSchema(authControllerMethods.ByName("Refresh")),
+		connect.WithHandlerOptions(opts...),
 	)
-	authControllerUpdatePasswordHandler := connect_go.NewUnaryHandler(
+	authControllerUpdatePasswordHandler := connect.NewUnaryHandler(
 		AuthControllerUpdatePasswordProcedure,
 		svc.UpdatePassword,
-		opts...,
+		connect.WithSchema(authControllerMethods.ByName("UpdatePassword")),
+		connect.WithHandlerOptions(opts...),
 	)
-	authControllerUpdateEmailHandler := connect_go.NewUnaryHandler(
+	authControllerUpdateEmailHandler := connect.NewUnaryHandler(
 		AuthControllerUpdateEmailProcedure,
 		svc.UpdateEmail,
-		opts...,
+		connect.WithSchema(authControllerMethods.ByName("UpdateEmail")),
+		connect.WithHandlerOptions(opts...),
+	)
+	authControllerDeleteAccountHandler := connect.NewUnaryHandler(
+		AuthControllerDeleteAccountProcedure,
+		svc.DeleteAccount,
+		connect.WithSchema(authControllerMethods.ByName("DeleteAccount")),
+		connect.WithHandlerOptions(opts...),
 	)
 	return "/server.user.AuthController/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
@@ -167,6 +202,8 @@ func NewAuthControllerHandler(svc AuthControllerHandler, opts ...connect_go.Hand
 			authControllerUpdatePasswordHandler.ServeHTTP(w, r)
 		case AuthControllerUpdateEmailProcedure:
 			authControllerUpdateEmailHandler.ServeHTTP(w, r)
+		case AuthControllerDeleteAccountProcedure:
+			authControllerDeleteAccountHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -176,18 +213,22 @@ func NewAuthControllerHandler(svc AuthControllerHandler, opts ...connect_go.Hand
 // UnimplementedAuthControllerHandler returns CodeUnimplemented from all methods.
 type UnimplementedAuthControllerHandler struct{}
 
-func (UnimplementedAuthControllerHandler) SignOut(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[emptypb.Empty], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.AuthController.SignOut is not implemented"))
+func (UnimplementedAuthControllerHandler) SignOut(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[emptypb.Empty], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.user.AuthController.SignOut is not implemented"))
 }
 
-func (UnimplementedAuthControllerHandler) Refresh(context.Context, *connect_go.Request[user.RefreshTokenRequest]) (*connect_go.Response[user.UserAuthTokenResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.AuthController.Refresh is not implemented"))
+func (UnimplementedAuthControllerHandler) Refresh(context.Context, *connect.Request[user.RefreshTokenRequest]) (*connect.Response[user.UserAuthTokenResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.user.AuthController.Refresh is not implemented"))
 }
 
-func (UnimplementedAuthControllerHandler) UpdatePassword(context.Context, *connect_go.Request[user.UpdatePasswordRequest]) (*connect_go.Response[emptypb.Empty], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.AuthController.UpdatePassword is not implemented"))
+func (UnimplementedAuthControllerHandler) UpdatePassword(context.Context, *connect.Request[user.UpdatePasswordRequest]) (*connect.Response[emptypb.Empty], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.user.AuthController.UpdatePassword is not implemented"))
 }
 
-func (UnimplementedAuthControllerHandler) UpdateEmail(context.Context, *connect_go.Request[user.UpdateEmailRequest]) (*connect_go.Response[emptypb.Empty], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.AuthController.UpdateEmail is not implemented"))
+func (UnimplementedAuthControllerHandler) UpdateEmail(context.Context, *connect.Request[user.UpdateEmailRequest]) (*connect.Response[emptypb.Empty], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.user.AuthController.UpdateEmail is not implemented"))
+}
+
+func (UnimplementedAuthControllerHandler) DeleteAccount(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[emptypb.Empty], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.user.AuthController.DeleteAccount is not implemented"))
 }

@@ -5,9 +5,9 @@
 package adminconnect
 
 import (
+	connect "connectrpc.com/connect"
 	context "context"
 	errors "errors"
-	connect_go "connectrpc.com/connect"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	http "net/http"
 	admin "server/api/v1/admin"
@@ -19,7 +19,7 @@ import (
 // generated with a version of connect newer than the one compiled into your binary. You can fix the
 // problem by either regenerating this code with an older version of connect or updating the connect
 // version compiled into your binary.
-const _ = connect_go.IsAtLeastVersion0_1_0
+const _ = connect.IsAtLeastVersion1_13_0
 
 const (
 	// AnonAuthControllerName is the fully-qualified name of the AnonAuthController service.
@@ -51,10 +51,10 @@ const (
 // AnonAuthControllerClient is a client for the server.admin.AnonAuthController service.
 type AnonAuthControllerClient interface {
 	// トークン不要
-	SignUp(context.Context, *connect_go.Request[admin.AdminAuthRequest]) (*connect_go.Response[emptypb.Empty], error)
-	SignIn(context.Context, *connect_go.Request[admin.AdminAuthRequest]) (*connect_go.Response[admin.AnonAuthTokenResponse], error)
-	ResetPasswordMail(context.Context, *connect_go.Request[admin.ResetPasswordRequest]) (*connect_go.Response[emptypb.Empty], error)
-	SetNewPassword(context.Context, *connect_go.Request[admin.SetNewPasswordRequest]) (*connect_go.Response[emptypb.Empty], error)
+	SignUp(context.Context, *connect.Request[admin.AdminAuthRequest]) (*connect.Response[emptypb.Empty], error)
+	SignIn(context.Context, *connect.Request[admin.AdminAuthRequest]) (*connect.Response[admin.AnonAuthTokenResponse], error)
+	ResetPasswordMail(context.Context, *connect.Request[admin.ResetPasswordRequest]) (*connect.Response[emptypb.Empty], error)
+	SetNewPassword(context.Context, *connect.Request[admin.SetNewPasswordRequest]) (*connect.Response[emptypb.Empty], error)
 }
 
 // NewAnonAuthControllerClient constructs a client for the server.admin.AnonAuthController service.
@@ -64,67 +64,72 @@ type AnonAuthControllerClient interface {
 //
 // The URL supplied here should be the base URL for the Connect or gRPC server (for example,
 // http://api.acme.com or https://acme.com/grpc).
-func NewAnonAuthControllerClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) AnonAuthControllerClient {
+func NewAnonAuthControllerClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) AnonAuthControllerClient {
 	baseURL = strings.TrimRight(baseURL, "/")
+	anonAuthControllerMethods := admin.File_v1_admin_AnonAuth_proto.Services().ByName("AnonAuthController").Methods()
 	return &anonAuthControllerClient{
-		signUp: connect_go.NewClient[admin.AdminAuthRequest, emptypb.Empty](
+		signUp: connect.NewClient[admin.AdminAuthRequest, emptypb.Empty](
 			httpClient,
 			baseURL+AnonAuthControllerSignUpProcedure,
-			opts...,
+			connect.WithSchema(anonAuthControllerMethods.ByName("SignUp")),
+			connect.WithClientOptions(opts...),
 		),
-		signIn: connect_go.NewClient[admin.AdminAuthRequest, admin.AnonAuthTokenResponse](
+		signIn: connect.NewClient[admin.AdminAuthRequest, admin.AnonAuthTokenResponse](
 			httpClient,
 			baseURL+AnonAuthControllerSignInProcedure,
-			opts...,
+			connect.WithSchema(anonAuthControllerMethods.ByName("SignIn")),
+			connect.WithClientOptions(opts...),
 		),
-		resetPasswordMail: connect_go.NewClient[admin.ResetPasswordRequest, emptypb.Empty](
+		resetPasswordMail: connect.NewClient[admin.ResetPasswordRequest, emptypb.Empty](
 			httpClient,
 			baseURL+AnonAuthControllerResetPasswordMailProcedure,
-			opts...,
+			connect.WithSchema(anonAuthControllerMethods.ByName("ResetPasswordMail")),
+			connect.WithClientOptions(opts...),
 		),
-		setNewPassword: connect_go.NewClient[admin.SetNewPasswordRequest, emptypb.Empty](
+		setNewPassword: connect.NewClient[admin.SetNewPasswordRequest, emptypb.Empty](
 			httpClient,
 			baseURL+AnonAuthControllerSetNewPasswordProcedure,
-			opts...,
+			connect.WithSchema(anonAuthControllerMethods.ByName("SetNewPassword")),
+			connect.WithClientOptions(opts...),
 		),
 	}
 }
 
 // anonAuthControllerClient implements AnonAuthControllerClient.
 type anonAuthControllerClient struct {
-	signUp            *connect_go.Client[admin.AdminAuthRequest, emptypb.Empty]
-	signIn            *connect_go.Client[admin.AdminAuthRequest, admin.AnonAuthTokenResponse]
-	resetPasswordMail *connect_go.Client[admin.ResetPasswordRequest, emptypb.Empty]
-	setNewPassword    *connect_go.Client[admin.SetNewPasswordRequest, emptypb.Empty]
+	signUp            *connect.Client[admin.AdminAuthRequest, emptypb.Empty]
+	signIn            *connect.Client[admin.AdminAuthRequest, admin.AnonAuthTokenResponse]
+	resetPasswordMail *connect.Client[admin.ResetPasswordRequest, emptypb.Empty]
+	setNewPassword    *connect.Client[admin.SetNewPasswordRequest, emptypb.Empty]
 }
 
 // SignUp calls server.admin.AnonAuthController.SignUp.
-func (c *anonAuthControllerClient) SignUp(ctx context.Context, req *connect_go.Request[admin.AdminAuthRequest]) (*connect_go.Response[emptypb.Empty], error) {
+func (c *anonAuthControllerClient) SignUp(ctx context.Context, req *connect.Request[admin.AdminAuthRequest]) (*connect.Response[emptypb.Empty], error) {
 	return c.signUp.CallUnary(ctx, req)
 }
 
 // SignIn calls server.admin.AnonAuthController.SignIn.
-func (c *anonAuthControllerClient) SignIn(ctx context.Context, req *connect_go.Request[admin.AdminAuthRequest]) (*connect_go.Response[admin.AnonAuthTokenResponse], error) {
+func (c *anonAuthControllerClient) SignIn(ctx context.Context, req *connect.Request[admin.AdminAuthRequest]) (*connect.Response[admin.AnonAuthTokenResponse], error) {
 	return c.signIn.CallUnary(ctx, req)
 }
 
 // ResetPasswordMail calls server.admin.AnonAuthController.ResetPasswordMail.
-func (c *anonAuthControllerClient) ResetPasswordMail(ctx context.Context, req *connect_go.Request[admin.ResetPasswordRequest]) (*connect_go.Response[emptypb.Empty], error) {
+func (c *anonAuthControllerClient) ResetPasswordMail(ctx context.Context, req *connect.Request[admin.ResetPasswordRequest]) (*connect.Response[emptypb.Empty], error) {
 	return c.resetPasswordMail.CallUnary(ctx, req)
 }
 
 // SetNewPassword calls server.admin.AnonAuthController.SetNewPassword.
-func (c *anonAuthControllerClient) SetNewPassword(ctx context.Context, req *connect_go.Request[admin.SetNewPasswordRequest]) (*connect_go.Response[emptypb.Empty], error) {
+func (c *anonAuthControllerClient) SetNewPassword(ctx context.Context, req *connect.Request[admin.SetNewPasswordRequest]) (*connect.Response[emptypb.Empty], error) {
 	return c.setNewPassword.CallUnary(ctx, req)
 }
 
 // AnonAuthControllerHandler is an implementation of the server.admin.AnonAuthController service.
 type AnonAuthControllerHandler interface {
 	// トークン不要
-	SignUp(context.Context, *connect_go.Request[admin.AdminAuthRequest]) (*connect_go.Response[emptypb.Empty], error)
-	SignIn(context.Context, *connect_go.Request[admin.AdminAuthRequest]) (*connect_go.Response[admin.AnonAuthTokenResponse], error)
-	ResetPasswordMail(context.Context, *connect_go.Request[admin.ResetPasswordRequest]) (*connect_go.Response[emptypb.Empty], error)
-	SetNewPassword(context.Context, *connect_go.Request[admin.SetNewPasswordRequest]) (*connect_go.Response[emptypb.Empty], error)
+	SignUp(context.Context, *connect.Request[admin.AdminAuthRequest]) (*connect.Response[emptypb.Empty], error)
+	SignIn(context.Context, *connect.Request[admin.AdminAuthRequest]) (*connect.Response[admin.AnonAuthTokenResponse], error)
+	ResetPasswordMail(context.Context, *connect.Request[admin.ResetPasswordRequest]) (*connect.Response[emptypb.Empty], error)
+	SetNewPassword(context.Context, *connect.Request[admin.SetNewPasswordRequest]) (*connect.Response[emptypb.Empty], error)
 }
 
 // NewAnonAuthControllerHandler builds an HTTP handler from the service implementation. It returns
@@ -132,26 +137,31 @@ type AnonAuthControllerHandler interface {
 //
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
-func NewAnonAuthControllerHandler(svc AnonAuthControllerHandler, opts ...connect_go.HandlerOption) (string, http.Handler) {
-	anonAuthControllerSignUpHandler := connect_go.NewUnaryHandler(
+func NewAnonAuthControllerHandler(svc AnonAuthControllerHandler, opts ...connect.HandlerOption) (string, http.Handler) {
+	anonAuthControllerMethods := admin.File_v1_admin_AnonAuth_proto.Services().ByName("AnonAuthController").Methods()
+	anonAuthControllerSignUpHandler := connect.NewUnaryHandler(
 		AnonAuthControllerSignUpProcedure,
 		svc.SignUp,
-		opts...,
+		connect.WithSchema(anonAuthControllerMethods.ByName("SignUp")),
+		connect.WithHandlerOptions(opts...),
 	)
-	anonAuthControllerSignInHandler := connect_go.NewUnaryHandler(
+	anonAuthControllerSignInHandler := connect.NewUnaryHandler(
 		AnonAuthControllerSignInProcedure,
 		svc.SignIn,
-		opts...,
+		connect.WithSchema(anonAuthControllerMethods.ByName("SignIn")),
+		connect.WithHandlerOptions(opts...),
 	)
-	anonAuthControllerResetPasswordMailHandler := connect_go.NewUnaryHandler(
+	anonAuthControllerResetPasswordMailHandler := connect.NewUnaryHandler(
 		AnonAuthControllerResetPasswordMailProcedure,
 		svc.ResetPasswordMail,
-		opts...,
+		connect.WithSchema(anonAuthControllerMethods.ByName("ResetPasswordMail")),
+		connect.WithHandlerOptions(opts...),
 	)
-	anonAuthControllerSetNewPasswordHandler := connect_go.NewUnaryHandler(
+	anonAuthControllerSetNewPasswordHandler := connect.NewUnaryHandler(
 		AnonAuthControllerSetNewPasswordProcedure,
 		svc.SetNewPassword,
-		opts...,
+		connect.WithSchema(anonAuthControllerMethods.ByName("SetNewPassword")),
+		connect.WithHandlerOptions(opts...),
 	)
 	return "/server.admin.AnonAuthController/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
@@ -172,18 +182,18 @@ func NewAnonAuthControllerHandler(svc AnonAuthControllerHandler, opts ...connect
 // UnimplementedAnonAuthControllerHandler returns CodeUnimplemented from all methods.
 type UnimplementedAnonAuthControllerHandler struct{}
 
-func (UnimplementedAnonAuthControllerHandler) SignUp(context.Context, *connect_go.Request[admin.AdminAuthRequest]) (*connect_go.Response[emptypb.Empty], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.AnonAuthController.SignUp is not implemented"))
+func (UnimplementedAnonAuthControllerHandler) SignUp(context.Context, *connect.Request[admin.AdminAuthRequest]) (*connect.Response[emptypb.Empty], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.admin.AnonAuthController.SignUp is not implemented"))
 }
 
-func (UnimplementedAnonAuthControllerHandler) SignIn(context.Context, *connect_go.Request[admin.AdminAuthRequest]) (*connect_go.Response[admin.AnonAuthTokenResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.AnonAuthController.SignIn is not implemented"))
+func (UnimplementedAnonAuthControllerHandler) SignIn(context.Context, *connect.Request[admin.AdminAuthRequest]) (*connect.Response[admin.AnonAuthTokenResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.admin.AnonAuthController.SignIn is not implemented"))
 }
 
-func (UnimplementedAnonAuthControllerHandler) ResetPasswordMail(context.Context, *connect_go.Request[admin.ResetPasswordRequest]) (*connect_go.Response[emptypb.Empty], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.AnonAuthController.ResetPasswordMail is not implemented"))
+func (UnimplementedAnonAuthControllerHandler) ResetPasswordMail(context.Context, *connect.Request[admin.ResetPasswordRequest]) (*connect.Response[emptypb.Empty], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.admin.AnonAuthController.ResetPasswordMail is not implemented"))
 }
 
-func (UnimplementedAnonAuthControllerHandler) SetNewPassword(context.Context, *connect_go.Request[admin.SetNewPasswordRequest]) (*connect_go.Response[emptypb.Empty], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.AnonAuthController.SetNewPassword is not implemented"))
+func (UnimplementedAnonAuthControllerHandler) SetNewPassword(context.Context, *connect.Request[admin.SetNewPasswordRequest]) (*connect.Response[emptypb.Empty], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.admin.AnonAuthController.SetNewPassword is not implemented"))
 }

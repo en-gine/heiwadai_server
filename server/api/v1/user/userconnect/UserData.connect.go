@@ -5,9 +5,9 @@
 package userconnect
 
 import (
+	connect "connectrpc.com/connect"
 	context "context"
 	errors "errors"
-	connect_go "connectrpc.com/connect"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	http "net/http"
 	user "server/api/v1/user"
@@ -19,7 +19,7 @@ import (
 // generated with a version of connect newer than the one compiled into your binary. You can fix the
 // problem by either regenerating this code with an older version of connect or updating the connect
 // version compiled into your binary.
-const _ = connect_go.IsAtLeastVersion0_1_0
+const _ = connect.IsAtLeastVersion1_13_0
 
 const (
 	// UserDataControllerName is the fully-qualified name of the UserDataController service.
@@ -45,8 +45,8 @@ const (
 // UserDataControllerClient is a client for the server.user.UserDataController service.
 type UserDataControllerClient interface {
 	// ユーザー情報の更新
-	Update(context.Context, *connect_go.Request[user.UserUpdateDataRequest]) (*connect_go.Response[user.UserDataResponse], error)
-	GetUser(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[user.UserDataResponse], error)
+	Update(context.Context, *connect.Request[user.UserUpdateDataRequest]) (*connect.Response[user.UserDataResponse], error)
+	GetUser(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[user.UserDataResponse], error)
 }
 
 // NewUserDataControllerClient constructs a client for the server.user.UserDataController service.
@@ -56,43 +56,46 @@ type UserDataControllerClient interface {
 //
 // The URL supplied here should be the base URL for the Connect or gRPC server (for example,
 // http://api.acme.com or https://acme.com/grpc).
-func NewUserDataControllerClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) UserDataControllerClient {
+func NewUserDataControllerClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) UserDataControllerClient {
 	baseURL = strings.TrimRight(baseURL, "/")
+	userDataControllerMethods := user.File_v1_user_UserData_proto.Services().ByName("UserDataController").Methods()
 	return &userDataControllerClient{
-		update: connect_go.NewClient[user.UserUpdateDataRequest, user.UserDataResponse](
+		update: connect.NewClient[user.UserUpdateDataRequest, user.UserDataResponse](
 			httpClient,
 			baseURL+UserDataControllerUpdateProcedure,
-			opts...,
+			connect.WithSchema(userDataControllerMethods.ByName("Update")),
+			connect.WithClientOptions(opts...),
 		),
-		getUser: connect_go.NewClient[emptypb.Empty, user.UserDataResponse](
+		getUser: connect.NewClient[emptypb.Empty, user.UserDataResponse](
 			httpClient,
 			baseURL+UserDataControllerGetUserProcedure,
-			opts...,
+			connect.WithSchema(userDataControllerMethods.ByName("GetUser")),
+			connect.WithClientOptions(opts...),
 		),
 	}
 }
 
 // userDataControllerClient implements UserDataControllerClient.
 type userDataControllerClient struct {
-	update  *connect_go.Client[user.UserUpdateDataRequest, user.UserDataResponse]
-	getUser *connect_go.Client[emptypb.Empty, user.UserDataResponse]
+	update  *connect.Client[user.UserUpdateDataRequest, user.UserDataResponse]
+	getUser *connect.Client[emptypb.Empty, user.UserDataResponse]
 }
 
 // Update calls server.user.UserDataController.Update.
-func (c *userDataControllerClient) Update(ctx context.Context, req *connect_go.Request[user.UserUpdateDataRequest]) (*connect_go.Response[user.UserDataResponse], error) {
+func (c *userDataControllerClient) Update(ctx context.Context, req *connect.Request[user.UserUpdateDataRequest]) (*connect.Response[user.UserDataResponse], error) {
 	return c.update.CallUnary(ctx, req)
 }
 
 // GetUser calls server.user.UserDataController.GetUser.
-func (c *userDataControllerClient) GetUser(ctx context.Context, req *connect_go.Request[emptypb.Empty]) (*connect_go.Response[user.UserDataResponse], error) {
+func (c *userDataControllerClient) GetUser(ctx context.Context, req *connect.Request[emptypb.Empty]) (*connect.Response[user.UserDataResponse], error) {
 	return c.getUser.CallUnary(ctx, req)
 }
 
 // UserDataControllerHandler is an implementation of the server.user.UserDataController service.
 type UserDataControllerHandler interface {
 	// ユーザー情報の更新
-	Update(context.Context, *connect_go.Request[user.UserUpdateDataRequest]) (*connect_go.Response[user.UserDataResponse], error)
-	GetUser(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[user.UserDataResponse], error)
+	Update(context.Context, *connect.Request[user.UserUpdateDataRequest]) (*connect.Response[user.UserDataResponse], error)
+	GetUser(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[user.UserDataResponse], error)
 }
 
 // NewUserDataControllerHandler builds an HTTP handler from the service implementation. It returns
@@ -100,16 +103,19 @@ type UserDataControllerHandler interface {
 //
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
-func NewUserDataControllerHandler(svc UserDataControllerHandler, opts ...connect_go.HandlerOption) (string, http.Handler) {
-	userDataControllerUpdateHandler := connect_go.NewUnaryHandler(
+func NewUserDataControllerHandler(svc UserDataControllerHandler, opts ...connect.HandlerOption) (string, http.Handler) {
+	userDataControllerMethods := user.File_v1_user_UserData_proto.Services().ByName("UserDataController").Methods()
+	userDataControllerUpdateHandler := connect.NewUnaryHandler(
 		UserDataControllerUpdateProcedure,
 		svc.Update,
-		opts...,
+		connect.WithSchema(userDataControllerMethods.ByName("Update")),
+		connect.WithHandlerOptions(opts...),
 	)
-	userDataControllerGetUserHandler := connect_go.NewUnaryHandler(
+	userDataControllerGetUserHandler := connect.NewUnaryHandler(
 		UserDataControllerGetUserProcedure,
 		svc.GetUser,
-		opts...,
+		connect.WithSchema(userDataControllerMethods.ByName("GetUser")),
+		connect.WithHandlerOptions(opts...),
 	)
 	return "/server.user.UserDataController/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
@@ -126,10 +132,10 @@ func NewUserDataControllerHandler(svc UserDataControllerHandler, opts ...connect
 // UnimplementedUserDataControllerHandler returns CodeUnimplemented from all methods.
 type UnimplementedUserDataControllerHandler struct{}
 
-func (UnimplementedUserDataControllerHandler) Update(context.Context, *connect_go.Request[user.UserUpdateDataRequest]) (*connect_go.Response[user.UserDataResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.UserDataController.Update is not implemented"))
+func (UnimplementedUserDataControllerHandler) Update(context.Context, *connect.Request[user.UserUpdateDataRequest]) (*connect.Response[user.UserDataResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.user.UserDataController.Update is not implemented"))
 }
 
-func (UnimplementedUserDataControllerHandler) GetUser(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[user.UserDataResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.UserDataController.GetUser is not implemented"))
+func (UnimplementedUserDataControllerHandler) GetUser(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[user.UserDataResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.user.UserDataController.GetUser is not implemented"))
 }

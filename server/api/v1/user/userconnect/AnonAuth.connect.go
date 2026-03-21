@@ -5,9 +5,9 @@
 package userconnect
 
 import (
+	connect "connectrpc.com/connect"
 	context "context"
 	errors "errors"
-	connect_go "connectrpc.com/connect"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	http "net/http"
 	user "server/api/v1/user"
@@ -19,7 +19,7 @@ import (
 // generated with a version of connect newer than the one compiled into your binary. You can fix the
 // problem by either regenerating this code with an older version of connect or updating the connect
 // version compiled into your binary.
-const _ = connect_go.IsAtLeastVersion0_1_0
+const _ = connect.IsAtLeastVersion1_13_0
 
 const (
 	// AnonAuthControllerName is the fully-qualified name of the AnonAuthController service.
@@ -66,23 +66,23 @@ const (
 // AnonAuthControllerClient is a client for the server.user.AnonAuthController service.
 type AnonAuthControllerClient interface {
 	// 初回ユーザー登録
-	Register(context.Context, *connect_go.Request[user.UserRegisterRequest]) (*connect_go.Response[emptypb.Empty], error)
+	Register(context.Context, *connect.Request[user.UserRegisterRequest]) (*connect.Response[emptypb.Empty], error)
 	// ユーザー登録後にメールアドレスの確認が完了し、パスワードを設定する
-	SignUp(context.Context, *connect_go.Request[user.SignUpRequest]) (*connect_go.Response[emptypb.Empty], error)
+	SignUp(context.Context, *connect.Request[user.SignUpRequest]) (*connect.Response[emptypb.Empty], error)
 	// ログイン
-	SignIn(context.Context, *connect_go.Request[user.UserAuthRequest]) (*connect_go.Response[user.AnonTokenResponse], error)
+	SignIn(context.Context, *connect.Request[user.UserAuthRequest]) (*connect.Response[user.AnonTokenResponse], error)
 	// パスワードリセット用メール送信
-	ResetPasswordMail(context.Context, *connect_go.Request[user.UserMailRequest]) (*connect_go.Response[emptypb.Empty], error)
+	ResetPasswordMail(context.Context, *connect.Request[user.UserMailRequest]) (*connect.Response[emptypb.Empty], error)
 	// パスワードリセット(メールリダイレクトからのトークンと共に設定)
-	SetNewPassword(context.Context, *connect_go.Request[user.SetNewPasswordRequest]) (*connect_go.Response[emptypb.Empty], error)
+	SetNewPassword(context.Context, *connect.Request[user.SetNewPasswordRequest]) (*connect.Response[emptypb.Empty], error)
 	// トークンを元にユーザーメール取得（パスワード再設定の画面に使用）
-	GetUserMailByToken(context.Context, *connect_go.Request[user.TokenRequest]) (*connect_go.Response[user.UserMailResponse], error)
+	GetUserMailByToken(context.Context, *connect.Request[user.TokenRequest]) (*connect.Response[user.UserMailResponse], error)
 	// メールアドレスによる再招待
-	IsUnderRegister(context.Context, *connect_go.Request[user.UserMailRequest]) (*connect_go.Response[user.IsUnderRegisterResponse], error)
+	IsUnderRegister(context.Context, *connect.Request[user.UserMailRequest]) (*connect.Response[user.IsUnderRegisterResponse], error)
 	// 登録して途中離脱したユーザーの再招待
-	ResendInviteMail(context.Context, *connect_go.Request[user.UserMailRequest]) (*connect_go.Response[emptypb.Empty], error)
+	ResendInviteMail(context.Context, *connect.Request[user.UserMailRequest]) (*connect.Response[emptypb.Empty], error)
 	// 登録して途中離脱したユーザーの削除
-	DeleteUnderRegisterUser(context.Context, *connect_go.Request[user.UserMailRequest]) (*connect_go.Response[emptypb.Empty], error)
+	DeleteUnderRegisterUser(context.Context, *connect.Request[user.UserMailRequest]) (*connect.Response[emptypb.Empty], error)
 }
 
 // NewAnonAuthControllerClient constructs a client for the server.user.AnonAuthController service.
@@ -92,135 +92,145 @@ type AnonAuthControllerClient interface {
 //
 // The URL supplied here should be the base URL for the Connect or gRPC server (for example,
 // http://api.acme.com or https://acme.com/grpc).
-func NewAnonAuthControllerClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) AnonAuthControllerClient {
+func NewAnonAuthControllerClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) AnonAuthControllerClient {
 	baseURL = strings.TrimRight(baseURL, "/")
+	anonAuthControllerMethods := user.File_v1_user_AnonAuth_proto.Services().ByName("AnonAuthController").Methods()
 	return &anonAuthControllerClient{
-		register: connect_go.NewClient[user.UserRegisterRequest, emptypb.Empty](
+		register: connect.NewClient[user.UserRegisterRequest, emptypb.Empty](
 			httpClient,
 			baseURL+AnonAuthControllerRegisterProcedure,
-			opts...,
+			connect.WithSchema(anonAuthControllerMethods.ByName("Register")),
+			connect.WithClientOptions(opts...),
 		),
-		signUp: connect_go.NewClient[user.SignUpRequest, emptypb.Empty](
+		signUp: connect.NewClient[user.SignUpRequest, emptypb.Empty](
 			httpClient,
 			baseURL+AnonAuthControllerSignUpProcedure,
-			opts...,
+			connect.WithSchema(anonAuthControllerMethods.ByName("SignUp")),
+			connect.WithClientOptions(opts...),
 		),
-		signIn: connect_go.NewClient[user.UserAuthRequest, user.AnonTokenResponse](
+		signIn: connect.NewClient[user.UserAuthRequest, user.AnonTokenResponse](
 			httpClient,
 			baseURL+AnonAuthControllerSignInProcedure,
-			opts...,
+			connect.WithSchema(anonAuthControllerMethods.ByName("SignIn")),
+			connect.WithClientOptions(opts...),
 		),
-		resetPasswordMail: connect_go.NewClient[user.UserMailRequest, emptypb.Empty](
+		resetPasswordMail: connect.NewClient[user.UserMailRequest, emptypb.Empty](
 			httpClient,
 			baseURL+AnonAuthControllerResetPasswordMailProcedure,
-			opts...,
+			connect.WithSchema(anonAuthControllerMethods.ByName("ResetPasswordMail")),
+			connect.WithClientOptions(opts...),
 		),
-		setNewPassword: connect_go.NewClient[user.SetNewPasswordRequest, emptypb.Empty](
+		setNewPassword: connect.NewClient[user.SetNewPasswordRequest, emptypb.Empty](
 			httpClient,
 			baseURL+AnonAuthControllerSetNewPasswordProcedure,
-			opts...,
+			connect.WithSchema(anonAuthControllerMethods.ByName("SetNewPassword")),
+			connect.WithClientOptions(opts...),
 		),
-		getUserMailByToken: connect_go.NewClient[user.TokenRequest, user.UserMailResponse](
+		getUserMailByToken: connect.NewClient[user.TokenRequest, user.UserMailResponse](
 			httpClient,
 			baseURL+AnonAuthControllerGetUserMailByTokenProcedure,
-			opts...,
+			connect.WithSchema(anonAuthControllerMethods.ByName("GetUserMailByToken")),
+			connect.WithClientOptions(opts...),
 		),
-		isUnderRegister: connect_go.NewClient[user.UserMailRequest, user.IsUnderRegisterResponse](
+		isUnderRegister: connect.NewClient[user.UserMailRequest, user.IsUnderRegisterResponse](
 			httpClient,
 			baseURL+AnonAuthControllerIsUnderRegisterProcedure,
-			opts...,
+			connect.WithSchema(anonAuthControllerMethods.ByName("IsUnderRegister")),
+			connect.WithClientOptions(opts...),
 		),
-		resendInviteMail: connect_go.NewClient[user.UserMailRequest, emptypb.Empty](
+		resendInviteMail: connect.NewClient[user.UserMailRequest, emptypb.Empty](
 			httpClient,
 			baseURL+AnonAuthControllerResendInviteMailProcedure,
-			opts...,
+			connect.WithSchema(anonAuthControllerMethods.ByName("ResendInviteMail")),
+			connect.WithClientOptions(opts...),
 		),
-		deleteUnderRegisterUser: connect_go.NewClient[user.UserMailRequest, emptypb.Empty](
+		deleteUnderRegisterUser: connect.NewClient[user.UserMailRequest, emptypb.Empty](
 			httpClient,
 			baseURL+AnonAuthControllerDeleteUnderRegisterUserProcedure,
-			opts...,
+			connect.WithSchema(anonAuthControllerMethods.ByName("DeleteUnderRegisterUser")),
+			connect.WithClientOptions(opts...),
 		),
 	}
 }
 
 // anonAuthControllerClient implements AnonAuthControllerClient.
 type anonAuthControllerClient struct {
-	register                *connect_go.Client[user.UserRegisterRequest, emptypb.Empty]
-	signUp                  *connect_go.Client[user.SignUpRequest, emptypb.Empty]
-	signIn                  *connect_go.Client[user.UserAuthRequest, user.AnonTokenResponse]
-	resetPasswordMail       *connect_go.Client[user.UserMailRequest, emptypb.Empty]
-	setNewPassword          *connect_go.Client[user.SetNewPasswordRequest, emptypb.Empty]
-	getUserMailByToken      *connect_go.Client[user.TokenRequest, user.UserMailResponse]
-	isUnderRegister         *connect_go.Client[user.UserMailRequest, user.IsUnderRegisterResponse]
-	resendInviteMail        *connect_go.Client[user.UserMailRequest, emptypb.Empty]
-	deleteUnderRegisterUser *connect_go.Client[user.UserMailRequest, emptypb.Empty]
+	register                *connect.Client[user.UserRegisterRequest, emptypb.Empty]
+	signUp                  *connect.Client[user.SignUpRequest, emptypb.Empty]
+	signIn                  *connect.Client[user.UserAuthRequest, user.AnonTokenResponse]
+	resetPasswordMail       *connect.Client[user.UserMailRequest, emptypb.Empty]
+	setNewPassword          *connect.Client[user.SetNewPasswordRequest, emptypb.Empty]
+	getUserMailByToken      *connect.Client[user.TokenRequest, user.UserMailResponse]
+	isUnderRegister         *connect.Client[user.UserMailRequest, user.IsUnderRegisterResponse]
+	resendInviteMail        *connect.Client[user.UserMailRequest, emptypb.Empty]
+	deleteUnderRegisterUser *connect.Client[user.UserMailRequest, emptypb.Empty]
 }
 
 // Register calls server.user.AnonAuthController.Register.
-func (c *anonAuthControllerClient) Register(ctx context.Context, req *connect_go.Request[user.UserRegisterRequest]) (*connect_go.Response[emptypb.Empty], error) {
+func (c *anonAuthControllerClient) Register(ctx context.Context, req *connect.Request[user.UserRegisterRequest]) (*connect.Response[emptypb.Empty], error) {
 	return c.register.CallUnary(ctx, req)
 }
 
 // SignUp calls server.user.AnonAuthController.SignUp.
-func (c *anonAuthControllerClient) SignUp(ctx context.Context, req *connect_go.Request[user.SignUpRequest]) (*connect_go.Response[emptypb.Empty], error) {
+func (c *anonAuthControllerClient) SignUp(ctx context.Context, req *connect.Request[user.SignUpRequest]) (*connect.Response[emptypb.Empty], error) {
 	return c.signUp.CallUnary(ctx, req)
 }
 
 // SignIn calls server.user.AnonAuthController.SignIn.
-func (c *anonAuthControllerClient) SignIn(ctx context.Context, req *connect_go.Request[user.UserAuthRequest]) (*connect_go.Response[user.AnonTokenResponse], error) {
+func (c *anonAuthControllerClient) SignIn(ctx context.Context, req *connect.Request[user.UserAuthRequest]) (*connect.Response[user.AnonTokenResponse], error) {
 	return c.signIn.CallUnary(ctx, req)
 }
 
 // ResetPasswordMail calls server.user.AnonAuthController.ResetPasswordMail.
-func (c *anonAuthControllerClient) ResetPasswordMail(ctx context.Context, req *connect_go.Request[user.UserMailRequest]) (*connect_go.Response[emptypb.Empty], error) {
+func (c *anonAuthControllerClient) ResetPasswordMail(ctx context.Context, req *connect.Request[user.UserMailRequest]) (*connect.Response[emptypb.Empty], error) {
 	return c.resetPasswordMail.CallUnary(ctx, req)
 }
 
 // SetNewPassword calls server.user.AnonAuthController.SetNewPassword.
-func (c *anonAuthControllerClient) SetNewPassword(ctx context.Context, req *connect_go.Request[user.SetNewPasswordRequest]) (*connect_go.Response[emptypb.Empty], error) {
+func (c *anonAuthControllerClient) SetNewPassword(ctx context.Context, req *connect.Request[user.SetNewPasswordRequest]) (*connect.Response[emptypb.Empty], error) {
 	return c.setNewPassword.CallUnary(ctx, req)
 }
 
 // GetUserMailByToken calls server.user.AnonAuthController.GetUserMailByToken.
-func (c *anonAuthControllerClient) GetUserMailByToken(ctx context.Context, req *connect_go.Request[user.TokenRequest]) (*connect_go.Response[user.UserMailResponse], error) {
+func (c *anonAuthControllerClient) GetUserMailByToken(ctx context.Context, req *connect.Request[user.TokenRequest]) (*connect.Response[user.UserMailResponse], error) {
 	return c.getUserMailByToken.CallUnary(ctx, req)
 }
 
 // IsUnderRegister calls server.user.AnonAuthController.IsUnderRegister.
-func (c *anonAuthControllerClient) IsUnderRegister(ctx context.Context, req *connect_go.Request[user.UserMailRequest]) (*connect_go.Response[user.IsUnderRegisterResponse], error) {
+func (c *anonAuthControllerClient) IsUnderRegister(ctx context.Context, req *connect.Request[user.UserMailRequest]) (*connect.Response[user.IsUnderRegisterResponse], error) {
 	return c.isUnderRegister.CallUnary(ctx, req)
 }
 
 // ResendInviteMail calls server.user.AnonAuthController.ResendInviteMail.
-func (c *anonAuthControllerClient) ResendInviteMail(ctx context.Context, req *connect_go.Request[user.UserMailRequest]) (*connect_go.Response[emptypb.Empty], error) {
+func (c *anonAuthControllerClient) ResendInviteMail(ctx context.Context, req *connect.Request[user.UserMailRequest]) (*connect.Response[emptypb.Empty], error) {
 	return c.resendInviteMail.CallUnary(ctx, req)
 }
 
 // DeleteUnderRegisterUser calls server.user.AnonAuthController.DeleteUnderRegisterUser.
-func (c *anonAuthControllerClient) DeleteUnderRegisterUser(ctx context.Context, req *connect_go.Request[user.UserMailRequest]) (*connect_go.Response[emptypb.Empty], error) {
+func (c *anonAuthControllerClient) DeleteUnderRegisterUser(ctx context.Context, req *connect.Request[user.UserMailRequest]) (*connect.Response[emptypb.Empty], error) {
 	return c.deleteUnderRegisterUser.CallUnary(ctx, req)
 }
 
 // AnonAuthControllerHandler is an implementation of the server.user.AnonAuthController service.
 type AnonAuthControllerHandler interface {
 	// 初回ユーザー登録
-	Register(context.Context, *connect_go.Request[user.UserRegisterRequest]) (*connect_go.Response[emptypb.Empty], error)
+	Register(context.Context, *connect.Request[user.UserRegisterRequest]) (*connect.Response[emptypb.Empty], error)
 	// ユーザー登録後にメールアドレスの確認が完了し、パスワードを設定する
-	SignUp(context.Context, *connect_go.Request[user.SignUpRequest]) (*connect_go.Response[emptypb.Empty], error)
+	SignUp(context.Context, *connect.Request[user.SignUpRequest]) (*connect.Response[emptypb.Empty], error)
 	// ログイン
-	SignIn(context.Context, *connect_go.Request[user.UserAuthRequest]) (*connect_go.Response[user.AnonTokenResponse], error)
+	SignIn(context.Context, *connect.Request[user.UserAuthRequest]) (*connect.Response[user.AnonTokenResponse], error)
 	// パスワードリセット用メール送信
-	ResetPasswordMail(context.Context, *connect_go.Request[user.UserMailRequest]) (*connect_go.Response[emptypb.Empty], error)
+	ResetPasswordMail(context.Context, *connect.Request[user.UserMailRequest]) (*connect.Response[emptypb.Empty], error)
 	// パスワードリセット(メールリダイレクトからのトークンと共に設定)
-	SetNewPassword(context.Context, *connect_go.Request[user.SetNewPasswordRequest]) (*connect_go.Response[emptypb.Empty], error)
+	SetNewPassword(context.Context, *connect.Request[user.SetNewPasswordRequest]) (*connect.Response[emptypb.Empty], error)
 	// トークンを元にユーザーメール取得（パスワード再設定の画面に使用）
-	GetUserMailByToken(context.Context, *connect_go.Request[user.TokenRequest]) (*connect_go.Response[user.UserMailResponse], error)
+	GetUserMailByToken(context.Context, *connect.Request[user.TokenRequest]) (*connect.Response[user.UserMailResponse], error)
 	// メールアドレスによる再招待
-	IsUnderRegister(context.Context, *connect_go.Request[user.UserMailRequest]) (*connect_go.Response[user.IsUnderRegisterResponse], error)
+	IsUnderRegister(context.Context, *connect.Request[user.UserMailRequest]) (*connect.Response[user.IsUnderRegisterResponse], error)
 	// 登録して途中離脱したユーザーの再招待
-	ResendInviteMail(context.Context, *connect_go.Request[user.UserMailRequest]) (*connect_go.Response[emptypb.Empty], error)
+	ResendInviteMail(context.Context, *connect.Request[user.UserMailRequest]) (*connect.Response[emptypb.Empty], error)
 	// 登録して途中離脱したユーザーの削除
-	DeleteUnderRegisterUser(context.Context, *connect_go.Request[user.UserMailRequest]) (*connect_go.Response[emptypb.Empty], error)
+	DeleteUnderRegisterUser(context.Context, *connect.Request[user.UserMailRequest]) (*connect.Response[emptypb.Empty], error)
 }
 
 // NewAnonAuthControllerHandler builds an HTTP handler from the service implementation. It returns
@@ -228,51 +238,61 @@ type AnonAuthControllerHandler interface {
 //
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
-func NewAnonAuthControllerHandler(svc AnonAuthControllerHandler, opts ...connect_go.HandlerOption) (string, http.Handler) {
-	anonAuthControllerRegisterHandler := connect_go.NewUnaryHandler(
+func NewAnonAuthControllerHandler(svc AnonAuthControllerHandler, opts ...connect.HandlerOption) (string, http.Handler) {
+	anonAuthControllerMethods := user.File_v1_user_AnonAuth_proto.Services().ByName("AnonAuthController").Methods()
+	anonAuthControllerRegisterHandler := connect.NewUnaryHandler(
 		AnonAuthControllerRegisterProcedure,
 		svc.Register,
-		opts...,
+		connect.WithSchema(anonAuthControllerMethods.ByName("Register")),
+		connect.WithHandlerOptions(opts...),
 	)
-	anonAuthControllerSignUpHandler := connect_go.NewUnaryHandler(
+	anonAuthControllerSignUpHandler := connect.NewUnaryHandler(
 		AnonAuthControllerSignUpProcedure,
 		svc.SignUp,
-		opts...,
+		connect.WithSchema(anonAuthControllerMethods.ByName("SignUp")),
+		connect.WithHandlerOptions(opts...),
 	)
-	anonAuthControllerSignInHandler := connect_go.NewUnaryHandler(
+	anonAuthControllerSignInHandler := connect.NewUnaryHandler(
 		AnonAuthControllerSignInProcedure,
 		svc.SignIn,
-		opts...,
+		connect.WithSchema(anonAuthControllerMethods.ByName("SignIn")),
+		connect.WithHandlerOptions(opts...),
 	)
-	anonAuthControllerResetPasswordMailHandler := connect_go.NewUnaryHandler(
+	anonAuthControllerResetPasswordMailHandler := connect.NewUnaryHandler(
 		AnonAuthControllerResetPasswordMailProcedure,
 		svc.ResetPasswordMail,
-		opts...,
+		connect.WithSchema(anonAuthControllerMethods.ByName("ResetPasswordMail")),
+		connect.WithHandlerOptions(opts...),
 	)
-	anonAuthControllerSetNewPasswordHandler := connect_go.NewUnaryHandler(
+	anonAuthControllerSetNewPasswordHandler := connect.NewUnaryHandler(
 		AnonAuthControllerSetNewPasswordProcedure,
 		svc.SetNewPassword,
-		opts...,
+		connect.WithSchema(anonAuthControllerMethods.ByName("SetNewPassword")),
+		connect.WithHandlerOptions(opts...),
 	)
-	anonAuthControllerGetUserMailByTokenHandler := connect_go.NewUnaryHandler(
+	anonAuthControllerGetUserMailByTokenHandler := connect.NewUnaryHandler(
 		AnonAuthControllerGetUserMailByTokenProcedure,
 		svc.GetUserMailByToken,
-		opts...,
+		connect.WithSchema(anonAuthControllerMethods.ByName("GetUserMailByToken")),
+		connect.WithHandlerOptions(opts...),
 	)
-	anonAuthControllerIsUnderRegisterHandler := connect_go.NewUnaryHandler(
+	anonAuthControllerIsUnderRegisterHandler := connect.NewUnaryHandler(
 		AnonAuthControllerIsUnderRegisterProcedure,
 		svc.IsUnderRegister,
-		opts...,
+		connect.WithSchema(anonAuthControllerMethods.ByName("IsUnderRegister")),
+		connect.WithHandlerOptions(opts...),
 	)
-	anonAuthControllerResendInviteMailHandler := connect_go.NewUnaryHandler(
+	anonAuthControllerResendInviteMailHandler := connect.NewUnaryHandler(
 		AnonAuthControllerResendInviteMailProcedure,
 		svc.ResendInviteMail,
-		opts...,
+		connect.WithSchema(anonAuthControllerMethods.ByName("ResendInviteMail")),
+		connect.WithHandlerOptions(opts...),
 	)
-	anonAuthControllerDeleteUnderRegisterUserHandler := connect_go.NewUnaryHandler(
+	anonAuthControllerDeleteUnderRegisterUserHandler := connect.NewUnaryHandler(
 		AnonAuthControllerDeleteUnderRegisterUserProcedure,
 		svc.DeleteUnderRegisterUser,
-		opts...,
+		connect.WithSchema(anonAuthControllerMethods.ByName("DeleteUnderRegisterUser")),
+		connect.WithHandlerOptions(opts...),
 	)
 	return "/server.user.AnonAuthController/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
@@ -303,38 +323,38 @@ func NewAnonAuthControllerHandler(svc AnonAuthControllerHandler, opts ...connect
 // UnimplementedAnonAuthControllerHandler returns CodeUnimplemented from all methods.
 type UnimplementedAnonAuthControllerHandler struct{}
 
-func (UnimplementedAnonAuthControllerHandler) Register(context.Context, *connect_go.Request[user.UserRegisterRequest]) (*connect_go.Response[emptypb.Empty], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.AnonAuthController.Register is not implemented"))
+func (UnimplementedAnonAuthControllerHandler) Register(context.Context, *connect.Request[user.UserRegisterRequest]) (*connect.Response[emptypb.Empty], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.user.AnonAuthController.Register is not implemented"))
 }
 
-func (UnimplementedAnonAuthControllerHandler) SignUp(context.Context, *connect_go.Request[user.SignUpRequest]) (*connect_go.Response[emptypb.Empty], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.AnonAuthController.SignUp is not implemented"))
+func (UnimplementedAnonAuthControllerHandler) SignUp(context.Context, *connect.Request[user.SignUpRequest]) (*connect.Response[emptypb.Empty], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.user.AnonAuthController.SignUp is not implemented"))
 }
 
-func (UnimplementedAnonAuthControllerHandler) SignIn(context.Context, *connect_go.Request[user.UserAuthRequest]) (*connect_go.Response[user.AnonTokenResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.AnonAuthController.SignIn is not implemented"))
+func (UnimplementedAnonAuthControllerHandler) SignIn(context.Context, *connect.Request[user.UserAuthRequest]) (*connect.Response[user.AnonTokenResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.user.AnonAuthController.SignIn is not implemented"))
 }
 
-func (UnimplementedAnonAuthControllerHandler) ResetPasswordMail(context.Context, *connect_go.Request[user.UserMailRequest]) (*connect_go.Response[emptypb.Empty], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.AnonAuthController.ResetPasswordMail is not implemented"))
+func (UnimplementedAnonAuthControllerHandler) ResetPasswordMail(context.Context, *connect.Request[user.UserMailRequest]) (*connect.Response[emptypb.Empty], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.user.AnonAuthController.ResetPasswordMail is not implemented"))
 }
 
-func (UnimplementedAnonAuthControllerHandler) SetNewPassword(context.Context, *connect_go.Request[user.SetNewPasswordRequest]) (*connect_go.Response[emptypb.Empty], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.AnonAuthController.SetNewPassword is not implemented"))
+func (UnimplementedAnonAuthControllerHandler) SetNewPassword(context.Context, *connect.Request[user.SetNewPasswordRequest]) (*connect.Response[emptypb.Empty], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.user.AnonAuthController.SetNewPassword is not implemented"))
 }
 
-func (UnimplementedAnonAuthControllerHandler) GetUserMailByToken(context.Context, *connect_go.Request[user.TokenRequest]) (*connect_go.Response[user.UserMailResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.AnonAuthController.GetUserMailByToken is not implemented"))
+func (UnimplementedAnonAuthControllerHandler) GetUserMailByToken(context.Context, *connect.Request[user.TokenRequest]) (*connect.Response[user.UserMailResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.user.AnonAuthController.GetUserMailByToken is not implemented"))
 }
 
-func (UnimplementedAnonAuthControllerHandler) IsUnderRegister(context.Context, *connect_go.Request[user.UserMailRequest]) (*connect_go.Response[user.IsUnderRegisterResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.AnonAuthController.IsUnderRegister is not implemented"))
+func (UnimplementedAnonAuthControllerHandler) IsUnderRegister(context.Context, *connect.Request[user.UserMailRequest]) (*connect.Response[user.IsUnderRegisterResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.user.AnonAuthController.IsUnderRegister is not implemented"))
 }
 
-func (UnimplementedAnonAuthControllerHandler) ResendInviteMail(context.Context, *connect_go.Request[user.UserMailRequest]) (*connect_go.Response[emptypb.Empty], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.AnonAuthController.ResendInviteMail is not implemented"))
+func (UnimplementedAnonAuthControllerHandler) ResendInviteMail(context.Context, *connect.Request[user.UserMailRequest]) (*connect.Response[emptypb.Empty], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.user.AnonAuthController.ResendInviteMail is not implemented"))
 }
 
-func (UnimplementedAnonAuthControllerHandler) DeleteUnderRegisterUser(context.Context, *connect_go.Request[user.UserMailRequest]) (*connect_go.Response[emptypb.Empty], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.AnonAuthController.DeleteUnderRegisterUser is not implemented"))
+func (UnimplementedAnonAuthControllerHandler) DeleteUnderRegisterUser(context.Context, *connect.Request[user.UserMailRequest]) (*connect.Response[emptypb.Empty], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.user.AnonAuthController.DeleteUnderRegisterUser is not implemented"))
 }

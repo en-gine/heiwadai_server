@@ -5,9 +5,9 @@
 package userconnect
 
 import (
+	connect "connectrpc.com/connect"
 	context "context"
 	errors "errors"
-	connect_go "connectrpc.com/connect"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	http "net/http"
 	shared "server/api/v1/shared"
@@ -20,7 +20,7 @@ import (
 // generated with a version of connect newer than the one compiled into your binary. You can fix the
 // problem by either regenerating this code with an older version of connect or updating the connect
 // version compiled into your binary.
-const _ = connect_go.IsAtLeastVersion0_1_0
+const _ = connect.IsAtLeastVersion1_13_0
 
 const (
 	// StoreControllerName is the fully-qualified name of the StoreController service.
@@ -50,13 +50,13 @@ const (
 // StoreControllerClient is a client for the server.user.StoreController service.
 type StoreControllerClient interface {
 	// 店舗情報の詳細を取得
-	GetByID(context.Context, *connect_go.Request[user.StoreIDRequest]) (*connect_go.Response[shared.Store], error)
+	GetByID(context.Context, *connect.Request[user.StoreIDRequest]) (*connect.Response[shared.Store], error)
 	// 店舗情報の一覧を取得
-	GetAll(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[shared.Stores], error)
+	GetAll(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[shared.Stores], error)
 	// ホテル（宿泊可能な店舗）の一覧を取得
-	GetStayables(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[shared.StayableStores], error)
+	GetStayables(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[shared.StayableStores], error)
 	// ホテル（宿泊可能な店舗）の詳細を取得
-	GetStayableByID(context.Context, *connect_go.Request[user.StoreIDRequest]) (*connect_go.Response[shared.StayableStore], error)
+	GetStayableByID(context.Context, *connect.Request[user.StoreIDRequest]) (*connect.Response[shared.StayableStore], error)
 }
 
 // NewStoreControllerClient constructs a client for the server.user.StoreController service. By
@@ -66,70 +66,75 @@ type StoreControllerClient interface {
 //
 // The URL supplied here should be the base URL for the Connect or gRPC server (for example,
 // http://api.acme.com or https://acme.com/grpc).
-func NewStoreControllerClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) StoreControllerClient {
+func NewStoreControllerClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) StoreControllerClient {
 	baseURL = strings.TrimRight(baseURL, "/")
+	storeControllerMethods := user.File_v1_user_Store_proto.Services().ByName("StoreController").Methods()
 	return &storeControllerClient{
-		getByID: connect_go.NewClient[user.StoreIDRequest, shared.Store](
+		getByID: connect.NewClient[user.StoreIDRequest, shared.Store](
 			httpClient,
 			baseURL+StoreControllerGetByIDProcedure,
-			opts...,
+			connect.WithSchema(storeControllerMethods.ByName("GetByID")),
+			connect.WithClientOptions(opts...),
 		),
-		getAll: connect_go.NewClient[emptypb.Empty, shared.Stores](
+		getAll: connect.NewClient[emptypb.Empty, shared.Stores](
 			httpClient,
 			baseURL+StoreControllerGetAllProcedure,
-			opts...,
+			connect.WithSchema(storeControllerMethods.ByName("GetAll")),
+			connect.WithClientOptions(opts...),
 		),
-		getStayables: connect_go.NewClient[emptypb.Empty, shared.StayableStores](
+		getStayables: connect.NewClient[emptypb.Empty, shared.StayableStores](
 			httpClient,
 			baseURL+StoreControllerGetStayablesProcedure,
-			opts...,
+			connect.WithSchema(storeControllerMethods.ByName("GetStayables")),
+			connect.WithClientOptions(opts...),
 		),
-		getStayableByID: connect_go.NewClient[user.StoreIDRequest, shared.StayableStore](
+		getStayableByID: connect.NewClient[user.StoreIDRequest, shared.StayableStore](
 			httpClient,
 			baseURL+StoreControllerGetStayableByIDProcedure,
-			opts...,
+			connect.WithSchema(storeControllerMethods.ByName("GetStayableByID")),
+			connect.WithClientOptions(opts...),
 		),
 	}
 }
 
 // storeControllerClient implements StoreControllerClient.
 type storeControllerClient struct {
-	getByID         *connect_go.Client[user.StoreIDRequest, shared.Store]
-	getAll          *connect_go.Client[emptypb.Empty, shared.Stores]
-	getStayables    *connect_go.Client[emptypb.Empty, shared.StayableStores]
-	getStayableByID *connect_go.Client[user.StoreIDRequest, shared.StayableStore]
+	getByID         *connect.Client[user.StoreIDRequest, shared.Store]
+	getAll          *connect.Client[emptypb.Empty, shared.Stores]
+	getStayables    *connect.Client[emptypb.Empty, shared.StayableStores]
+	getStayableByID *connect.Client[user.StoreIDRequest, shared.StayableStore]
 }
 
 // GetByID calls server.user.StoreController.GetByID.
-func (c *storeControllerClient) GetByID(ctx context.Context, req *connect_go.Request[user.StoreIDRequest]) (*connect_go.Response[shared.Store], error) {
+func (c *storeControllerClient) GetByID(ctx context.Context, req *connect.Request[user.StoreIDRequest]) (*connect.Response[shared.Store], error) {
 	return c.getByID.CallUnary(ctx, req)
 }
 
 // GetAll calls server.user.StoreController.GetAll.
-func (c *storeControllerClient) GetAll(ctx context.Context, req *connect_go.Request[emptypb.Empty]) (*connect_go.Response[shared.Stores], error) {
+func (c *storeControllerClient) GetAll(ctx context.Context, req *connect.Request[emptypb.Empty]) (*connect.Response[shared.Stores], error) {
 	return c.getAll.CallUnary(ctx, req)
 }
 
 // GetStayables calls server.user.StoreController.GetStayables.
-func (c *storeControllerClient) GetStayables(ctx context.Context, req *connect_go.Request[emptypb.Empty]) (*connect_go.Response[shared.StayableStores], error) {
+func (c *storeControllerClient) GetStayables(ctx context.Context, req *connect.Request[emptypb.Empty]) (*connect.Response[shared.StayableStores], error) {
 	return c.getStayables.CallUnary(ctx, req)
 }
 
 // GetStayableByID calls server.user.StoreController.GetStayableByID.
-func (c *storeControllerClient) GetStayableByID(ctx context.Context, req *connect_go.Request[user.StoreIDRequest]) (*connect_go.Response[shared.StayableStore], error) {
+func (c *storeControllerClient) GetStayableByID(ctx context.Context, req *connect.Request[user.StoreIDRequest]) (*connect.Response[shared.StayableStore], error) {
 	return c.getStayableByID.CallUnary(ctx, req)
 }
 
 // StoreControllerHandler is an implementation of the server.user.StoreController service.
 type StoreControllerHandler interface {
 	// 店舗情報の詳細を取得
-	GetByID(context.Context, *connect_go.Request[user.StoreIDRequest]) (*connect_go.Response[shared.Store], error)
+	GetByID(context.Context, *connect.Request[user.StoreIDRequest]) (*connect.Response[shared.Store], error)
 	// 店舗情報の一覧を取得
-	GetAll(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[shared.Stores], error)
+	GetAll(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[shared.Stores], error)
 	// ホテル（宿泊可能な店舗）の一覧を取得
-	GetStayables(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[shared.StayableStores], error)
+	GetStayables(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[shared.StayableStores], error)
 	// ホテル（宿泊可能な店舗）の詳細を取得
-	GetStayableByID(context.Context, *connect_go.Request[user.StoreIDRequest]) (*connect_go.Response[shared.StayableStore], error)
+	GetStayableByID(context.Context, *connect.Request[user.StoreIDRequest]) (*connect.Response[shared.StayableStore], error)
 }
 
 // NewStoreControllerHandler builds an HTTP handler from the service implementation. It returns the
@@ -137,26 +142,31 @@ type StoreControllerHandler interface {
 //
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
-func NewStoreControllerHandler(svc StoreControllerHandler, opts ...connect_go.HandlerOption) (string, http.Handler) {
-	storeControllerGetByIDHandler := connect_go.NewUnaryHandler(
+func NewStoreControllerHandler(svc StoreControllerHandler, opts ...connect.HandlerOption) (string, http.Handler) {
+	storeControllerMethods := user.File_v1_user_Store_proto.Services().ByName("StoreController").Methods()
+	storeControllerGetByIDHandler := connect.NewUnaryHandler(
 		StoreControllerGetByIDProcedure,
 		svc.GetByID,
-		opts...,
+		connect.WithSchema(storeControllerMethods.ByName("GetByID")),
+		connect.WithHandlerOptions(opts...),
 	)
-	storeControllerGetAllHandler := connect_go.NewUnaryHandler(
+	storeControllerGetAllHandler := connect.NewUnaryHandler(
 		StoreControllerGetAllProcedure,
 		svc.GetAll,
-		opts...,
+		connect.WithSchema(storeControllerMethods.ByName("GetAll")),
+		connect.WithHandlerOptions(opts...),
 	)
-	storeControllerGetStayablesHandler := connect_go.NewUnaryHandler(
+	storeControllerGetStayablesHandler := connect.NewUnaryHandler(
 		StoreControllerGetStayablesProcedure,
 		svc.GetStayables,
-		opts...,
+		connect.WithSchema(storeControllerMethods.ByName("GetStayables")),
+		connect.WithHandlerOptions(opts...),
 	)
-	storeControllerGetStayableByIDHandler := connect_go.NewUnaryHandler(
+	storeControllerGetStayableByIDHandler := connect.NewUnaryHandler(
 		StoreControllerGetStayableByIDProcedure,
 		svc.GetStayableByID,
-		opts...,
+		connect.WithSchema(storeControllerMethods.ByName("GetStayableByID")),
+		connect.WithHandlerOptions(opts...),
 	)
 	return "/server.user.StoreController/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
@@ -177,18 +187,18 @@ func NewStoreControllerHandler(svc StoreControllerHandler, opts ...connect_go.Ha
 // UnimplementedStoreControllerHandler returns CodeUnimplemented from all methods.
 type UnimplementedStoreControllerHandler struct{}
 
-func (UnimplementedStoreControllerHandler) GetByID(context.Context, *connect_go.Request[user.StoreIDRequest]) (*connect_go.Response[shared.Store], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.StoreController.GetByID is not implemented"))
+func (UnimplementedStoreControllerHandler) GetByID(context.Context, *connect.Request[user.StoreIDRequest]) (*connect.Response[shared.Store], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.user.StoreController.GetByID is not implemented"))
 }
 
-func (UnimplementedStoreControllerHandler) GetAll(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[shared.Stores], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.StoreController.GetAll is not implemented"))
+func (UnimplementedStoreControllerHandler) GetAll(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[shared.Stores], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.user.StoreController.GetAll is not implemented"))
 }
 
-func (UnimplementedStoreControllerHandler) GetStayables(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[shared.StayableStores], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.StoreController.GetStayables is not implemented"))
+func (UnimplementedStoreControllerHandler) GetStayables(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[shared.StayableStores], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.user.StoreController.GetStayables is not implemented"))
 }
 
-func (UnimplementedStoreControllerHandler) GetStayableByID(context.Context, *connect_go.Request[user.StoreIDRequest]) (*connect_go.Response[shared.StayableStore], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.StoreController.GetStayableByID is not implemented"))
+func (UnimplementedStoreControllerHandler) GetStayableByID(context.Context, *connect.Request[user.StoreIDRequest]) (*connect.Response[shared.StayableStore], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.user.StoreController.GetStayableByID is not implemented"))
 }

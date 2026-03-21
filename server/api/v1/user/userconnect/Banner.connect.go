@@ -5,9 +5,9 @@
 package userconnect
 
 import (
+	connect "connectrpc.com/connect"
 	context "context"
 	errors "errors"
-	connect_go "connectrpc.com/connect"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	http "net/http"
 	user "server/api/v1/user"
@@ -19,7 +19,7 @@ import (
 // generated with a version of connect newer than the one compiled into your binary. You can fix the
 // problem by either regenerating this code with an older version of connect or updating the connect
 // version compiled into your binary.
-const _ = connect_go.IsAtLeastVersion0_1_0
+const _ = connect.IsAtLeastVersion1_13_0
 
 const (
 	// BannerControllerName is the fully-qualified name of the BannerController service.
@@ -42,7 +42,7 @@ const (
 // BannerControllerClient is a client for the server.user.BannerController service.
 type BannerControllerClient interface {
 	// TOPバナーの取得 URLと画像URLを配列で返す
-	GetBanner(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[user.BannerResponse], error)
+	GetBanner(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[user.BannerResponse], error)
 }
 
 // NewBannerControllerClient constructs a client for the server.user.BannerController service. By
@@ -52,31 +52,33 @@ type BannerControllerClient interface {
 //
 // The URL supplied here should be the base URL for the Connect or gRPC server (for example,
 // http://api.acme.com or https://acme.com/grpc).
-func NewBannerControllerClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) BannerControllerClient {
+func NewBannerControllerClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) BannerControllerClient {
 	baseURL = strings.TrimRight(baseURL, "/")
+	bannerControllerMethods := user.File_v1_user_Banner_proto.Services().ByName("BannerController").Methods()
 	return &bannerControllerClient{
-		getBanner: connect_go.NewClient[emptypb.Empty, user.BannerResponse](
+		getBanner: connect.NewClient[emptypb.Empty, user.BannerResponse](
 			httpClient,
 			baseURL+BannerControllerGetBannerProcedure,
-			opts...,
+			connect.WithSchema(bannerControllerMethods.ByName("GetBanner")),
+			connect.WithClientOptions(opts...),
 		),
 	}
 }
 
 // bannerControllerClient implements BannerControllerClient.
 type bannerControllerClient struct {
-	getBanner *connect_go.Client[emptypb.Empty, user.BannerResponse]
+	getBanner *connect.Client[emptypb.Empty, user.BannerResponse]
 }
 
 // GetBanner calls server.user.BannerController.GetBanner.
-func (c *bannerControllerClient) GetBanner(ctx context.Context, req *connect_go.Request[emptypb.Empty]) (*connect_go.Response[user.BannerResponse], error) {
+func (c *bannerControllerClient) GetBanner(ctx context.Context, req *connect.Request[emptypb.Empty]) (*connect.Response[user.BannerResponse], error) {
 	return c.getBanner.CallUnary(ctx, req)
 }
 
 // BannerControllerHandler is an implementation of the server.user.BannerController service.
 type BannerControllerHandler interface {
 	// TOPバナーの取得 URLと画像URLを配列で返す
-	GetBanner(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[user.BannerResponse], error)
+	GetBanner(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[user.BannerResponse], error)
 }
 
 // NewBannerControllerHandler builds an HTTP handler from the service implementation. It returns the
@@ -84,11 +86,13 @@ type BannerControllerHandler interface {
 //
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
-func NewBannerControllerHandler(svc BannerControllerHandler, opts ...connect_go.HandlerOption) (string, http.Handler) {
-	bannerControllerGetBannerHandler := connect_go.NewUnaryHandler(
+func NewBannerControllerHandler(svc BannerControllerHandler, opts ...connect.HandlerOption) (string, http.Handler) {
+	bannerControllerMethods := user.File_v1_user_Banner_proto.Services().ByName("BannerController").Methods()
+	bannerControllerGetBannerHandler := connect.NewUnaryHandler(
 		BannerControllerGetBannerProcedure,
 		svc.GetBanner,
-		opts...,
+		connect.WithSchema(bannerControllerMethods.ByName("GetBanner")),
+		connect.WithHandlerOptions(opts...),
 	)
 	return "/server.user.BannerController/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
@@ -103,6 +107,6 @@ func NewBannerControllerHandler(svc BannerControllerHandler, opts ...connect_go.
 // UnimplementedBannerControllerHandler returns CodeUnimplemented from all methods.
 type UnimplementedBannerControllerHandler struct{}
 
-func (UnimplementedBannerControllerHandler) GetBanner(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[user.BannerResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.BannerController.GetBanner is not implemented"))
+func (UnimplementedBannerControllerHandler) GetBanner(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[user.BannerResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.user.BannerController.GetBanner is not implemented"))
 }

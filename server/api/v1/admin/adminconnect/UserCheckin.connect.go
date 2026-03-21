@@ -5,9 +5,9 @@
 package adminconnect
 
 import (
+	connect "connectrpc.com/connect"
 	context "context"
 	errors "errors"
-	connect_go "connectrpc.com/connect"
 	http "net/http"
 	admin "server/api/v1/admin"
 	strings "strings"
@@ -18,7 +18,7 @@ import (
 // generated with a version of connect newer than the one compiled into your binary. You can fix the
 // problem by either regenerating this code with an older version of connect or updating the connect
 // version compiled into your binary.
-const _ = connect_go.IsAtLeastVersion0_1_0
+const _ = connect.IsAtLeastVersion1_13_0
 
 const (
 	// UserCheckinControllerName is the fully-qualified name of the UserCheckinController service.
@@ -43,8 +43,8 @@ const (
 
 // UserCheckinControllerClient is a client for the server.admin.UserCheckinController service.
 type UserCheckinControllerClient interface {
-	GetAllRecent(context.Context, *connect_go.Request[admin.GetRecentAllCheckinRequest]) (*connect_go.Response[admin.CheckinsResponse], error)
-	GetUserLog(context.Context, *connect_go.Request[admin.UserCheckinRequest]) (*connect_go.Response[admin.CheckinsResponse], error)
+	GetAllRecent(context.Context, *connect.Request[admin.GetRecentAllCheckinRequest]) (*connect.Response[admin.CheckinsResponse], error)
+	GetUserLog(context.Context, *connect.Request[admin.UserCheckinRequest]) (*connect.Response[admin.CheckinsResponse], error)
 }
 
 // NewUserCheckinControllerClient constructs a client for the server.admin.UserCheckinController
@@ -54,43 +54,46 @@ type UserCheckinControllerClient interface {
 //
 // The URL supplied here should be the base URL for the Connect or gRPC server (for example,
 // http://api.acme.com or https://acme.com/grpc).
-func NewUserCheckinControllerClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) UserCheckinControllerClient {
+func NewUserCheckinControllerClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) UserCheckinControllerClient {
 	baseURL = strings.TrimRight(baseURL, "/")
+	userCheckinControllerMethods := admin.File_v1_admin_UserCheckin_proto.Services().ByName("UserCheckinController").Methods()
 	return &userCheckinControllerClient{
-		getAllRecent: connect_go.NewClient[admin.GetRecentAllCheckinRequest, admin.CheckinsResponse](
+		getAllRecent: connect.NewClient[admin.GetRecentAllCheckinRequest, admin.CheckinsResponse](
 			httpClient,
 			baseURL+UserCheckinControllerGetAllRecentProcedure,
-			opts...,
+			connect.WithSchema(userCheckinControllerMethods.ByName("GetAllRecent")),
+			connect.WithClientOptions(opts...),
 		),
-		getUserLog: connect_go.NewClient[admin.UserCheckinRequest, admin.CheckinsResponse](
+		getUserLog: connect.NewClient[admin.UserCheckinRequest, admin.CheckinsResponse](
 			httpClient,
 			baseURL+UserCheckinControllerGetUserLogProcedure,
-			opts...,
+			connect.WithSchema(userCheckinControllerMethods.ByName("GetUserLog")),
+			connect.WithClientOptions(opts...),
 		),
 	}
 }
 
 // userCheckinControllerClient implements UserCheckinControllerClient.
 type userCheckinControllerClient struct {
-	getAllRecent *connect_go.Client[admin.GetRecentAllCheckinRequest, admin.CheckinsResponse]
-	getUserLog   *connect_go.Client[admin.UserCheckinRequest, admin.CheckinsResponse]
+	getAllRecent *connect.Client[admin.GetRecentAllCheckinRequest, admin.CheckinsResponse]
+	getUserLog   *connect.Client[admin.UserCheckinRequest, admin.CheckinsResponse]
 }
 
 // GetAllRecent calls server.admin.UserCheckinController.GetAllRecent.
-func (c *userCheckinControllerClient) GetAllRecent(ctx context.Context, req *connect_go.Request[admin.GetRecentAllCheckinRequest]) (*connect_go.Response[admin.CheckinsResponse], error) {
+func (c *userCheckinControllerClient) GetAllRecent(ctx context.Context, req *connect.Request[admin.GetRecentAllCheckinRequest]) (*connect.Response[admin.CheckinsResponse], error) {
 	return c.getAllRecent.CallUnary(ctx, req)
 }
 
 // GetUserLog calls server.admin.UserCheckinController.GetUserLog.
-func (c *userCheckinControllerClient) GetUserLog(ctx context.Context, req *connect_go.Request[admin.UserCheckinRequest]) (*connect_go.Response[admin.CheckinsResponse], error) {
+func (c *userCheckinControllerClient) GetUserLog(ctx context.Context, req *connect.Request[admin.UserCheckinRequest]) (*connect.Response[admin.CheckinsResponse], error) {
 	return c.getUserLog.CallUnary(ctx, req)
 }
 
 // UserCheckinControllerHandler is an implementation of the server.admin.UserCheckinController
 // service.
 type UserCheckinControllerHandler interface {
-	GetAllRecent(context.Context, *connect_go.Request[admin.GetRecentAllCheckinRequest]) (*connect_go.Response[admin.CheckinsResponse], error)
-	GetUserLog(context.Context, *connect_go.Request[admin.UserCheckinRequest]) (*connect_go.Response[admin.CheckinsResponse], error)
+	GetAllRecent(context.Context, *connect.Request[admin.GetRecentAllCheckinRequest]) (*connect.Response[admin.CheckinsResponse], error)
+	GetUserLog(context.Context, *connect.Request[admin.UserCheckinRequest]) (*connect.Response[admin.CheckinsResponse], error)
 }
 
 // NewUserCheckinControllerHandler builds an HTTP handler from the service implementation. It
@@ -98,16 +101,19 @@ type UserCheckinControllerHandler interface {
 //
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
-func NewUserCheckinControllerHandler(svc UserCheckinControllerHandler, opts ...connect_go.HandlerOption) (string, http.Handler) {
-	userCheckinControllerGetAllRecentHandler := connect_go.NewUnaryHandler(
+func NewUserCheckinControllerHandler(svc UserCheckinControllerHandler, opts ...connect.HandlerOption) (string, http.Handler) {
+	userCheckinControllerMethods := admin.File_v1_admin_UserCheckin_proto.Services().ByName("UserCheckinController").Methods()
+	userCheckinControllerGetAllRecentHandler := connect.NewUnaryHandler(
 		UserCheckinControllerGetAllRecentProcedure,
 		svc.GetAllRecent,
-		opts...,
+		connect.WithSchema(userCheckinControllerMethods.ByName("GetAllRecent")),
+		connect.WithHandlerOptions(opts...),
 	)
-	userCheckinControllerGetUserLogHandler := connect_go.NewUnaryHandler(
+	userCheckinControllerGetUserLogHandler := connect.NewUnaryHandler(
 		UserCheckinControllerGetUserLogProcedure,
 		svc.GetUserLog,
-		opts...,
+		connect.WithSchema(userCheckinControllerMethods.ByName("GetUserLog")),
+		connect.WithHandlerOptions(opts...),
 	)
 	return "/server.admin.UserCheckinController/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
@@ -124,10 +130,10 @@ func NewUserCheckinControllerHandler(svc UserCheckinControllerHandler, opts ...c
 // UnimplementedUserCheckinControllerHandler returns CodeUnimplemented from all methods.
 type UnimplementedUserCheckinControllerHandler struct{}
 
-func (UnimplementedUserCheckinControllerHandler) GetAllRecent(context.Context, *connect_go.Request[admin.GetRecentAllCheckinRequest]) (*connect_go.Response[admin.CheckinsResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.UserCheckinController.GetAllRecent is not implemented"))
+func (UnimplementedUserCheckinControllerHandler) GetAllRecent(context.Context, *connect.Request[admin.GetRecentAllCheckinRequest]) (*connect.Response[admin.CheckinsResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.admin.UserCheckinController.GetAllRecent is not implemented"))
 }
 
-func (UnimplementedUserCheckinControllerHandler) GetUserLog(context.Context, *connect_go.Request[admin.UserCheckinRequest]) (*connect_go.Response[admin.CheckinsResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.UserCheckinController.GetUserLog is not implemented"))
+func (UnimplementedUserCheckinControllerHandler) GetUserLog(context.Context, *connect.Request[admin.UserCheckinRequest]) (*connect.Response[admin.CheckinsResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.admin.UserCheckinController.GetUserLog is not implemented"))
 }

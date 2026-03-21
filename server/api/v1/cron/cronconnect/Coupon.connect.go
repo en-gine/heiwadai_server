@@ -5,9 +5,9 @@
 package cronconnect
 
 import (
+	connect "connectrpc.com/connect"
 	context "context"
 	errors "errors"
-	connect_go "connectrpc.com/connect"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	http "net/http"
 	cron "server/api/v1/cron"
@@ -19,7 +19,7 @@ import (
 // generated with a version of connect newer than the one compiled into your binary. You can fix the
 // problem by either regenerating this code with an older version of connect or updating the connect
 // version compiled into your binary.
-const _ = connect_go.IsAtLeastVersion0_1_0
+const _ = connect.IsAtLeastVersion1_13_0
 
 const (
 	// CronCouponControllerName is the fully-qualified name of the CronCouponController service.
@@ -41,7 +41,7 @@ const (
 
 // CronCouponControllerClient is a client for the server.cron.CronCouponController service.
 type CronCouponControllerClient interface {
-	BulkIssueBirthdayCoupon(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[cron.AffectedCountResponse], error)
+	BulkIssueBirthdayCoupon(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[cron.AffectedCountResponse], error)
 }
 
 // NewCronCouponControllerClient constructs a client for the server.cron.CronCouponController
@@ -51,30 +51,32 @@ type CronCouponControllerClient interface {
 //
 // The URL supplied here should be the base URL for the Connect or gRPC server (for example,
 // http://api.acme.com or https://acme.com/grpc).
-func NewCronCouponControllerClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) CronCouponControllerClient {
+func NewCronCouponControllerClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) CronCouponControllerClient {
 	baseURL = strings.TrimRight(baseURL, "/")
+	cronCouponControllerMethods := cron.File_v1_cron_Coupon_proto.Services().ByName("CronCouponController").Methods()
 	return &cronCouponControllerClient{
-		bulkIssueBirthdayCoupon: connect_go.NewClient[emptypb.Empty, cron.AffectedCountResponse](
+		bulkIssueBirthdayCoupon: connect.NewClient[emptypb.Empty, cron.AffectedCountResponse](
 			httpClient,
 			baseURL+CronCouponControllerBulkIssueBirthdayCouponProcedure,
-			opts...,
+			connect.WithSchema(cronCouponControllerMethods.ByName("BulkIssueBirthdayCoupon")),
+			connect.WithClientOptions(opts...),
 		),
 	}
 }
 
 // cronCouponControllerClient implements CronCouponControllerClient.
 type cronCouponControllerClient struct {
-	bulkIssueBirthdayCoupon *connect_go.Client[emptypb.Empty, cron.AffectedCountResponse]
+	bulkIssueBirthdayCoupon *connect.Client[emptypb.Empty, cron.AffectedCountResponse]
 }
 
 // BulkIssueBirthdayCoupon calls server.cron.CronCouponController.BulkIssueBirthdayCoupon.
-func (c *cronCouponControllerClient) BulkIssueBirthdayCoupon(ctx context.Context, req *connect_go.Request[emptypb.Empty]) (*connect_go.Response[cron.AffectedCountResponse], error) {
+func (c *cronCouponControllerClient) BulkIssueBirthdayCoupon(ctx context.Context, req *connect.Request[emptypb.Empty]) (*connect.Response[cron.AffectedCountResponse], error) {
 	return c.bulkIssueBirthdayCoupon.CallUnary(ctx, req)
 }
 
 // CronCouponControllerHandler is an implementation of the server.cron.CronCouponController service.
 type CronCouponControllerHandler interface {
-	BulkIssueBirthdayCoupon(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[cron.AffectedCountResponse], error)
+	BulkIssueBirthdayCoupon(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[cron.AffectedCountResponse], error)
 }
 
 // NewCronCouponControllerHandler builds an HTTP handler from the service implementation. It returns
@@ -82,11 +84,13 @@ type CronCouponControllerHandler interface {
 //
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
-func NewCronCouponControllerHandler(svc CronCouponControllerHandler, opts ...connect_go.HandlerOption) (string, http.Handler) {
-	cronCouponControllerBulkIssueBirthdayCouponHandler := connect_go.NewUnaryHandler(
+func NewCronCouponControllerHandler(svc CronCouponControllerHandler, opts ...connect.HandlerOption) (string, http.Handler) {
+	cronCouponControllerMethods := cron.File_v1_cron_Coupon_proto.Services().ByName("CronCouponController").Methods()
+	cronCouponControllerBulkIssueBirthdayCouponHandler := connect.NewUnaryHandler(
 		CronCouponControllerBulkIssueBirthdayCouponProcedure,
 		svc.BulkIssueBirthdayCoupon,
-		opts...,
+		connect.WithSchema(cronCouponControllerMethods.ByName("BulkIssueBirthdayCoupon")),
+		connect.WithHandlerOptions(opts...),
 	)
 	return "/server.cron.CronCouponController/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
@@ -101,6 +105,6 @@ func NewCronCouponControllerHandler(svc CronCouponControllerHandler, opts ...con
 // UnimplementedCronCouponControllerHandler returns CodeUnimplemented from all methods.
 type UnimplementedCronCouponControllerHandler struct{}
 
-func (UnimplementedCronCouponControllerHandler) BulkIssueBirthdayCoupon(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[cron.AffectedCountResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.cron.CronCouponController.BulkIssueBirthdayCoupon is not implemented"))
+func (UnimplementedCronCouponControllerHandler) BulkIssueBirthdayCoupon(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[cron.AffectedCountResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.cron.CronCouponController.BulkIssueBirthdayCoupon is not implemented"))
 }

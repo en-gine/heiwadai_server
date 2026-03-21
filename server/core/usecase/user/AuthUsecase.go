@@ -3,6 +3,8 @@ package user
 import (
 	"time"
 
+	"github.com/google/uuid"
+
 	"server/core/entity"
 	"server/core/errors"
 	"server/core/infra/action"
@@ -315,6 +317,44 @@ func (u *AuthUsecase) ResendInviteMail(
 
 	if err != nil {
 		return errors.NewDomainError(errors.ActionError, err.Error())
+	}
+
+	return nil
+}
+
+func (u *AuthUsecase) DeleteAccount(
+	userID uuid.UUID,
+	token string,
+) *errors.DomainError {
+	// ユーザー存在確認
+	existUser, err := u.userQuery.GetByID(userID)
+	if err != nil {
+		return errors.NewDomainError(errors.QueryError, err.Error())
+	}
+	if existUser == nil {
+		return errors.NewDomainError(errors.QueryDataNotFoundError, "ユーザーが存在しません")
+	}
+
+	// 未来の予約がある場合は削除不可
+	hasFuture, err := u.userRepository.HasFutureBooking(userID)
+	if err != nil {
+		return errors.NewDomainError(errors.QueryError, err.Error())
+	}
+	if hasFuture {
+		return errors.NewDomainError(errors.UnPemitedOperation, "チェックアウト前の予約があるため、アカウントを削除できません")
+	}
+
+	// ユーザーデータを物理削除（user_book, user_report → user_manager → CASCADE）
+	err = u.userRepository.Delete(userID)
+	if err != nil {
+		return errors.NewDomainError(errors.RepositoryError, err.Error())
+	}
+
+	// セッション無効化（auth.users は既に削除済みだが、キャッシュ対策）
+	if token != "" {
+		if signOutErr := u.authAction.SignOut(token); signOutErr != nil {
+			logger.Error(signOutErr.Error())
+		}
 	}
 
 	return nil

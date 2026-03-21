@@ -5,9 +5,9 @@
 package adminconnect
 
 import (
+	connect "connectrpc.com/connect"
 	context "context"
 	errors "errors"
-	connect_go "connectrpc.com/connect"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	http "net/http"
 	admin "server/api/v1/admin"
@@ -19,7 +19,7 @@ import (
 // generated with a version of connect newer than the one compiled into your binary. You can fix the
 // problem by either regenerating this code with an older version of connect or updating the connect
 // version compiled into your binary.
-const _ = connect_go.IsAtLeastVersion0_1_0
+const _ = connect.IsAtLeastVersion1_13_0
 
 const (
 	// AuthControllerName is the fully-qualified name of the AuthController service.
@@ -54,12 +54,12 @@ const (
 // AuthControllerClient is a client for the server.admin.AuthController service.
 type AuthControllerClient interface {
 	// トークン必要
-	SignOut(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[emptypb.Empty], error)
-	Refresh(context.Context, *connect_go.Request[admin.AdminRefreshTokenRequest]) (*connect_go.Response[admin.AdminAuthTokenResponse], error)
-	UpdatePassword(context.Context, *connect_go.Request[admin.UpdatePasswordRequest]) (*connect_go.Response[emptypb.Empty], error)
-	UpdateEmail(context.Context, *connect_go.Request[admin.UpdateEmailRequest]) (*connect_go.Response[emptypb.Empty], error)
-	Register(context.Context, *connect_go.Request[admin.AdminRegisterRequest]) (*connect_go.Response[admin.AdminRegisterResponse], error)
-	ResendInviteMail(context.Context, *connect_go.Request[admin.ResendInviteRequest]) (*connect_go.Response[emptypb.Empty], error)
+	SignOut(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[emptypb.Empty], error)
+	Refresh(context.Context, *connect.Request[admin.AdminRefreshTokenRequest]) (*connect.Response[admin.AdminAuthTokenResponse], error)
+	UpdatePassword(context.Context, *connect.Request[admin.UpdatePasswordRequest]) (*connect.Response[emptypb.Empty], error)
+	UpdateEmail(context.Context, *connect.Request[admin.UpdateEmailRequest]) (*connect.Response[emptypb.Empty], error)
+	Register(context.Context, *connect.Request[admin.AdminRegisterRequest]) (*connect.Response[admin.AdminRegisterResponse], error)
+	ResendInviteMail(context.Context, *connect.Request[admin.ResendInviteRequest]) (*connect.Response[emptypb.Empty], error)
 }
 
 // NewAuthControllerClient constructs a client for the server.admin.AuthController service. By
@@ -69,91 +69,98 @@ type AuthControllerClient interface {
 //
 // The URL supplied here should be the base URL for the Connect or gRPC server (for example,
 // http://api.acme.com or https://acme.com/grpc).
-func NewAuthControllerClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) AuthControllerClient {
+func NewAuthControllerClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) AuthControllerClient {
 	baseURL = strings.TrimRight(baseURL, "/")
+	authControllerMethods := admin.File_v1_admin_Auth_proto.Services().ByName("AuthController").Methods()
 	return &authControllerClient{
-		signOut: connect_go.NewClient[emptypb.Empty, emptypb.Empty](
+		signOut: connect.NewClient[emptypb.Empty, emptypb.Empty](
 			httpClient,
 			baseURL+AuthControllerSignOutProcedure,
-			opts...,
+			connect.WithSchema(authControllerMethods.ByName("SignOut")),
+			connect.WithClientOptions(opts...),
 		),
-		refresh: connect_go.NewClient[admin.AdminRefreshTokenRequest, admin.AdminAuthTokenResponse](
+		refresh: connect.NewClient[admin.AdminRefreshTokenRequest, admin.AdminAuthTokenResponse](
 			httpClient,
 			baseURL+AuthControllerRefreshProcedure,
-			opts...,
+			connect.WithSchema(authControllerMethods.ByName("Refresh")),
+			connect.WithClientOptions(opts...),
 		),
-		updatePassword: connect_go.NewClient[admin.UpdatePasswordRequest, emptypb.Empty](
+		updatePassword: connect.NewClient[admin.UpdatePasswordRequest, emptypb.Empty](
 			httpClient,
 			baseURL+AuthControllerUpdatePasswordProcedure,
-			opts...,
+			connect.WithSchema(authControllerMethods.ByName("UpdatePassword")),
+			connect.WithClientOptions(opts...),
 		),
-		updateEmail: connect_go.NewClient[admin.UpdateEmailRequest, emptypb.Empty](
+		updateEmail: connect.NewClient[admin.UpdateEmailRequest, emptypb.Empty](
 			httpClient,
 			baseURL+AuthControllerUpdateEmailProcedure,
-			opts...,
+			connect.WithSchema(authControllerMethods.ByName("UpdateEmail")),
+			connect.WithClientOptions(opts...),
 		),
-		register: connect_go.NewClient[admin.AdminRegisterRequest, admin.AdminRegisterResponse](
+		register: connect.NewClient[admin.AdminRegisterRequest, admin.AdminRegisterResponse](
 			httpClient,
 			baseURL+AuthControllerRegisterProcedure,
-			opts...,
+			connect.WithSchema(authControllerMethods.ByName("Register")),
+			connect.WithClientOptions(opts...),
 		),
-		resendInviteMail: connect_go.NewClient[admin.ResendInviteRequest, emptypb.Empty](
+		resendInviteMail: connect.NewClient[admin.ResendInviteRequest, emptypb.Empty](
 			httpClient,
 			baseURL+AuthControllerResendInviteMailProcedure,
-			opts...,
+			connect.WithSchema(authControllerMethods.ByName("ResendInviteMail")),
+			connect.WithClientOptions(opts...),
 		),
 	}
 }
 
 // authControllerClient implements AuthControllerClient.
 type authControllerClient struct {
-	signOut          *connect_go.Client[emptypb.Empty, emptypb.Empty]
-	refresh          *connect_go.Client[admin.AdminRefreshTokenRequest, admin.AdminAuthTokenResponse]
-	updatePassword   *connect_go.Client[admin.UpdatePasswordRequest, emptypb.Empty]
-	updateEmail      *connect_go.Client[admin.UpdateEmailRequest, emptypb.Empty]
-	register         *connect_go.Client[admin.AdminRegisterRequest, admin.AdminRegisterResponse]
-	resendInviteMail *connect_go.Client[admin.ResendInviteRequest, emptypb.Empty]
+	signOut          *connect.Client[emptypb.Empty, emptypb.Empty]
+	refresh          *connect.Client[admin.AdminRefreshTokenRequest, admin.AdminAuthTokenResponse]
+	updatePassword   *connect.Client[admin.UpdatePasswordRequest, emptypb.Empty]
+	updateEmail      *connect.Client[admin.UpdateEmailRequest, emptypb.Empty]
+	register         *connect.Client[admin.AdminRegisterRequest, admin.AdminRegisterResponse]
+	resendInviteMail *connect.Client[admin.ResendInviteRequest, emptypb.Empty]
 }
 
 // SignOut calls server.admin.AuthController.SignOut.
-func (c *authControllerClient) SignOut(ctx context.Context, req *connect_go.Request[emptypb.Empty]) (*connect_go.Response[emptypb.Empty], error) {
+func (c *authControllerClient) SignOut(ctx context.Context, req *connect.Request[emptypb.Empty]) (*connect.Response[emptypb.Empty], error) {
 	return c.signOut.CallUnary(ctx, req)
 }
 
 // Refresh calls server.admin.AuthController.Refresh.
-func (c *authControllerClient) Refresh(ctx context.Context, req *connect_go.Request[admin.AdminRefreshTokenRequest]) (*connect_go.Response[admin.AdminAuthTokenResponse], error) {
+func (c *authControllerClient) Refresh(ctx context.Context, req *connect.Request[admin.AdminRefreshTokenRequest]) (*connect.Response[admin.AdminAuthTokenResponse], error) {
 	return c.refresh.CallUnary(ctx, req)
 }
 
 // UpdatePassword calls server.admin.AuthController.UpdatePassword.
-func (c *authControllerClient) UpdatePassword(ctx context.Context, req *connect_go.Request[admin.UpdatePasswordRequest]) (*connect_go.Response[emptypb.Empty], error) {
+func (c *authControllerClient) UpdatePassword(ctx context.Context, req *connect.Request[admin.UpdatePasswordRequest]) (*connect.Response[emptypb.Empty], error) {
 	return c.updatePassword.CallUnary(ctx, req)
 }
 
 // UpdateEmail calls server.admin.AuthController.UpdateEmail.
-func (c *authControllerClient) UpdateEmail(ctx context.Context, req *connect_go.Request[admin.UpdateEmailRequest]) (*connect_go.Response[emptypb.Empty], error) {
+func (c *authControllerClient) UpdateEmail(ctx context.Context, req *connect.Request[admin.UpdateEmailRequest]) (*connect.Response[emptypb.Empty], error) {
 	return c.updateEmail.CallUnary(ctx, req)
 }
 
 // Register calls server.admin.AuthController.Register.
-func (c *authControllerClient) Register(ctx context.Context, req *connect_go.Request[admin.AdminRegisterRequest]) (*connect_go.Response[admin.AdminRegisterResponse], error) {
+func (c *authControllerClient) Register(ctx context.Context, req *connect.Request[admin.AdminRegisterRequest]) (*connect.Response[admin.AdminRegisterResponse], error) {
 	return c.register.CallUnary(ctx, req)
 }
 
 // ResendInviteMail calls server.admin.AuthController.ResendInviteMail.
-func (c *authControllerClient) ResendInviteMail(ctx context.Context, req *connect_go.Request[admin.ResendInviteRequest]) (*connect_go.Response[emptypb.Empty], error) {
+func (c *authControllerClient) ResendInviteMail(ctx context.Context, req *connect.Request[admin.ResendInviteRequest]) (*connect.Response[emptypb.Empty], error) {
 	return c.resendInviteMail.CallUnary(ctx, req)
 }
 
 // AuthControllerHandler is an implementation of the server.admin.AuthController service.
 type AuthControllerHandler interface {
 	// トークン必要
-	SignOut(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[emptypb.Empty], error)
-	Refresh(context.Context, *connect_go.Request[admin.AdminRefreshTokenRequest]) (*connect_go.Response[admin.AdminAuthTokenResponse], error)
-	UpdatePassword(context.Context, *connect_go.Request[admin.UpdatePasswordRequest]) (*connect_go.Response[emptypb.Empty], error)
-	UpdateEmail(context.Context, *connect_go.Request[admin.UpdateEmailRequest]) (*connect_go.Response[emptypb.Empty], error)
-	Register(context.Context, *connect_go.Request[admin.AdminRegisterRequest]) (*connect_go.Response[admin.AdminRegisterResponse], error)
-	ResendInviteMail(context.Context, *connect_go.Request[admin.ResendInviteRequest]) (*connect_go.Response[emptypb.Empty], error)
+	SignOut(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[emptypb.Empty], error)
+	Refresh(context.Context, *connect.Request[admin.AdminRefreshTokenRequest]) (*connect.Response[admin.AdminAuthTokenResponse], error)
+	UpdatePassword(context.Context, *connect.Request[admin.UpdatePasswordRequest]) (*connect.Response[emptypb.Empty], error)
+	UpdateEmail(context.Context, *connect.Request[admin.UpdateEmailRequest]) (*connect.Response[emptypb.Empty], error)
+	Register(context.Context, *connect.Request[admin.AdminRegisterRequest]) (*connect.Response[admin.AdminRegisterResponse], error)
+	ResendInviteMail(context.Context, *connect.Request[admin.ResendInviteRequest]) (*connect.Response[emptypb.Empty], error)
 }
 
 // NewAuthControllerHandler builds an HTTP handler from the service implementation. It returns the
@@ -161,36 +168,43 @@ type AuthControllerHandler interface {
 //
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
-func NewAuthControllerHandler(svc AuthControllerHandler, opts ...connect_go.HandlerOption) (string, http.Handler) {
-	authControllerSignOutHandler := connect_go.NewUnaryHandler(
+func NewAuthControllerHandler(svc AuthControllerHandler, opts ...connect.HandlerOption) (string, http.Handler) {
+	authControllerMethods := admin.File_v1_admin_Auth_proto.Services().ByName("AuthController").Methods()
+	authControllerSignOutHandler := connect.NewUnaryHandler(
 		AuthControllerSignOutProcedure,
 		svc.SignOut,
-		opts...,
+		connect.WithSchema(authControllerMethods.ByName("SignOut")),
+		connect.WithHandlerOptions(opts...),
 	)
-	authControllerRefreshHandler := connect_go.NewUnaryHandler(
+	authControllerRefreshHandler := connect.NewUnaryHandler(
 		AuthControllerRefreshProcedure,
 		svc.Refresh,
-		opts...,
+		connect.WithSchema(authControllerMethods.ByName("Refresh")),
+		connect.WithHandlerOptions(opts...),
 	)
-	authControllerUpdatePasswordHandler := connect_go.NewUnaryHandler(
+	authControllerUpdatePasswordHandler := connect.NewUnaryHandler(
 		AuthControllerUpdatePasswordProcedure,
 		svc.UpdatePassword,
-		opts...,
+		connect.WithSchema(authControllerMethods.ByName("UpdatePassword")),
+		connect.WithHandlerOptions(opts...),
 	)
-	authControllerUpdateEmailHandler := connect_go.NewUnaryHandler(
+	authControllerUpdateEmailHandler := connect.NewUnaryHandler(
 		AuthControllerUpdateEmailProcedure,
 		svc.UpdateEmail,
-		opts...,
+		connect.WithSchema(authControllerMethods.ByName("UpdateEmail")),
+		connect.WithHandlerOptions(opts...),
 	)
-	authControllerRegisterHandler := connect_go.NewUnaryHandler(
+	authControllerRegisterHandler := connect.NewUnaryHandler(
 		AuthControllerRegisterProcedure,
 		svc.Register,
-		opts...,
+		connect.WithSchema(authControllerMethods.ByName("Register")),
+		connect.WithHandlerOptions(opts...),
 	)
-	authControllerResendInviteMailHandler := connect_go.NewUnaryHandler(
+	authControllerResendInviteMailHandler := connect.NewUnaryHandler(
 		AuthControllerResendInviteMailProcedure,
 		svc.ResendInviteMail,
-		opts...,
+		connect.WithSchema(authControllerMethods.ByName("ResendInviteMail")),
+		connect.WithHandlerOptions(opts...),
 	)
 	return "/server.admin.AuthController/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
@@ -215,26 +229,26 @@ func NewAuthControllerHandler(svc AuthControllerHandler, opts ...connect_go.Hand
 // UnimplementedAuthControllerHandler returns CodeUnimplemented from all methods.
 type UnimplementedAuthControllerHandler struct{}
 
-func (UnimplementedAuthControllerHandler) SignOut(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[emptypb.Empty], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.AuthController.SignOut is not implemented"))
+func (UnimplementedAuthControllerHandler) SignOut(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[emptypb.Empty], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.admin.AuthController.SignOut is not implemented"))
 }
 
-func (UnimplementedAuthControllerHandler) Refresh(context.Context, *connect_go.Request[admin.AdminRefreshTokenRequest]) (*connect_go.Response[admin.AdminAuthTokenResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.AuthController.Refresh is not implemented"))
+func (UnimplementedAuthControllerHandler) Refresh(context.Context, *connect.Request[admin.AdminRefreshTokenRequest]) (*connect.Response[admin.AdminAuthTokenResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.admin.AuthController.Refresh is not implemented"))
 }
 
-func (UnimplementedAuthControllerHandler) UpdatePassword(context.Context, *connect_go.Request[admin.UpdatePasswordRequest]) (*connect_go.Response[emptypb.Empty], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.AuthController.UpdatePassword is not implemented"))
+func (UnimplementedAuthControllerHandler) UpdatePassword(context.Context, *connect.Request[admin.UpdatePasswordRequest]) (*connect.Response[emptypb.Empty], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.admin.AuthController.UpdatePassword is not implemented"))
 }
 
-func (UnimplementedAuthControllerHandler) UpdateEmail(context.Context, *connect_go.Request[admin.UpdateEmailRequest]) (*connect_go.Response[emptypb.Empty], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.AuthController.UpdateEmail is not implemented"))
+func (UnimplementedAuthControllerHandler) UpdateEmail(context.Context, *connect.Request[admin.UpdateEmailRequest]) (*connect.Response[emptypb.Empty], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.admin.AuthController.UpdateEmail is not implemented"))
 }
 
-func (UnimplementedAuthControllerHandler) Register(context.Context, *connect_go.Request[admin.AdminRegisterRequest]) (*connect_go.Response[admin.AdminRegisterResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.AuthController.Register is not implemented"))
+func (UnimplementedAuthControllerHandler) Register(context.Context, *connect.Request[admin.AdminRegisterRequest]) (*connect.Response[admin.AdminRegisterResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.admin.AuthController.Register is not implemented"))
 }
 
-func (UnimplementedAuthControllerHandler) ResendInviteMail(context.Context, *connect_go.Request[admin.ResendInviteRequest]) (*connect_go.Response[emptypb.Empty], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.AuthController.ResendInviteMail is not implemented"))
+func (UnimplementedAuthControllerHandler) ResendInviteMail(context.Context, *connect.Request[admin.ResendInviteRequest]) (*connect.Response[emptypb.Empty], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.admin.AuthController.ResendInviteMail is not implemented"))
 }

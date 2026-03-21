@@ -5,9 +5,9 @@
 package adminconnect
 
 import (
+	connect "connectrpc.com/connect"
 	context "context"
 	errors "errors"
-	connect_go "connectrpc.com/connect"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	http "net/http"
 	admin "server/api/v1/admin"
@@ -19,7 +19,7 @@ import (
 // generated with a version of connect newer than the one compiled into your binary. You can fix the
 // problem by either regenerating this code with an older version of connect or updating the connect
 // version compiled into your binary.
-const _ = connect_go.IsAtLeastVersion0_1_0
+const _ = connect.IsAtLeastVersion1_13_0
 
 const (
 	// MessageControllerName is the fully-qualified name of the MessageController service.
@@ -53,11 +53,11 @@ const (
 
 // MessageControllerClient is a client for the server.admin.MessageController service.
 type MessageControllerClient interface {
-	GetByID(context.Context, *connect_go.Request[admin.MessageIDRequest]) (*connect_go.Response[admin.MessageResponse], error)
-	GetList(context.Context, *connect_go.Request[admin.GetMessageRequest]) (*connect_go.Response[admin.MessagesResponse], error)
-	Create(context.Context, *connect_go.Request[admin.MessageCreateRequest]) (*connect_go.Response[admin.MessageResponse], error)
-	Update(context.Context, *connect_go.Request[admin.MessageUpdateRequest]) (*connect_go.Response[admin.MessageResponse], error)
-	Delete(context.Context, *connect_go.Request[admin.MessageIDRequest]) (*connect_go.Response[emptypb.Empty], error)
+	GetByID(context.Context, *connect.Request[admin.MessageIDRequest]) (*connect.Response[admin.MessageResponse], error)
+	GetList(context.Context, *connect.Request[admin.GetMessageRequest]) (*connect.Response[admin.MessagesResponse], error)
+	Create(context.Context, *connect.Request[admin.MessageCreateRequest]) (*connect.Response[admin.MessageResponse], error)
+	Update(context.Context, *connect.Request[admin.MessageUpdateRequest]) (*connect.Response[admin.MessageResponse], error)
+	Delete(context.Context, *connect.Request[admin.MessageIDRequest]) (*connect.Response[emptypb.Empty], error)
 }
 
 // NewMessageControllerClient constructs a client for the server.admin.MessageController service. By
@@ -67,78 +67,84 @@ type MessageControllerClient interface {
 //
 // The URL supplied here should be the base URL for the Connect or gRPC server (for example,
 // http://api.acme.com or https://acme.com/grpc).
-func NewMessageControllerClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) MessageControllerClient {
+func NewMessageControllerClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) MessageControllerClient {
 	baseURL = strings.TrimRight(baseURL, "/")
+	messageControllerMethods := admin.File_v1_admin_Messages_proto.Services().ByName("MessageController").Methods()
 	return &messageControllerClient{
-		getByID: connect_go.NewClient[admin.MessageIDRequest, admin.MessageResponse](
+		getByID: connect.NewClient[admin.MessageIDRequest, admin.MessageResponse](
 			httpClient,
 			baseURL+MessageControllerGetByIDProcedure,
-			opts...,
+			connect.WithSchema(messageControllerMethods.ByName("GetByID")),
+			connect.WithClientOptions(opts...),
 		),
-		getList: connect_go.NewClient[admin.GetMessageRequest, admin.MessagesResponse](
+		getList: connect.NewClient[admin.GetMessageRequest, admin.MessagesResponse](
 			httpClient,
 			baseURL+MessageControllerGetListProcedure,
-			opts...,
+			connect.WithSchema(messageControllerMethods.ByName("GetList")),
+			connect.WithClientOptions(opts...),
 		),
-		create: connect_go.NewClient[admin.MessageCreateRequest, admin.MessageResponse](
+		create: connect.NewClient[admin.MessageCreateRequest, admin.MessageResponse](
 			httpClient,
 			baseURL+MessageControllerCreateProcedure,
-			opts...,
+			connect.WithSchema(messageControllerMethods.ByName("Create")),
+			connect.WithClientOptions(opts...),
 		),
-		update: connect_go.NewClient[admin.MessageUpdateRequest, admin.MessageResponse](
+		update: connect.NewClient[admin.MessageUpdateRequest, admin.MessageResponse](
 			httpClient,
 			baseURL+MessageControllerUpdateProcedure,
-			opts...,
+			connect.WithSchema(messageControllerMethods.ByName("Update")),
+			connect.WithClientOptions(opts...),
 		),
-		delete: connect_go.NewClient[admin.MessageIDRequest, emptypb.Empty](
+		delete: connect.NewClient[admin.MessageIDRequest, emptypb.Empty](
 			httpClient,
 			baseURL+MessageControllerDeleteProcedure,
-			opts...,
+			connect.WithSchema(messageControllerMethods.ByName("Delete")),
+			connect.WithClientOptions(opts...),
 		),
 	}
 }
 
 // messageControllerClient implements MessageControllerClient.
 type messageControllerClient struct {
-	getByID *connect_go.Client[admin.MessageIDRequest, admin.MessageResponse]
-	getList *connect_go.Client[admin.GetMessageRequest, admin.MessagesResponse]
-	create  *connect_go.Client[admin.MessageCreateRequest, admin.MessageResponse]
-	update  *connect_go.Client[admin.MessageUpdateRequest, admin.MessageResponse]
-	delete  *connect_go.Client[admin.MessageIDRequest, emptypb.Empty]
+	getByID *connect.Client[admin.MessageIDRequest, admin.MessageResponse]
+	getList *connect.Client[admin.GetMessageRequest, admin.MessagesResponse]
+	create  *connect.Client[admin.MessageCreateRequest, admin.MessageResponse]
+	update  *connect.Client[admin.MessageUpdateRequest, admin.MessageResponse]
+	delete  *connect.Client[admin.MessageIDRequest, emptypb.Empty]
 }
 
 // GetByID calls server.admin.MessageController.GetByID.
-func (c *messageControllerClient) GetByID(ctx context.Context, req *connect_go.Request[admin.MessageIDRequest]) (*connect_go.Response[admin.MessageResponse], error) {
+func (c *messageControllerClient) GetByID(ctx context.Context, req *connect.Request[admin.MessageIDRequest]) (*connect.Response[admin.MessageResponse], error) {
 	return c.getByID.CallUnary(ctx, req)
 }
 
 // GetList calls server.admin.MessageController.GetList.
-func (c *messageControllerClient) GetList(ctx context.Context, req *connect_go.Request[admin.GetMessageRequest]) (*connect_go.Response[admin.MessagesResponse], error) {
+func (c *messageControllerClient) GetList(ctx context.Context, req *connect.Request[admin.GetMessageRequest]) (*connect.Response[admin.MessagesResponse], error) {
 	return c.getList.CallUnary(ctx, req)
 }
 
 // Create calls server.admin.MessageController.Create.
-func (c *messageControllerClient) Create(ctx context.Context, req *connect_go.Request[admin.MessageCreateRequest]) (*connect_go.Response[admin.MessageResponse], error) {
+func (c *messageControllerClient) Create(ctx context.Context, req *connect.Request[admin.MessageCreateRequest]) (*connect.Response[admin.MessageResponse], error) {
 	return c.create.CallUnary(ctx, req)
 }
 
 // Update calls server.admin.MessageController.Update.
-func (c *messageControllerClient) Update(ctx context.Context, req *connect_go.Request[admin.MessageUpdateRequest]) (*connect_go.Response[admin.MessageResponse], error) {
+func (c *messageControllerClient) Update(ctx context.Context, req *connect.Request[admin.MessageUpdateRequest]) (*connect.Response[admin.MessageResponse], error) {
 	return c.update.CallUnary(ctx, req)
 }
 
 // Delete calls server.admin.MessageController.Delete.
-func (c *messageControllerClient) Delete(ctx context.Context, req *connect_go.Request[admin.MessageIDRequest]) (*connect_go.Response[emptypb.Empty], error) {
+func (c *messageControllerClient) Delete(ctx context.Context, req *connect.Request[admin.MessageIDRequest]) (*connect.Response[emptypb.Empty], error) {
 	return c.delete.CallUnary(ctx, req)
 }
 
 // MessageControllerHandler is an implementation of the server.admin.MessageController service.
 type MessageControllerHandler interface {
-	GetByID(context.Context, *connect_go.Request[admin.MessageIDRequest]) (*connect_go.Response[admin.MessageResponse], error)
-	GetList(context.Context, *connect_go.Request[admin.GetMessageRequest]) (*connect_go.Response[admin.MessagesResponse], error)
-	Create(context.Context, *connect_go.Request[admin.MessageCreateRequest]) (*connect_go.Response[admin.MessageResponse], error)
-	Update(context.Context, *connect_go.Request[admin.MessageUpdateRequest]) (*connect_go.Response[admin.MessageResponse], error)
-	Delete(context.Context, *connect_go.Request[admin.MessageIDRequest]) (*connect_go.Response[emptypb.Empty], error)
+	GetByID(context.Context, *connect.Request[admin.MessageIDRequest]) (*connect.Response[admin.MessageResponse], error)
+	GetList(context.Context, *connect.Request[admin.GetMessageRequest]) (*connect.Response[admin.MessagesResponse], error)
+	Create(context.Context, *connect.Request[admin.MessageCreateRequest]) (*connect.Response[admin.MessageResponse], error)
+	Update(context.Context, *connect.Request[admin.MessageUpdateRequest]) (*connect.Response[admin.MessageResponse], error)
+	Delete(context.Context, *connect.Request[admin.MessageIDRequest]) (*connect.Response[emptypb.Empty], error)
 }
 
 // NewMessageControllerHandler builds an HTTP handler from the service implementation. It returns
@@ -146,31 +152,37 @@ type MessageControllerHandler interface {
 //
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
-func NewMessageControllerHandler(svc MessageControllerHandler, opts ...connect_go.HandlerOption) (string, http.Handler) {
-	messageControllerGetByIDHandler := connect_go.NewUnaryHandler(
+func NewMessageControllerHandler(svc MessageControllerHandler, opts ...connect.HandlerOption) (string, http.Handler) {
+	messageControllerMethods := admin.File_v1_admin_Messages_proto.Services().ByName("MessageController").Methods()
+	messageControllerGetByIDHandler := connect.NewUnaryHandler(
 		MessageControllerGetByIDProcedure,
 		svc.GetByID,
-		opts...,
+		connect.WithSchema(messageControllerMethods.ByName("GetByID")),
+		connect.WithHandlerOptions(opts...),
 	)
-	messageControllerGetListHandler := connect_go.NewUnaryHandler(
+	messageControllerGetListHandler := connect.NewUnaryHandler(
 		MessageControllerGetListProcedure,
 		svc.GetList,
-		opts...,
+		connect.WithSchema(messageControllerMethods.ByName("GetList")),
+		connect.WithHandlerOptions(opts...),
 	)
-	messageControllerCreateHandler := connect_go.NewUnaryHandler(
+	messageControllerCreateHandler := connect.NewUnaryHandler(
 		MessageControllerCreateProcedure,
 		svc.Create,
-		opts...,
+		connect.WithSchema(messageControllerMethods.ByName("Create")),
+		connect.WithHandlerOptions(opts...),
 	)
-	messageControllerUpdateHandler := connect_go.NewUnaryHandler(
+	messageControllerUpdateHandler := connect.NewUnaryHandler(
 		MessageControllerUpdateProcedure,
 		svc.Update,
-		opts...,
+		connect.WithSchema(messageControllerMethods.ByName("Update")),
+		connect.WithHandlerOptions(opts...),
 	)
-	messageControllerDeleteHandler := connect_go.NewUnaryHandler(
+	messageControllerDeleteHandler := connect.NewUnaryHandler(
 		MessageControllerDeleteProcedure,
 		svc.Delete,
-		opts...,
+		connect.WithSchema(messageControllerMethods.ByName("Delete")),
+		connect.WithHandlerOptions(opts...),
 	)
 	return "/server.admin.MessageController/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
@@ -193,22 +205,22 @@ func NewMessageControllerHandler(svc MessageControllerHandler, opts ...connect_g
 // UnimplementedMessageControllerHandler returns CodeUnimplemented from all methods.
 type UnimplementedMessageControllerHandler struct{}
 
-func (UnimplementedMessageControllerHandler) GetByID(context.Context, *connect_go.Request[admin.MessageIDRequest]) (*connect_go.Response[admin.MessageResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.MessageController.GetByID is not implemented"))
+func (UnimplementedMessageControllerHandler) GetByID(context.Context, *connect.Request[admin.MessageIDRequest]) (*connect.Response[admin.MessageResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.admin.MessageController.GetByID is not implemented"))
 }
 
-func (UnimplementedMessageControllerHandler) GetList(context.Context, *connect_go.Request[admin.GetMessageRequest]) (*connect_go.Response[admin.MessagesResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.MessageController.GetList is not implemented"))
+func (UnimplementedMessageControllerHandler) GetList(context.Context, *connect.Request[admin.GetMessageRequest]) (*connect.Response[admin.MessagesResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.admin.MessageController.GetList is not implemented"))
 }
 
-func (UnimplementedMessageControllerHandler) Create(context.Context, *connect_go.Request[admin.MessageCreateRequest]) (*connect_go.Response[admin.MessageResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.MessageController.Create is not implemented"))
+func (UnimplementedMessageControllerHandler) Create(context.Context, *connect.Request[admin.MessageCreateRequest]) (*connect.Response[admin.MessageResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.admin.MessageController.Create is not implemented"))
 }
 
-func (UnimplementedMessageControllerHandler) Update(context.Context, *connect_go.Request[admin.MessageUpdateRequest]) (*connect_go.Response[admin.MessageResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.MessageController.Update is not implemented"))
+func (UnimplementedMessageControllerHandler) Update(context.Context, *connect.Request[admin.MessageUpdateRequest]) (*connect.Response[admin.MessageResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.admin.MessageController.Update is not implemented"))
 }
 
-func (UnimplementedMessageControllerHandler) Delete(context.Context, *connect_go.Request[admin.MessageIDRequest]) (*connect_go.Response[emptypb.Empty], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.MessageController.Delete is not implemented"))
+func (UnimplementedMessageControllerHandler) Delete(context.Context, *connect.Request[admin.MessageIDRequest]) (*connect.Response[emptypb.Empty], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.admin.MessageController.Delete is not implemented"))
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"time"
 
 	"server/core/entity"
 	"server/core/infra/repository"
@@ -105,6 +106,20 @@ func (ur *UserRepository) Delete(userID uuid.UUID) error {
 	if err != nil {
 		return err
 	}
+
+	// CASCADE なしのテーブルを先に削除（user_book, user_report）
+	_, err = models.UserBooks(models.UserBookWhere.BookUserID.EQ(userID.String())).DeleteAll(ctx, tran.Tran())
+	if err != nil {
+		tran.Rollback()
+		return err
+	}
+	_, err = models.UserReports(models.UserReportWhere.UserID.EQ(userID.String())).DeleteAll(ctx, tran.Tran())
+	if err != nil {
+		tran.Rollback()
+		return err
+	}
+
+	// user_manager を削除（CASCADE で user_data, user_option, checkin 等も削除される）
 	deleteUserManager, err := models.FindUserManager(ctx, tran.Tran(), userID.String())
 	if err != nil {
 		if err != sql.ErrNoRows {
@@ -119,38 +134,13 @@ func (ur *UserRepository) Delete(userID uuid.UUID) error {
 		}
 	}
 
-	deleteUserData, err := models.FindUserDatum(ctx, tran.Tran(), userID.String())
-	if err != nil {
-		if err != sql.ErrNoRows {
-			tran.Rollback()
-			return err
-		}
-	} else {
-		_, err = deleteUserData.Delete(ctx, tran.Tran())
-		if err != nil {
-			tran.Rollback()
-			return err
-		}
-	}
-
-	deleteUserOption, err := models.FindUserOption(ctx, tran.Tran(), userID.String())
-	if err != nil {
-		if err != sql.ErrNoRows {
-			tran.Rollback()
-			return err
-		}
-	} else {
-		_, err = deleteUserOption.Delete(ctx, tran.Tran())
-		if err != nil {
-			tran.Rollback()
-			return err
-		}
-	}
 	_, err = tran.Exec(fmt.Sprintf("DELETE FROM auth.users WHERE id = '%s'", userID.String()))
 	if err != nil {
 		if err == sql.ErrNoRows {
+			tran.Rollback()
 			return nil
 		}
+		tran.Rollback()
 		logger.Error(err.Error())
 		return err
 	}
@@ -161,6 +151,19 @@ func (ur *UserRepository) Delete(userID uuid.UUID) error {
 	}
 
 	return nil
+}
+
+func (ur *UserRepository) HasFutureBooking(userID uuid.UUID) (bool, error) {
+	ctx := context.Background()
+	now := time.Now()
+	exists, err := models.UserBooks(
+		models.UserBookWhere.BookUserID.EQ(userID.String()),
+		models.UserBookWhere.StayTo.GTE(now),
+	).Exists(ctx, ur.db)
+	if err != nil {
+		return false, err
+	}
+	return exists, nil
 }
 
 func (ur *UserRepository) DeleteUnderRegisterUser(userID uuid.UUID) error {

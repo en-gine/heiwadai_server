@@ -5,9 +5,9 @@
 package userconnect
 
 import (
+	connect "connectrpc.com/connect"
 	context "context"
 	errors "errors"
-	connect_go "connectrpc.com/connect"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	http "net/http"
 	shared "server/api/v1/shared"
@@ -20,7 +20,7 @@ import (
 // generated with a version of connect newer than the one compiled into your binary. You can fix the
 // problem by either regenerating this code with an older version of connect or updating the connect
 // version compiled into your binary.
-const _ = connect_go.IsAtLeastVersion0_1_0
+const _ = connect.IsAtLeastVersion1_13_0
 
 const (
 	// MyCouponControllerName is the fully-qualified name of the MyCouponController service.
@@ -54,13 +54,13 @@ const (
 // MyCouponControllerClient is a client for the server.user.MyCouponController service.
 type MyCouponControllerClient interface {
 	// 現在ユーザーが持っているクーポン一覧を取得する
-	GetList(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[user.MyCouponsResponse], error)
-	GetExpiredList(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[user.MyCouponsResponse], error)
-	GetUsedList(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[user.MyCouponsResponse], error)
+	GetList(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[user.MyCouponsResponse], error)
+	GetExpiredList(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[user.MyCouponsResponse], error)
+	GetUsedList(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[user.MyCouponsResponse], error)
 	// クーポンの詳細
-	GetDetail(context.Context, *connect_go.Request[user.CouponIDRequest]) (*connect_go.Response[shared.Coupon], error)
+	GetDetail(context.Context, *connect.Request[user.CouponIDRequest]) (*connect.Response[shared.Coupon], error)
 	// クーポンの使用
-	Use(context.Context, *connect_go.Request[user.CouponIDRequest]) (*connect_go.Response[emptypb.Empty], error)
+	Use(context.Context, *connect.Request[user.CouponIDRequest]) (*connect.Response[emptypb.Empty], error)
 }
 
 // NewMyCouponControllerClient constructs a client for the server.user.MyCouponController service.
@@ -70,81 +70,87 @@ type MyCouponControllerClient interface {
 //
 // The URL supplied here should be the base URL for the Connect or gRPC server (for example,
 // http://api.acme.com or https://acme.com/grpc).
-func NewMyCouponControllerClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) MyCouponControllerClient {
+func NewMyCouponControllerClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) MyCouponControllerClient {
 	baseURL = strings.TrimRight(baseURL, "/")
+	myCouponControllerMethods := user.File_v1_user_MyCoupon_proto.Services().ByName("MyCouponController").Methods()
 	return &myCouponControllerClient{
-		getList: connect_go.NewClient[emptypb.Empty, user.MyCouponsResponse](
+		getList: connect.NewClient[emptypb.Empty, user.MyCouponsResponse](
 			httpClient,
 			baseURL+MyCouponControllerGetListProcedure,
-			opts...,
+			connect.WithSchema(myCouponControllerMethods.ByName("GetList")),
+			connect.WithClientOptions(opts...),
 		),
-		getExpiredList: connect_go.NewClient[emptypb.Empty, user.MyCouponsResponse](
+		getExpiredList: connect.NewClient[emptypb.Empty, user.MyCouponsResponse](
 			httpClient,
 			baseURL+MyCouponControllerGetExpiredListProcedure,
-			opts...,
+			connect.WithSchema(myCouponControllerMethods.ByName("GetExpiredList")),
+			connect.WithClientOptions(opts...),
 		),
-		getUsedList: connect_go.NewClient[emptypb.Empty, user.MyCouponsResponse](
+		getUsedList: connect.NewClient[emptypb.Empty, user.MyCouponsResponse](
 			httpClient,
 			baseURL+MyCouponControllerGetUsedListProcedure,
-			opts...,
+			connect.WithSchema(myCouponControllerMethods.ByName("GetUsedList")),
+			connect.WithClientOptions(opts...),
 		),
-		getDetail: connect_go.NewClient[user.CouponIDRequest, shared.Coupon](
+		getDetail: connect.NewClient[user.CouponIDRequest, shared.Coupon](
 			httpClient,
 			baseURL+MyCouponControllerGetDetailProcedure,
-			opts...,
+			connect.WithSchema(myCouponControllerMethods.ByName("GetDetail")),
+			connect.WithClientOptions(opts...),
 		),
-		use: connect_go.NewClient[user.CouponIDRequest, emptypb.Empty](
+		use: connect.NewClient[user.CouponIDRequest, emptypb.Empty](
 			httpClient,
 			baseURL+MyCouponControllerUseProcedure,
-			opts...,
+			connect.WithSchema(myCouponControllerMethods.ByName("Use")),
+			connect.WithClientOptions(opts...),
 		),
 	}
 }
 
 // myCouponControllerClient implements MyCouponControllerClient.
 type myCouponControllerClient struct {
-	getList        *connect_go.Client[emptypb.Empty, user.MyCouponsResponse]
-	getExpiredList *connect_go.Client[emptypb.Empty, user.MyCouponsResponse]
-	getUsedList    *connect_go.Client[emptypb.Empty, user.MyCouponsResponse]
-	getDetail      *connect_go.Client[user.CouponIDRequest, shared.Coupon]
-	use            *connect_go.Client[user.CouponIDRequest, emptypb.Empty]
+	getList        *connect.Client[emptypb.Empty, user.MyCouponsResponse]
+	getExpiredList *connect.Client[emptypb.Empty, user.MyCouponsResponse]
+	getUsedList    *connect.Client[emptypb.Empty, user.MyCouponsResponse]
+	getDetail      *connect.Client[user.CouponIDRequest, shared.Coupon]
+	use            *connect.Client[user.CouponIDRequest, emptypb.Empty]
 }
 
 // GetList calls server.user.MyCouponController.GetList.
-func (c *myCouponControllerClient) GetList(ctx context.Context, req *connect_go.Request[emptypb.Empty]) (*connect_go.Response[user.MyCouponsResponse], error) {
+func (c *myCouponControllerClient) GetList(ctx context.Context, req *connect.Request[emptypb.Empty]) (*connect.Response[user.MyCouponsResponse], error) {
 	return c.getList.CallUnary(ctx, req)
 }
 
 // GetExpiredList calls server.user.MyCouponController.GetExpiredList.
-func (c *myCouponControllerClient) GetExpiredList(ctx context.Context, req *connect_go.Request[emptypb.Empty]) (*connect_go.Response[user.MyCouponsResponse], error) {
+func (c *myCouponControllerClient) GetExpiredList(ctx context.Context, req *connect.Request[emptypb.Empty]) (*connect.Response[user.MyCouponsResponse], error) {
 	return c.getExpiredList.CallUnary(ctx, req)
 }
 
 // GetUsedList calls server.user.MyCouponController.GetUsedList.
-func (c *myCouponControllerClient) GetUsedList(ctx context.Context, req *connect_go.Request[emptypb.Empty]) (*connect_go.Response[user.MyCouponsResponse], error) {
+func (c *myCouponControllerClient) GetUsedList(ctx context.Context, req *connect.Request[emptypb.Empty]) (*connect.Response[user.MyCouponsResponse], error) {
 	return c.getUsedList.CallUnary(ctx, req)
 }
 
 // GetDetail calls server.user.MyCouponController.GetDetail.
-func (c *myCouponControllerClient) GetDetail(ctx context.Context, req *connect_go.Request[user.CouponIDRequest]) (*connect_go.Response[shared.Coupon], error) {
+func (c *myCouponControllerClient) GetDetail(ctx context.Context, req *connect.Request[user.CouponIDRequest]) (*connect.Response[shared.Coupon], error) {
 	return c.getDetail.CallUnary(ctx, req)
 }
 
 // Use calls server.user.MyCouponController.Use.
-func (c *myCouponControllerClient) Use(ctx context.Context, req *connect_go.Request[user.CouponIDRequest]) (*connect_go.Response[emptypb.Empty], error) {
+func (c *myCouponControllerClient) Use(ctx context.Context, req *connect.Request[user.CouponIDRequest]) (*connect.Response[emptypb.Empty], error) {
 	return c.use.CallUnary(ctx, req)
 }
 
 // MyCouponControllerHandler is an implementation of the server.user.MyCouponController service.
 type MyCouponControllerHandler interface {
 	// 現在ユーザーが持っているクーポン一覧を取得する
-	GetList(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[user.MyCouponsResponse], error)
-	GetExpiredList(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[user.MyCouponsResponse], error)
-	GetUsedList(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[user.MyCouponsResponse], error)
+	GetList(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[user.MyCouponsResponse], error)
+	GetExpiredList(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[user.MyCouponsResponse], error)
+	GetUsedList(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[user.MyCouponsResponse], error)
 	// クーポンの詳細
-	GetDetail(context.Context, *connect_go.Request[user.CouponIDRequest]) (*connect_go.Response[shared.Coupon], error)
+	GetDetail(context.Context, *connect.Request[user.CouponIDRequest]) (*connect.Response[shared.Coupon], error)
 	// クーポンの使用
-	Use(context.Context, *connect_go.Request[user.CouponIDRequest]) (*connect_go.Response[emptypb.Empty], error)
+	Use(context.Context, *connect.Request[user.CouponIDRequest]) (*connect.Response[emptypb.Empty], error)
 }
 
 // NewMyCouponControllerHandler builds an HTTP handler from the service implementation. It returns
@@ -152,31 +158,37 @@ type MyCouponControllerHandler interface {
 //
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
-func NewMyCouponControllerHandler(svc MyCouponControllerHandler, opts ...connect_go.HandlerOption) (string, http.Handler) {
-	myCouponControllerGetListHandler := connect_go.NewUnaryHandler(
+func NewMyCouponControllerHandler(svc MyCouponControllerHandler, opts ...connect.HandlerOption) (string, http.Handler) {
+	myCouponControllerMethods := user.File_v1_user_MyCoupon_proto.Services().ByName("MyCouponController").Methods()
+	myCouponControllerGetListHandler := connect.NewUnaryHandler(
 		MyCouponControllerGetListProcedure,
 		svc.GetList,
-		opts...,
+		connect.WithSchema(myCouponControllerMethods.ByName("GetList")),
+		connect.WithHandlerOptions(opts...),
 	)
-	myCouponControllerGetExpiredListHandler := connect_go.NewUnaryHandler(
+	myCouponControllerGetExpiredListHandler := connect.NewUnaryHandler(
 		MyCouponControllerGetExpiredListProcedure,
 		svc.GetExpiredList,
-		opts...,
+		connect.WithSchema(myCouponControllerMethods.ByName("GetExpiredList")),
+		connect.WithHandlerOptions(opts...),
 	)
-	myCouponControllerGetUsedListHandler := connect_go.NewUnaryHandler(
+	myCouponControllerGetUsedListHandler := connect.NewUnaryHandler(
 		MyCouponControllerGetUsedListProcedure,
 		svc.GetUsedList,
-		opts...,
+		connect.WithSchema(myCouponControllerMethods.ByName("GetUsedList")),
+		connect.WithHandlerOptions(opts...),
 	)
-	myCouponControllerGetDetailHandler := connect_go.NewUnaryHandler(
+	myCouponControllerGetDetailHandler := connect.NewUnaryHandler(
 		MyCouponControllerGetDetailProcedure,
 		svc.GetDetail,
-		opts...,
+		connect.WithSchema(myCouponControllerMethods.ByName("GetDetail")),
+		connect.WithHandlerOptions(opts...),
 	)
-	myCouponControllerUseHandler := connect_go.NewUnaryHandler(
+	myCouponControllerUseHandler := connect.NewUnaryHandler(
 		MyCouponControllerUseProcedure,
 		svc.Use,
-		opts...,
+		connect.WithSchema(myCouponControllerMethods.ByName("Use")),
+		connect.WithHandlerOptions(opts...),
 	)
 	return "/server.user.MyCouponController/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
@@ -199,22 +211,22 @@ func NewMyCouponControllerHandler(svc MyCouponControllerHandler, opts ...connect
 // UnimplementedMyCouponControllerHandler returns CodeUnimplemented from all methods.
 type UnimplementedMyCouponControllerHandler struct{}
 
-func (UnimplementedMyCouponControllerHandler) GetList(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[user.MyCouponsResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.MyCouponController.GetList is not implemented"))
+func (UnimplementedMyCouponControllerHandler) GetList(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[user.MyCouponsResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.user.MyCouponController.GetList is not implemented"))
 }
 
-func (UnimplementedMyCouponControllerHandler) GetExpiredList(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[user.MyCouponsResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.MyCouponController.GetExpiredList is not implemented"))
+func (UnimplementedMyCouponControllerHandler) GetExpiredList(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[user.MyCouponsResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.user.MyCouponController.GetExpiredList is not implemented"))
 }
 
-func (UnimplementedMyCouponControllerHandler) GetUsedList(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[user.MyCouponsResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.MyCouponController.GetUsedList is not implemented"))
+func (UnimplementedMyCouponControllerHandler) GetUsedList(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[user.MyCouponsResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.user.MyCouponController.GetUsedList is not implemented"))
 }
 
-func (UnimplementedMyCouponControllerHandler) GetDetail(context.Context, *connect_go.Request[user.CouponIDRequest]) (*connect_go.Response[shared.Coupon], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.MyCouponController.GetDetail is not implemented"))
+func (UnimplementedMyCouponControllerHandler) GetDetail(context.Context, *connect.Request[user.CouponIDRequest]) (*connect.Response[shared.Coupon], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.user.MyCouponController.GetDetail is not implemented"))
 }
 
-func (UnimplementedMyCouponControllerHandler) Use(context.Context, *connect_go.Request[user.CouponIDRequest]) (*connect_go.Response[emptypb.Empty], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.MyCouponController.Use is not implemented"))
+func (UnimplementedMyCouponControllerHandler) Use(context.Context, *connect.Request[user.CouponIDRequest]) (*connect.Response[emptypb.Empty], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.user.MyCouponController.Use is not implemented"))
 }

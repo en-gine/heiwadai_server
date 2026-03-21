@@ -5,9 +5,9 @@
 package adminconnect
 
 import (
+	connect "connectrpc.com/connect"
 	context "context"
 	errors "errors"
-	connect_go "connectrpc.com/connect"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	http "net/http"
 	admin "server/api/v1/admin"
@@ -19,7 +19,7 @@ import (
 // generated with a version of connect newer than the one compiled into your binary. You can fix the
 // problem by either regenerating this code with an older version of connect or updating the connect
 // version compiled into your binary.
-const _ = connect_go.IsAtLeastVersion0_1_0
+const _ = connect.IsAtLeastVersion1_13_0
 
 const (
 	// UserDataControllerName is the fully-qualified name of the UserDataController service.
@@ -53,11 +53,11 @@ const (
 
 // UserDataControllerClient is a client for the server.admin.UserDataController service.
 type UserDataControllerClient interface {
-	GetByID(context.Context, *connect_go.Request[admin.UserIDRequest]) (*connect_go.Response[admin.UserDataResponse], error)
-	Update(context.Context, *connect_go.Request[admin.UserUpdateDataRequest]) (*connect_go.Response[admin.UserDataResponse], error)
-	Delete(context.Context, *connect_go.Request[admin.UserDeleteRequest]) (*connect_go.Response[emptypb.Empty], error)
-	GetList(context.Context, *connect_go.Request[admin.UserListFilterRequest]) (*connect_go.Response[admin.UserListResponse], error)
-	GetLoginLogList(context.Context, *connect_go.Request[admin.UserLoginLogRequest]) (*connect_go.Response[admin.UserLoginLogListResponse], error)
+	GetByID(context.Context, *connect.Request[admin.UserIDRequest]) (*connect.Response[admin.UserDataResponse], error)
+	Update(context.Context, *connect.Request[admin.UserUpdateDataRequest]) (*connect.Response[admin.UserDataResponse], error)
+	Delete(context.Context, *connect.Request[admin.UserDeleteRequest]) (*connect.Response[emptypb.Empty], error)
+	GetList(context.Context, *connect.Request[admin.UserListFilterRequest]) (*connect.Response[admin.UserListResponse], error)
+	GetLoginLogList(context.Context, *connect.Request[admin.UserLoginLogRequest]) (*connect.Response[admin.UserLoginLogListResponse], error)
 }
 
 // NewUserDataControllerClient constructs a client for the server.admin.UserDataController service.
@@ -67,78 +67,84 @@ type UserDataControllerClient interface {
 //
 // The URL supplied here should be the base URL for the Connect or gRPC server (for example,
 // http://api.acme.com or https://acme.com/grpc).
-func NewUserDataControllerClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) UserDataControllerClient {
+func NewUserDataControllerClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) UserDataControllerClient {
 	baseURL = strings.TrimRight(baseURL, "/")
+	userDataControllerMethods := admin.File_v1_admin_UserData_proto.Services().ByName("UserDataController").Methods()
 	return &userDataControllerClient{
-		getByID: connect_go.NewClient[admin.UserIDRequest, admin.UserDataResponse](
+		getByID: connect.NewClient[admin.UserIDRequest, admin.UserDataResponse](
 			httpClient,
 			baseURL+UserDataControllerGetByIDProcedure,
-			opts...,
+			connect.WithSchema(userDataControllerMethods.ByName("GetByID")),
+			connect.WithClientOptions(opts...),
 		),
-		update: connect_go.NewClient[admin.UserUpdateDataRequest, admin.UserDataResponse](
+		update: connect.NewClient[admin.UserUpdateDataRequest, admin.UserDataResponse](
 			httpClient,
 			baseURL+UserDataControllerUpdateProcedure,
-			opts...,
+			connect.WithSchema(userDataControllerMethods.ByName("Update")),
+			connect.WithClientOptions(opts...),
 		),
-		delete: connect_go.NewClient[admin.UserDeleteRequest, emptypb.Empty](
+		delete: connect.NewClient[admin.UserDeleteRequest, emptypb.Empty](
 			httpClient,
 			baseURL+UserDataControllerDeleteProcedure,
-			opts...,
+			connect.WithSchema(userDataControllerMethods.ByName("Delete")),
+			connect.WithClientOptions(opts...),
 		),
-		getList: connect_go.NewClient[admin.UserListFilterRequest, admin.UserListResponse](
+		getList: connect.NewClient[admin.UserListFilterRequest, admin.UserListResponse](
 			httpClient,
 			baseURL+UserDataControllerGetListProcedure,
-			opts...,
+			connect.WithSchema(userDataControllerMethods.ByName("GetList")),
+			connect.WithClientOptions(opts...),
 		),
-		getLoginLogList: connect_go.NewClient[admin.UserLoginLogRequest, admin.UserLoginLogListResponse](
+		getLoginLogList: connect.NewClient[admin.UserLoginLogRequest, admin.UserLoginLogListResponse](
 			httpClient,
 			baseURL+UserDataControllerGetLoginLogListProcedure,
-			opts...,
+			connect.WithSchema(userDataControllerMethods.ByName("GetLoginLogList")),
+			connect.WithClientOptions(opts...),
 		),
 	}
 }
 
 // userDataControllerClient implements UserDataControllerClient.
 type userDataControllerClient struct {
-	getByID         *connect_go.Client[admin.UserIDRequest, admin.UserDataResponse]
-	update          *connect_go.Client[admin.UserUpdateDataRequest, admin.UserDataResponse]
-	delete          *connect_go.Client[admin.UserDeleteRequest, emptypb.Empty]
-	getList         *connect_go.Client[admin.UserListFilterRequest, admin.UserListResponse]
-	getLoginLogList *connect_go.Client[admin.UserLoginLogRequest, admin.UserLoginLogListResponse]
+	getByID         *connect.Client[admin.UserIDRequest, admin.UserDataResponse]
+	update          *connect.Client[admin.UserUpdateDataRequest, admin.UserDataResponse]
+	delete          *connect.Client[admin.UserDeleteRequest, emptypb.Empty]
+	getList         *connect.Client[admin.UserListFilterRequest, admin.UserListResponse]
+	getLoginLogList *connect.Client[admin.UserLoginLogRequest, admin.UserLoginLogListResponse]
 }
 
 // GetByID calls server.admin.UserDataController.GetByID.
-func (c *userDataControllerClient) GetByID(ctx context.Context, req *connect_go.Request[admin.UserIDRequest]) (*connect_go.Response[admin.UserDataResponse], error) {
+func (c *userDataControllerClient) GetByID(ctx context.Context, req *connect.Request[admin.UserIDRequest]) (*connect.Response[admin.UserDataResponse], error) {
 	return c.getByID.CallUnary(ctx, req)
 }
 
 // Update calls server.admin.UserDataController.Update.
-func (c *userDataControllerClient) Update(ctx context.Context, req *connect_go.Request[admin.UserUpdateDataRequest]) (*connect_go.Response[admin.UserDataResponse], error) {
+func (c *userDataControllerClient) Update(ctx context.Context, req *connect.Request[admin.UserUpdateDataRequest]) (*connect.Response[admin.UserDataResponse], error) {
 	return c.update.CallUnary(ctx, req)
 }
 
 // Delete calls server.admin.UserDataController.Delete.
-func (c *userDataControllerClient) Delete(ctx context.Context, req *connect_go.Request[admin.UserDeleteRequest]) (*connect_go.Response[emptypb.Empty], error) {
+func (c *userDataControllerClient) Delete(ctx context.Context, req *connect.Request[admin.UserDeleteRequest]) (*connect.Response[emptypb.Empty], error) {
 	return c.delete.CallUnary(ctx, req)
 }
 
 // GetList calls server.admin.UserDataController.GetList.
-func (c *userDataControllerClient) GetList(ctx context.Context, req *connect_go.Request[admin.UserListFilterRequest]) (*connect_go.Response[admin.UserListResponse], error) {
+func (c *userDataControllerClient) GetList(ctx context.Context, req *connect.Request[admin.UserListFilterRequest]) (*connect.Response[admin.UserListResponse], error) {
 	return c.getList.CallUnary(ctx, req)
 }
 
 // GetLoginLogList calls server.admin.UserDataController.GetLoginLogList.
-func (c *userDataControllerClient) GetLoginLogList(ctx context.Context, req *connect_go.Request[admin.UserLoginLogRequest]) (*connect_go.Response[admin.UserLoginLogListResponse], error) {
+func (c *userDataControllerClient) GetLoginLogList(ctx context.Context, req *connect.Request[admin.UserLoginLogRequest]) (*connect.Response[admin.UserLoginLogListResponse], error) {
 	return c.getLoginLogList.CallUnary(ctx, req)
 }
 
 // UserDataControllerHandler is an implementation of the server.admin.UserDataController service.
 type UserDataControllerHandler interface {
-	GetByID(context.Context, *connect_go.Request[admin.UserIDRequest]) (*connect_go.Response[admin.UserDataResponse], error)
-	Update(context.Context, *connect_go.Request[admin.UserUpdateDataRequest]) (*connect_go.Response[admin.UserDataResponse], error)
-	Delete(context.Context, *connect_go.Request[admin.UserDeleteRequest]) (*connect_go.Response[emptypb.Empty], error)
-	GetList(context.Context, *connect_go.Request[admin.UserListFilterRequest]) (*connect_go.Response[admin.UserListResponse], error)
-	GetLoginLogList(context.Context, *connect_go.Request[admin.UserLoginLogRequest]) (*connect_go.Response[admin.UserLoginLogListResponse], error)
+	GetByID(context.Context, *connect.Request[admin.UserIDRequest]) (*connect.Response[admin.UserDataResponse], error)
+	Update(context.Context, *connect.Request[admin.UserUpdateDataRequest]) (*connect.Response[admin.UserDataResponse], error)
+	Delete(context.Context, *connect.Request[admin.UserDeleteRequest]) (*connect.Response[emptypb.Empty], error)
+	GetList(context.Context, *connect.Request[admin.UserListFilterRequest]) (*connect.Response[admin.UserListResponse], error)
+	GetLoginLogList(context.Context, *connect.Request[admin.UserLoginLogRequest]) (*connect.Response[admin.UserLoginLogListResponse], error)
 }
 
 // NewUserDataControllerHandler builds an HTTP handler from the service implementation. It returns
@@ -146,31 +152,37 @@ type UserDataControllerHandler interface {
 //
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
-func NewUserDataControllerHandler(svc UserDataControllerHandler, opts ...connect_go.HandlerOption) (string, http.Handler) {
-	userDataControllerGetByIDHandler := connect_go.NewUnaryHandler(
+func NewUserDataControllerHandler(svc UserDataControllerHandler, opts ...connect.HandlerOption) (string, http.Handler) {
+	userDataControllerMethods := admin.File_v1_admin_UserData_proto.Services().ByName("UserDataController").Methods()
+	userDataControllerGetByIDHandler := connect.NewUnaryHandler(
 		UserDataControllerGetByIDProcedure,
 		svc.GetByID,
-		opts...,
+		connect.WithSchema(userDataControllerMethods.ByName("GetByID")),
+		connect.WithHandlerOptions(opts...),
 	)
-	userDataControllerUpdateHandler := connect_go.NewUnaryHandler(
+	userDataControllerUpdateHandler := connect.NewUnaryHandler(
 		UserDataControllerUpdateProcedure,
 		svc.Update,
-		opts...,
+		connect.WithSchema(userDataControllerMethods.ByName("Update")),
+		connect.WithHandlerOptions(opts...),
 	)
-	userDataControllerDeleteHandler := connect_go.NewUnaryHandler(
+	userDataControllerDeleteHandler := connect.NewUnaryHandler(
 		UserDataControllerDeleteProcedure,
 		svc.Delete,
-		opts...,
+		connect.WithSchema(userDataControllerMethods.ByName("Delete")),
+		connect.WithHandlerOptions(opts...),
 	)
-	userDataControllerGetListHandler := connect_go.NewUnaryHandler(
+	userDataControllerGetListHandler := connect.NewUnaryHandler(
 		UserDataControllerGetListProcedure,
 		svc.GetList,
-		opts...,
+		connect.WithSchema(userDataControllerMethods.ByName("GetList")),
+		connect.WithHandlerOptions(opts...),
 	)
-	userDataControllerGetLoginLogListHandler := connect_go.NewUnaryHandler(
+	userDataControllerGetLoginLogListHandler := connect.NewUnaryHandler(
 		UserDataControllerGetLoginLogListProcedure,
 		svc.GetLoginLogList,
-		opts...,
+		connect.WithSchema(userDataControllerMethods.ByName("GetLoginLogList")),
+		connect.WithHandlerOptions(opts...),
 	)
 	return "/server.admin.UserDataController/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
@@ -193,22 +205,22 @@ func NewUserDataControllerHandler(svc UserDataControllerHandler, opts ...connect
 // UnimplementedUserDataControllerHandler returns CodeUnimplemented from all methods.
 type UnimplementedUserDataControllerHandler struct{}
 
-func (UnimplementedUserDataControllerHandler) GetByID(context.Context, *connect_go.Request[admin.UserIDRequest]) (*connect_go.Response[admin.UserDataResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.UserDataController.GetByID is not implemented"))
+func (UnimplementedUserDataControllerHandler) GetByID(context.Context, *connect.Request[admin.UserIDRequest]) (*connect.Response[admin.UserDataResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.admin.UserDataController.GetByID is not implemented"))
 }
 
-func (UnimplementedUserDataControllerHandler) Update(context.Context, *connect_go.Request[admin.UserUpdateDataRequest]) (*connect_go.Response[admin.UserDataResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.UserDataController.Update is not implemented"))
+func (UnimplementedUserDataControllerHandler) Update(context.Context, *connect.Request[admin.UserUpdateDataRequest]) (*connect.Response[admin.UserDataResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.admin.UserDataController.Update is not implemented"))
 }
 
-func (UnimplementedUserDataControllerHandler) Delete(context.Context, *connect_go.Request[admin.UserDeleteRequest]) (*connect_go.Response[emptypb.Empty], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.UserDataController.Delete is not implemented"))
+func (UnimplementedUserDataControllerHandler) Delete(context.Context, *connect.Request[admin.UserDeleteRequest]) (*connect.Response[emptypb.Empty], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.admin.UserDataController.Delete is not implemented"))
 }
 
-func (UnimplementedUserDataControllerHandler) GetList(context.Context, *connect_go.Request[admin.UserListFilterRequest]) (*connect_go.Response[admin.UserListResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.UserDataController.GetList is not implemented"))
+func (UnimplementedUserDataControllerHandler) GetList(context.Context, *connect.Request[admin.UserListFilterRequest]) (*connect.Response[admin.UserListResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.admin.UserDataController.GetList is not implemented"))
 }
 
-func (UnimplementedUserDataControllerHandler) GetLoginLogList(context.Context, *connect_go.Request[admin.UserLoginLogRequest]) (*connect_go.Response[admin.UserLoginLogListResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.UserDataController.GetLoginLogList is not implemented"))
+func (UnimplementedUserDataControllerHandler) GetLoginLogList(context.Context, *connect.Request[admin.UserLoginLogRequest]) (*connect.Response[admin.UserLoginLogListResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.admin.UserDataController.GetLoginLogList is not implemented"))
 }

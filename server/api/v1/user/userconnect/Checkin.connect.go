@@ -5,9 +5,9 @@
 package userconnect
 
 import (
+	connect "connectrpc.com/connect"
 	context "context"
 	errors "errors"
-	connect_go "connectrpc.com/connect"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	http "net/http"
 	user "server/api/v1/user"
@@ -19,7 +19,7 @@ import (
 // generated with a version of connect newer than the one compiled into your binary. You can fix the
 // problem by either regenerating this code with an older version of connect or updating the connect
 // version compiled into your binary.
-const _ = connect_go.IsAtLeastVersion0_1_0
+const _ = connect.IsAtLeastVersion1_13_0
 
 const (
 	// CheckinControllerName is the fully-qualified name of the CheckinController service.
@@ -45,9 +45,9 @@ const (
 // CheckinControllerClient is a client for the server.user.CheckinController service.
 type CheckinControllerClient interface {
 	// 自身のスタンプカード取得（現在のチェックイン済情報と店舗のスタンプ画像が届く）
-	GetStampCard(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[user.StampCardResponse], error)
+	GetStampCard(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[user.StampCardResponse], error)
 	// 店舗に対するチェックイン（QRコード利用）
-	Checkin(context.Context, *connect_go.Request[user.CheckinRequest]) (*connect_go.Response[user.CheckinResponse], error)
+	Checkin(context.Context, *connect.Request[user.CheckinRequest]) (*connect.Response[user.CheckinResponse], error)
 }
 
 // NewCheckinControllerClient constructs a client for the server.user.CheckinController service. By
@@ -57,44 +57,47 @@ type CheckinControllerClient interface {
 //
 // The URL supplied here should be the base URL for the Connect or gRPC server (for example,
 // http://api.acme.com or https://acme.com/grpc).
-func NewCheckinControllerClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) CheckinControllerClient {
+func NewCheckinControllerClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) CheckinControllerClient {
 	baseURL = strings.TrimRight(baseURL, "/")
+	checkinControllerMethods := user.File_v1_user_Checkin_proto.Services().ByName("CheckinController").Methods()
 	return &checkinControllerClient{
-		getStampCard: connect_go.NewClient[emptypb.Empty, user.StampCardResponse](
+		getStampCard: connect.NewClient[emptypb.Empty, user.StampCardResponse](
 			httpClient,
 			baseURL+CheckinControllerGetStampCardProcedure,
-			opts...,
+			connect.WithSchema(checkinControllerMethods.ByName("GetStampCard")),
+			connect.WithClientOptions(opts...),
 		),
-		checkin: connect_go.NewClient[user.CheckinRequest, user.CheckinResponse](
+		checkin: connect.NewClient[user.CheckinRequest, user.CheckinResponse](
 			httpClient,
 			baseURL+CheckinControllerCheckinProcedure,
-			opts...,
+			connect.WithSchema(checkinControllerMethods.ByName("Checkin")),
+			connect.WithClientOptions(opts...),
 		),
 	}
 }
 
 // checkinControllerClient implements CheckinControllerClient.
 type checkinControllerClient struct {
-	getStampCard *connect_go.Client[emptypb.Empty, user.StampCardResponse]
-	checkin      *connect_go.Client[user.CheckinRequest, user.CheckinResponse]
+	getStampCard *connect.Client[emptypb.Empty, user.StampCardResponse]
+	checkin      *connect.Client[user.CheckinRequest, user.CheckinResponse]
 }
 
 // GetStampCard calls server.user.CheckinController.GetStampCard.
-func (c *checkinControllerClient) GetStampCard(ctx context.Context, req *connect_go.Request[emptypb.Empty]) (*connect_go.Response[user.StampCardResponse], error) {
+func (c *checkinControllerClient) GetStampCard(ctx context.Context, req *connect.Request[emptypb.Empty]) (*connect.Response[user.StampCardResponse], error) {
 	return c.getStampCard.CallUnary(ctx, req)
 }
 
 // Checkin calls server.user.CheckinController.Checkin.
-func (c *checkinControllerClient) Checkin(ctx context.Context, req *connect_go.Request[user.CheckinRequest]) (*connect_go.Response[user.CheckinResponse], error) {
+func (c *checkinControllerClient) Checkin(ctx context.Context, req *connect.Request[user.CheckinRequest]) (*connect.Response[user.CheckinResponse], error) {
 	return c.checkin.CallUnary(ctx, req)
 }
 
 // CheckinControllerHandler is an implementation of the server.user.CheckinController service.
 type CheckinControllerHandler interface {
 	// 自身のスタンプカード取得（現在のチェックイン済情報と店舗のスタンプ画像が届く）
-	GetStampCard(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[user.StampCardResponse], error)
+	GetStampCard(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[user.StampCardResponse], error)
 	// 店舗に対するチェックイン（QRコード利用）
-	Checkin(context.Context, *connect_go.Request[user.CheckinRequest]) (*connect_go.Response[user.CheckinResponse], error)
+	Checkin(context.Context, *connect.Request[user.CheckinRequest]) (*connect.Response[user.CheckinResponse], error)
 }
 
 // NewCheckinControllerHandler builds an HTTP handler from the service implementation. It returns
@@ -102,16 +105,19 @@ type CheckinControllerHandler interface {
 //
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
-func NewCheckinControllerHandler(svc CheckinControllerHandler, opts ...connect_go.HandlerOption) (string, http.Handler) {
-	checkinControllerGetStampCardHandler := connect_go.NewUnaryHandler(
+func NewCheckinControllerHandler(svc CheckinControllerHandler, opts ...connect.HandlerOption) (string, http.Handler) {
+	checkinControllerMethods := user.File_v1_user_Checkin_proto.Services().ByName("CheckinController").Methods()
+	checkinControllerGetStampCardHandler := connect.NewUnaryHandler(
 		CheckinControllerGetStampCardProcedure,
 		svc.GetStampCard,
-		opts...,
+		connect.WithSchema(checkinControllerMethods.ByName("GetStampCard")),
+		connect.WithHandlerOptions(opts...),
 	)
-	checkinControllerCheckinHandler := connect_go.NewUnaryHandler(
+	checkinControllerCheckinHandler := connect.NewUnaryHandler(
 		CheckinControllerCheckinProcedure,
 		svc.Checkin,
-		opts...,
+		connect.WithSchema(checkinControllerMethods.ByName("Checkin")),
+		connect.WithHandlerOptions(opts...),
 	)
 	return "/server.user.CheckinController/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
@@ -128,10 +134,10 @@ func NewCheckinControllerHandler(svc CheckinControllerHandler, opts ...connect_g
 // UnimplementedCheckinControllerHandler returns CodeUnimplemented from all methods.
 type UnimplementedCheckinControllerHandler struct{}
 
-func (UnimplementedCheckinControllerHandler) GetStampCard(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[user.StampCardResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.CheckinController.GetStampCard is not implemented"))
+func (UnimplementedCheckinControllerHandler) GetStampCard(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[user.StampCardResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.user.CheckinController.GetStampCard is not implemented"))
 }
 
-func (UnimplementedCheckinControllerHandler) Checkin(context.Context, *connect_go.Request[user.CheckinRequest]) (*connect_go.Response[user.CheckinResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.CheckinController.Checkin is not implemented"))
+func (UnimplementedCheckinControllerHandler) Checkin(context.Context, *connect.Request[user.CheckinRequest]) (*connect.Response[user.CheckinResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.user.CheckinController.Checkin is not implemented"))
 }

@@ -5,9 +5,9 @@
 package userconnect
 
 import (
+	connect "connectrpc.com/connect"
 	context "context"
 	errors "errors"
-	connect_go "connectrpc.com/connect"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	http "net/http"
 	user "server/api/v1/user"
@@ -19,7 +19,7 @@ import (
 // generated with a version of connect newer than the one compiled into your binary. You can fix the
 // problem by either regenerating this code with an older version of connect or updating the connect
 // version compiled into your binary.
-const _ = connect_go.IsAtLeastVersion0_1_0
+const _ = connect.IsAtLeastVersion1_13_0
 
 const (
 	// BookControllerName is the fully-qualified name of the BookController service.
@@ -59,15 +59,15 @@ const (
 // BookControllerClient is a client for the server.user.BookController service.
 type BookControllerClient interface {
 	// 現在の自身の予約状況
-	GetMyBook(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[user.BooksResponse], error)
+	GetMyBook(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[user.BooksResponse], error)
 	// 現在の自身の特定の予約の詳細を取得
-	GetBookByID(context.Context, *connect_go.Request[user.BookIDRequest]) (*connect_go.Response[user.BookResponse], error)
+	GetBookByID(context.Context, *connect.Request[user.BookIDRequest]) (*connect.Response[user.BookResponse], error)
 	// 予約のキャンセル
-	Cancel(context.Context, *connect_go.Request[user.BookIDRequest]) (*connect_go.Response[emptypb.Empty], error)
+	Cancel(context.Context, *connect.Request[user.BookIDRequest]) (*connect.Response[emptypb.Empty], error)
 	// 予約情報からプランの予約
-	Reserve(context.Context, *connect_go.Request[user.ReserveRequest]) (*connect_go.Response[emptypb.Empty], error)
+	Reserve(context.Context, *connect.Request[user.ReserveRequest]) (*connect.Response[emptypb.Empty], error)
 	// 現在メンテナンス中かどうか
-	GetMentenanceInfo(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[user.BookMentenanceInfoResponse], error)
+	GetMentenanceInfo(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[user.BookMentenanceInfoResponse], error)
 }
 
 // NewBookControllerClient constructs a client for the server.user.BookController service. By
@@ -77,83 +77,89 @@ type BookControllerClient interface {
 //
 // The URL supplied here should be the base URL for the Connect or gRPC server (for example,
 // http://api.acme.com or https://acme.com/grpc).
-func NewBookControllerClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) BookControllerClient {
+func NewBookControllerClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) BookControllerClient {
 	baseURL = strings.TrimRight(baseURL, "/")
+	bookControllerMethods := user.File_v1_user_Book_proto.Services().ByName("BookController").Methods()
 	return &bookControllerClient{
-		getMyBook: connect_go.NewClient[emptypb.Empty, user.BooksResponse](
+		getMyBook: connect.NewClient[emptypb.Empty, user.BooksResponse](
 			httpClient,
 			baseURL+BookControllerGetMyBookProcedure,
-			opts...,
+			connect.WithSchema(bookControllerMethods.ByName("GetMyBook")),
+			connect.WithClientOptions(opts...),
 		),
-		getBookByID: connect_go.NewClient[user.BookIDRequest, user.BookResponse](
+		getBookByID: connect.NewClient[user.BookIDRequest, user.BookResponse](
 			httpClient,
 			baseURL+BookControllerGetBookByIDProcedure,
-			opts...,
+			connect.WithSchema(bookControllerMethods.ByName("GetBookByID")),
+			connect.WithClientOptions(opts...),
 		),
-		cancel: connect_go.NewClient[user.BookIDRequest, emptypb.Empty](
+		cancel: connect.NewClient[user.BookIDRequest, emptypb.Empty](
 			httpClient,
 			baseURL+BookControllerCancelProcedure,
-			opts...,
+			connect.WithSchema(bookControllerMethods.ByName("Cancel")),
+			connect.WithClientOptions(opts...),
 		),
-		reserve: connect_go.NewClient[user.ReserveRequest, emptypb.Empty](
+		reserve: connect.NewClient[user.ReserveRequest, emptypb.Empty](
 			httpClient,
 			baseURL+BookControllerReserveProcedure,
-			opts...,
+			connect.WithSchema(bookControllerMethods.ByName("Reserve")),
+			connect.WithClientOptions(opts...),
 		),
-		getMentenanceInfo: connect_go.NewClient[emptypb.Empty, user.BookMentenanceInfoResponse](
+		getMentenanceInfo: connect.NewClient[emptypb.Empty, user.BookMentenanceInfoResponse](
 			httpClient,
 			baseURL+BookControllerGetMentenanceInfoProcedure,
-			opts...,
+			connect.WithSchema(bookControllerMethods.ByName("GetMentenanceInfo")),
+			connect.WithClientOptions(opts...),
 		),
 	}
 }
 
 // bookControllerClient implements BookControllerClient.
 type bookControllerClient struct {
-	getMyBook         *connect_go.Client[emptypb.Empty, user.BooksResponse]
-	getBookByID       *connect_go.Client[user.BookIDRequest, user.BookResponse]
-	cancel            *connect_go.Client[user.BookIDRequest, emptypb.Empty]
-	reserve           *connect_go.Client[user.ReserveRequest, emptypb.Empty]
-	getMentenanceInfo *connect_go.Client[emptypb.Empty, user.BookMentenanceInfoResponse]
+	getMyBook         *connect.Client[emptypb.Empty, user.BooksResponse]
+	getBookByID       *connect.Client[user.BookIDRequest, user.BookResponse]
+	cancel            *connect.Client[user.BookIDRequest, emptypb.Empty]
+	reserve           *connect.Client[user.ReserveRequest, emptypb.Empty]
+	getMentenanceInfo *connect.Client[emptypb.Empty, user.BookMentenanceInfoResponse]
 }
 
 // GetMyBook calls server.user.BookController.GetMyBook.
-func (c *bookControllerClient) GetMyBook(ctx context.Context, req *connect_go.Request[emptypb.Empty]) (*connect_go.Response[user.BooksResponse], error) {
+func (c *bookControllerClient) GetMyBook(ctx context.Context, req *connect.Request[emptypb.Empty]) (*connect.Response[user.BooksResponse], error) {
 	return c.getMyBook.CallUnary(ctx, req)
 }
 
 // GetBookByID calls server.user.BookController.GetBookByID.
-func (c *bookControllerClient) GetBookByID(ctx context.Context, req *connect_go.Request[user.BookIDRequest]) (*connect_go.Response[user.BookResponse], error) {
+func (c *bookControllerClient) GetBookByID(ctx context.Context, req *connect.Request[user.BookIDRequest]) (*connect.Response[user.BookResponse], error) {
 	return c.getBookByID.CallUnary(ctx, req)
 }
 
 // Cancel calls server.user.BookController.Cancel.
-func (c *bookControllerClient) Cancel(ctx context.Context, req *connect_go.Request[user.BookIDRequest]) (*connect_go.Response[emptypb.Empty], error) {
+func (c *bookControllerClient) Cancel(ctx context.Context, req *connect.Request[user.BookIDRequest]) (*connect.Response[emptypb.Empty], error) {
 	return c.cancel.CallUnary(ctx, req)
 }
 
 // Reserve calls server.user.BookController.Reserve.
-func (c *bookControllerClient) Reserve(ctx context.Context, req *connect_go.Request[user.ReserveRequest]) (*connect_go.Response[emptypb.Empty], error) {
+func (c *bookControllerClient) Reserve(ctx context.Context, req *connect.Request[user.ReserveRequest]) (*connect.Response[emptypb.Empty], error) {
 	return c.reserve.CallUnary(ctx, req)
 }
 
 // GetMentenanceInfo calls server.user.BookController.GetMentenanceInfo.
-func (c *bookControllerClient) GetMentenanceInfo(ctx context.Context, req *connect_go.Request[emptypb.Empty]) (*connect_go.Response[user.BookMentenanceInfoResponse], error) {
+func (c *bookControllerClient) GetMentenanceInfo(ctx context.Context, req *connect.Request[emptypb.Empty]) (*connect.Response[user.BookMentenanceInfoResponse], error) {
 	return c.getMentenanceInfo.CallUnary(ctx, req)
 }
 
 // BookControllerHandler is an implementation of the server.user.BookController service.
 type BookControllerHandler interface {
 	// 現在の自身の予約状況
-	GetMyBook(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[user.BooksResponse], error)
+	GetMyBook(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[user.BooksResponse], error)
 	// 現在の自身の特定の予約の詳細を取得
-	GetBookByID(context.Context, *connect_go.Request[user.BookIDRequest]) (*connect_go.Response[user.BookResponse], error)
+	GetBookByID(context.Context, *connect.Request[user.BookIDRequest]) (*connect.Response[user.BookResponse], error)
 	// 予約のキャンセル
-	Cancel(context.Context, *connect_go.Request[user.BookIDRequest]) (*connect_go.Response[emptypb.Empty], error)
+	Cancel(context.Context, *connect.Request[user.BookIDRequest]) (*connect.Response[emptypb.Empty], error)
 	// 予約情報からプランの予約
-	Reserve(context.Context, *connect_go.Request[user.ReserveRequest]) (*connect_go.Response[emptypb.Empty], error)
+	Reserve(context.Context, *connect.Request[user.ReserveRequest]) (*connect.Response[emptypb.Empty], error)
 	// 現在メンテナンス中かどうか
-	GetMentenanceInfo(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[user.BookMentenanceInfoResponse], error)
+	GetMentenanceInfo(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[user.BookMentenanceInfoResponse], error)
 }
 
 // NewBookControllerHandler builds an HTTP handler from the service implementation. It returns the
@@ -161,31 +167,37 @@ type BookControllerHandler interface {
 //
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
-func NewBookControllerHandler(svc BookControllerHandler, opts ...connect_go.HandlerOption) (string, http.Handler) {
-	bookControllerGetMyBookHandler := connect_go.NewUnaryHandler(
+func NewBookControllerHandler(svc BookControllerHandler, opts ...connect.HandlerOption) (string, http.Handler) {
+	bookControllerMethods := user.File_v1_user_Book_proto.Services().ByName("BookController").Methods()
+	bookControllerGetMyBookHandler := connect.NewUnaryHandler(
 		BookControllerGetMyBookProcedure,
 		svc.GetMyBook,
-		opts...,
+		connect.WithSchema(bookControllerMethods.ByName("GetMyBook")),
+		connect.WithHandlerOptions(opts...),
 	)
-	bookControllerGetBookByIDHandler := connect_go.NewUnaryHandler(
+	bookControllerGetBookByIDHandler := connect.NewUnaryHandler(
 		BookControllerGetBookByIDProcedure,
 		svc.GetBookByID,
-		opts...,
+		connect.WithSchema(bookControllerMethods.ByName("GetBookByID")),
+		connect.WithHandlerOptions(opts...),
 	)
-	bookControllerCancelHandler := connect_go.NewUnaryHandler(
+	bookControllerCancelHandler := connect.NewUnaryHandler(
 		BookControllerCancelProcedure,
 		svc.Cancel,
-		opts...,
+		connect.WithSchema(bookControllerMethods.ByName("Cancel")),
+		connect.WithHandlerOptions(opts...),
 	)
-	bookControllerReserveHandler := connect_go.NewUnaryHandler(
+	bookControllerReserveHandler := connect.NewUnaryHandler(
 		BookControllerReserveProcedure,
 		svc.Reserve,
-		opts...,
+		connect.WithSchema(bookControllerMethods.ByName("Reserve")),
+		connect.WithHandlerOptions(opts...),
 	)
-	bookControllerGetMentenanceInfoHandler := connect_go.NewUnaryHandler(
+	bookControllerGetMentenanceInfoHandler := connect.NewUnaryHandler(
 		BookControllerGetMentenanceInfoProcedure,
 		svc.GetMentenanceInfo,
-		opts...,
+		connect.WithSchema(bookControllerMethods.ByName("GetMentenanceInfo")),
+		connect.WithHandlerOptions(opts...),
 	)
 	return "/server.user.BookController/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
@@ -208,30 +220,30 @@ func NewBookControllerHandler(svc BookControllerHandler, opts ...connect_go.Hand
 // UnimplementedBookControllerHandler returns CodeUnimplemented from all methods.
 type UnimplementedBookControllerHandler struct{}
 
-func (UnimplementedBookControllerHandler) GetMyBook(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[user.BooksResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.BookController.GetMyBook is not implemented"))
+func (UnimplementedBookControllerHandler) GetMyBook(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[user.BooksResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.user.BookController.GetMyBook is not implemented"))
 }
 
-func (UnimplementedBookControllerHandler) GetBookByID(context.Context, *connect_go.Request[user.BookIDRequest]) (*connect_go.Response[user.BookResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.BookController.GetBookByID is not implemented"))
+func (UnimplementedBookControllerHandler) GetBookByID(context.Context, *connect.Request[user.BookIDRequest]) (*connect.Response[user.BookResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.user.BookController.GetBookByID is not implemented"))
 }
 
-func (UnimplementedBookControllerHandler) Cancel(context.Context, *connect_go.Request[user.BookIDRequest]) (*connect_go.Response[emptypb.Empty], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.BookController.Cancel is not implemented"))
+func (UnimplementedBookControllerHandler) Cancel(context.Context, *connect.Request[user.BookIDRequest]) (*connect.Response[emptypb.Empty], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.user.BookController.Cancel is not implemented"))
 }
 
-func (UnimplementedBookControllerHandler) Reserve(context.Context, *connect_go.Request[user.ReserveRequest]) (*connect_go.Response[emptypb.Empty], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.BookController.Reserve is not implemented"))
+func (UnimplementedBookControllerHandler) Reserve(context.Context, *connect.Request[user.ReserveRequest]) (*connect.Response[emptypb.Empty], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.user.BookController.Reserve is not implemented"))
 }
 
-func (UnimplementedBookControllerHandler) GetMentenanceInfo(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[user.BookMentenanceInfoResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.BookController.GetMentenanceInfo is not implemented"))
+func (UnimplementedBookControllerHandler) GetMentenanceInfo(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[user.BookMentenanceInfoResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.user.BookController.GetMentenanceInfo is not implemented"))
 }
 
 // PlanControllerClient is a client for the server.user.PlanController service.
 type PlanControllerClient interface {
-	Search(context.Context, *connect_go.Request[user.PlanSearchRequest]) (*connect_go.Response[user.SearchPlanResponse], error)
-	GetDetail(context.Context, *connect_go.Request[user.PlanDetailRequest]) (*connect_go.Response[user.PlanStayDetailResponse], error)
+	Search(context.Context, *connect.Request[user.PlanSearchRequest]) (*connect.Response[user.SearchPlanResponse], error)
+	GetDetail(context.Context, *connect.Request[user.PlanDetailRequest]) (*connect.Response[user.PlanStayDetailResponse], error)
 }
 
 // NewPlanControllerClient constructs a client for the server.user.PlanController service. By
@@ -241,42 +253,45 @@ type PlanControllerClient interface {
 //
 // The URL supplied here should be the base URL for the Connect or gRPC server (for example,
 // http://api.acme.com or https://acme.com/grpc).
-func NewPlanControllerClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) PlanControllerClient {
+func NewPlanControllerClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) PlanControllerClient {
 	baseURL = strings.TrimRight(baseURL, "/")
+	planControllerMethods := user.File_v1_user_Book_proto.Services().ByName("PlanController").Methods()
 	return &planControllerClient{
-		search: connect_go.NewClient[user.PlanSearchRequest, user.SearchPlanResponse](
+		search: connect.NewClient[user.PlanSearchRequest, user.SearchPlanResponse](
 			httpClient,
 			baseURL+PlanControllerSearchProcedure,
-			opts...,
+			connect.WithSchema(planControllerMethods.ByName("Search")),
+			connect.WithClientOptions(opts...),
 		),
-		getDetail: connect_go.NewClient[user.PlanDetailRequest, user.PlanStayDetailResponse](
+		getDetail: connect.NewClient[user.PlanDetailRequest, user.PlanStayDetailResponse](
 			httpClient,
 			baseURL+PlanControllerGetDetailProcedure,
-			opts...,
+			connect.WithSchema(planControllerMethods.ByName("GetDetail")),
+			connect.WithClientOptions(opts...),
 		),
 	}
 }
 
 // planControllerClient implements PlanControllerClient.
 type planControllerClient struct {
-	search    *connect_go.Client[user.PlanSearchRequest, user.SearchPlanResponse]
-	getDetail *connect_go.Client[user.PlanDetailRequest, user.PlanStayDetailResponse]
+	search    *connect.Client[user.PlanSearchRequest, user.SearchPlanResponse]
+	getDetail *connect.Client[user.PlanDetailRequest, user.PlanStayDetailResponse]
 }
 
 // Search calls server.user.PlanController.Search.
-func (c *planControllerClient) Search(ctx context.Context, req *connect_go.Request[user.PlanSearchRequest]) (*connect_go.Response[user.SearchPlanResponse], error) {
+func (c *planControllerClient) Search(ctx context.Context, req *connect.Request[user.PlanSearchRequest]) (*connect.Response[user.SearchPlanResponse], error) {
 	return c.search.CallUnary(ctx, req)
 }
 
 // GetDetail calls server.user.PlanController.GetDetail.
-func (c *planControllerClient) GetDetail(ctx context.Context, req *connect_go.Request[user.PlanDetailRequest]) (*connect_go.Response[user.PlanStayDetailResponse], error) {
+func (c *planControllerClient) GetDetail(ctx context.Context, req *connect.Request[user.PlanDetailRequest]) (*connect.Response[user.PlanStayDetailResponse], error) {
 	return c.getDetail.CallUnary(ctx, req)
 }
 
 // PlanControllerHandler is an implementation of the server.user.PlanController service.
 type PlanControllerHandler interface {
-	Search(context.Context, *connect_go.Request[user.PlanSearchRequest]) (*connect_go.Response[user.SearchPlanResponse], error)
-	GetDetail(context.Context, *connect_go.Request[user.PlanDetailRequest]) (*connect_go.Response[user.PlanStayDetailResponse], error)
+	Search(context.Context, *connect.Request[user.PlanSearchRequest]) (*connect.Response[user.SearchPlanResponse], error)
+	GetDetail(context.Context, *connect.Request[user.PlanDetailRequest]) (*connect.Response[user.PlanStayDetailResponse], error)
 }
 
 // NewPlanControllerHandler builds an HTTP handler from the service implementation. It returns the
@@ -284,16 +299,19 @@ type PlanControllerHandler interface {
 //
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
-func NewPlanControllerHandler(svc PlanControllerHandler, opts ...connect_go.HandlerOption) (string, http.Handler) {
-	planControllerSearchHandler := connect_go.NewUnaryHandler(
+func NewPlanControllerHandler(svc PlanControllerHandler, opts ...connect.HandlerOption) (string, http.Handler) {
+	planControllerMethods := user.File_v1_user_Book_proto.Services().ByName("PlanController").Methods()
+	planControllerSearchHandler := connect.NewUnaryHandler(
 		PlanControllerSearchProcedure,
 		svc.Search,
-		opts...,
+		connect.WithSchema(planControllerMethods.ByName("Search")),
+		connect.WithHandlerOptions(opts...),
 	)
-	planControllerGetDetailHandler := connect_go.NewUnaryHandler(
+	planControllerGetDetailHandler := connect.NewUnaryHandler(
 		PlanControllerGetDetailProcedure,
 		svc.GetDetail,
-		opts...,
+		connect.WithSchema(planControllerMethods.ByName("GetDetail")),
+		connect.WithHandlerOptions(opts...),
 	)
 	return "/server.user.PlanController/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
@@ -310,10 +328,10 @@ func NewPlanControllerHandler(svc PlanControllerHandler, opts ...connect_go.Hand
 // UnimplementedPlanControllerHandler returns CodeUnimplemented from all methods.
 type UnimplementedPlanControllerHandler struct{}
 
-func (UnimplementedPlanControllerHandler) Search(context.Context, *connect_go.Request[user.PlanSearchRequest]) (*connect_go.Response[user.SearchPlanResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.PlanController.Search is not implemented"))
+func (UnimplementedPlanControllerHandler) Search(context.Context, *connect.Request[user.PlanSearchRequest]) (*connect.Response[user.SearchPlanResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.user.PlanController.Search is not implemented"))
 }
 
-func (UnimplementedPlanControllerHandler) GetDetail(context.Context, *connect_go.Request[user.PlanDetailRequest]) (*connect_go.Response[user.PlanStayDetailResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.PlanController.GetDetail is not implemented"))
+func (UnimplementedPlanControllerHandler) GetDetail(context.Context, *connect.Request[user.PlanDetailRequest]) (*connect.Response[user.PlanStayDetailResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.user.PlanController.GetDetail is not implemented"))
 }

@@ -13,6 +13,7 @@ import (
 	"server/router"
 
 	connect "connectrpc.com/connect"
+	"github.com/google/uuid"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -126,4 +127,25 @@ func (ac *AuthController) Refresh(ctx context.Context, req *connect.Request[user
 		ExpiresIn:    int64(*tkn.ExpiresIn),
 		RefreshToken: *tkn.RefreshToken,
 	}), nil
+}
+
+func (ac *AuthController) DeleteAccount(ctx context.Context, req *connect.Request[emptypb.Empty]) (*connect.Response[emptypb.Empty], error) {
+	if ctx.Value(router.UserIDKey) == nil {
+		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("ログインが必要です。"))
+	}
+	userID, err := uuid.Parse(ctx.Value(router.UserIDKey).(string))
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("ユーザーIDの形式が不正です。"))
+	}
+
+	var token string
+	if ctx.Value(router.TokenKey) != nil {
+		token = ctx.Value(router.TokenKey).(string)
+	}
+
+	domainErr := ac.authUseCase.DeleteAccount(userID, token)
+	if domainErr != nil {
+		return nil, controller.ErrorHandler(domainErr)
+	}
+	return connect.NewResponse(&emptypb.Empty{}), nil
 }

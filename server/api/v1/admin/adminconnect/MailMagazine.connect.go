@@ -5,9 +5,9 @@
 package adminconnect
 
 import (
+	connect "connectrpc.com/connect"
 	context "context"
 	errors "errors"
-	connect_go "connectrpc.com/connect"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	http "net/http"
 	admin "server/api/v1/admin"
@@ -19,7 +19,7 @@ import (
 // generated with a version of connect newer than the one compiled into your binary. You can fix the
 // problem by either regenerating this code with an older version of connect or updating the connect
 // version compiled into your binary.
-const _ = connect_go.IsAtLeastVersion0_1_0
+const _ = connect.IsAtLeastVersion1_13_0
 
 const (
 	// MailMagazineControllerName is the fully-qualified name of the MailMagazineController service.
@@ -59,13 +59,13 @@ const (
 
 // MailMagazineControllerClient is a client for the server.admin.MailMagazineController service.
 type MailMagazineControllerClient interface {
-	GetList(context.Context, *connect_go.Request[admin.GetMailMagazineListRequest]) (*connect_go.Response[admin.MailMagazinesResponse], error)
-	GetByID(context.Context, *connect_go.Request[admin.MailMagazineIDRequest]) (*connect_go.Response[admin.MailMagazine], error)
-	GetUserLogList(context.Context, *connect_go.Request[admin.UserLogListRequest]) (*connect_go.Response[admin.UserMailMagazineLogResponse], error)
-	SaveDraft(context.Context, *connect_go.Request[admin.SaveDraftRequest]) (*connect_go.Response[admin.MailMagazine], error)
-	Update(context.Context, *connect_go.Request[admin.UpdateMailMagazineRequest]) (*connect_go.Response[admin.MailMagazine], error)
-	Delete(context.Context, *connect_go.Request[admin.DeleteMailMagazineRequest]) (*connect_go.Response[emptypb.Empty], error)
-	Send(context.Context, *connect_go.Request[admin.SendMailMagazineRequest]) (*connect_go.Response[emptypb.Empty], error)
+	GetList(context.Context, *connect.Request[admin.GetMailMagazineListRequest]) (*connect.Response[admin.MailMagazinesResponse], error)
+	GetByID(context.Context, *connect.Request[admin.MailMagazineIDRequest]) (*connect.Response[admin.MailMagazine], error)
+	GetUserLogList(context.Context, *connect.Request[admin.UserLogListRequest]) (*connect.Response[admin.UserMailMagazineLogResponse], error)
+	SaveDraft(context.Context, *connect.Request[admin.SaveDraftRequest]) (*connect.Response[admin.MailMagazine], error)
+	Update(context.Context, *connect.Request[admin.UpdateMailMagazineRequest]) (*connect.Response[admin.MailMagazine], error)
+	Delete(context.Context, *connect.Request[admin.DeleteMailMagazineRequest]) (*connect.Response[emptypb.Empty], error)
+	Send(context.Context, *connect.Request[admin.SendMailMagazineRequest]) (*connect.Response[emptypb.Empty], error)
 }
 
 // NewMailMagazineControllerClient constructs a client for the server.admin.MailMagazineController
@@ -75,103 +75,111 @@ type MailMagazineControllerClient interface {
 //
 // The URL supplied here should be the base URL for the Connect or gRPC server (for example,
 // http://api.acme.com or https://acme.com/grpc).
-func NewMailMagazineControllerClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) MailMagazineControllerClient {
+func NewMailMagazineControllerClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) MailMagazineControllerClient {
 	baseURL = strings.TrimRight(baseURL, "/")
+	mailMagazineControllerMethods := admin.File_v1_admin_MailMagazine_proto.Services().ByName("MailMagazineController").Methods()
 	return &mailMagazineControllerClient{
-		getList: connect_go.NewClient[admin.GetMailMagazineListRequest, admin.MailMagazinesResponse](
+		getList: connect.NewClient[admin.GetMailMagazineListRequest, admin.MailMagazinesResponse](
 			httpClient,
 			baseURL+MailMagazineControllerGetListProcedure,
-			opts...,
+			connect.WithSchema(mailMagazineControllerMethods.ByName("GetList")),
+			connect.WithClientOptions(opts...),
 		),
-		getByID: connect_go.NewClient[admin.MailMagazineIDRequest, admin.MailMagazine](
+		getByID: connect.NewClient[admin.MailMagazineIDRequest, admin.MailMagazine](
 			httpClient,
 			baseURL+MailMagazineControllerGetByIDProcedure,
-			opts...,
+			connect.WithSchema(mailMagazineControllerMethods.ByName("GetByID")),
+			connect.WithClientOptions(opts...),
 		),
-		getUserLogList: connect_go.NewClient[admin.UserLogListRequest, admin.UserMailMagazineLogResponse](
+		getUserLogList: connect.NewClient[admin.UserLogListRequest, admin.UserMailMagazineLogResponse](
 			httpClient,
 			baseURL+MailMagazineControllerGetUserLogListProcedure,
-			opts...,
+			connect.WithSchema(mailMagazineControllerMethods.ByName("GetUserLogList")),
+			connect.WithClientOptions(opts...),
 		),
-		saveDraft: connect_go.NewClient[admin.SaveDraftRequest, admin.MailMagazine](
+		saveDraft: connect.NewClient[admin.SaveDraftRequest, admin.MailMagazine](
 			httpClient,
 			baseURL+MailMagazineControllerSaveDraftProcedure,
-			opts...,
+			connect.WithSchema(mailMagazineControllerMethods.ByName("SaveDraft")),
+			connect.WithClientOptions(opts...),
 		),
-		update: connect_go.NewClient[admin.UpdateMailMagazineRequest, admin.MailMagazine](
+		update: connect.NewClient[admin.UpdateMailMagazineRequest, admin.MailMagazine](
 			httpClient,
 			baseURL+MailMagazineControllerUpdateProcedure,
-			opts...,
+			connect.WithSchema(mailMagazineControllerMethods.ByName("Update")),
+			connect.WithClientOptions(opts...),
 		),
-		delete: connect_go.NewClient[admin.DeleteMailMagazineRequest, emptypb.Empty](
+		delete: connect.NewClient[admin.DeleteMailMagazineRequest, emptypb.Empty](
 			httpClient,
 			baseURL+MailMagazineControllerDeleteProcedure,
-			opts...,
+			connect.WithSchema(mailMagazineControllerMethods.ByName("Delete")),
+			connect.WithClientOptions(opts...),
 		),
-		send: connect_go.NewClient[admin.SendMailMagazineRequest, emptypb.Empty](
+		send: connect.NewClient[admin.SendMailMagazineRequest, emptypb.Empty](
 			httpClient,
 			baseURL+MailMagazineControllerSendProcedure,
-			opts...,
+			connect.WithSchema(mailMagazineControllerMethods.ByName("Send")),
+			connect.WithClientOptions(opts...),
 		),
 	}
 }
 
 // mailMagazineControllerClient implements MailMagazineControllerClient.
 type mailMagazineControllerClient struct {
-	getList        *connect_go.Client[admin.GetMailMagazineListRequest, admin.MailMagazinesResponse]
-	getByID        *connect_go.Client[admin.MailMagazineIDRequest, admin.MailMagazine]
-	getUserLogList *connect_go.Client[admin.UserLogListRequest, admin.UserMailMagazineLogResponse]
-	saveDraft      *connect_go.Client[admin.SaveDraftRequest, admin.MailMagazine]
-	update         *connect_go.Client[admin.UpdateMailMagazineRequest, admin.MailMagazine]
-	delete         *connect_go.Client[admin.DeleteMailMagazineRequest, emptypb.Empty]
-	send           *connect_go.Client[admin.SendMailMagazineRequest, emptypb.Empty]
+	getList        *connect.Client[admin.GetMailMagazineListRequest, admin.MailMagazinesResponse]
+	getByID        *connect.Client[admin.MailMagazineIDRequest, admin.MailMagazine]
+	getUserLogList *connect.Client[admin.UserLogListRequest, admin.UserMailMagazineLogResponse]
+	saveDraft      *connect.Client[admin.SaveDraftRequest, admin.MailMagazine]
+	update         *connect.Client[admin.UpdateMailMagazineRequest, admin.MailMagazine]
+	delete         *connect.Client[admin.DeleteMailMagazineRequest, emptypb.Empty]
+	send           *connect.Client[admin.SendMailMagazineRequest, emptypb.Empty]
 }
 
 // GetList calls server.admin.MailMagazineController.GetList.
-func (c *mailMagazineControllerClient) GetList(ctx context.Context, req *connect_go.Request[admin.GetMailMagazineListRequest]) (*connect_go.Response[admin.MailMagazinesResponse], error) {
+func (c *mailMagazineControllerClient) GetList(ctx context.Context, req *connect.Request[admin.GetMailMagazineListRequest]) (*connect.Response[admin.MailMagazinesResponse], error) {
 	return c.getList.CallUnary(ctx, req)
 }
 
 // GetByID calls server.admin.MailMagazineController.GetByID.
-func (c *mailMagazineControllerClient) GetByID(ctx context.Context, req *connect_go.Request[admin.MailMagazineIDRequest]) (*connect_go.Response[admin.MailMagazine], error) {
+func (c *mailMagazineControllerClient) GetByID(ctx context.Context, req *connect.Request[admin.MailMagazineIDRequest]) (*connect.Response[admin.MailMagazine], error) {
 	return c.getByID.CallUnary(ctx, req)
 }
 
 // GetUserLogList calls server.admin.MailMagazineController.GetUserLogList.
-func (c *mailMagazineControllerClient) GetUserLogList(ctx context.Context, req *connect_go.Request[admin.UserLogListRequest]) (*connect_go.Response[admin.UserMailMagazineLogResponse], error) {
+func (c *mailMagazineControllerClient) GetUserLogList(ctx context.Context, req *connect.Request[admin.UserLogListRequest]) (*connect.Response[admin.UserMailMagazineLogResponse], error) {
 	return c.getUserLogList.CallUnary(ctx, req)
 }
 
 // SaveDraft calls server.admin.MailMagazineController.SaveDraft.
-func (c *mailMagazineControllerClient) SaveDraft(ctx context.Context, req *connect_go.Request[admin.SaveDraftRequest]) (*connect_go.Response[admin.MailMagazine], error) {
+func (c *mailMagazineControllerClient) SaveDraft(ctx context.Context, req *connect.Request[admin.SaveDraftRequest]) (*connect.Response[admin.MailMagazine], error) {
 	return c.saveDraft.CallUnary(ctx, req)
 }
 
 // Update calls server.admin.MailMagazineController.Update.
-func (c *mailMagazineControllerClient) Update(ctx context.Context, req *connect_go.Request[admin.UpdateMailMagazineRequest]) (*connect_go.Response[admin.MailMagazine], error) {
+func (c *mailMagazineControllerClient) Update(ctx context.Context, req *connect.Request[admin.UpdateMailMagazineRequest]) (*connect.Response[admin.MailMagazine], error) {
 	return c.update.CallUnary(ctx, req)
 }
 
 // Delete calls server.admin.MailMagazineController.Delete.
-func (c *mailMagazineControllerClient) Delete(ctx context.Context, req *connect_go.Request[admin.DeleteMailMagazineRequest]) (*connect_go.Response[emptypb.Empty], error) {
+func (c *mailMagazineControllerClient) Delete(ctx context.Context, req *connect.Request[admin.DeleteMailMagazineRequest]) (*connect.Response[emptypb.Empty], error) {
 	return c.delete.CallUnary(ctx, req)
 }
 
 // Send calls server.admin.MailMagazineController.Send.
-func (c *mailMagazineControllerClient) Send(ctx context.Context, req *connect_go.Request[admin.SendMailMagazineRequest]) (*connect_go.Response[emptypb.Empty], error) {
+func (c *mailMagazineControllerClient) Send(ctx context.Context, req *connect.Request[admin.SendMailMagazineRequest]) (*connect.Response[emptypb.Empty], error) {
 	return c.send.CallUnary(ctx, req)
 }
 
 // MailMagazineControllerHandler is an implementation of the server.admin.MailMagazineController
 // service.
 type MailMagazineControllerHandler interface {
-	GetList(context.Context, *connect_go.Request[admin.GetMailMagazineListRequest]) (*connect_go.Response[admin.MailMagazinesResponse], error)
-	GetByID(context.Context, *connect_go.Request[admin.MailMagazineIDRequest]) (*connect_go.Response[admin.MailMagazine], error)
-	GetUserLogList(context.Context, *connect_go.Request[admin.UserLogListRequest]) (*connect_go.Response[admin.UserMailMagazineLogResponse], error)
-	SaveDraft(context.Context, *connect_go.Request[admin.SaveDraftRequest]) (*connect_go.Response[admin.MailMagazine], error)
-	Update(context.Context, *connect_go.Request[admin.UpdateMailMagazineRequest]) (*connect_go.Response[admin.MailMagazine], error)
-	Delete(context.Context, *connect_go.Request[admin.DeleteMailMagazineRequest]) (*connect_go.Response[emptypb.Empty], error)
-	Send(context.Context, *connect_go.Request[admin.SendMailMagazineRequest]) (*connect_go.Response[emptypb.Empty], error)
+	GetList(context.Context, *connect.Request[admin.GetMailMagazineListRequest]) (*connect.Response[admin.MailMagazinesResponse], error)
+	GetByID(context.Context, *connect.Request[admin.MailMagazineIDRequest]) (*connect.Response[admin.MailMagazine], error)
+	GetUserLogList(context.Context, *connect.Request[admin.UserLogListRequest]) (*connect.Response[admin.UserMailMagazineLogResponse], error)
+	SaveDraft(context.Context, *connect.Request[admin.SaveDraftRequest]) (*connect.Response[admin.MailMagazine], error)
+	Update(context.Context, *connect.Request[admin.UpdateMailMagazineRequest]) (*connect.Response[admin.MailMagazine], error)
+	Delete(context.Context, *connect.Request[admin.DeleteMailMagazineRequest]) (*connect.Response[emptypb.Empty], error)
+	Send(context.Context, *connect.Request[admin.SendMailMagazineRequest]) (*connect.Response[emptypb.Empty], error)
 }
 
 // NewMailMagazineControllerHandler builds an HTTP handler from the service implementation. It
@@ -179,41 +187,49 @@ type MailMagazineControllerHandler interface {
 //
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
-func NewMailMagazineControllerHandler(svc MailMagazineControllerHandler, opts ...connect_go.HandlerOption) (string, http.Handler) {
-	mailMagazineControllerGetListHandler := connect_go.NewUnaryHandler(
+func NewMailMagazineControllerHandler(svc MailMagazineControllerHandler, opts ...connect.HandlerOption) (string, http.Handler) {
+	mailMagazineControllerMethods := admin.File_v1_admin_MailMagazine_proto.Services().ByName("MailMagazineController").Methods()
+	mailMagazineControllerGetListHandler := connect.NewUnaryHandler(
 		MailMagazineControllerGetListProcedure,
 		svc.GetList,
-		opts...,
+		connect.WithSchema(mailMagazineControllerMethods.ByName("GetList")),
+		connect.WithHandlerOptions(opts...),
 	)
-	mailMagazineControllerGetByIDHandler := connect_go.NewUnaryHandler(
+	mailMagazineControllerGetByIDHandler := connect.NewUnaryHandler(
 		MailMagazineControllerGetByIDProcedure,
 		svc.GetByID,
-		opts...,
+		connect.WithSchema(mailMagazineControllerMethods.ByName("GetByID")),
+		connect.WithHandlerOptions(opts...),
 	)
-	mailMagazineControllerGetUserLogListHandler := connect_go.NewUnaryHandler(
+	mailMagazineControllerGetUserLogListHandler := connect.NewUnaryHandler(
 		MailMagazineControllerGetUserLogListProcedure,
 		svc.GetUserLogList,
-		opts...,
+		connect.WithSchema(mailMagazineControllerMethods.ByName("GetUserLogList")),
+		connect.WithHandlerOptions(opts...),
 	)
-	mailMagazineControllerSaveDraftHandler := connect_go.NewUnaryHandler(
+	mailMagazineControllerSaveDraftHandler := connect.NewUnaryHandler(
 		MailMagazineControllerSaveDraftProcedure,
 		svc.SaveDraft,
-		opts...,
+		connect.WithSchema(mailMagazineControllerMethods.ByName("SaveDraft")),
+		connect.WithHandlerOptions(opts...),
 	)
-	mailMagazineControllerUpdateHandler := connect_go.NewUnaryHandler(
+	mailMagazineControllerUpdateHandler := connect.NewUnaryHandler(
 		MailMagazineControllerUpdateProcedure,
 		svc.Update,
-		opts...,
+		connect.WithSchema(mailMagazineControllerMethods.ByName("Update")),
+		connect.WithHandlerOptions(opts...),
 	)
-	mailMagazineControllerDeleteHandler := connect_go.NewUnaryHandler(
+	mailMagazineControllerDeleteHandler := connect.NewUnaryHandler(
 		MailMagazineControllerDeleteProcedure,
 		svc.Delete,
-		opts...,
+		connect.WithSchema(mailMagazineControllerMethods.ByName("Delete")),
+		connect.WithHandlerOptions(opts...),
 	)
-	mailMagazineControllerSendHandler := connect_go.NewUnaryHandler(
+	mailMagazineControllerSendHandler := connect.NewUnaryHandler(
 		MailMagazineControllerSendProcedure,
 		svc.Send,
-		opts...,
+		connect.WithSchema(mailMagazineControllerMethods.ByName("Send")),
+		connect.WithHandlerOptions(opts...),
 	)
 	return "/server.admin.MailMagazineController/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
@@ -240,30 +256,30 @@ func NewMailMagazineControllerHandler(svc MailMagazineControllerHandler, opts ..
 // UnimplementedMailMagazineControllerHandler returns CodeUnimplemented from all methods.
 type UnimplementedMailMagazineControllerHandler struct{}
 
-func (UnimplementedMailMagazineControllerHandler) GetList(context.Context, *connect_go.Request[admin.GetMailMagazineListRequest]) (*connect_go.Response[admin.MailMagazinesResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.MailMagazineController.GetList is not implemented"))
+func (UnimplementedMailMagazineControllerHandler) GetList(context.Context, *connect.Request[admin.GetMailMagazineListRequest]) (*connect.Response[admin.MailMagazinesResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.admin.MailMagazineController.GetList is not implemented"))
 }
 
-func (UnimplementedMailMagazineControllerHandler) GetByID(context.Context, *connect_go.Request[admin.MailMagazineIDRequest]) (*connect_go.Response[admin.MailMagazine], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.MailMagazineController.GetByID is not implemented"))
+func (UnimplementedMailMagazineControllerHandler) GetByID(context.Context, *connect.Request[admin.MailMagazineIDRequest]) (*connect.Response[admin.MailMagazine], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.admin.MailMagazineController.GetByID is not implemented"))
 }
 
-func (UnimplementedMailMagazineControllerHandler) GetUserLogList(context.Context, *connect_go.Request[admin.UserLogListRequest]) (*connect_go.Response[admin.UserMailMagazineLogResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.MailMagazineController.GetUserLogList is not implemented"))
+func (UnimplementedMailMagazineControllerHandler) GetUserLogList(context.Context, *connect.Request[admin.UserLogListRequest]) (*connect.Response[admin.UserMailMagazineLogResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.admin.MailMagazineController.GetUserLogList is not implemented"))
 }
 
-func (UnimplementedMailMagazineControllerHandler) SaveDraft(context.Context, *connect_go.Request[admin.SaveDraftRequest]) (*connect_go.Response[admin.MailMagazine], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.MailMagazineController.SaveDraft is not implemented"))
+func (UnimplementedMailMagazineControllerHandler) SaveDraft(context.Context, *connect.Request[admin.SaveDraftRequest]) (*connect.Response[admin.MailMagazine], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.admin.MailMagazineController.SaveDraft is not implemented"))
 }
 
-func (UnimplementedMailMagazineControllerHandler) Update(context.Context, *connect_go.Request[admin.UpdateMailMagazineRequest]) (*connect_go.Response[admin.MailMagazine], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.MailMagazineController.Update is not implemented"))
+func (UnimplementedMailMagazineControllerHandler) Update(context.Context, *connect.Request[admin.UpdateMailMagazineRequest]) (*connect.Response[admin.MailMagazine], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.admin.MailMagazineController.Update is not implemented"))
 }
 
-func (UnimplementedMailMagazineControllerHandler) Delete(context.Context, *connect_go.Request[admin.DeleteMailMagazineRequest]) (*connect_go.Response[emptypb.Empty], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.MailMagazineController.Delete is not implemented"))
+func (UnimplementedMailMagazineControllerHandler) Delete(context.Context, *connect.Request[admin.DeleteMailMagazineRequest]) (*connect.Response[emptypb.Empty], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.admin.MailMagazineController.Delete is not implemented"))
 }
 
-func (UnimplementedMailMagazineControllerHandler) Send(context.Context, *connect_go.Request[admin.SendMailMagazineRequest]) (*connect_go.Response[emptypb.Empty], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.admin.MailMagazineController.Send is not implemented"))
+func (UnimplementedMailMagazineControllerHandler) Send(context.Context, *connect.Request[admin.SendMailMagazineRequest]) (*connect.Response[emptypb.Empty], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.admin.MailMagazineController.Send is not implemented"))
 }

@@ -5,9 +5,9 @@
 package userconnect
 
 import (
+	connect "connectrpc.com/connect"
 	context "context"
 	errors "errors"
-	connect_go "connectrpc.com/connect"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	http "net/http"
 	user "server/api/v1/user"
@@ -19,7 +19,7 @@ import (
 // generated with a version of connect newer than the one compiled into your binary. You can fix the
 // problem by either regenerating this code with an older version of connect or updating the connect
 // version compiled into your binary.
-const _ = connect_go.IsAtLeastVersion0_1_0
+const _ = connect.IsAtLeastVersion1_13_0
 
 const (
 	// PostControllerName is the fully-qualified name of the PostController service.
@@ -44,9 +44,9 @@ const (
 // PostControllerClient is a client for the server.user.PostController service.
 type PostControllerClient interface {
 	// お知らせ一覧を取得
-	GetPosts(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[user.PostsResponse], error)
+	GetPosts(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[user.PostsResponse], error)
 	// お知らせの詳細を取得
-	GetPostByID(context.Context, *connect_go.Request[user.PostRequest]) (*connect_go.Response[user.PostResponse], error)
+	GetPostByID(context.Context, *connect.Request[user.PostRequest]) (*connect.Response[user.PostResponse], error)
 }
 
 // NewPostControllerClient constructs a client for the server.user.PostController service. By
@@ -56,44 +56,47 @@ type PostControllerClient interface {
 //
 // The URL supplied here should be the base URL for the Connect or gRPC server (for example,
 // http://api.acme.com or https://acme.com/grpc).
-func NewPostControllerClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) PostControllerClient {
+func NewPostControllerClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) PostControllerClient {
 	baseURL = strings.TrimRight(baseURL, "/")
+	postControllerMethods := user.File_v1_user_Post_proto.Services().ByName("PostController").Methods()
 	return &postControllerClient{
-		getPosts: connect_go.NewClient[emptypb.Empty, user.PostsResponse](
+		getPosts: connect.NewClient[emptypb.Empty, user.PostsResponse](
 			httpClient,
 			baseURL+PostControllerGetPostsProcedure,
-			opts...,
+			connect.WithSchema(postControllerMethods.ByName("GetPosts")),
+			connect.WithClientOptions(opts...),
 		),
-		getPostByID: connect_go.NewClient[user.PostRequest, user.PostResponse](
+		getPostByID: connect.NewClient[user.PostRequest, user.PostResponse](
 			httpClient,
 			baseURL+PostControllerGetPostByIDProcedure,
-			opts...,
+			connect.WithSchema(postControllerMethods.ByName("GetPostByID")),
+			connect.WithClientOptions(opts...),
 		),
 	}
 }
 
 // postControllerClient implements PostControllerClient.
 type postControllerClient struct {
-	getPosts    *connect_go.Client[emptypb.Empty, user.PostsResponse]
-	getPostByID *connect_go.Client[user.PostRequest, user.PostResponse]
+	getPosts    *connect.Client[emptypb.Empty, user.PostsResponse]
+	getPostByID *connect.Client[user.PostRequest, user.PostResponse]
 }
 
 // GetPosts calls server.user.PostController.GetPosts.
-func (c *postControllerClient) GetPosts(ctx context.Context, req *connect_go.Request[emptypb.Empty]) (*connect_go.Response[user.PostsResponse], error) {
+func (c *postControllerClient) GetPosts(ctx context.Context, req *connect.Request[emptypb.Empty]) (*connect.Response[user.PostsResponse], error) {
 	return c.getPosts.CallUnary(ctx, req)
 }
 
 // GetPostByID calls server.user.PostController.GetPostByID.
-func (c *postControllerClient) GetPostByID(ctx context.Context, req *connect_go.Request[user.PostRequest]) (*connect_go.Response[user.PostResponse], error) {
+func (c *postControllerClient) GetPostByID(ctx context.Context, req *connect.Request[user.PostRequest]) (*connect.Response[user.PostResponse], error) {
 	return c.getPostByID.CallUnary(ctx, req)
 }
 
 // PostControllerHandler is an implementation of the server.user.PostController service.
 type PostControllerHandler interface {
 	// お知らせ一覧を取得
-	GetPosts(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[user.PostsResponse], error)
+	GetPosts(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[user.PostsResponse], error)
 	// お知らせの詳細を取得
-	GetPostByID(context.Context, *connect_go.Request[user.PostRequest]) (*connect_go.Response[user.PostResponse], error)
+	GetPostByID(context.Context, *connect.Request[user.PostRequest]) (*connect.Response[user.PostResponse], error)
 }
 
 // NewPostControllerHandler builds an HTTP handler from the service implementation. It returns the
@@ -101,16 +104,19 @@ type PostControllerHandler interface {
 //
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
-func NewPostControllerHandler(svc PostControllerHandler, opts ...connect_go.HandlerOption) (string, http.Handler) {
-	postControllerGetPostsHandler := connect_go.NewUnaryHandler(
+func NewPostControllerHandler(svc PostControllerHandler, opts ...connect.HandlerOption) (string, http.Handler) {
+	postControllerMethods := user.File_v1_user_Post_proto.Services().ByName("PostController").Methods()
+	postControllerGetPostsHandler := connect.NewUnaryHandler(
 		PostControllerGetPostsProcedure,
 		svc.GetPosts,
-		opts...,
+		connect.WithSchema(postControllerMethods.ByName("GetPosts")),
+		connect.WithHandlerOptions(opts...),
 	)
-	postControllerGetPostByIDHandler := connect_go.NewUnaryHandler(
+	postControllerGetPostByIDHandler := connect.NewUnaryHandler(
 		PostControllerGetPostByIDProcedure,
 		svc.GetPostByID,
-		opts...,
+		connect.WithSchema(postControllerMethods.ByName("GetPostByID")),
+		connect.WithHandlerOptions(opts...),
 	)
 	return "/server.user.PostController/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
@@ -127,10 +133,10 @@ func NewPostControllerHandler(svc PostControllerHandler, opts ...connect_go.Hand
 // UnimplementedPostControllerHandler returns CodeUnimplemented from all methods.
 type UnimplementedPostControllerHandler struct{}
 
-func (UnimplementedPostControllerHandler) GetPosts(context.Context, *connect_go.Request[emptypb.Empty]) (*connect_go.Response[user.PostsResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.PostController.GetPosts is not implemented"))
+func (UnimplementedPostControllerHandler) GetPosts(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[user.PostsResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.user.PostController.GetPosts is not implemented"))
 }
 
-func (UnimplementedPostControllerHandler) GetPostByID(context.Context, *connect_go.Request[user.PostRequest]) (*connect_go.Response[user.PostResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.PostController.GetPostByID is not implemented"))
+func (UnimplementedPostControllerHandler) GetPostByID(context.Context, *connect.Request[user.PostRequest]) (*connect.Response[user.PostResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.user.PostController.GetPostByID is not implemented"))
 }

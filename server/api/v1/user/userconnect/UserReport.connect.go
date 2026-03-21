@@ -5,9 +5,9 @@
 package userconnect
 
 import (
+	connect "connectrpc.com/connect"
 	context "context"
 	errors "errors"
-	connect_go "connectrpc.com/connect"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	http "net/http"
 	user "server/api/v1/user"
@@ -19,7 +19,7 @@ import (
 // generated with a version of connect newer than the one compiled into your binary. You can fix the
 // problem by either regenerating this code with an older version of connect or updating the connect
 // version compiled into your binary.
-const _ = connect_go.IsAtLeastVersion0_1_0
+const _ = connect.IsAtLeastVersion1_13_0
 
 const (
 	// UserReportControllerName is the fully-qualified name of the UserReportController service.
@@ -41,7 +41,7 @@ const (
 
 // UserReportControllerClient is a client for the server.user.UserReportController service.
 type UserReportControllerClient interface {
-	Send(context.Context, *connect_go.Request[user.UserReportRequest]) (*connect_go.Response[emptypb.Empty], error)
+	Send(context.Context, *connect.Request[user.UserReportRequest]) (*connect.Response[emptypb.Empty], error)
 }
 
 // NewUserReportControllerClient constructs a client for the server.user.UserReportController
@@ -51,30 +51,32 @@ type UserReportControllerClient interface {
 //
 // The URL supplied here should be the base URL for the Connect or gRPC server (for example,
 // http://api.acme.com or https://acme.com/grpc).
-func NewUserReportControllerClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) UserReportControllerClient {
+func NewUserReportControllerClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) UserReportControllerClient {
 	baseURL = strings.TrimRight(baseURL, "/")
+	userReportControllerMethods := user.File_v1_user_UserReport_proto.Services().ByName("UserReportController").Methods()
 	return &userReportControllerClient{
-		send: connect_go.NewClient[user.UserReportRequest, emptypb.Empty](
+		send: connect.NewClient[user.UserReportRequest, emptypb.Empty](
 			httpClient,
 			baseURL+UserReportControllerSendProcedure,
-			opts...,
+			connect.WithSchema(userReportControllerMethods.ByName("Send")),
+			connect.WithClientOptions(opts...),
 		),
 	}
 }
 
 // userReportControllerClient implements UserReportControllerClient.
 type userReportControllerClient struct {
-	send *connect_go.Client[user.UserReportRequest, emptypb.Empty]
+	send *connect.Client[user.UserReportRequest, emptypb.Empty]
 }
 
 // Send calls server.user.UserReportController.Send.
-func (c *userReportControllerClient) Send(ctx context.Context, req *connect_go.Request[user.UserReportRequest]) (*connect_go.Response[emptypb.Empty], error) {
+func (c *userReportControllerClient) Send(ctx context.Context, req *connect.Request[user.UserReportRequest]) (*connect.Response[emptypb.Empty], error) {
 	return c.send.CallUnary(ctx, req)
 }
 
 // UserReportControllerHandler is an implementation of the server.user.UserReportController service.
 type UserReportControllerHandler interface {
-	Send(context.Context, *connect_go.Request[user.UserReportRequest]) (*connect_go.Response[emptypb.Empty], error)
+	Send(context.Context, *connect.Request[user.UserReportRequest]) (*connect.Response[emptypb.Empty], error)
 }
 
 // NewUserReportControllerHandler builds an HTTP handler from the service implementation. It returns
@@ -82,11 +84,13 @@ type UserReportControllerHandler interface {
 //
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
-func NewUserReportControllerHandler(svc UserReportControllerHandler, opts ...connect_go.HandlerOption) (string, http.Handler) {
-	userReportControllerSendHandler := connect_go.NewUnaryHandler(
+func NewUserReportControllerHandler(svc UserReportControllerHandler, opts ...connect.HandlerOption) (string, http.Handler) {
+	userReportControllerMethods := user.File_v1_user_UserReport_proto.Services().ByName("UserReportController").Methods()
+	userReportControllerSendHandler := connect.NewUnaryHandler(
 		UserReportControllerSendProcedure,
 		svc.Send,
-		opts...,
+		connect.WithSchema(userReportControllerMethods.ByName("Send")),
+		connect.WithHandlerOptions(opts...),
 	)
 	return "/server.user.UserReportController/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
@@ -101,6 +105,6 @@ func NewUserReportControllerHandler(svc UserReportControllerHandler, opts ...con
 // UnimplementedUserReportControllerHandler returns CodeUnimplemented from all methods.
 type UnimplementedUserReportControllerHandler struct{}
 
-func (UnimplementedUserReportControllerHandler) Send(context.Context, *connect_go.Request[user.UserReportRequest]) (*connect_go.Response[emptypb.Empty], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.UserReportController.Send is not implemented"))
+func (UnimplementedUserReportControllerHandler) Send(context.Context, *connect.Request[user.UserReportRequest]) (*connect.Response[emptypb.Empty], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.user.UserReportController.Send is not implemented"))
 }

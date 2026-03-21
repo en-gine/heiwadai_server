@@ -5,9 +5,9 @@
 package userconnect
 
 import (
+	connect "connectrpc.com/connect"
 	context "context"
 	errors "errors"
-	connect_go "connectrpc.com/connect"
 	http "net/http"
 	user "server/api/v1/user"
 	strings "strings"
@@ -18,7 +18,7 @@ import (
 // generated with a version of connect newer than the one compiled into your binary. You can fix the
 // problem by either regenerating this code with an older version of connect or updating the connect
 // version compiled into your binary.
-const _ = connect_go.IsAtLeastVersion0_1_0
+const _ = connect.IsAtLeastVersion1_13_0
 
 const (
 	// MessageControllerName is the fully-qualified name of the MessageController service.
@@ -41,7 +41,7 @@ const (
 // MessageControllerClient is a client for the server.user.MessageController service.
 type MessageControllerClient interface {
 	// 　ポップアップメッセージのリストを取得する（最後に取得したIDを元にリクエスト）
-	GetMessagesAfter(context.Context, *connect_go.Request[user.MessageRequest]) (*connect_go.Response[user.MessagesResponse], error)
+	GetMessagesAfter(context.Context, *connect.Request[user.MessageRequest]) (*connect.Response[user.MessagesResponse], error)
 }
 
 // NewMessageControllerClient constructs a client for the server.user.MessageController service. By
@@ -51,31 +51,33 @@ type MessageControllerClient interface {
 //
 // The URL supplied here should be the base URL for the Connect or gRPC server (for example,
 // http://api.acme.com or https://acme.com/grpc).
-func NewMessageControllerClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) MessageControllerClient {
+func NewMessageControllerClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) MessageControllerClient {
 	baseURL = strings.TrimRight(baseURL, "/")
+	messageControllerMethods := user.File_v1_user_Messages_proto.Services().ByName("MessageController").Methods()
 	return &messageControllerClient{
-		getMessagesAfter: connect_go.NewClient[user.MessageRequest, user.MessagesResponse](
+		getMessagesAfter: connect.NewClient[user.MessageRequest, user.MessagesResponse](
 			httpClient,
 			baseURL+MessageControllerGetMessagesAfterProcedure,
-			opts...,
+			connect.WithSchema(messageControllerMethods.ByName("GetMessagesAfter")),
+			connect.WithClientOptions(opts...),
 		),
 	}
 }
 
 // messageControllerClient implements MessageControllerClient.
 type messageControllerClient struct {
-	getMessagesAfter *connect_go.Client[user.MessageRequest, user.MessagesResponse]
+	getMessagesAfter *connect.Client[user.MessageRequest, user.MessagesResponse]
 }
 
 // GetMessagesAfter calls server.user.MessageController.GetMessagesAfter.
-func (c *messageControllerClient) GetMessagesAfter(ctx context.Context, req *connect_go.Request[user.MessageRequest]) (*connect_go.Response[user.MessagesResponse], error) {
+func (c *messageControllerClient) GetMessagesAfter(ctx context.Context, req *connect.Request[user.MessageRequest]) (*connect.Response[user.MessagesResponse], error) {
 	return c.getMessagesAfter.CallUnary(ctx, req)
 }
 
 // MessageControllerHandler is an implementation of the server.user.MessageController service.
 type MessageControllerHandler interface {
 	// 　ポップアップメッセージのリストを取得する（最後に取得したIDを元にリクエスト）
-	GetMessagesAfter(context.Context, *connect_go.Request[user.MessageRequest]) (*connect_go.Response[user.MessagesResponse], error)
+	GetMessagesAfter(context.Context, *connect.Request[user.MessageRequest]) (*connect.Response[user.MessagesResponse], error)
 }
 
 // NewMessageControllerHandler builds an HTTP handler from the service implementation. It returns
@@ -83,11 +85,13 @@ type MessageControllerHandler interface {
 //
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
-func NewMessageControllerHandler(svc MessageControllerHandler, opts ...connect_go.HandlerOption) (string, http.Handler) {
-	messageControllerGetMessagesAfterHandler := connect_go.NewUnaryHandler(
+func NewMessageControllerHandler(svc MessageControllerHandler, opts ...connect.HandlerOption) (string, http.Handler) {
+	messageControllerMethods := user.File_v1_user_Messages_proto.Services().ByName("MessageController").Methods()
+	messageControllerGetMessagesAfterHandler := connect.NewUnaryHandler(
 		MessageControllerGetMessagesAfterProcedure,
 		svc.GetMessagesAfter,
-		opts...,
+		connect.WithSchema(messageControllerMethods.ByName("GetMessagesAfter")),
+		connect.WithHandlerOptions(opts...),
 	)
 	return "/server.user.MessageController/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
@@ -102,6 +106,6 @@ func NewMessageControllerHandler(svc MessageControllerHandler, opts ...connect_g
 // UnimplementedMessageControllerHandler returns CodeUnimplemented from all methods.
 type UnimplementedMessageControllerHandler struct{}
 
-func (UnimplementedMessageControllerHandler) GetMessagesAfter(context.Context, *connect_go.Request[user.MessageRequest]) (*connect_go.Response[user.MessagesResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("server.user.MessageController.GetMessagesAfter is not implemented"))
+func (UnimplementedMessageControllerHandler) GetMessagesAfter(context.Context, *connect.Request[user.MessageRequest]) (*connect.Response[user.MessagesResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("server.user.MessageController.GetMessagesAfter is not implemented"))
 }
