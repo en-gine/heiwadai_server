@@ -267,6 +267,12 @@ func GetUserListFilterMods(query *types.UserQuery) []qm.QueryMod {
 }
 
 func UserModelToEntity(model *models.UserDatum, email string) *entity.User {
+	var prefecture *entity.Prefecture
+	if model.Prefecture != 0 {
+		p := entity.Prefecture(model.Prefecture)
+		prefecture = &p
+	}
+
 	return entity.RegenUser(
 		uuid.MustParse(model.UserID),
 		model.FirstName,
@@ -276,7 +282,7 @@ func UserModelToEntity(model *models.UserDatum, email string) *entity.User {
 		model.CompanyName.Ptr(),
 		model.BirthDate.Ptr(),
 		&model.ZipCode.String,
-		entity.Prefecture(model.Prefecture),
+		prefecture,
 		model.City.Ptr(),
 		model.Address.Ptr(),
 		model.Tel.Ptr(),

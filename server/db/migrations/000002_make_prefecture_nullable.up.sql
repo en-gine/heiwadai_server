@@ -1,0 +1,2 @@
+ALTER TABLE user_data ALTER COLUMN prefecture DROP NOT NULL;
+ALTER TABLE user_data ALTER COLUMN prefecture SET DEFAULT NULL;

@@ -46,7 +46,7 @@ func (u *AuthUsecase) Register(
 	CompanyName *string,
 	BirthDate *time.Time,
 	ZipCode *string,
-	PrefectureID int,
+	PrefectureID *int,
 	City *string,
 	Address *string,
 	Tel *string,
@@ -81,7 +81,11 @@ func (u *AuthUsecase) Register(
 		return nil, errors.NewDomainError(errors.AlreadyExist, "既に内部スタッフとして登録されているメールアドレスです")
 	}
 
-	prefecture := entity.Prefecture(PrefectureID)
+	var prefecture *entity.Prefecture
+	if PrefectureID != nil && *PrefectureID != 0 {
+		p := entity.Prefecture(*PrefectureID)
+		prefecture = &p
+	}
 
 	// 招待メール送信
 	defaultPassword, domainErr := entity.GenerateRandomPassword()

@@ -169,6 +169,17 @@ func IntToPrefecture(n int) (Prefecture, *errors.DomainError) {
 	return Prefecture(n), nil
 }
 
+func IntToPrefecturePtr(n int) (*Prefecture, *errors.DomainError) {
+	if n == 0 {
+		return nil, nil
+	}
+	p, err := IntToPrefecture(n)
+	if err != nil {
+		return nil, err
+	}
+	return &p, nil
+}
+
 func StringToPrefecture(name string) (Prefecture, *errors.DomainError) {
 	for i := int(Hokkaido); i <= int(Okinawa); i++ {
 		p := Prefecture(i)
