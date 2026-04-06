@@ -22,6 +22,7 @@ func UserSeeder() {
 	tel := "0943-77-3185"
 	email := env.GetEnv(env.TestUserMail)
 	birth := time.Date(1996, 1, 1, 0, 0, 0, 0, time.Local)
+	prefID := 12
 	fmt.Println(email)
 	user, err := authUsecase.Register(
 		"Tomohide",
@@ -31,7 +32,7 @@ func UserSeeder() {
 		&companyName,
 		&birth,
 		&zip,
-		12,
+		&prefID,
 		&city,
 		&address,
 		&tel,

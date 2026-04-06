@@ -42,6 +42,12 @@ func (u *UserDataController) Update(ctx context.Context, req *connect.Request[us
 
 	msg := req.Msg
 
+	var prefectureID *int
+	if msg.Prefecture != 0 {
+		v := int(msg.Prefecture)
+		prefectureID = &v
+	}
+
 	user, domainErr := u.usecase.Update(
 		userID,
 		msg.FirstName,
@@ -51,7 +57,7 @@ func (u *UserDataController) Update(ctx context.Context, req *connect.Request[us
 		msg.CompanyName,
 		util.TimeStampPtrToTimePtr(msg.BirthDate),
 		msg.ZipCode,
-		int(msg.Prefecture),
+		prefectureID,
 		msg.City,
 		msg.Address,
 		msg.Tel,
@@ -85,6 +91,11 @@ func (u *UserDataController) GetUser(ctx context.Context, req *connect.Request[e
 }
 
 func UserEntityToResponse(user *entity.User) *userv1.UserDataResponse {
+	var pref shared.Prefecture
+	if user.Prefecture != nil {
+		pref = shared.Prefecture(user.Prefecture.ToInt())
+	}
+
 	return &userv1.UserDataResponse{
 		ID:            user.ID.String(),
 		FirstName:     user.FirstName,
@@ -94,7 +105,7 @@ func UserEntityToResponse(user *entity.User) *userv1.UserDataResponse {
 		CompanyName:   user.CompanyName,
 		BirthDate:     util.TimePtrToTimeStampPtr(user.BirthDate),
 		ZipCode:       user.ZipCode,
-		Prefecture:    shared.Prefecture(user.Prefecture.ToInt()),
+		Prefecture:    pref,
 		City:          user.City,
 		Address:       user.Address,
 		Tel:           user.Tel,

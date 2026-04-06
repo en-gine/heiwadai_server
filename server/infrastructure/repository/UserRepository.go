@@ -36,6 +36,11 @@ func (ur *UserRepository) Save(updateUser *entity.User, updateUserOption *entity
 	if err != nil {
 		return err
 	}
+	var prefectureVal int
+	if updateUser.Prefecture != nil {
+		prefectureVal = updateUser.Prefecture.ToInt()
+	}
+
 	user := models.UserDatum{
 		UserID:        updateUser.ID.String(),
 		FirstName:     updateUser.FirstName,
@@ -45,7 +50,7 @@ func (ur *UserRepository) Save(updateUser *entity.User, updateUserOption *entity
 		CompanyName:   null.StringFromPtr(updateUser.CompanyName),
 		BirthDate:     null.TimeFromPtr(updateUser.BirthDate),
 		ZipCode:       null.StringFromPtr(updateUser.ZipCode),
-		Prefecture:    int(updateUser.Prefecture),
+		Prefecture:    prefectureVal,
 		City:          null.StringFromPtr(updateUser.City),
 		Address:       null.StringFromPtr(updateUser.Address),
 		Tel:           null.StringFromPtr(updateUser.Tel),

@@ -30,6 +30,12 @@ func NewAuthController(authUsecase *usecase.AuthUsecase) *AuthController {
 func (ac *AuthController) Register(ctx context.Context, req *connect.Request[user.UserRegisterRequest]) (*connect.Response[emptypb.Empty], error) {
 	msg := req.Msg
 
+	var prefectureID *int
+	if msg.Prefecture != 0 {
+		v := int(msg.Prefecture)
+		prefectureID = &v
+	}
+
 	_, domaiErr := ac.authUseCase.Register(
 		msg.FirstName,
 		msg.LastName,
@@ -38,7 +44,7 @@ func (ac *AuthController) Register(ctx context.Context, req *connect.Request[use
 		msg.CompanyName,
 		util.TimeStampPtrToTimePtr(msg.BirthDate),
 		msg.ZipCode,
-		int(msg.Prefecture),
+		prefectureID,
 		msg.City,
 		msg.Address,
 		msg.Tel,
