@@ -50,9 +50,9 @@ func (ur *UserRepository) Save(updateUser *entity.User, updateUserOption *entity
 		return fmt.Errorf("failed to upsert user_manager: %w", err)
 	}
 
-	var prefectureVal int
+	var prefectureVal null.Int
 	if updateUser.Prefecture != nil {
-		prefectureVal = updateUser.Prefecture.ToInt()
+		prefectureVal = null.IntFrom(updateUser.Prefecture.ToInt())
 	}
 
 	user := models.UserDatum{
