@@ -36,9 +36,9 @@ func (ur *UserRepository) Save(updateUser *entity.User, updateUserOption *entity
 	if err != nil {
 		return err
 	}
-	var prefectureVal int
+	var prefectureVal null.Int
 	if updateUser.Prefecture != nil {
-		prefectureVal = updateUser.Prefecture.ToInt()
+		prefectureVal = null.IntFrom(updateUser.Prefecture.ToInt())
 	}
 
 	user := models.UserDatum{

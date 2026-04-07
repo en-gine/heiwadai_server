@@ -81,7 +81,10 @@ func (u *AuthUsecase) Register(
 
 	var prefecture *entity.Prefecture
 	if PrefectureID != nil && *PrefectureID != 0 {
-		p := entity.Prefecture(*PrefectureID)
+		p, domainErr := entity.IntToPrefecture(*PrefectureID)
+		if domainErr != nil {
+			return nil, domainErr
+		}
 		prefecture = &p
 	}
 

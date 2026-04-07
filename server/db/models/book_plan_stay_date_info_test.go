@@ -683,7 +683,7 @@ func testBookPlanStayDateInfosSelect(t *testing.T) {
 }
 
 var (
-	bookPlanStayDateInfoDBTypes = map[string]string{`PlanID`: `uuid`, `StayDate`: `timestamp without time zone`, `StayDateTotalPrice`: `integer`}
+	bookPlanStayDateInfoDBTypes = map[string]string{`PlanID`: `uuid`, `StayDate`: `timestamp with time zone`, `StayDateTotalPrice`: `integer`}
 	_                           = bytes.MinRead
 )
 
