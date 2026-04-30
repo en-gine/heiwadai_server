@@ -7,6 +7,7 @@ import (
 	"html/template"
 	"strconv"
 	"time"
+	_ "time/tzdata"
 
 	"server/core/entity"
 	"server/core/errors"
@@ -24,6 +25,8 @@ var reserveMailTemplate string
 
 //go:embed template/CancelMail.html
 var cancelMailTemplate string
+
+var jst, _ = time.LoadLocation("Asia/Tokyo")
 
 type BookUsecase struct {
 	bookQuery  queryservice.IBookQueryService
@@ -230,11 +233,11 @@ func reserveMailContent(
 		"GuestName":              bookinfo.GuestData.LastName + bookinfo.GuestData.FirstName,
 		"GuestMail":              bookinfo.GuestData.Mail,
 		"ReservationNumber":      bookinfo.TlDataID,
-		"CheckInDate":            bookinfo.StayFrom.In(time.Local).Format("2006年1月2日"),
-		"CheckOutDate":           bookinfo.StayTo.In(time.Local).Format("2006年1月2日"),
+		"CheckInDate":            bookinfo.StayFrom.In(jst).Format("2006年1月2日"),
+		"CheckOutDate":           bookinfo.StayTo.In(jst).Format("2006年1月2日"),
 		"CheckInTime":            bookinfo.CheckInTime.String(),
-		"CheckInDateTimeFormat":  bookinfo.StayFrom.In(time.Local).Format("2006-01-02") + "T00:00:00+09:00",
-		"CheckOutDateTimeFormat": bookinfo.StayTo.In(time.Local).Format("2006-01-02") + "T00:00:00+09:00",
+		"CheckInDateTimeFormat":  bookinfo.StayFrom.In(jst).Format("2006-01-02T00:00:00+09:00"),
+		"CheckOutDateTimeFormat": bookinfo.StayTo.In(jst).Format("2006-01-02T00:00:00+09:00"),
 		"ReservationPlan":        bookinfo.BookPlan.Plan.Title,
 		"NumberOfGuests":         people,
 		"RoomCount":              strconv.FormatUint(uint64(bookinfo.RoomCount), 10),
@@ -277,8 +280,8 @@ func cancelMailContent(
 	data := map[string]string{
 		"GuestName":         bookinfo.GuestData.LastName + bookinfo.GuestData.FirstName,
 		"ReservationNumber": bookinfo.TlDataID,
-		"CheckInDate":       bookinfo.StayFrom.Format("2006年1月2日"),
-		"CheckOutDate":      bookinfo.StayTo.Format("2006年1月2日"),
+		"CheckInDate":       bookinfo.StayFrom.In(jst).Format("2006年1月2日"),
+		"CheckOutDate":      bookinfo.StayTo.In(jst).Format("2006年1月2日"),
 		"ReservationPlan":   bookinfo.BookPlan.Plan.Title,
 		"NumberOfGuests":    people,
 		"RoomCount":         strconv.FormatUint(uint64(bookinfo.RoomCount), 10),

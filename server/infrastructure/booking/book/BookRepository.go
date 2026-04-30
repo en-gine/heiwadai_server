@@ -168,7 +168,7 @@ func NewBookingRQ(bookData *entity.Booking, store *entity.StayableStore) *Envelo
 					CommonRequest: CommonRequest{
 						AgtID:       store.BookingSystemLoginID,
 						AgtPassword: store.BookingSystemPassword,
-						SystemDate:  time.Now().Format("2006-01-02T15:04:05"),
+						SystemDate:  time.Now().In(util.JST).Format("2006-01-02T15:04:05"),
 					},
 					ExtendLincoln: ExtendLincoln{
 						TllHotelCode: BookingSystemID,
@@ -195,8 +195,8 @@ func NewBookingRQ(bookData *entity.Booking, store *entity.StayableStore) *Envelo
 						},
 						BasicInformation: BasicInformation{
 							TravelAgencyBookingNumber:  bookData.TlDataID,
-							TravelAgencyBookingDate:    time.Now().Format("2006-01-02"),
-							TravelAgencyBookingTime:    time.Now().Format("15:04:05"),
+							TravelAgencyBookingDate:    time.Now().In(util.JST).Format("2006-01-02"),
+							TravelAgencyBookingTime:    time.Now().In(util.JST).Format("15:04:05"),
 							GuestOrGroupNameSingleByte: guestNameKana,
 							GuestOrGroupKanjiName:      guest.LastName + " " + guest.FirstName,
 							GuestOrGroupPhoneNumber:    *guest.Tel,
@@ -252,7 +252,7 @@ func NewCancelRQ(bookData *entity.Booking, store *entity.StayableStore, dataID s
 					CommonRequest: CommonRequest{
 						AgtID:       store.BookingSystemLoginID,
 						AgtPassword: store.BookingSystemPassword,
-						SystemDate:  time.Now().Format("2006-01-02T15:04:05"),
+						SystemDate:  time.Now().In(util.JST).Format("2006-01-02T15:04:05"),
 					},
 					BookingInfo: BookingInfo{
 						TllHotelCode:     BookingSystemID,

@@ -1,6 +1,11 @@
 package util
 
-import "time"
+import (
+	"time"
+	_ "time/tzdata"
+)
+
+var JST, _ = time.LoadLocation("Asia/Tokyo")
 
 type YYYYMMDD string
 
@@ -13,9 +18,8 @@ func (s YYYYMMDD) ToString() string {
 }
 
 func DateToYYYYMMDD(date time.Time) YYYYMMDD {
-	// date型を受け取ってYYYY-MM-DDの形式の文字列に変換する
-	// time.Localを使用してシステムのタイムゾーン（JST）でフォーマットする
-	return YYYYMMDD(date.In(time.Local).Format("2006-01-02"))
+	// JST固定でフォーマット（main.goのtime.Local設定に依存させない）
+	return YYYYMMDD(date.In(JST).Format("2006-01-02"))
 }
 
 func StringToYYYYMMDD(dateStr string) (*YYYYMMDD, error) {
@@ -45,7 +49,6 @@ func (s StrDate) ToString() string {
 }
 
 func DateToStrDate(date time.Time) StrDate {
-	// date型を受け取ってYYYY-MM-DDの形式の文字列に変換する
-	// time.Localを使用してシステムのタイムゾーン（JST）でフォーマットする
-	return StrDate(date.In(time.Local).Format("2006-01-02"))
+	// JST固定でフォーマット（main.goのtime.Local設定に依存させない）
+	return StrDate(date.In(JST).Format("2006-01-02"))
 }
