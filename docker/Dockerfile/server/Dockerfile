@@ -10,7 +10,7 @@ RUN apt-get install -y build-essential curl file git gcc
 
 ### connect buf https://github.com/bufbuild/connect-go
 RUN go mod tidy && \
-  go install github.com/bufbuild/buf/cmd/buf@latest && \
+  go install github.com/bufbuild/buf/cmd/buf@v1.50.0 && \
   go install github.com/fullstorydev/grpcurl/cmd/grpcurl@latest && \
   go install google.golang.org/protobuf/cmd/protoc-gen-go@latest && \
   go install connectrpc.com/connect/cmd/protoc-gen-connect-go@latest && \
@@ -32,12 +32,9 @@ RUN go install github.com/aarondl/sqlboiler/v4@latest && \
 
 ### For development
 RUN go mod tidy && \
-  go install -v github.com/ramya-rao-a/go-outline@latest && \
-  go install -v github.com/rogpeppe/godef@latest && \
-  go install -v github.com/stamblerre/gocode@latest && \
-  go install -v golang.org/x/tools/cmd/goimports@latest && \
-  go install -v golang.org/x/tools/gopls@v0.14.2 && \
-  go install -v github.com/cosmtrek/air@v1.44.0 && \
+  go install -v golang.org/x/tools/cmd/goimports@v0.30.0 && \
+  go install -v golang.org/x/tools/gopls@v0.18.1 && \
+  go install -v github.com/air-verse/air@v1.61.7 && \
   go get github.com/rs/cors
 
 ### For Lint

@@ -6,7 +6,6 @@ import (
 
 	adminv1 "server/api/v1/admin"
 	"server/api/v1/shared"
-	userv1 "server/api/v1/user"
 
 	adminv1connect "server/api/v1/admin/adminconnect"
 	"server/controller"
@@ -41,6 +40,12 @@ func (u *UserDataController) Update(ctx context.Context, req *connect.Request[ad
 	msg := req.Msg
 	user := msg.User
 
+	var prefectureID *int
+	if user.Prefecture != 0 {
+		v := int(user.Prefecture)
+		prefectureID = &v
+	}
+
 	entity, domainErr := u.userUsecase.Update(
 		uuid.MustParse(msg.UserID),
 		user.FirstName,
@@ -50,7 +55,7 @@ func (u *UserDataController) Update(ctx context.Context, req *connect.Request[ad
 		user.CompanyName,
 		util.TimeStampPtrToTimePtr(user.BirthDate),
 		user.ZipCode,
-		int(user.Prefecture),
+		prefectureID,
 		user.City,
 		user.Address,
 		user.Tel,
@@ -64,21 +69,7 @@ func (u *UserDataController) Update(ctx context.Context, req *connect.Request[ad
 	}
 
 	res := connect.NewResponse(&adminv1.UserDataResponse{
-		User: &userv1.UserDataResponse{
-			ID:            entity.User.ID.String(),
-			FirstName:     entity.User.FirstName,
-			LastName:      entity.User.LastName,
-			FirstNameKana: entity.User.FirstNameKana,
-			LastNameKana:  entity.User.LastNameKana,
-			CompanyName:   entity.User.CompanyName,
-			BirthDate:     util.TimePtrToTimeStampPtr(entity.User.BirthDate),
-			ZipCode:       entity.User.ZipCode,
-			Prefecture:    shared.Prefecture(entity.User.Prefecture.ToInt()),
-			City:          entity.User.City,
-			Address:       entity.User.Address,
-			Tel:           entity.User.Tel,
-			AcceptMail:    entity.User.AcceptMail,
-		},
+		User:            userController.UserEntityToResponse(entity.User),
 		InnerNote:       entity.UserOption.InnerNote,
 		IsBlackCustomer: entity.UserOption.IsBlackCustomer,
 	})

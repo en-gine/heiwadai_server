@@ -14,6 +14,7 @@ import (
 	"server/infrastructure/logger"
 
 	"github.com/google/uuid"
+	"github.com/aarondl/null/v8"
 	"github.com/aarondl/sqlboiler/v4/queries/qm"
 )
 
@@ -258,7 +259,7 @@ func GetUserListFilterMods(query *types.UserQuery) []qm.QueryMod {
 			qmMods = append(qmMods, lastNameKanaQuery)
 		}
 		if query.Prefecture != nil {
-			prefectureQuery = models.UserDatumWhere.Prefecture.EQ(query.Prefecture.ToInt())
+			prefectureQuery = models.UserDatumWhere.Prefecture.EQ(null.IntFrom(query.Prefecture.ToInt()))
 			qmMods = append(qmMods, prefectureQuery)
 		}
 	}
@@ -267,6 +268,12 @@ func GetUserListFilterMods(query *types.UserQuery) []qm.QueryMod {
 }
 
 func UserModelToEntity(model *models.UserDatum, email string) *entity.User {
+	var prefecture *entity.Prefecture
+	if model.Prefecture.Valid && model.Prefecture.Int != 0 {
+		p := entity.Prefecture(model.Prefecture.Int)
+		prefecture = &p
+	}
+
 	return entity.RegenUser(
 		uuid.MustParse(model.UserID),
 		model.FirstName,
@@ -276,7 +283,7 @@ func UserModelToEntity(model *models.UserDatum, email string) *entity.User {
 		model.CompanyName.Ptr(),
 		model.BirthDate.Ptr(),
 		&model.ZipCode.String,
-		entity.Prefecture(model.Prefecture),
+		prefecture,
 		model.City.Ptr(),
 		model.Address.Ptr(),
 		model.Tel.Ptr(),

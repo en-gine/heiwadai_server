@@ -32,7 +32,7 @@ func (u *UserDataUsecase) Update(
 	CompanyName *string,
 	BirthDate *time.Time,
 	ZipCode *string,
-	PrefectureID int,
+	PrefectureID *int,
 	City *string,
 	Address *string,
 	Tel *string,
@@ -61,7 +61,14 @@ func (u *UserDataUsecase) Update(
 		return nil, errors.NewDomainError(errors.QueryDataNotFoundError, "このアドレスで登録されているユーザーが存在しません")
 	}
 
-	prefecture := entity.Prefecture(PrefectureID)
+	var prefecture *entity.Prefecture
+	if PrefectureID != nil && *PrefectureID != 0 {
+		p, domainErr := entity.IntToPrefecture(*PrefectureID)
+		if domainErr != nil {
+			return nil, domainErr
+		}
+		prefecture = &p
+	}
 
 	updateData := entity.RegenUser(
 		ID,
