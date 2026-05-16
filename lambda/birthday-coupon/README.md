@@ -6,6 +6,7 @@
 
 - **実行スケジュール**: 毎月1日午前0時（UTC）/ 午前9時（JST）
 - **機能**: HeiwadaiサーバーのCronエンドポイントを呼び出して誕生日クーポンを発行
+- **通知**: Discord Webhook と SMTP メール（運用者向け）に成功／エラーを並列送信
 - **ランタイム**: Node.js 18.x
 - **タイムアウト**: 60秒
 - **メモリ**: 128MB
@@ -14,10 +15,26 @@
 
 ### 1. 環境変数の設定
 
+#### 必須
+
 ```bash
 export CRON_ACCESS_ENDPOINT="https://your-server.com/server.cron.CronCouponController/BulkIssueBirthdayCoupon"
 export CRON_ACCESS_SECRET="your-authorization-token"
 export CRON_ACCESS_KEY="your-cron-key"
+```
+
+#### 任意（メール通知を有効にする場合）
+
+サーバー本体 (`server/server/infrastructure/action/SendMail.go`) と同じ SMTP 認証情報を再利用します。
+すべて空でデプロイした場合はメール通知は自動的にスキップされ、Discord 通知のみ稼働します。
+
+```bash
+export MAIL_HOST="smtp.example.com"
+export MAIL_PORT="587"                       # 465 を指定すると暗黙のTLSになります
+export MAIL_USER="your-smtp-user"
+export MAIL_PASS="your-smtp-password"
+export MAIL_FROM="no-reply@heiwadai-hotel.app"
+export OPERATOR_MAIL_TO="ops@heiwadai-hotel.app,hirakawa@example.com"   # カンマ区切りで複数指定可
 ```
 
 ### 2. 初回デプロイ

@@ -155,19 +155,31 @@ endif
 ifndef CRON_ACCESS_KEY
 	$(error CRON_ACCESS_KEY is not set. Please set environment variables)
 endif
-	@echo "Updating Lambda environment variables with Discord Webhook..."
+	@echo "Updating Lambda environment variables (Discord Webhook + SMTP mail)..."
 	@echo '{"Variables":{' > /tmp/lambda-env.json
 	@echo '"CRON_ACCESS_ENDPOINT":"$(CRON_ACCESS_ENDPOINT)",' >> /tmp/lambda-env.json
 	@echo '"CRON_ACCESS_SECRET":"$(CRON_ACCESS_SECRET)",' >> /tmp/lambda-env.json
 	@echo '"CRON_ACCESS_KEY":"$(CRON_ACCESS_KEY)",' >> /tmp/lambda-env.json
-	@echo '"WEBHOOK_URL":"https://discord.com/api/webhooks/1391258342978093056/qKhwsFxWqr21Uvp-SjqqYW0dSFCpfy2CCIANEGnexY9Tmhlii7Srj8V7K8q-7rssWGKD"' >> /tmp/lambda-env.json
+	@echo '"WEBHOOK_URL":"https://discord.com/api/webhooks/1391258342978093056/qKhwsFxWqr21Uvp-SjqqYW0dSFCpfy2CCIANEGnexY9Tmhlii7Srj8V7K8q-7rssWGKD",' >> /tmp/lambda-env.json
+	@echo '"MAIL_HOST":"$(MAIL_HOST)",' >> /tmp/lambda-env.json
+	@echo '"MAIL_PORT":"$(MAIL_PORT)",' >> /tmp/lambda-env.json
+	@echo '"MAIL_USER":"$(MAIL_USER)",' >> /tmp/lambda-env.json
+	@echo '"MAIL_PASS":"$(MAIL_PASS)",' >> /tmp/lambda-env.json
+	@echo '"MAIL_FROM":"$(MAIL_FROM)",' >> /tmp/lambda-env.json
+	@echo '"OPERATOR_MAIL_TO":"$(OPERATOR_MAIL_TO)"' >> /tmp/lambda-env.json
 	@echo '}}' >> /tmp/lambda-env.json
 	$(AWS_CMD) lambda update-function-configuration \
 		--function-name $(LAMBDA_FUNCTION_NAME) \
 		--environment file:///tmp/lambda-env.json \
 		--region $(AWS_REGION)
 	@rm -f /tmp/lambda-env.json
-	@echo "Discord Webhook configured successfully!"
+	@echo "Discord Webhook and mail settings configured!"
+	@if [ -z "$(OPERATOR_MAIL_TO)" ] || [ -z "$(MAIL_HOST)" ]; then \
+		echo "⚠️  Email notification is DISABLED (MAIL_HOST or OPERATOR_MAIL_TO is empty)."; \
+		echo "    Set MAIL_HOST, MAIL_PORT, MAIL_USER, MAIL_PASS, MAIL_FROM, OPERATOR_MAIL_TO to enable."; \
+	else \
+		echo "✅ Email notification is ENABLED. Recipients: $(OPERATOR_MAIL_TO)"; \
+	fi
 
 # EventBridgeルールの作成（毎月1日午前9時JST = 午前0時UTC）
 eventbridge-create-rule: aws-check
@@ -257,6 +269,14 @@ help-lambda:
 	@echo "  CRON_ACCESS_ENDPOINT   - APIエンドポイントURL"
 	@echo "  CRON_ACCESS_SECRET     - Authorization token"
 	@echo "  CRON_ACCESS_KEY       - X-Cron-Key value"
+	@echo ""
+	@echo "Optional variables (email notification):"
+	@echo "  MAIL_HOST             - SMTPホスト（サーバーと共通）"
+	@echo "  MAIL_PORT             - SMTPポート（例: 587, 465）"
+	@echo "  MAIL_USER             - SMTPユーザー"
+	@echo "  MAIL_PASS             - SMTPパスワード"
+	@echo "  MAIL_FROM             - 差出人アドレス"
+	@echo "  OPERATOR_MAIL_TO      - 通知先メールアドレス（カンマ区切りで複数指定可）"
 	@echo ""
 	@echo "Optional variables:"
 	@echo "  AWS_REGION            - AWS region (default: ap-northeast-1)"

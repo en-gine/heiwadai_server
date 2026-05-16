@@ -1,5 +1,41 @@
 const axios = require('axios');
 const https = require('https');
+const nodemailer = require('nodemailer');
+
+async function sendEmailNotification(subject, content, isError = false) {
+    const to = process.env.OPERATOR_MAIL_TO;
+    const host = process.env.MAIL_HOST;
+    const port = process.env.MAIL_PORT;
+    const user = process.env.MAIL_USER;
+    const pass = process.env.MAIL_PASS;
+    const from = process.env.MAIL_FROM;
+
+    if (!to || !host || !port || !user || !pass || !from) {
+        console.log('Mail config incomplete. Skipping email notification.');
+        return;
+    }
+
+    const portNum = Number(port);
+    const transporter = nodemailer.createTransport({
+        host,
+        port: portNum,
+        secure: portNum === 465,
+        auth: { user, pass },
+    });
+
+    const prefix = isError ? '[ERROR]' : '[OK]';
+    try {
+        await transporter.sendMail({
+            from: `"平和台ホテル送信専用" <${from}>`,
+            to: to.split(',').map(s => s.trim()).filter(Boolean),
+            subject: `${prefix} [Heiwadai] ${subject}`,
+            text: content,
+        });
+        console.log('Email notification sent successfully');
+    } catch (error) {
+        console.error('Failed to send email notification:', error.message);
+    }
+}
 
 /**
  * Discord/Slack Webhook通知関数（固定IP不要）
@@ -36,6 +72,13 @@ async function sendWebhookNotification(subject, content, isError = false) {
     } catch (error) {
         console.error('Failed to send webhook notification:', error.message);
     }
+}
+
+async function notify(subject, content, isError = false) {
+    await Promise.allSettled([
+        sendWebhookNotification(subject, content, isError),
+        sendEmailNotification(subject, content, isError),
+    ]);
 }
 
 /**
@@ -126,8 +169,8 @@ exports.handler = async (event) => {
 API エンドポイント: ${process.env.CRON_ACCESS_ENDPOINT}
 レスポンス: ${JSON.stringify(response.data, null, 2)}`;
 
-        await sendWebhookNotification('誕生日クーポン発行完了', successContent, false);
-        
+        await notify('誕生日クーポン発行完了', successContent, false);
+
         return result;
         
     } catch (err) {
@@ -175,8 +218,8 @@ HTTP ステータス: ${error.response.status}
 📋 対応が必要な場合は、AWS CloudWatch Logsでより詳細なログを確認してください。
 Log Group: /aws/lambda/birthday-coupon-function`;
 
-        await sendWebhookNotification('誕生日クーポン発行エラー', errorContent, true);
-        
+        await notify('誕生日クーポン発行エラー', errorContent, true);
+
         // エラーでもLambdaは成功として扱う（CloudWatchでログ確認可能）
         return result;
     }
