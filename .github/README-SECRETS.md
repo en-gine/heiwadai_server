@@ -29,7 +29,7 @@ make list-github-actions-access-keys
 ## 仕組み
 
 ### 🔄 自動化の流れ
-1. **GitHub Actions**: masterブランチにプッシュ → ECRにDockerイメージをビルド・プッシュ
+1. **GitHub Actions**: mainブランチにプッシュ → ECRにDockerイメージをビルド・プッシュ
 2. **App Runner**: ECRの新しいイメージを自動検知 → 自動デプロイ
 
 ### 🔒 セキュリティの利点
@@ -80,11 +80,11 @@ ECRアクセス専用のIAMユーザーを作成：
 ## 動作確認
 
 ### 自動デプロイのテスト
-1. masterブランチにコードをプッシュ
+1. mainブランチにコードをプッシュ
    ```bash
-   git checkout master
+   git checkout main
    git merge develop
-   git push origin master
+   git push origin main
    ```
 
 2. **進行状況の確認**
