@@ -140,7 +140,7 @@ make deploy-apprunner-with-fixed-ip
 ### CI/CD with GitHub Actions
 Automatic deployment is configured using App Runner's auto-deployment feature:
 
-- **Trigger**: Push to master branch or manual dispatch
+- **Trigger**: Push to main branch or manual dispatch
 - **Process**: 
   1. GitHub Actions: Build Docker image → Push to ECR
   2. App Runner: Auto-detect new ECR image → Deploy automatically
